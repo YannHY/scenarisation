@@ -342,16 +342,71 @@ function e(string $value): string
       <?php endif; ?>
     </main>
     <?php render_site_footer(); ?>
+    <dialog id="saved-action-dialog" class="modal account-confirm-dialog"
+      aria-labelledby="saved-action-title" aria-describedby="saved-action-message">
+      <h2 id="saved-action-title" class="modal-title"></h2>
+      <p id="saved-action-message" class="account-confirm-message"></p>
+      <div class="modal-actions">
+        <button class="btn btn-light" type="button" data-saved-cancel autofocus></button>
+        <button class="btn btn-primary" type="button" data-saved-confirm></button>
+      </div>
+    </dialog>
     <script>
-      document.querySelectorAll('.saved-action-confirm').forEach(function (form) {
-        form.addEventListener('submit', function (event) {
-          var lang = document.documentElement.lang === 'en' ? 'en' : 'fr';
-          var message = lang === 'en' ? form.dataset.confirmEn : form.dataset.confirmFr;
-          if (message && !window.confirm(message)) {
+      (function () {
+        var dialog = document.getElementById('saved-action-dialog');
+        var cancel = dialog.querySelector('[data-saved-cancel]');
+        var confirm = dialog.querySelector('[data-saved-confirm]');
+        var pendingForm = null;
+        var pendingSubmitter = null;
+        var previousFocus = null;
+        var approvedForm = null;
+
+        document.querySelectorAll('.saved-action-confirm').forEach(function (form) {
+          form.addEventListener('submit', function (event) {
+            if (approvedForm === form) return;
             event.preventDefault();
+            if (pendingForm) return;
+            var english = document.documentElement.lang === 'en';
+            var deleting = form.elements.action.value === 'delete';
+            dialog.querySelector('h2').textContent = deleting
+              ? (english ? 'Delete design' : 'Supprimer le design')
+              : (english ? 'Revoke share link' : 'Révoquer le lien de partage');
+            dialog.querySelector('p').textContent = english ? form.dataset.confirmEn : form.dataset.confirmFr;
+            cancel.textContent = english ? 'Cancel' : 'Annuler';
+            confirm.textContent = deleting
+              ? (english ? 'Delete' : 'Supprimer')
+              : (english ? 'Revoke link' : 'Révoquer le lien');
+            pendingForm = form;
+            pendingSubmitter = event.submitter;
+            previousFocus = event.submitter || document.activeElement;
+            dialog.returnValue = '';
+            dialog.showModal();
+            cancel.focus();
+          });
+        });
+
+        cancel.addEventListener('click', function () { dialog.close('cancel'); });
+        confirm.addEventListener('click', function () { dialog.close('confirm'); });
+        dialog.addEventListener('cancel', function (event) {
+          event.preventDefault();
+          dialog.close('cancel');
+        });
+        dialog.addEventListener('close', function () {
+          var form = pendingForm;
+          var submitter = pendingSubmitter;
+          pendingForm = null;
+          pendingSubmitter = null;
+          if (previousFocus && previousFocus.isConnected) previousFocus.focus();
+          if (dialog.returnValue === 'confirm' && form && form.isConnected) {
+            approvedForm = form;
+            try {
+              form.requestSubmit(submitter || undefined);
+            } finally {
+              approvedForm = null;
+            }
           }
         });
-      });
+      }());
     </script>
   </body>
 </html>
