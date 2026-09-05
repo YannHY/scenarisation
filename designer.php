@@ -16,7 +16,7 @@ app_start_session();
     <link rel="stylesheet" href="css/account-ui.css?v=20260903-pagefind-dark" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="css/interface.css?v=20260905-draft-dialog-v2" />
+    <link rel="stylesheet" href="css/interface.css?v=20260905-subtle-focus" />
   </head>
   <body class="designer-page">
     <a id="skip-link" class="skip-link" href="#board">Aller au contenu principal</a>

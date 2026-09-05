@@ -11,7 +11,7 @@
   --primary: #245a8f;
   --link-color: #145bb4;
   --link-hover: #0f4f9d;
-  --focus: #0a58ca;
+  --focus: #737373;
   --shadow-soft: 0 12px 32px rgba(19, 39, 68, 0.08);
   --shadow-card:
     0 1px 2px rgba(15, 23, 42, 0.05),
@@ -283,8 +283,8 @@ input:focus-visible,
 textarea:focus-visible,
 select:focus-visible,
 [tabindex]:focus-visible {
-  outline: 3px solid var(--focus);
-  outline-offset: 2px;
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
 }
 
 .material-icon-svg {
@@ -2220,8 +2220,8 @@ html body:not(.home-page) h3.analysis-section-title {
 }
 
 .nav-language-toggle:focus-visible {
-  outline: 3px solid var(--focus);
-  outline-offset: 2px;
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
   position: relative;
   z-index: 1;
 }
@@ -2735,8 +2735,8 @@ main {
 }
 
 .add-session-card:focus-visible {
-  outline: 3px solid var(--focus);
-  outline-offset: 4px;
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
   border-color: var(--primary);
 }
 
@@ -4878,7 +4878,7 @@ html[data-theme="dark"] body {
   --primary: #78a6ca;
   --link-color: #8cc6ff;
   --link-hover: #b9dcff;
-  --focus:   #88c4ff;
+  --focus:   #aaa59a;
 
   /* ── Text hierarchy ── */
   --text-strong: #f7f4ed;

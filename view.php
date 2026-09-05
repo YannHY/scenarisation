@@ -848,7 +848,7 @@ $displayDesignedMinutes = $designedMinutes > 0 ? $designedMinutes : $totalMinute
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="assets/favicon.svg?v=20260804" type="image/svg+xml" sizes="any">
   <title><?= esc($title) ?> — Learning Designer</title>
-  <link rel="stylesheet" href="css/interface.css?v=20260905-feedback-tabs">
+  <link rel="stylesheet" href="css/interface.css?v=20260905-subtle-focus">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
   <style>
     :root {
