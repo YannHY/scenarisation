@@ -152,7 +152,7 @@ app_start_session();
             <div class="form-row outcomes-row">
               <div class="outcomes-header">
                 <button id="add-outcome-btn" type="button" class="outcomes-add-btn" aria-label="Ajouter un acquis d'apprentissage"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
-                <label id="label-meta-outcomes" data-tooltip-i18n="outcomesTooltip">Acquis d'apprentissage</label>
+                <label id="label-meta-outcomes" data-tooltip-i18n="outcomesTooltip">Acquis d'apprentissage&nbsp;*</label>
               </div>
               <div id="outcomes-list" class="outcomes-list"></div>
             </div>

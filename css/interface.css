@@ -508,7 +508,7 @@ html body.designer-page h1.brand-title {
 .panel-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: clamp(48px, 7vw, 120px);
+  column-gap: clamp(24px, 3vw, 48px);
   row-gap: 28px;
   align-items: start;
 }
@@ -539,11 +539,11 @@ html body.designer-page h1.brand-title {
 }
 
 .panel-column-left .form-row {
-  grid-template-columns: 124px minmax(0, 1fr);
+  grid-template-columns: 156px minmax(0, 1fr);
 }
 
 .panel-column-right .form-row {
-  grid-template-columns: 140px minmax(0, 1fr);
+  grid-template-columns: 176px minmax(0, 1fr);
 }
 
 #label-meta-delivery,
