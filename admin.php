@@ -1,23 +1,45 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/lib/bootstrap.php';
+require_once __DIR__ . '/lib/admin-security.php';
 
 $admin = require_admin_page();
 $db = app_db();
+ensure_admin_security_table($db);
+$_SESSION['admin_security_csrf'] ??= bin2hex(random_bytes(32));
 $db->prepare('DELETE FROM app_feedback WHERE created_at_epoch < ?')->execute([time() - 63072000]);
 $db->prepare("UPDATE app_feedback SET visitor_hash = '' WHERE visitor_hash <> '' AND created_at_epoch < ?")
     ->execute([time() - 86400]);
 $message = '';
 $error = '';
 $activeAdminTab = (string)($_GET['tab'] ?? $_POST['admin_tab'] ?? 'accounts');
-if (!in_array($activeAdminTab, ['accounts', 'feedback', 'statistics'], true)) {
+if (!in_array($activeAdminTab, ['accounts', 'feedback', 'statistics', 'security'], true)) {
     $activeAdminTab = 'accounts';
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_same_origin_post();
     $adminAction = (string)($_POST['admin_action'] ?? 'create_account');
-    if ($adminAction === 'delete_feedback') {
+    if ($adminAction === 'moderate_user') {
+        $activeAdminTab = 'security';
+        if (!hash_equals($_SESSION['admin_security_csrf'], (string)($_POST['csrf_token'] ?? ''))) {
+            $error = 'Formulaire expiré. Rechargez la page puis réessayez.';
+        } else {
+            try {
+                admin_moderate_user($db, (int)$admin['id'], (int)($_POST['target_user_id'] ?? 0),
+                    (string)($_POST['security_action'] ?? ''), (string)($_POST['reason'] ?? ''),
+                    (string)($_POST['confirmation'] ?? ''));
+                $_SESSION['admin_security_message'] = 'Intervention enregistrée avec succès.';
+                header('Location: admin.php?tab=security');
+                exit;
+            } catch (InvalidArgumentException $e) {
+                $error = $e->getMessage();
+            } catch (Throwable $e) {
+                error_log('Admin moderation failed: ' . $e->getMessage());
+                $error = 'L’intervention a échoué. Aucune modification n’a été conservée.';
+            }
+        }
+    } elseif ($adminAction === 'delete_feedback') {
         $activeAdminTab = 'feedback';
         $feedbackId = filter_var($_POST['feedback_id'] ?? null, FILTER_VALIDATE_INT, [
             'options' => ['min_range' => 1],
@@ -31,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ? 'Le retour a été supprimé.'
                 : 'Ce retour avait déjà été supprimé.';
         }
-    } else {
+    } elseif ($adminAction === 'create_account') {
         $username = sanitize_username((string)($_POST['username'] ?? ''));
         $email = trim((string)($_POST['email'] ?? ''));
         $password = (string)($_POST['password'] ?? '');
@@ -55,6 +77,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
+if (isset($_SESSION['admin_security_message'])) {
+    $message = (string)$_SESSION['admin_security_message'];
+    unset($_SESSION['admin_security_message']);
+}
+$securityLog = $db->query('SELECT * FROM admin_security_log ORDER BY id DESC LIMIT 100')->fetchAll();
+$securityLabels = ['suspend' => 'Suspension', 'reactivate' => 'Réactivation', 'delete' => 'Suppression'];
 
 $usersStmt = $db->query("SELECT
     u.id,
@@ -181,6 +210,9 @@ function admin_stat_percentage(int $value, int $total): int
                 <i class="fa-solid fa-chart-column" aria-hidden="true"></i>
                 Statistiques
             </button>
+            <button id="admin-tab-security" class="admin-tab<?= $activeAdminTab === 'security' ? ' is-active' : '' ?>" type="button" role="tab" aria-selected="<?= $activeAdminTab === 'security' ? 'true' : 'false' ?>" aria-controls="admin-panel-security" data-admin-tab="security">
+                <i class="fa-solid fa-shield-halved" aria-hidden="true"></i> Sécurité
+            </button>
         </div>
 
         <?php if ($message !== ''): ?>
@@ -189,6 +221,59 @@ function admin_stat_percentage(int $value, int $total): int
         <?php if ($error !== ''): ?>
             <p class="account-message error"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></p>
         <?php endif; ?>
+
+        <div id="admin-panel-security" class="admin-tab-panel" role="tabpanel" aria-labelledby="admin-tab-security"<?= $activeAdminTab === 'security' ? '' : ' hidden' ?>>
+            <form method="post" action="admin.php?tab=security" class="account-form panel">
+                <h2>Modérer un compte</h2>
+                <p class="account-copy">La suspension bloque l’accès au compte, révoque ses jetons CLI et retire ses designs du catalogue et du partage. La réactivation ne republie pas les designs et ne restaure pas les jetons.</p>
+                <input type="hidden" name="admin_action" value="moderate_user">
+                <input type="hidden" name="admin_tab" value="security">
+                <input type="hidden" name="csrf_token" value="<?= h($_SESSION['admin_security_csrf']) ?>">
+                <div>
+                    <label for="security-user">Compte concerné</label>
+                    <select id="security-user" name="target_user_id" required>
+                        <option value="">Choisir un utilisateur</option>
+                        <?php foreach ($users as $u): ?>
+                            <?php if ((int)$u['id'] === (int)$admin['id']) continue; ?>
+                            <option value="<?= (int)$u['id'] ?>"<?= (int)($_POST['target_user_id'] ?? 0) === (int)$u['id'] ? ' selected' : '' ?>><?= h($u['username'] . ' — ' . $u['email'] . ' · ' . ($u['status'] === 'active' ? 'Actif' : 'Suspendu') . ' · ' . $u['role'] . ' · ' . $u['design_count'] . ' design(s)') ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div>
+                    <label for="security-action">Intervention</label>
+                    <select id="security-action" name="security_action" required>
+                        <?php foreach ($securityLabels as $value => $label): ?>
+                            <option value="<?= h($value) ?>"<?= ($_POST['security_action'] ?? '') === $value ? ' selected' : '' ?>><?= h($label) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div>
+                    <label for="security-reason">Motif de l’intervention</label>
+                    <input id="security-reason" name="reason" required maxlength="500" value="<?= h((string)($_POST['reason'] ?? '')) ?>" placeholder="Ex. : publications abusives répétées">
+                </div>
+                <div id="security-delete-confirmation">
+                    <p class="account-message error" id="security-delete-warning">La suppression est définitive : le compte, tous ses designs et ses jetons CLI seront supprimés. L’historique des interventions sera conservé.</p>
+                    <label for="security-confirmation">Pour supprimer, recopiez exactement le nom d’utilisateur</label>
+                    <input id="security-confirmation" name="confirmation" autocomplete="off" aria-describedby="security-delete-warning">
+                </div>
+                <p class="account-copy">Votre propre compte et le dernier administrateur actif sont protégés.</p>
+                <button type="submit">Appliquer l’intervention</button>
+            </form>
+            <section class="panel">
+                <h2>Historique des interventions</h2>
+                <p class="account-copy">Les 100 interventions les plus récentes. Dates en UTC.</p>
+                <?php if ($securityLog === []): ?>
+                    <p>Aucune intervention pour le moment.</p>
+                <?php else: ?>
+                    <div class="table-wrap"><table>
+                        <thead><tr><th>Date</th><th>Administrateur</th><th>Compte concerné</th><th>Action</th><th>Motif</th></tr></thead>
+                        <tbody><?php foreach ($securityLog as $entry): ?>
+                            <tr><td><?= h($entry['created_at']) ?></td><td><?= h($entry['actor_name']) ?> (#<?= (int)$entry['actor_id'] ?>)</td><td><?= h($entry['target_name']) ?> (#<?= (int)$entry['target_id'] ?>)</td><td><?= h($securityLabels[$entry['action']] ?? $entry['action']) ?></td><td class="admin-feedback-comment"><?= h($entry['reason']) ?></td></tr>
+                        <?php endforeach; ?></tbody>
+                    </table></div>
+                <?php endif; ?>
+            </section>
+        </div>
 
         <div id="admin-panel-statistics" class="admin-tab-panel" role="tabpanel" aria-labelledby="admin-tab-statistics"<?= $activeAdminTab === 'statistics' ? '' : ' hidden' ?>>
         <section class="admin-statistics-panel">
@@ -493,6 +578,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var panels = {
         accounts: document.getElementById('admin-panel-accounts'),
         feedback: document.getElementById('admin-panel-feedback'),
+        security: document.getElementById('admin-panel-security'),
         statistics: document.getElementById('admin-panel-statistics')
     };
 
@@ -537,6 +623,15 @@ document.addEventListener('DOMContentLoaded', function () {
             next.focus();
         });
     });
+
+    var securityAction = document.getElementById('security-action');
+    function updateSecurityConfirmation() {
+        var deleting = securityAction.value === 'delete';
+        document.getElementById('security-delete-confirmation').hidden = !deleting;
+        document.getElementById('security-confirmation').required = deleting;
+    }
+    securityAction.addEventListener('change', updateSecurityConfirmation);
+    updateSecurityConfirmation();
 
     var search = document.getElementById('admin-account-search');
     var role = document.getElementById('admin-account-role');
