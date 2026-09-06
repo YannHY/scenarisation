@@ -139,6 +139,14 @@ body.admin-page .admin-feedback-panel {
   margin-bottom: var(--page-section-gap);
 }
 
+.admin-backup-panel {
+  margin-top: var(--page-section-gap, 28px);
+}
+
+.admin-backup-panel .account-secondary-button {
+  width: fit-content;
+}
+
 .admin-tabs {
   display: flex;
   align-items: flex-end;
@@ -1103,6 +1111,9 @@ h1, h2 {
   gap: var(--page-section-gap, 28px);
   margin-bottom: var(--page-section-gap, 28px);
 }
+body.profile-page .account-topbar {
+  margin-bottom: 0;
+}
 .panel {
   background: #f9fbfe;
   border: 1px solid var(--line);
@@ -1154,20 +1165,16 @@ h1, h2 {
   color: #fff;
   text-decoration: none;
 }
-.profile-saves-link {
-  flex: 0 0 auto;
-  font-weight: 700;
-}
 .profile-progress-row {
   display: flex;
   align-items: center;
   gap: 14px;
   flex-wrap: wrap;
-  margin-bottom: 18px;
+  margin-bottom: 36px;
 }
 .profile-stat {
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
   gap: 10px;
   min-height: 50px;
   padding: 12px 14px;
@@ -1222,15 +1229,25 @@ h1, h2 {
   display: inline-block;
   max-width: 100%;
   color: var(--primary);
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 12px;
+  font-weight: 500;
   overflow-wrap: anywhere;
   text-decoration: none;
 }
 .profile-publication-main p {
   margin: 8px 0 0;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 12px;
+}
+.profile-cli .profile-publication-main p {
+  font-size: 11px;
+}
+.profile-cli .profile-publication-main p code {
+  font-size: inherit;
+}
+body.profile-page #cli_token_name::placeholder {
+  color: #8a8a8a;
+  opacity: 1;
 }
 .profile-publication-actions {
   flex: 0 0 auto;
@@ -1536,9 +1553,91 @@ th {
   border-color: rgba(129, 124, 112, 0.42);
 }
 
-[data-theme="dark"] body.profile-page .danger-panel {
-  background: rgba(49, 29, 31, 0.72);
-  border-color: rgba(248, 113, 113, 0.28);
+/* White actions stay readable in both themes, including the scenario counter. */
+body.profile-page .profile-productions .profile-primary-link,
+body.profile-page .profile-productions .profile-stat {
+  background: #fff;
+  border-color: #e5e7eb;
+  color: #5a6a7e;
+  box-shadow: none;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+body.profile-page .profile-productions .profile-stat-value {
+  color: #245a8f;
+}
+
+body.profile-page .profile-productions .profile-stat-label {
+  color: #5a6a7e;
+}
+
+body.profile-page .profile-productions .profile-primary-link:hover,
+body.profile-page .profile-productions .profile-stat:hover {
+  border-color: #5a6a7e;
+}
+
+body.profile-page .profile-productions .profile-primary-link:focus-visible,
+body.profile-page .profile-productions .profile-stat:focus-visible {
+  outline: 2px solid #5a6a7e;
+  outline-offset: 3px;
+}
+
+/* Keep account deletion within a red-and-white palette in both themes. */
+body.profile-page .account-form.danger-panel {
+  --primary: #fff;
+  --heading-ink: #fff;
+  --text: #b83645;
+  --focus: #fff;
+  background: #b83645;
+  border-color: #b83645;
+  color: #fff;
+  box-shadow: none;
+}
+
+body.profile-page .danger-panel .account-copy,
+body.profile-page .danger-panel label {
+  color: #fff;
+}
+
+body.profile-page .danger-panel input {
+  --focus: #b83645;
+  color: #b83645;
+  background: #fff;
+  border-color: #fff;
+  caret-color: #b83645;
+  color-scheme: light;
+}
+
+body.profile-page .danger-panel input:-webkit-autofill,
+body.profile-page .danger-panel input:-webkit-autofill:hover,
+body.profile-page .danger-panel input:-webkit-autofill:focus,
+body.profile-page .danger-panel input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 100px #fff inset;
+  box-shadow: 0 0 0 100px #fff inset;
+  -webkit-text-fill-color: #b83645;
+}
+
+body.profile-page .danger-panel input:autofill {
+  box-shadow: 0 0 0 100px #fff inset;
+  -webkit-text-fill-color: #b83645;
+}
+
+body.profile-page .danger-panel .danger-button {
+  background: #fff !important;
+  border-color: #fff;
+  color: #b83645;
+  box-shadow: none;
+}
+
+body.profile-page .danger-panel .danger-button:hover,
+body.profile-page .danger-panel .danger-button:focus-visible {
+  background: #fff0f2 !important;
+  border-color: #fff0f2;
+}
+
+body.profile-page .danger-panel .danger-button:focus-visible {
+  outline-offset: 3px;
 }
 
 [data-theme="dark"] td {

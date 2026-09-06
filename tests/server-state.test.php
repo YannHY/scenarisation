@@ -37,6 +37,21 @@ try {
     check(app_env('APP_MAIL_FROM') === 'local@example.test', 'local sender overrides distributed defaults');
     putenv('APP_BASE_URL=https://env.example.test/app');
     check(app_base_url() === 'https://env.example.test/app', 'environment remains highest priority');
+    $_SERVER['HTTPS'] = 'on';
+    $_SERVER['HTTP_HOST'] = 'designs.my-school.fr';
+    $_SERVER['SCRIPT_NAME'] = '/atelier/profile.php';
+    putenv('APP_BASE_URL=https://example.com/learning-designer-revised');
+    check(app_base_url() === 'https://designs.my-school.fr/atelier', 'sample URL falls back to actual site and installation folder');
+    putenv('APP_BASE_URL=https://WWW.EXAMPLE.COM/old-folder');
+    $_SERVER['SCRIPT_NAME'] = '/profile.php';
+    check(app_base_url() === 'https://designs.my-school.fr', 'sample subdomain also falls back for root installations');
+    putenv('APP_BASE_URL=https://public.my-school.fr');
+    $_SERVER['SCRIPT_NAME'] = '/atelier/profile.php';
+    check(app_base_url() === 'https://public.my-school.fr/atelier', 'valid configured domain retains the installation folder');
+    putenv('APP_BASE_URL=https://public.my-school.fr/published');
+    check(app_base_url() === 'https://public.my-school.fr/published', 'valid explicit public path remains authoritative');
+    unset($_SERVER['HTTPS'], $_SERVER['HTTP_HOST']);
+    $_SERVER['SCRIPT_NAME'] = '/learning/designer.php';
     putenv('APP_BASE_URL');
 
     // Simulate an existing v4 installation with a saved design and no revision.

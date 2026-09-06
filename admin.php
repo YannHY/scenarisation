@@ -154,7 +154,7 @@ function admin_stat_percentage(int $value, int $total): int
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="css/interface.css?v=20260905-subtle-focus">
     <link rel="stylesheet" href="css/account-ui.css?v=20260906-highlight">
-    <link rel="stylesheet" href="css/account-pages.css?v=20260905-admin-statistics-flat-v3">
+    <link rel="stylesheet" href="css/account-pages.css?v=20260906-admin-backup-section">
 </head>
 <body class="admin-page">
 <?php render_site_nav('admin'); ?>
@@ -475,6 +475,13 @@ function admin_stat_percentage(int $value, int $total): int
                 </table>
             </div>
         </section>
+            <section class="panel admin-backup-panel" aria-labelledby="admin-backup-title">
+                <h2 id="admin-backup-title">Sauvegarde des scénarios</h2>
+                <p class="account-copy">Téléchargez tous les scénarios dans une archive ZIP, avec un dossier par utilisateur et un fichier JSON par scénario, réimportable dans l’éditeur après extraction.</p>
+                <a class="account-secondary-button" href="export_scenarios.php?scope=all">
+                    <i class="fa-solid fa-file-export" aria-hidden="true"></i>Sauvegarder tous les scénarios
+                </a>
+            </section>
         </div>
     </section>
 </main>

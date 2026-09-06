@@ -101,7 +101,7 @@ Un scénario peut être exporté en Markdown, HTML, JSON, Excel ou Word. L'expor
 
 ## Installation locale
 
-Le projet ne nécessite pas d'étape de compilation. PHP avec PDO SQLite suffit pour le lancer :
+Le projet ne nécessite pas d'étape de compilation. PHP avec PDO SQLite suffit pour le lancer. L’export de tous les scénarios depuis le profil nécessite aussi l’extension PHP `zip` et fournit une archive contenant un fichier JSON par scénario, réimportable dans l’éditeur après extraction :
 
 ```bash
 git clone https://github.com/YannHY/learning-designer.git

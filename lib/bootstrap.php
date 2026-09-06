@@ -113,6 +113,11 @@ function app_is_https(): bool
 function app_base_url(): string
 {
     $configured = trim((string)(app_env('APP_BASE_URL') ?? ''));
+    // Ignore sample configuration left behind during installation.
+    $configuredHost = strtolower(rtrim((string)(parse_url($configured, PHP_URL_HOST) ?? ''), '.'));
+    if ($configuredHost === 'example.com' || str_ends_with($configuredHost, '.example.com')) {
+        $configured = '';
+    }
     if ($configured !== '') {
         $base = rtrim($configured, '/');
         $configuredPath = (string)(parse_url($base, PHP_URL_PATH) ?? '');

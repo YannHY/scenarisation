@@ -199,7 +199,7 @@ function e(string $value): string
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="css/interface.css?v=20260905-subtle-focus">
     <link rel="stylesheet" href="css/account-ui.css?v=20260906-highlight">
-    <link rel="stylesheet" href="css/account-pages.css?v=20260904-content-rhythm">
+    <link rel="stylesheet" href="css/account-pages.css?v=20260906-profile-role-spacing">
 </head>
 <body class="profile-page">
 <?php render_site_nav('profile'); ?>
@@ -210,7 +210,7 @@ function e(string $value): string
                 <h1 id="profile-title" class="title-with-icon"><i class="fa-solid fa-user" aria-hidden="true"></i>Profil</h1>
             </div>
         </div>
-        <p class="account-copy"><span id="profile-role-label">Rôle</span>&nbsp;: <?= e((string)$me['role']) ?>.</p>
+        <p class="account-copy"><span id="profile-role-label">Rôle</span>&nbsp;: <?= e((string)$me['role']) ?></p>
 
         <?php if ($message !== ''): ?>
             <p class="account-message success" data-profile-flash><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?></p>
@@ -257,24 +257,22 @@ function e(string $value): string
             <div class="profile-section-head">
                 <div>
                     <h2 id="profile-productions-title" class="title-with-icon"><i class="fa-solid fa-layer-group" aria-hidden="true"></i>Mes productions</h2>
-                    <p id="profile-productions-copy" class="account-copy">Suivez vos sauvegardes et les designs publiés avec un lien web.</p>
-                </div>
-                <div class="profile-section-actions">
-                    <a id="profile-saves-link" class="subtle-link profile-saves-link" href="my-designs.php">Voir les designs</a>
+                    <p id="profile-productions-copy" class="account-copy">Suivez vos sauvegardes et les scénarios publiés avec un lien web.</p>
                 </div>
             </div>
 
             <div class="profile-progress-row">
-                <div class="profile-stat">
+                <a class="profile-stat" href="my-designs.php">
                     <span class="profile-stat-value"><?= $designCount ?></span>
-                    <span class="profile-stat-label" data-profile-design-count="<?= $designCount ?>">design<?= $designCount > 1 ? 's' : '' ?> enregistré<?= $designCount > 1 ? 's' : '' ?></span>
-                </div>
+                    <span class="profile-stat-label" data-profile-design-count="<?= $designCount ?>">scénario<?= $designCount > 1 ? 's' : '' ?> enregistré<?= $designCount > 1 ? 's' : '' ?></span>
+                </a>
+                <a id="profile-export-link" class="profile-primary-link" href="export_scenarios.php"><i class="fa-solid fa-file-export" aria-hidden="true"></i>Exporter tous mes scénarios</a>
                 <a id="profile-competencies-link" class="profile-primary-link" href="competencies.php"><i class="fa-solid fa-table-list" aria-hidden="true"></i>Voir mes compétences</a>
             </div>
 
             <h3 id="profile-publications-title" class="profile-subtitle title-with-icon"><i class="fa-solid fa-share-nodes" aria-hidden="true"></i>Publications actives</h3>
             <?php if (!$publishedDesigns): ?>
-                <p id="profile-empty-publications" class="profile-empty">Aucun design publié pour le moment.</p>
+                <p id="profile-empty-publications" class="profile-empty">Aucun scénario publié pour le moment.</p>
             <?php else: ?>
                 <div class="profile-publication-list">
                     <?php foreach ($publishedDesigns as $design): ?>
@@ -320,7 +318,7 @@ function e(string $value): string
                 <input type="hidden" name="action" value="create_cli_token">
                 <div class="field">
                     <label id="profile-cli-token-name-label" for="cli_token_name">Nom du jeton</label>
-                    <input id="cli_token_name" name="cli_token_name" type="text" value="Mac / Claude / Codex">
+                    <input id="cli_token_name" name="cli_token_name" type="text" placeholder="Donnez un nom à votre jeton">
                 </div>
                 <button id="profile-cli-create-button" type="submit">Créer un jeton CLI</button>
             </form>
@@ -377,12 +375,12 @@ document.addEventListener('DOMContentLoaded', function () {
         'profile-new-password-label': 'New password',
         'profile-confirm-password-label': 'Confirmation',
         'profile-update-password': 'Update',
-        'profile-productions-title': 'My designs',
-        'profile-productions-copy': 'Track your saved designs and designs published with a web link.',
+        'profile-productions-title': 'My scenarios',
+        'profile-productions-copy': 'Track your saved scenarios and scenarios published with a web link.',
+        'profile-export-link': 'Export all my scenarios',
         'profile-competencies-link': 'View my competencies',
-        'profile-saves-link': 'View designs',
         'profile-publications-title': 'Active publications',
-        'profile-empty-publications': 'No published design yet.',
+        'profile-empty-publications': 'No published scenario yet.',
         'profile-cli-title': 'CLI publishing',
         'profile-cli-copy': 'Create a personal token to publish with the `scenarisation publish` command.',
         'profile-cli-token-name-label': 'Token name',
@@ -390,7 +388,7 @@ document.addEventListener('DOMContentLoaded', function () {
         'profile-cli-active-title': 'Active tokens',
         'profile-cli-empty': 'No active CLI token.',
         'profile-delete-title': 'Delete my account',
-        'profile-delete-copy': 'All your designs will be deleted with your account.',
+        'profile-delete-copy': 'All your scenarios will be deleted with your account.',
         'profile-delete-password-label': 'Current password',
         'profile-delete-button': 'Delete my account'
     };
@@ -445,6 +443,9 @@ document.addEventListener('DOMContentLoaded', function () {
     function applyProfileLanguage(lang) {
         document.documentElement.lang = lang === 'en' ? 'en' : 'fr';
         document.title = lang === 'en' ? 'Profile | Scenarisation' : 'Profil | Scenarisation';
+        document.getElementById('cli_token_name').placeholder = lang === 'en'
+            ? 'Give your token a name'
+            : 'Donnez un nom à votre jeton';
 
         Object.keys(translations).forEach(function (id) {
             var el = document.getElementById(id);
@@ -455,9 +456,9 @@ document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('[data-profile-design-count]').forEach(function (el) {
             var count = Number(el.getAttribute('data-profile-design-count') || '0');
             if (lang === 'en') {
-                el.textContent = count === 1 ? 'saved design' : 'saved designs';
+                el.textContent = count === 1 ? 'saved scenario' : 'saved scenarios';
             } else {
-                el.textContent = 'design' + (count > 1 ? 's' : '') + ' enregistré' + (count > 1 ? 's' : '');
+                el.textContent = 'scénario' + (count > 1 ? 's' : '') + ' enregistré' + (count > 1 ? 's' : '');
             }
         });
 
