@@ -129,7 +129,7 @@ function share_count_label(int $count, string $singular, ?string $plural = null)
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="assets/favicon.svg?v=20260906-scenarisation" type="image/svg+xml" sizes="any" />
-    <title data-site-i18n-en="Shared designs | Scenarisation" data-site-i18n-fr="Designs partagés | Scenarisation">Designs partagés | Scenarisation</title>
+    <title data-site-i18n-en="Shared designs | Scenarisation" data-site-i18n-fr="Scénarios partagés | Scenarisation">Scénarios partagés | Scenarisation</title>
     <?php render_theme_boot_script(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -311,15 +311,15 @@ function share_count_label(int $count, string $singular, ?string $plural = null)
     <main class="shared-shell">
       <div class="shared-header">
         <div>
-          <h1 class="shared-title" data-site-i18n-en="Shared designs" data-site-i18n-fr="Designs partagés">Designs partagés</h1>
-          <p class="shared-subtitle" data-site-i18n-en="Explore shared designs and import the ones you want to adapt." data-site-i18n-fr="Explorez les designs partagés et importez ceux que vous souhaitez adapter.">Explorez les designs partagés et importez ceux que vous souhaitez adapter.</p>
+          <h1 class="shared-title" data-site-i18n-en="Shared designs" data-site-i18n-fr="Scénarios partagés">Scénarios partagés</h1>
+          <p class="shared-subtitle" data-site-i18n-en="Explore shared designs and import the ones you want to adapt." data-site-i18n-fr="Explorez les scénarios partagés et importez ceux que vous souhaitez adapter.">Explorez les scénarios partagés et importez ceux que vous souhaitez adapter.</p>
         </div>
       </div>
 
       <?php if (!$items): ?>
-        <p class="shared-empty" data-site-i18n-en="No designs are currently visible in the shared designs catalog." data-site-i18n-fr="Aucun design n’est encore visible dans la page de partage.">Aucun design n’est encore visible dans la page de partage.</p>
+        <p class="shared-empty" data-site-i18n-en="No designs are currently visible in the shared designs catalog." data-site-i18n-fr="Aucun scénario n’est encore visible dans la page de partage.">Aucun scénario n’est encore visible dans la page de partage.</p>
       <?php else: ?>
-        <section class="shared-grid" aria-label="Designs publiés dans le catalogue" data-site-i18n-attr="aria-label" data-site-i18n-en="Designs published in the catalog" data-site-i18n-fr="Designs publiés dans le catalogue">
+        <section class="shared-grid" aria-label="Scénarios publiés dans le catalogue" data-site-i18n-attr="aria-label" data-site-i18n-en="Designs published in the catalog" data-site-i18n-fr="Scénarios publiés dans le catalogue">
           <?php foreach ($items as $item): ?>
             <article class="shared-card">
               <div>
@@ -333,7 +333,7 @@ function share_count_label(int $count, string $singular, ?string $plural = null)
               <?php if ($item['description'] !== ''): ?>
                 <p class="shared-card-copy"><?= h($item['description']) ?></p>
               <?php endif; ?>
-              <div class="shared-meta" aria-label="Résumé du design" data-site-i18n-attr="aria-label" data-site-i18n-en="Design summary" data-site-i18n-fr="Résumé du design">
+              <div class="shared-meta" aria-label="Résumé du scénario" data-site-i18n-attr="aria-label" data-site-i18n-en="Design summary" data-site-i18n-fr="Résumé du scénario">
                 <span class="shared-pill"><i class="fa-regular fa-folder" aria-hidden="true"></i><span data-site-i18n-en="<?= h(share_count_label((int)$item['session_count'], 'session')) ?>" data-site-i18n-fr="<?= h(share_count_label((int)$item['session_count'], 'séance')) ?>"><?= h(share_count_label((int)$item['session_count'], 'séance')) ?></span></span>
                 <span class="shared-pill"><i class="fa-solid fa-list-check" aria-hidden="true"></i><span data-site-i18n-en="<?= h(share_count_label((int)$item['activity_count'], 'activity', 'activities')) ?>" data-site-i18n-fr="<?= h(share_count_label((int)$item['activity_count'], 'activité')) ?>"><?= h(share_count_label((int)$item['activity_count'], 'activité')) ?></span></span>
                 <span class="shared-pill"><i class="fa-regular fa-clock" aria-hidden="true"></i><span data-site-i18n-en="<?= h(share_format_minutes((int)$item['duration'], 'en')) ?>" data-site-i18n-fr="<?= h(share_format_minutes((int)$item['duration'])) ?>"><?= h(share_format_minutes((int)$item['duration'])) ?></span></span>

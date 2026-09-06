@@ -702,7 +702,7 @@ const I18N = {
     eval_certificative: "Certificative",
     infoTitle: "À propos",
     footerHelp: "Aide",
-    footerSharedDesigns: "Designs partagés",
+    footerSharedDesigns: "Scénarios partagés",
     infoP1: "Cette application web monopage s’inspire de l’UCL Learning Designer :",
     infoP2: "(UCL Knowledge Lab, UCL Institute of Education, 2013-2026).",
     infoP3: "Traitement local par défaut : les données restent dans votre navigateur, sauf si vous vous connectez et enregistrez explicitement une production sur votre compte.",

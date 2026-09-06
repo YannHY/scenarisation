@@ -7,7 +7,7 @@
                 <span class="site-footer-separator" aria-hidden="true">|</span>
                 <a class="site-footer-link" id="footer-help-btn" href="help.php" data-site-i18n-en="Help" data-site-i18n-fr="Aide">Aide</a>
                 <span class="site-footer-separator" aria-hidden="true">|</span>
-                <a class="site-footer-link" id="footer-shared-designs-btn" href="share.php" data-site-i18n-en="Shared designs" data-site-i18n-fr="Designs partagés">Designs partagés</a>
+                <a class="site-footer-link" id="footer-shared-designs-btn" href="share.php" data-site-i18n-en="Shared designs" data-site-i18n-fr="Scénarios partagés">Scénarios partagés</a>
                 <span class="site-footer-separator" aria-hidden="true">|</span>
                 <a class="site-footer-link" id="footer-models-btn" href="models.php" data-site-i18n-en="Models" data-site-i18n-fr="Modèles">Modèles</a>
                 <span class="site-footer-separator" aria-hidden="true">|</span>

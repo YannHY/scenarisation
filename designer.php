@@ -596,7 +596,7 @@ app_start_session();
     <script src="js/competency-catalog.js?v=20260831-framework-i18n"></script>
     <script src="js/competency-greencomp-details.js?v=20260831-framework-i18n"></script>
     <script src="js/competency-digcomp-details.js?v=20260830-digcomp-statements"></script>
-    <script src="js/editor/config.js?v=20260905-modules-v1"></script>
+    <script src="js/editor/config.js?v=20260906-scenarios"></script>
     <script src="js/editor/competencies.js?v=20260905-modules-v1"></script>
     <script src="js/editor/exports.js?v=20260906-scenarisation"></script>
     <script src="js/editor/imports.js?v=20260905-modules-v1"></script>

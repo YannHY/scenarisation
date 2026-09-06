@@ -1153,15 +1153,15 @@ function render_site_nav(string $active = ''): void
             </button>
             <div class="account-toolbar-cluster">
                 <?php if ($isDesigner): ?>
-                    <button id="nav-new-design-btn" class="nav-icon-btn" type="button" title="Nouveau design" aria-label="Nouveau design" data-site-i18n-attr="title,aria-label" data-site-i18n-en="New design" data-site-i18n-fr="Nouveau design">
+                    <button id="nav-new-design-btn" class="nav-icon-btn" type="button" title="Nouveau scénario" aria-label="Nouveau scénario" data-site-i18n-attr="title,aria-label" data-site-i18n-en="New design" data-site-i18n-fr="Nouveau scénario">
                         <i class="fa-solid fa-file-circle-plus" aria-hidden="true"></i>
                     </button>
                 <?php else: ?>
-                    <a class="nav-icon-btn" href="designer.php" title="Nouveau design" aria-label="Nouveau design" data-site-i18n-attr="title,aria-label" data-site-i18n-en="New design" data-site-i18n-fr="Nouveau design">
+                    <a class="nav-icon-btn" href="designer.php" title="Nouveau scénario" aria-label="Nouveau scénario" data-site-i18n-attr="title,aria-label" data-site-i18n-en="New design" data-site-i18n-fr="Nouveau scénario">
                         <i class="fa-solid fa-file-circle-plus" aria-hidden="true"></i>
                     </a>
                 <?php endif; ?>
-                <a class="nav-account-btn nav-account-icon-btn<?= $savesClass ?>" href="my-designs.php" title="Designs" aria-label="Designs" data-site-i18n-attr="title,aria-label" data-site-i18n-en="Designs" data-site-i18n-fr="Designs">
+                <a class="nav-account-btn nav-account-icon-btn<?= $savesClass ?>" href="my-designs.php" title="Scénarios" aria-label="Scénarios" data-site-i18n-attr="title,aria-label" data-site-i18n-en="Designs" data-site-i18n-fr="Scénarios">
                     <i class="fa-regular fa-folder-open" aria-hidden="true"></i>
                 </a>
                 <?php if ($user): ?>
@@ -1415,7 +1415,7 @@ function site_breadcrumb_items(string $active = ''): array
             ['fr' => 'Prompts pédagogiques', 'en' => 'Teaching prompts'],
         ],
         'share' => [
-            ['fr' => 'Designs partagés', 'en' => 'Shared designs'],
+            ['fr' => 'Scénarios partagés', 'en' => 'Shared designs'],
         ],
         'saves' => [
             ['fr' => 'Mes designs', 'en' => 'My designs'],

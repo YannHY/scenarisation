@@ -191,7 +191,7 @@ $homeOgImageUrl = rtrim(app_base_url(), '/') . '/assets/og-home.png?v=20260906-s
                         data-site-i18n-fr="Diffusez simplement">Diffusez simplement</h2>
                 </div>
                 <p data-site-i18n-en="Publish a private viewing link, list a design in the public gallery or export it in the format of your choice. Creative Commons licences and importing make every scenario easier to reuse and adapt."
-                   data-site-i18n-fr="Publiez un lien de consultation, rendez un design visible dans la galerie ou exportez-le dans le format de votre choix. Les licences Creative Commons et l’import facilitent la réutilisation et l’adaptation de chaque scénario.">Publiez un lien de consultation, rendez un design visible dans la galerie ou exportez-le dans le format de votre choix. Les licences Creative Commons et l’import facilitent la réutilisation et l’adaptation de chaque scénario.</p>
+                   data-site-i18n-fr="Publiez un lien de consultation, rendez un scénario visible dans la galerie ou exportez-le dans le format de votre choix. Les licences Creative Commons et l’import facilitent la réutilisation et l’adaptation de chaque scénario.">Publiez un lien de consultation, rendez un scénario visible dans la galerie ou exportez-le dans le format de votre choix. Les licences Creative Commons et l’import facilitent la réutilisation et l’adaptation de chaque scénario.</p>
                 <a class="home-inline-action" href="help.php#sauvegarde-partage">
                     <span data-site-i18n-en="Explore sharing options" data-site-i18n-fr="Découvrir les options de partage">Découvrir les options de partage</span>
                     <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
@@ -202,7 +202,7 @@ $homeOgImageUrl = rtrim(app_base_url(), '/') . '/assets/og-home.png?v=20260906-s
                     <div class="home-share-head">
                         <span class="home-share-main-icon"><i class="fa-solid fa-share-nodes"></i></span>
                         <div>
-                            <strong data-site-i18n-en="A design ready to share" data-site-i18n-fr="Un design prêt à partager">Un design prêt à partager</strong>
+                            <strong data-site-i18n-en="A design ready to share" data-site-i18n-fr="Un scénario prêt à partager">Un scénario prêt à partager</strong>
                             <small data-site-i18n-en="Choose the right access for every audience" data-site-i18n-fr="Choisissez le bon accès pour chaque public">Choisissez le bon accès pour chaque public</small>
                         </div>
                     </div>
@@ -244,7 +244,7 @@ $homeOgImageUrl = rtrim(app_base_url(), '/') . '/assets/og-home.png?v=20260906-s
                         data-site-i18n-fr="Concevez avec l’IA">Concevez avec l’IA</h2>
                 </div>
                 <p data-site-i18n-en="Describe your teaching goal — or share an existing design — with an AI such as Codex or Claude Code. It can structure and enrich every aspect of the design, then analyse it and suggest improvements. The CLI creates, enriches and validates the design before publication."
-                   data-site-i18n-fr="Décrivez votre intention pédagogique — ou confiez un design existant — à une IA comme Codex ou Claude Code. Elle peut structurer et enrichir chaque dimension du scénario, puis analyser l’ensemble et proposer des ajustements. Le CLI crée, enrichit et valide le design avant sa publication.">Décrivez votre intention pédagogique — ou confiez un design existant — à une IA comme Codex ou Claude Code. Elle peut structurer et enrichir chaque dimension du scénario, puis analyser l’ensemble et proposer des ajustements. Le CLI crée, enrichit et valide le design avant sa publication.</p>
+                   data-site-i18n-fr="Décrivez votre intention pédagogique — ou confiez un scénario existant — à une IA comme Codex ou Claude Code. Elle peut structurer et enrichir chaque dimension du scénario, puis analyser l’ensemble et proposer des ajustements. Le CLI crée, enrichit et valide le scénario avant sa publication.">Décrivez votre intention pédagogique — ou confiez un scénario existant — à une IA comme Codex ou Claude Code. Elle peut structurer et enrichir chaque dimension du scénario, puis analyser l’ensemble et proposer des ajustements. Le CLI crée, enrichit et valide le scénario avant sa publication.</p>
                 <a class="home-inline-action" href="help.php#cli">
                     <span data-site-i18n-en="Discover AI and the CLI" data-site-i18n-fr="Découvrir l’IA et le CLI">Découvrir l’IA et le CLI</span>
                     <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
@@ -286,12 +286,12 @@ $homeOgImageUrl = rtrim(app_base_url(), '/') . '/assets/og-home.png?v=20260906-s
             <div class="home-final-cta-content home-reveal">
                 <p class="home-kicker"
                    data-site-i18n-en="Your next design starts here"
-                   data-site-i18n-fr="Votre prochain design commence ici">Votre prochain design commence ici</p>
+                   data-site-i18n-fr="Votre prochain scénario commence ici">Votre prochain scénario commence ici</p>
                 <h2 id="home-final-title"
                     data-site-i18n-en="Start designing"
                     data-site-i18n-fr="À vous de concevoir">À vous de concevoir</h2>
                 <a class="home-primary-action" href="designer.php">
-                    <span data-site-i18n-en="Create a design" data-site-i18n-fr="Créer un design">Créer un design</span>
+                    <span data-site-i18n-en="Create a design" data-site-i18n-fr="Créer un scénario">Créer un scénario</span>
                     <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
                 </a>
             </div>
