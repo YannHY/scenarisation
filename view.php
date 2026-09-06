@@ -89,6 +89,7 @@ $SCHOOL_SYSTEMS = [
     'uk_scotland' => 'Royaume-Uni — Écosse',
     'uk_northern_ireland' => 'Royaume-Uni — Irlande du Nord',
     'european_schools' => 'Système des Écoles européennes',
+    'ib' => 'Baccalauréat international (IB)',
     'isced_2011' => 'International — ISCED 2011 (CITE)',
 ];
 $SCHOOL_LEVELS  = [
@@ -140,6 +141,16 @@ $SCHOOL_LEVELS  = [
     'uk_wales_reception' => 'Reception',
     'uk_scotland_early_learning' => 'Petite enfance (Nursery)',
     'uk_northern_ireland_preschool' => 'Préscolaire (Pre-school)',
+    'ib_pyp' => 'PP — Programme primaire (3–12 ans)',
+    'ib_myp_1' => 'PEI — Programme d’éducation intermédiaire — 1re année',
+    'ib_myp_2' => 'PEI — Programme d’éducation intermédiaire — 2e année',
+    'ib_myp_3' => 'PEI — Programme d’éducation intermédiaire — 3e année',
+    'ib_myp_4' => 'PEI — Programme d’éducation intermédiaire — 4e année',
+    'ib_myp_5' => 'PEI — Programme d’éducation intermédiaire — 5e année',
+    'ib_dp_1' => 'Diplôme — Programme du diplôme — 1re année',
+    'ib_dp_2' => 'Diplôme — Programme du diplôme — 2e année',
+    'ib_cp_1' => 'POP — Programme à orientation professionnelle — 1re année',
+    'ib_cp_2' => 'POP — Programme à orientation professionnelle — 2e année',
     'isced_0' => 'ISCED 0 — Éducation de la petite enfance',
     'isced_1' => 'ISCED 1 — Enseignement primaire',
     'isced_2' => 'ISCED 2 — Premier cycle du secondaire',
@@ -792,6 +803,7 @@ if ($metaSchoolSystem === '' && $metaSchoolLevel !== '') {
         str_starts_with($metaSchoolLevel, 'uk_scotland_') => 'uk_scotland',
         str_starts_with($metaSchoolLevel, 'uk_northern_ireland_') => 'uk_northern_ireland',
         str_starts_with($metaSchoolLevel, 'eu_school_') => 'european_schools',
+        str_starts_with($metaSchoolLevel, 'ib_') => 'ib',
         str_starts_with($metaSchoolLevel, 'isced_') => 'isced_2011',
         default => 'france',
     };

@@ -523,7 +523,7 @@ PROMPT;
 
                 <h3 id="creer-premier-design">Créer un premier design, étape par étape</h3>
                 <ol>
-                    <li><strong>Décrire le contexte.</strong> Renseignez le titre, la description, la commande institutionnelle, les objectifs d’enseignement, les concepteurs, les enseignants, la taille du groupe, la modalité et le temps d’apprentissage prévu. Pour le niveau, choisissez d’abord un système ou une classification, puis la classe correspondante. Le catalogue couvre la France, la Suisse, les États-Unis, les trois communautés belges, les quatre systèmes du Royaume-Uni et le système transnational des Écoles européennes. ISCED 2011 est proposé séparément comme classification internationale de comparaison. La durée peut être exprimée en jours, heures et minutes ; le nombre d’heures correspondant à une journée est configurable.</li>
+                    <li><strong>Décrire le contexte.</strong> Renseignez le titre, la description, la commande institutionnelle, les objectifs d’enseignement, les concepteurs, les enseignants, la taille du groupe, la modalité et le temps d’apprentissage prévu. Pour le niveau, choisissez d’abord un système ou une classification, puis la classe correspondante. Le catalogue couvre la France, la Suisse, les États-Unis, les trois communautés belges, les quatre systèmes du Royaume-Uni et les systèmes transnationaux des Écoles européennes et du Baccalauréat international (IB). ISCED 2011 est proposé séparément comme classification internationale de comparaison. La durée peut être exprimée en jours, heures et minutes ; le nombre d’heures correspondant à une journée est configurable.</li>
                     <li><strong>Formuler les acquis attendus.</strong> Indiquez ce que les apprenants devront être capables de faire à la fin. Reliez si nécessaire chaque acquis à un niveau de la taxonomie révisée de Bloom et choisissez un verbe d’action observable.</li>
                     <li><strong>Structurer le parcours en moments.</strong> Un moment correspond à une phase cohérente de la séance ou de la séquence : lancement, exploration, entraînement, mise en commun, production ou évaluation.</li>
                     <li><strong>Ajouter les activités.</strong> Pour chacune, précisez le type d’apprentissage, la durée, l’organisation du groupe, le mode d’enseignement, le rythme, le mode de formation, l’évaluation, les consignes et les ressources.</li>
@@ -1012,7 +1012,7 @@ window.helpPromptTranslations = <?= json_encode([
     ],
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 </script>
-<script src="js/help-i18n.js?v=20260906-scenarisation"></script>
+<script src="js/help-i18n.js?v=20260906-ib"></script>
 <script>
 var initialHelpLanguage = 'fr';
 try {

@@ -146,6 +146,7 @@ const SCHOOL_SYSTEM_ALIASES = {
   uk_scotland: ["Écosse", "Ecosse", "Scotland", "Scottish school system"],
   uk_northern_ireland: ["Irlande du Nord", "Northern Ireland", "Northern Irish school system"],
   european_schools: ["Écoles européennes", "Ecoles europeennes", "European Schools", "Schola Europaea"],
+  ib: ["IB", "Baccalauréat international", "Bac international", "International Baccalaureate"],
   isced_2011: ["ISCED", "ISCED 2011", "CITE", "CITE 2011"]
 };
 

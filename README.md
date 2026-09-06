@@ -13,7 +13,7 @@ Le projet est inspiré de l'[UCL Learning Designer](https://www.ucl.ac.uk/learni
 - **Relire un scénario sous plusieurs angles** : la répartition du temps et des types d'apprentissage aide à repérer les déséquilibres, les enchaînements trop denses ou les modalités trop peu variées.
 - **Partager et réutiliser les productions** : un design peut être sauvegardé dans un compte, publié par lien, consulté en lecture seule et proposé dans le catalogue public sous licence Creative Commons.
 - **Travailler avec les outils déjà utilisés** : les imports et exports permettent de poursuivre le travail dans un tableur, un traitement de texte, une plateforme web ou un autre outil compatible.
-- **Choisir un référentiel scolaire cohérent** : le niveau dépend du système sélectionné. Le catalogue couvre la France, la Suisse, les États-Unis, les communautés belge française, flamande et germanophone, l’Angleterre, le pays de Galles, l’Écosse, l’Irlande du Nord et les Écoles européennes, ainsi que la classification internationale ISCED 2011.
+- **Choisir un référentiel scolaire cohérent** : le niveau dépend du système sélectionné. Le catalogue couvre la France, la Suisse, les États-Unis, les communautés belge française, flamande et germanophone, l’Angleterre, le pays de Galles, l’Écosse, l’Irlande du Nord les Écoles européennes et le Baccalauréat international (IB), ainsi que la classification internationale ISCED 2011.
 - **Concevoir avec une IA sans perdre la structure pédagogique** : une Skill réutilisable, une bibliothèque de prompts et le CLI `scenarisation` accompagnent la création, la validation et la publication des scénarios.
 
 ## Documentation

@@ -518,6 +518,7 @@ function applyLocalizedUI() {
   document.getElementById("opt-meta-school-system-uk-scotland").textContent = t("schoolSystemUnitedKingdomScotland");
   document.getElementById("opt-meta-school-system-uk-northern-ireland").textContent = t("schoolSystemUnitedKingdomNorthernIreland");
   document.getElementById("opt-meta-school-system-european-schools").textContent = t("schoolSystemEuropeanSchools");
+  document.getElementById("opt-meta-school-system-ib").textContent = t("schoolSystemIB");
   document.getElementById("opt-meta-school-system-isced").textContent = t("schoolSystemIsced");
   document.getElementById("optgroup-meta-school-systems-national").label = t("schoolSystemsNationalGroup");
   document.getElementById("optgroup-meta-school-systems-transnational").label = t("schoolSystemsTransnationalGroup");
