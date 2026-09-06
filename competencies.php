@@ -505,8 +505,8 @@ foreach ($sectionGroups as $sectionKey => $group) {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="assets/favicon.svg?v=20260804" type="image/svg+xml" sizes="any">
-    <title>Référentiels de compétences | Learning Designer</title>
+    <link rel="icon" href="assets/favicon.svg?v=20260906-scenarisation" type="image/svg+xml" sizes="any">
+    <title>Référentiels de compétences | Scenarisation</title>
     <?php render_theme_boot_script(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1094,7 +1094,7 @@ foreach ($sectionGroups as $sectionKey => $group) {
     <header class="competencies-header">
         <p class="competencies-kicker" data-i18n-fr="Documentation" data-i18n-en="Documentation">Documentation</p>
         <h1 class="competencies-title" data-i18n-fr="Référentiels de compétences" data-i18n-en="Competency frameworks">Référentiels de compétences</h1>
-        <p class="competencies-subtitle" data-i18n-fr="Catalogue complet des sept cadres proposés dans le sélecteur de Learning Designer. Chaque cadre est organisé par domaines et renvoie à sa source de référence." data-i18n-en="Complete catalogue of the seven frameworks available in Learning Designer’s picker. Each framework is organised by domain and links to its reference source.">Catalogue complet des sept cadres proposés dans le sélecteur de Learning Designer. Chaque cadre est organisé par domaines et renvoie à sa source de référence.</p>
+        <p class="competencies-subtitle" data-i18n-fr="Catalogue complet des sept cadres proposés dans le sélecteur de Scenarisation. Chaque cadre est organisé par domaines et renvoie à sa source de référence." data-i18n-en="Complete catalogue of the seven frameworks available in Scenarisation’s picker. Each framework is organised by domain and links to its reference source.">Catalogue complet des sept cadres proposés dans le sélecteur de Scenarisation. Chaque cadre est organisé par domaines et renvoie à sa source de référence.</p>
     </header>
 
     <section class="competencies-controls" aria-label="Filtres" data-i18n-attr="aria-label" data-i18n-fr="Filtres" data-i18n-en="Filters">
@@ -1431,7 +1431,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function applyPageLanguage(lang) {
         document.documentElement.lang = lang === 'en' ? 'en' : 'fr';
-        document.title = lang === 'en' ? 'Competency frameworks | Learning Designer' : 'Référentiels de compétences | Learning Designer';
+        document.title = lang === 'en' ? 'Competency frameworks | Scenarisation' : 'Référentiels de compétences | Scenarisation';
         document.querySelectorAll('[data-i18n-fr]').forEach(function (el) {
             var value = lang === 'en' ? el.dataset.i18nEn : el.dataset.i18nFr;
             if (!value) return;

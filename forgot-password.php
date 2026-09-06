@@ -36,10 +36,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             try {
                 $token = create_password_reset_token($db, (int)$account['id']);
                 if (!send_password_reset_message((string)$account['email'], (string)$account['username'], $token)) {
-                    error_log('Learning Designer : échec d’envoi d’un email de réinitialisation pour le compte ' . (int)$account['id'] . '.');
+                    error_log('Scenarisation : échec d’envoi d’un email de réinitialisation pour le compte ' . (int)$account['id'] . '.');
                 }
             } catch (Throwable $exception) {
-                error_log('Learning Designer : échec de préparation d’une réinitialisation de mot de passe : ' . $exception->getMessage());
+                error_log('Scenarisation : échec de préparation d’une réinitialisation de mot de passe : ' . $exception->getMessage());
             }
         }
 
@@ -54,8 +54,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="assets/favicon.svg?v=20260804" type="image/svg+xml" sizes="any">
-    <title>Mot de passe oublié | Learning Designer</title>
+    <link rel="icon" href="assets/favicon.svg?v=20260906-scenarisation" type="image/svg+xml" sizes="any">
+    <title>Mot de passe oublié | Scenarisation</title>
     <?php render_theme_boot_script(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -68,7 +68,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 <?php render_site_nav('forgot_password'); ?>
 <main class="account-shell with-nav">
     <section class="account-card">
-        <p class="account-kicker">Learning Designer</p>
+        <p class="account-kicker">Scenarisation</p>
         <h1>Mot de passe oublié</h1>
         <p class="account-copy">Indiquez l’adresse email de votre compte. Vous recevrez un lien valable pendant une heure pour choisir un nouveau mot de passe.</p>
 

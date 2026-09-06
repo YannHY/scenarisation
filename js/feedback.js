@@ -6,7 +6,7 @@
     fr: {
       trigger: "Donner votre avis",
       title: "Votre avis",
-      prompt: "Comment trouvez-vous Learning Designer ?",
+      prompt: "Comment trouvez-vous Scenarisation ?",
       positive: "Satisfait",
       neutral: "Mitigé",
       negative: "Insatisfait",
@@ -24,7 +24,7 @@
     en: {
       trigger: "Give feedback",
       title: "Your feedback",
-      prompt: "How do you feel about Learning Designer?",
+      prompt: "How do you feel about Scenarisation?",
       positive: "Satisfied",
       neutral: "Mixed",
       negative: "Dissatisfied",

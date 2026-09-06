@@ -1,7 +1,0 @@
-interface:
-  display_name: "Learning Designer"
-  short_description: "Create designs with the learning CLI."
-  default_prompt: "Use $learning-designer to create a Learning Designer sequence."
-
-policy:
-  allow_implicit_invocation: true

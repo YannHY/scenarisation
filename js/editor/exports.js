@@ -314,7 +314,7 @@ function buildHtmlExportDocument(scope = "full", sessionIds = null) {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Export Learning Designer</title>
+  <title>Export Scenarisation</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 24px; line-height: 1.4; }
     h1, h2, h4 { margin-bottom: 8px; }

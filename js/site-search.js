@@ -160,7 +160,7 @@
     } catch (_) {
       filename = "";
     }
-    return copy().categories[filename] || "Learning Designer";
+    return copy().categories[filename] || "Scenarisation";
   }
 
   function normalizedWords(value) {

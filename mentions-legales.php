@@ -10,9 +10,9 @@ $publicUrl = app_base_url();
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Mentions légales du site Learning Designer.">
-    <link rel="icon" href="assets/favicon.svg?v=20260804" type="image/svg+xml" sizes="any">
-    <title>Mentions légales | Learning Designer</title>
+    <meta name="description" content="Mentions légales du site Scenarisation.">
+    <link rel="icon" href="assets/favicon.svg?v=20260906-scenarisation" type="image/svg+xml" sizes="any">
+    <title>Mentions légales | Scenarisation</title>
     <?php render_theme_boot_script(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,7 +29,7 @@ $publicUrl = app_base_url();
         <p class="legal-updated"><strong>Dernière mise à jour&nbsp;: <time datetime="2026-09-05">5 septembre 2026</time></strong></p>
 
         <h2>Édition et publication</h2>
-        <p>Le site <strong>Learning Designer</strong>, accessible à l’adresse <a href="<?= h($publicUrl) ?>"><?= h($publicUrl) ?></a>, est un service non commercial créé et édité par <strong>Yann Houry</strong>, avec la contribution de <strong>François Jourde</strong>.</p>
+        <p>Le site <strong>Scenarisation</strong>, accessible à l’adresse <a href="<?= h($publicUrl) ?>"><?= h($publicUrl) ?></a>, est un service non commercial créé et édité par <strong>Yann Houry</strong>, avec la contribution de <strong>François Jourde</strong>.</p>
         <p>Le directeur de la publication est Yann Houry.</p>
         <p>Pour contacter l’éditeur, signaler un contenu ou exercer un droit de réponse, utilisez la <a href="https://www.ralentirtravaux.com/contact/contact.php" rel="noopener noreferrer">page de contact de Ralentir Travaux</a>.</p>
 
@@ -53,14 +53,14 @@ $publicUrl = app_base_url();
         <p>Pour signaler un contenu manifestement illicite, une atteinte à des droits ou la présence indue de données personnelles, adressez une demande suffisamment précise au directeur de la publication depuis la <a href="https://www.ralentirtravaux.com/contact/contact.php" rel="noopener noreferrer">page de contact</a>, en indiquant l’adresse du contenu concerné, le motif du signalement et, le cas échéant, les justificatifs utiles.</p>
 
         <h2>Utilisation du formulaire d’avis</h2>
-        <p>Le formulaire d’avis est destiné aux retours sincères portant sur l’utilisation et l’amélioration de Learning Designer. Il ne doit pas être utilisé pour transmettre des contenus illicites, injurieux, publicitaires, automatisés, ni des données personnelles ou confidentielles concernant l’utilisateur ou un tiers.</p>
+        <p>Le formulaire d’avis est destiné aux retours sincères portant sur l’utilisation et l’amélioration de Scenarisation. Il ne doit pas être utilisé pour transmettre des contenus illicites, injurieux, publicitaires, automatisés, ni des données personnelles ou confidentielles concernant l’utilisateur ou un tiers.</p>
         <p>Les commentaires ne sont pas publiés. Ils peuvent être consultés par les administrateurs autorisés, exploités sous forme agrégée pour améliorer le service, puis supprimés conformément à la <a href="politique-confidentialite.php">politique de confidentialité</a>. Les soumissions abusives peuvent être bloquées.</p>
 
         <h2>Données personnelles</h2>
         <p>Les informations relatives aux comptes, aux designs enregistrés, aux retours utilisateurs, aux cookies, au stockage local et aux services externes figurent dans la <a href="politique-confidentialite.php">politique de confidentialité</a>.</p>
 
         <h2>Liens externes et disponibilité</h2>
-        <p>Learning Designer peut contenir des liens vers des ressources externes choisies par l’éditeur ou ajoutées par les utilisateurs. L’éditeur ne contrôle pas en permanence ces sites et ne peut garantir leur disponibilité, leur exactitude ou leurs pratiques. Tout contenu manifestement illicite ou lien problématique peut être signalé.</p>
+        <p>Scenarisation peut contenir des liens vers des ressources externes choisies par l’éditeur ou ajoutées par les utilisateurs. L’éditeur ne contrôle pas en permanence ces sites et ne peut garantir leur disponibilité, leur exactitude ou leurs pratiques. Tout contenu manifestement illicite ou lien problématique peut être signalé.</p>
         <p>Le service est fourni sans garantie de disponibilité continue. Des interruptions peuvent intervenir pour maintenance, mise à jour, incident technique ou cause indépendante de l’éditeur.</p>
     </article>
 </main>

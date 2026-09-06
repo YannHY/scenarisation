@@ -846,8 +846,8 @@ $displayDesignedMinutes = $designedMinutes > 0 ? $designedMinutes : $totalMinute
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" href="assets/favicon.svg?v=20260804" type="image/svg+xml" sizes="any">
-  <title><?= esc($title) ?> — Learning Designer</title>
+  <link rel="icon" href="assets/favicon.svg?v=20260906-scenarisation" type="image/svg+xml" sizes="any">
+  <title><?= esc($title) ?> — Scenarisation</title>
   <link rel="stylesheet" href="css/interface.css?v=20260905-subtle-focus">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
   <style>
@@ -1424,7 +1424,7 @@ $displayDesignedMinutes = $designedMinutes > 0 ? $designedMinutes : $totalMinute
       <a href="<?= esc($license['url']) ?>" target="_blank" rel="license noopener noreferrer"><?= esc($license['label']) ?></a>.
     </p>
     <?php endif; ?>
-    <p>Partagé avec Learning Designer</p>
+    <p>Partagé avec Scenarisation</p>
   </footer>
 
 </main>
@@ -1544,6 +1544,6 @@ $displayDesignedMinutes = $designedMinutes > 0 ? $designedMinutes : $totalMinute
   }, { passive: true, capture: true });
 })();
 </script>
-<script src="js/feedback.js?v=20260905-feedback-v2"></script>
+<script src="js/feedback.js?v=20260906-scenarisation"></script>
 </body>
 </html>

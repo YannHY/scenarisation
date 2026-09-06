@@ -191,8 +191,8 @@ function e(string $value): string
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="assets/favicon.svg?v=20260804" type="image/svg+xml" sizes="any">
-    <title>Profil | Learning Designer</title>
+    <link rel="icon" href="assets/favicon.svg?v=20260906-scenarisation" type="image/svg+xml" sizes="any">
+    <title>Profil | Scenarisation</title>
     <?php render_theme_boot_script(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -302,7 +302,7 @@ function e(string $value): string
             <div class="profile-section-head">
                 <div>
                     <h2 id="profile-cli-title" class="title-with-icon"><i class="fa-solid fa-terminal" aria-hidden="true"></i>Publication depuis le CLI</h2>
-                    <p id="profile-cli-copy" class="account-copy">Créez un jeton personnel pour publier depuis la commande <code>learning publish</code>.</p>
+                    <p id="profile-cli-copy" class="account-copy">Créez un jeton personnel pour publier depuis la commande <code>scenarisation publish</code>.</p>
                 </div>
             </div>
 
@@ -312,7 +312,7 @@ function e(string $value): string
                     <code><?= e($newCliToken) ?></code>
                     <br>
                     <span>Commande :</span>
-                    <code>learning login --site <?= e(app_base_url()) ?></code>
+                    <code>scenarisation login --site <?= e(app_base_url()) ?></code>
                 </div>
             <?php endif; ?>
 
@@ -384,7 +384,7 @@ document.addEventListener('DOMContentLoaded', function () {
         'profile-publications-title': 'Active publications',
         'profile-empty-publications': 'No published design yet.',
         'profile-cli-title': 'CLI publishing',
-        'profile-cli-copy': 'Create a personal token to publish with the `learning publish` command.',
+        'profile-cli-copy': 'Create a personal token to publish with the `scenarisation publish` command.',
         'profile-cli-token-name-label': 'Token name',
         'profile-cli-create-button': 'Create CLI token',
         'profile-cli-active-title': 'Active tokens',
@@ -444,7 +444,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function applyProfileLanguage(lang) {
         document.documentElement.lang = lang === 'en' ? 'en' : 'fr';
-        document.title = lang === 'en' ? 'Profile | Learning Designer' : 'Profil | Learning Designer';
+        document.title = lang === 'en' ? 'Profile | Scenarisation' : 'Profil | Scenarisation';
 
         Object.keys(translations).forEach(function (id) {
             var el = document.getElementById(id);

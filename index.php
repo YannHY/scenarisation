@@ -5,21 +5,21 @@ require_once __DIR__ . '/lib/bootstrap.php';
 // La navigation lit la session : elle doit démarrer avant tout HTML.
 app_start_session();
 
-$homeTitle = 'Learning Designer | Concevoir des expériences d’apprentissage';
-$homeDescription = 'Learning Designer aide les enseignants à concevoir, analyser et partager des scénarios pédagogiques.';
+$homeTitle = 'Scenarisation | Concevoir des expériences d’apprentissage';
+$homeDescription = 'Scenarisation aide les enseignants à concevoir, analyser et partager des scénarios pédagogiques.';
 $homeUrl = rtrim(app_base_url(), '/') . '/';
-$homeOgImageUrl = rtrim(app_base_url(), '/') . '/assets/og-home.png';
+$homeOgImageUrl = rtrim(app_base_url(), '/') . '/assets/og-home.png?v=20260906-scenarisation';
 ?>
 <!doctype html>
 <html lang="fr">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="assets/favicon.svg?v=20260804" type="image/svg+xml" sizes="any">
+    <link rel="icon" href="assets/favicon.svg?v=20260906-scenarisation" type="image/svg+xml" sizes="any">
     <meta name="description" content="<?= h($homeDescription) ?>">
     <link rel="canonical" href="<?= h($homeUrl) ?>">
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Learning Designer">
+    <meta property="og:site_name" content="Scenarisation">
     <meta property="og:locale" content="fr_FR">
     <meta property="og:title" content="<?= h($homeTitle) ?>">
     <meta property="og:description" content="<?= h($homeDescription) ?>">
@@ -29,7 +29,7 @@ $homeOgImageUrl = rtrim(app_base_url(), '/') . '/assets/og-home.png';
     <meta property="og:image:type" content="image/png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="Learning Designer — Donnez forme aux expériences d’apprentissage">
+    <meta property="og:image:alt" content="Scenarisation — Donnez forme aux expériences d’apprentissage">
     <title><?= h($homeTitle) ?></title>
     <?php render_theme_boot_script(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
@@ -208,7 +208,7 @@ $homeOgImageUrl = rtrim(app_base_url(), '/') . '/assets/og-home.png';
                     </div>
                     <div class="home-share-link-row">
                         <i class="fa-solid fa-link"></i>
-                        <span>learning-designer/view/atelier-lecture</span>
+                        <span>scenarisation/view/atelier-lecture</span>
                         <strong data-site-i18n-en="Active link" data-site-i18n-fr="Lien actif">Lien actif</strong>
                     </div>
                     <div class="home-share-options">
@@ -257,9 +257,9 @@ $homeOgImageUrl = rtrim(app_base_url(), '/') . '/assets/og-home.png';
                         <small>learning</small>
                     </div>
                     <div class="home-terminal-body">
-                        <p><span class="home-prompt">$</span> learning init design.json</p>
+                        <p><span class="home-prompt">$</span> scenarisation init design.json</p>
                         <p class="home-terminal-result"><i class="fa-solid fa-check"></i> <span data-site-i18n-en="4 moments · 9 activities" data-site-i18n-fr="4 moments · 9 activités">4 moments · 9 activités</span></p>
-                        <p><span class="home-prompt">$</span> learning validate design.json</p>
+                        <p><span class="home-prompt">$</span> scenarisation validate design.json</p>
                         <p class="home-terminal-result"><i class="fa-solid fa-check"></i> <span data-site-i18n-en="Valid design, ready to publish" data-site-i18n-fr="Design valide, prêt à publier">Design valide, prêt à publier</span></p>
                         <p class="home-terminal-cursor"><span class="home-prompt">$</span> <i></i></p>
                     </div>

@@ -10,8 +10,8 @@ app_start_session();
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="assets/favicon.svg?v=20260804" type="image/svg+xml" sizes="any">
-    <title>Learning design | Learning Designer</title>
+    <link rel="icon" href="assets/favicon.svg?v=20260906-scenarisation" type="image/svg+xml" sizes="any">
+    <title>Learning design | Scenarisation</title>
     <?php render_theme_boot_script(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -289,7 +289,7 @@ app_start_session();
     </section>
 
     <section class="ld-section">
-        <h2 data-i18n-fr="Concevoir avec Learning Designer" data-i18n-en="Designing With Learning Designer">Concevoir avec Learning Designer</h2>
+        <h2 data-i18n-fr="Concevoir avec Scenarisation" data-i18n-en="Designing With Scenarisation">Concevoir avec Scenarisation</h2>
         <p data-i18n-fr="L'outil développé à l'University College London par l'équipe de Diana Laurillard aide les enseignants à concevoir des activités pédagogiques, à les partager et à analyser leur équilibre. On commence par décrire le contexte : titre, sujet, description, objectifs, acquis attendus et taille du groupe." data-i18n-en="The tool developed at University College London by Diana Laurillard’s team helps teachers design teaching activities, share them, and analyze their balance. The process starts by describing the context: title, topic, description, objectives, expected outcomes, and group size.">L'outil développé à l'University College London par l'équipe de Diana Laurillard aide les enseignants à concevoir des activités pédagogiques, à les partager et à analyser leur équilibre. On commence par décrire le contexte&nbsp;: titre, sujet, description, objectifs, acquis attendus et taille du groupe.</p>
         <div class="ld-step-grid">
             <article class="ld-step-card">
@@ -325,7 +325,7 @@ app_start_session();
 document.addEventListener('DOMContentLoaded', function () {
     function applyLearningDesignLanguage(lang) {
         document.documentElement.lang = lang === 'en' ? 'en' : 'fr';
-        document.title = lang === 'en' ? 'Learning design | Learning Designer' : 'Learning design | Learning Designer';
+        document.title = lang === 'en' ? 'Learning design | Scenarisation' : 'Learning design | Scenarisation';
         document.querySelectorAll('[data-i18n-fr]').forEach(function (el) {
             var value = lang === 'en' ? el.dataset.i18nEn : el.dataset.i18nFr;
             if (!value) return;

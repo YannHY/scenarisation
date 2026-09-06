@@ -20,7 +20,7 @@ function app_start_session(): void
     // d'émettre du HTML ; on trace le manquement au lieu de défigurer la page.
     if (headers_sent($fichier, $ligne)) {
         error_log(sprintf(
-            'Learning Designer : session demandée après envoi des en-têtes (sortie démarrée dans %s ligne %d).'
+            'Scenarisation : session demandée après envoi des en-têtes (sortie démarrée dans %s ligne %d).'
                 . ' Appelez app_start_session() avant tout HTML.',
             (string)$fichier,
             (int)$ligne
@@ -832,7 +832,7 @@ function send_email_verification_message(string $email, string $username, string
     }
 
     $from = trim((string)(app_env('APP_MAIL_FROM') ?? 'no-reply@ralentirtravaux.com'));
-    $fromName = trim((string)(app_env('APP_MAIL_FROM_NAME') ?? 'Learning Designer'));
+    $fromName = trim((string)(app_env('APP_MAIL_FROM_NAME') ?? 'Scenarisation'));
     if (!filter_var($from, FILTER_VALIDATE_EMAIL) || preg_match('/[\r\n]/', $from . $fromName)) {
         return false;
     }
@@ -840,12 +840,12 @@ function send_email_verification_message(string $email, string $username, string
     $verificationUrl = app_base_url() . '/verify-email.php?token=' . rawurlencode($token);
     $safeUsername = trim(str_replace(["\r", "\n"], ' ', $username));
     $body = "Bonjour {$safeUsername},\n\n"
-        . "Confirmez votre adresse email pour activer votre compte Learning Designer :\n"
+        . "Confirmez votre adresse email pour activer votre compte Scenarisation :\n"
         . $verificationUrl . "\n\n"
         . "Ce lien est valable pendant 24 heures et ne peut être utilisé qu'une fois.\n\n"
         . "Si vous n'avez pas demandé la création de ce compte, vous pouvez ignorer ce message.\n";
 
-    $subject = 'Confirmez votre adresse email — Learning Designer';
+    $subject = 'Confirmez votre adresse email — Scenarisation';
     if (function_exists('mb_encode_mimeheader')) {
         $subject = mb_encode_mimeheader($subject, 'UTF-8');
         $encodedFromName = mb_encode_mimeheader($fromName, 'UTF-8');
@@ -900,7 +900,7 @@ function send_password_reset_message(string $email, string $username, string $to
     }
 
     $from = trim((string)(app_env('APP_MAIL_FROM') ?? 'no-reply@ralentirtravaux.com'));
-    $fromName = trim((string)(app_env('APP_MAIL_FROM_NAME') ?? 'Learning Designer'));
+    $fromName = trim((string)(app_env('APP_MAIL_FROM_NAME') ?? 'Scenarisation'));
     if (!filter_var($from, FILTER_VALIDATE_EMAIL) || preg_match('/[\r\n]/', $from . $fromName)) {
         return false;
     }
@@ -908,12 +908,12 @@ function send_password_reset_message(string $email, string $username, string $to
     $resetUrl = app_base_url() . '/reset-password.php?token=' . rawurlencode($token);
     $safeUsername = trim(str_replace(["\r", "\n"], ' ', $username));
     $body = "Bonjour {$safeUsername},\n\n"
-        . "Vous avez demandé la réinitialisation de votre mot de passe Learning Designer :\n"
+        . "Vous avez demandé la réinitialisation de votre mot de passe Scenarisation :\n"
         . $resetUrl . "\n\n"
         . "Ce lien est valable pendant une heure et ne peut être utilisé qu'une fois.\n\n"
         . "Si vous n'êtes pas à l'origine de cette demande, ignorez ce message : votre mot de passe ne sera pas modifié.\n";
 
-    $subject = 'Réinitialisez votre mot de passe — Learning Designer';
+    $subject = 'Réinitialisez votre mot de passe — Scenarisation';
     if (function_exists('mb_encode_mimeheader')) {
         $subject = mb_encode_mimeheader($subject, 'UTF-8');
         $encodedFromName = mb_encode_mimeheader($fromName, 'UTF-8');
@@ -956,20 +956,20 @@ function app_competency_catalog_source(): string
 
     $path = __DIR__ . '/../js/competency-catalog.js';
     if (!is_file($path)) {
-        error_log('Learning Designer : catalogue de compétences introuvable (' . $path . ').');
+        error_log('Scenarisation : catalogue de compétences introuvable (' . $path . ').');
         return $source = '';
     }
 
     $js = (string)file_get_contents($path);
     if (!preg_match('/const\s+COMPETENCY_CATALOG_SOURCE\s*=\s*String\.raw`(.*?)`;/s', $js, $matches)) {
-        error_log('Learning Designer : COMPETENCY_CATALOG_SOURCE illisible dans ' . $path
+        error_log('Scenarisation : COMPETENCY_CATALOG_SOURCE illisible dans ' . $path
             . ' (constante renommée ou littéral modifié ?).');
         return $source = '';
     }
 
     $sourceFr = (string)$matches[1];
     if (!preg_match('/const\s+COMPETENCY_CATALOG_EN_SOURCE\s*=\s*String\.raw`(.*?)`;/s', $js, $translationMatches)) {
-        error_log('Learning Designer : traductions anglaises du catalogue de compétences illisibles dans ' . $path . '.');
+        error_log('Scenarisation : traductions anglaises du catalogue de compétences illisibles dans ' . $path . '.');
         return $source = $sourceFr;
     }
 
@@ -1022,13 +1022,13 @@ function app_competency_framework_catalog_source(): string
 
     $path = __DIR__ . '/../js/competency-catalog.js';
     if (!is_file($path)) {
-        error_log('Learning Designer : catalogue de cadres de compétences introuvable (' . $path . ').');
+        error_log('Scenarisation : catalogue de cadres de compétences introuvable (' . $path . ').');
         return $source = '';
     }
 
     $js = (string)file_get_contents($path);
     if (!preg_match('/const\s+COMPETENCY_FRAMEWORK_CATALOG_SOURCE\s*=\s*String\.raw`(.*?)`;/s', $js, $matches)) {
-        error_log('Learning Designer : COMPETENCY_FRAMEWORK_CATALOG_SOURCE illisible dans ' . $path . '.');
+        error_log('Scenarisation : COMPETENCY_FRAMEWORK_CATALOG_SOURCE illisible dans ' . $path . '.');
         return $source = '';
     }
 
@@ -1048,13 +1048,13 @@ function app_competency_digcomp_detail_source(): string
 
     $path = __DIR__ . '/../js/competency-digcomp-details.js';
     if (!is_file($path)) {
-        error_log('Learning Designer : repères DigComp introuvables (' . $path . ').');
+        error_log('Scenarisation : repères DigComp introuvables (' . $path . ').');
         return $source = '';
     }
 
     $js = (string)file_get_contents($path);
     if (!preg_match('/const\s+COMPETENCY_DIGCOMP_DETAIL_SOURCE\s*=\s*String\.raw`(.*?)`;/s', $js, $matches)) {
-        error_log('Learning Designer : COMPETENCY_DIGCOMP_DETAIL_SOURCE illisible dans ' . $path . '.');
+        error_log('Scenarisation : COMPETENCY_DIGCOMP_DETAIL_SOURCE illisible dans ' . $path . '.');
         return $source = '';
     }
 
@@ -1074,13 +1074,13 @@ function app_competency_greencomp_detail_source(): string
 
     $path = __DIR__ . '/../js/competency-greencomp-details.js';
     if (!is_file($path)) {
-        error_log('Learning Designer : repères GreenComp introuvables (' . $path . ').');
+        error_log('Scenarisation : repères GreenComp introuvables (' . $path . ').');
         return $source = '';
     }
 
     $js = (string)file_get_contents($path);
     if (!preg_match('/const\s+COMPETENCY_GREENCOMP_DETAIL_SOURCE\s*=\s*String\.raw`(.*?)`;/s', $js, $matches)) {
-        error_log('Learning Designer : COMPETENCY_GREENCOMP_DETAIL_SOURCE illisible dans ' . $path . '.');
+        error_log('Scenarisation : COMPETENCY_GREENCOMP_DETAIL_SOURCE illisible dans ' . $path . '.');
         return $source = '';
     }
 
@@ -1122,10 +1122,10 @@ function render_site_nav(string $active = ''): void
     ?>
     <header class="site-nav site-nav-page" role="navigation" aria-label="Navigation principale" data-site-i18n-attr="aria-label" data-site-i18n-en="Main navigation" data-site-i18n-fr="Navigation principale">
         <div class="site-nav-brand">
-            <a class="site-nav-brand-link" href="index.php" aria-label="Accueil Learning Designer" data-site-i18n-attr="aria-label" data-site-i18n-en="Learning Designer home" data-site-i18n-fr="Accueil Learning Designer">
+            <a class="site-nav-brand-link" href="index.php" aria-label="Accueil Scenarisation" data-site-i18n-attr="aria-label" data-site-i18n-en="Scenarisation home" data-site-i18n-fr="Accueil Scenarisation">
                 <span class="site-nav-brand-mark" aria-hidden="true"></span>
                 <div class="site-nav-brand-copy">
-                    <p class="site-nav-title">Learning Designer</p>
+                    <p class="site-nav-title">Scenarisation</p>
                 </div>
             </a>
         </div>
@@ -1348,7 +1348,7 @@ function render_site_nav(string $active = ''): void
         });
     });
     </script>
-    <script src="js/site-search.js?v=20260906-highlight"></script>
+    <script src="js/site-search.js?v=20260906-scenarisation"></script>
     <?php
 }
 

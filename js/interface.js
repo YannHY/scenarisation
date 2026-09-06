@@ -4301,28 +4301,28 @@ function getExportPayload(format = "json", scope = exportScope, sessionIds = exp
     return {
       content: buildExcelExportDocument(normalizedScope, sessionIds),
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      filename: `${filenamePrefix}-learning-designer-fr.xlsx`
+      filename: `${filenamePrefix}-scenarisation-fr.xlsx`
     };
   }
   if (chosen === "md" || chosen === "markdown") {
     return {
       content: buildMarkdownExport(normalizedScope, sessionIds),
       type: "text/markdown;charset=utf-8",
-      filename: `${filenamePrefix}-learning-designer-fr.md`
+      filename: `${filenamePrefix}-scenarisation-fr.md`
     };
   }
   if (chosen === "html") {
     return {
       content: buildHtmlExportDocument(normalizedScope, sessionIds),
       type: "text/html;charset=utf-8",
-      filename: `${filenamePrefix}-learning-designer-fr.html`
+      filename: `${filenamePrefix}-scenarisation-fr.html`
     };
   }
   if (chosen === "word" || chosen === "doc" || chosen === "docx") {
     return {
       content: buildWordExportDocument(normalizedScope, sessionIds),
       type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      filename: `${filenamePrefix}-learning-designer-fr.docx`
+      filename: `${filenamePrefix}-scenarisation-fr.docx`
     };
   }
   return {
@@ -4337,7 +4337,7 @@ function getExportPayload(format = "json", scope = exportScope, sessionIds = exp
       2
     ),
     type: "application/json;charset=utf-8",
-    filename: `${filenamePrefix}-learning-designer-fr.json`
+    filename: `${filenamePrefix}-scenarisation-fr.json`
   };
 }
 

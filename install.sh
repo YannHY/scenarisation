@@ -1,8 +1,15 @@
 #!/usr/bin/env sh
 set -eu
 
-REPO="${LEARNING_DESIGNER_REPO:-YannHY/learning-designer}"
-REF="${LEARNING_DESIGNER_REF:-main}"
+# Accept legacy environment overrides during the rename.
+SCENARISATION_REF="${SCENARISATION_REF:-${LEARNING_DESIGNER_REF:-}}"
+SCENARISATION_REPO="${SCENARISATION_REPO:-${LEARNING_DESIGNER_REPO:-}}"
+SCENARISATION_INSTALL_DIR="${SCENARISATION_INSTALL_DIR:-${LEARNING_INSTALL_DIR:-}}"
+SCENARISATION_INSTALL_NONINTERACTIVE="${SCENARISATION_INSTALL_NONINTERACTIVE:-${LEARNING_INSTALL_NONINTERACTIVE:-}}"
+SCENARISATION_INSTALL_QUIET="${SCENARISATION_INSTALL_QUIET:-${LEARNING_INSTALL_QUIET:-}}"
+
+REPO="${SCENARISATION_REPO:-YannHY/learning-designer}"
+REF="${SCENARISATION_REF:-main}"
 TTY="/dev/tty"
 
 has_tty() {
@@ -10,7 +17,7 @@ has_tty() {
 }
 
 say() {
-  if [ "${LEARNING_INSTALL_QUIET:-0}" = "1" ]; then
+  if [ "${SCENARISATION_INSTALL_QUIET:-0}" = "1" ]; then
     return
   fi
   if has_tty; then
@@ -86,8 +93,8 @@ first_suitable_dir() {
 }
 
 choose_install_dir() {
-  if [ -n "${LEARNING_INSTALL_DIR:-}" ]; then
-    printf '%s\n' "$LEARNING_INSTALL_DIR"
+  if [ -n "${SCENARISATION_INSTALL_DIR:-}" ]; then
+    printf '%s\n' "$SCENARISATION_INSTALL_DIR"
     return
   fi
 
@@ -97,7 +104,7 @@ choose_install_dir() {
     exit 1
   fi
 
-  if [ "${LEARNING_INSTALL_NONINTERACTIVE:-0}" = "1" ]; then
+  if [ "${SCENARISATION_INSTALL_NONINTERACTIVE:-0}" = "1" ]; then
     printf '%s\n' "$default_dir"
     return
   fi
@@ -108,9 +115,9 @@ choose_install_dir() {
   fi
 
   say ""
-  say "Learning Designer CLI installer"
+  say "Scenarisation CLI installer"
   say ""
-  say "This installs the command: learning"
+  say "This installs the command: scenarisation"
   say "No shell profile will be modified."
   say ""
   say "Choose where to install it:"
@@ -140,7 +147,7 @@ choose_install_dir() {
     c|C|custom|Custom)
       custom_dir="$(ask "Directory" "$default_dir")"
       if ! is_in_path "$custom_dir"; then
-        say "That directory is not in PATH, so learning would not be available directly."
+        say "That directory is not in PATH, so scenarisation would not be available directly."
         say "Using $default_dir instead."
         printf '%s\n' "$default_dir"
       else
@@ -152,23 +159,23 @@ choose_install_dir() {
 }
 
 INSTALL_DIR="$(choose_install_dir)"
-TARGET="$INSTALL_DIR/learning"
-TMP_FILE="$(mktemp "${TMPDIR:-/tmp}/learning.XXXXXX")"
+TARGET="$INSTALL_DIR/scenarisation"
+TMP_FILE="$(mktemp "${TMPDIR:-/tmp}/scenarisation.XXXXXX")"
 cleanup() {
   rm -f "$TMP_FILE"
 }
 trap cleanup EXIT
 
 if ! command -v python3 >/dev/null 2>&1; then
-  echo "install.sh: python3 is required to run learning." >&2
+  echo "install.sh: python3 is required to run scenarisation." >&2
   echo "Install Python 3, then run this installer again." >&2
   exit 1
 fi
 
-if [ -f "./bin/learning" ]; then
-  cp "./bin/learning" "$TMP_FILE"
+if [ -f "./bin/scenarisation" ]; then
+  cp "./bin/scenarisation" "$TMP_FILE"
 else
-  URL="https://raw.githubusercontent.com/$REPO/$REF/bin/learning"
+  URL="https://raw.githubusercontent.com/$REPO/$REF/bin/scenarisation"
   if command -v curl >/dev/null 2>&1; then
     curl -fsSL "$URL" -o "$TMP_FILE"
   elif command -v wget >/dev/null 2>&1; then
@@ -201,5 +208,5 @@ else
 fi
 
 say ""
-say "Installed learning to $TARGET"
-say "Run: learning --help"
+say "Installed scenarisation to $TARGET"
+say "Run: scenarisation --help"

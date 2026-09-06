@@ -10,9 +10,9 @@ app_start_session();
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="assets/favicon.svg?v=20260804" type="image/svg+xml" sizes="any">
+    <link rel="icon" href="assets/favicon.svg?v=20260906-scenarisation" type="image/svg+xml" sizes="any">
     <meta name="description" content="Le Cadre conversationnel de Diana Laurillard : concepts, pratiques, cycles et six types d'apprentissage.">
-    <title>Le Cadre conversationnel de Diana Laurillard | Learning Designer</title>
+    <title>Le Cadre conversationnel de Diana Laurillard | Scenarisation</title>
     <?php render_theme_boot_script(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
     <link rel="preconnect" href="https://fonts.googleapis.com">

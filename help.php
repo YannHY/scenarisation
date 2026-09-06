@@ -6,38 +6,38 @@ require_once __DIR__ . '/lib/bootstrap.php';
 app_start_session();
 
 $aiPrompt = <<<'PROMPT'
-Tu dois créer un design pédagogique Learning Designer en utilisant le CLI `learning`.
+Tu dois créer un design pédagogique Scenarisation en utilisant le CLI `scenarisation`.
 
 Important :
 Tu es peut-être dans un sandbox isolé. Sélectionne le CLI selon ses capacités, pas seulement selon l’existence d’une commande.
 
 Teste dans cet ordre :
-1. `./bin/learning` si tu travailles dans le dépôt Learning Designer ;
-2. la commande globale `learning` ;
-3. `./.tools/bin/learning` si cette copie locale existe déjà.
+1. `./bin/scenarisation` si tu travailles dans le dépôt Scenarisation ;
+2. la commande globale `scenarisation` ;
+3. `./.tools/bin/scenarisation` si cette copie locale existe déjà.
 
 Le CLI retenu doit prendre en charge `list school-systems`, `list activity-options`, les options `--school-system` et `--school-level` de `init`, les choix pédagogiques explicites de `add-activity` et `validate --strict-pedagogy`.
 
-Si la commande globale existe mais n’est pas compatible, indique-moi simplement qu’elle doit être mise à jour et demande-moi l’autorisation de lancer `learning upgrade`. Après mon accord explicite, effectue la mise à jour et recommence les vérifications.
+Si la commande globale existe mais n’est pas compatible, indique-moi simplement qu’elle doit être mise à jour et demande-moi l’autorisation de lancer `scenarisation upgrade`. Après mon accord explicite, effectue la mise à jour et recommence les vérifications.
 
 Si aucune copie compatible n’est disponible, installe une copie locale dans ton environnement :
 
 mkdir -p .tools/bin
-curl -fsSL https://raw.githubusercontent.com/YannHY/learning-designer/main/bin/learning -o .tools/bin/learning
-chmod +x .tools/bin/learning
-./.tools/bin/learning --help
+curl -fsSL https://raw.githubusercontent.com/YannHY/learning-designer/main/bin/scenarisation -o .tools/bin/scenarisation
+chmod +x .tools/bin/scenarisation
+./.tools/bin/scenarisation --help
 
 Si raw.githubusercontent.com est bloqué, utilise web_fetch ou une autre méthode disponible pour récupérer :
-https://github.com/YannHY/learning-designer/blob/main/bin/learning
+https://github.com/YannHY/learning-designer/blob/main/bin/scenarisation
 
-Puis écris le fichier dans `.tools/bin/learning`, rends-le exécutable et vérifie ses capacités.
+Puis écris le fichier dans `.tools/bin/scenarisation`, rends-le exécutable et vérifie ses capacités.
 
-Mémorise la commande compatible retenue sous la variable `LEARNING` : `./bin/learning`, `learning` ou `./.tools/bin/learning`. Utilise ensuite `$LEARNING` dans toutes les commandes ci-dessous. Ne suppose pas qu’une variable shell définie dans une commande précédente persistera : si nécessaire, remplace `$LEARNING` par la commande retenue.
+Mémorise la commande compatible retenue sous la variable `SCENARISATION` : `./bin/scenarisation`, `scenarisation` ou `./.tools/bin/scenarisation`. Utilise ensuite `$SCENARISATION` dans toutes les commandes ci-dessous. Ne suppose pas qu’une variable shell définie dans une commande précédente persistera : si nécessaire, remplace `$SCENARISATION` par la commande retenue.
 
-Une fois `.tools/bin/learning` créé, ne dépends plus du réseau.
+Une fois `.tools/bin/scenarisation` créé, ne dépends plus du réseau.
 
 Mission :
-Créer un fichier `design.json` complet, structuré, détaillé et importable dans Learning Designer.
+Créer un fichier `design.json` complet, structuré, détaillé et importable dans Scenarisation.
 
 Utilise le CLI autant que possible. N’écris pas le JSON à la main sauf si le CLI est impossible à utiliser après plusieurs tentatives documentées.
 
@@ -86,17 +86,17 @@ Avant d’exécuter les commandes de création complète, reformule brièvement 
 Ensuite utilise le CLI, pas une écriture manuelle du JSON.
 
 Avant de créer toutes les activités, vérifie les commandes utiles :
-- $LEARNING --help
-- $LEARNING init --help
-- $LEARNING add-moment --help
-- $LEARNING add-activity --help
-- $LEARNING outcome --help
-- $LEARNING list types
-- $LEARNING list bloom
-- $LEARNING list competencies
-- $LEARNING list activity-options
-- $LEARNING list school-systems
-- $LEARNING list school-levels --system IDENTIFIANT
+- $SCENARISATION --help
+- $SCENARISATION init --help
+- $SCENARISATION add-moment --help
+- $SCENARISATION add-activity --help
+- $SCENARISATION outcome --help
+- $SCENARISATION list types
+- $SCENARISATION list bloom
+- $SCENARISATION list competencies
+- $SCENARISATION list activity-options
+- $SCENARISATION list school-systems
+- $SCENARISATION list school-levels --system IDENTIFIANT
 
 Pour `init` et `add-activity`, utilise uniquement les valeurs contrôlées acceptées par le CLI.
 
@@ -113,7 +113,7 @@ Valeurs sûres :
 
 Pour chaque activité, détermine et transmets explicitement `--group`, `--teaching`, `--pacing`, `--mode`, `--evaluation` et `--aias`. Ne t’appuie pas sur des valeurs par défaut. Choisis-les comme un ensemble cohérent à partir de l’objectif, de l’autonomie des élèves, des interactions nécessaires, des contraintes de formation et des traces d’apprentissage attendues. AIAS 1 signifie sans IA ; AIAS 2 réserve l’IA à l’exploration, la recherche ou la planification ; AIAS 3 en fait une collaboratrice dont l’élève évalue et transforme les productions ; AIAS 4 l’intègre pleinement sous la direction critique de l’élève ; AIAS 5 correspond à l’exploration et à la co-conception de nouveaux usages. Utilise `not-applicable` seulement si le cadre AIAS ne s’applique réellement pas, et ne laisse jamais AIAS indécis dans un design généré.
 
-Pour `init`, transmets le système et le niveau lorsqu’ils sont connus, par exemple : `$LEARNING init design.json --school-system france --school-level quatrieme`.
+Pour `init`, transmets le système et le niveau lorsqu’ils sont connus, par exemple : `$SCENARISATION init design.json --school-system france --school-level quatrieme`.
 
 Utilise les valeurs canoniques ci-dessus pour `--pacing` et `--mode` ; le CLI accepte également leurs principaux équivalents français ou anglais.
 
@@ -122,12 +122,12 @@ Ne mets jamais de phrases longues dans les champs contrôlés comme `--school-sy
 Utilise `--description` pour décrire l’activité du point de vue pédagogique et `--instructions` pour les consignes directement adressées aux élèves. Place les critères, supports, rôle de l’enseignant, modalités de différenciation et autres détails dans `--notes`, `--objectives` ou `--intentions` selon leur portée.
 
 Commandes à utiliser obligatoirement autant que possible :
-- $LEARNING init
-- $LEARNING add-moment
-- $LEARNING add-activity
-- $LEARNING outcome
-- $LEARNING validate design.json --strict-pedagogy
-- $LEARNING prompt design.json
+- $SCENARISATION init
+- $SCENARISATION add-moment
+- $SCENARISATION add-activity
+- $SCENARISATION outcome
+- $SCENARISATION validate design.json --strict-pedagogy
+- $SCENARISATION prompt design.json
 
 Procédure recommandée :
 1. Crée `design.json` avec `init`.
@@ -180,11 +180,11 @@ Publication :
 Ne publie pas directement depuis ton sandbox sauf si je te donne explicitement un jeton CLI.
 Pour publier depuis mon Mac, indique-moi simplement, si le fichier est sur le Bureau :
 
-learning publish ~/Desktop/design.json
+scenarisation publish ~/Desktop/design.json
 
 Ou, si le fichier reste dans le dossier courant :
 
-learning publish design.json
+scenarisation publish design.json
 
 Règles importantes :
 - Travaille progressivement.
@@ -193,7 +193,7 @@ Règles importantes :
 - Vérifie les valeurs acceptées avant de générer beaucoup d’activités.
 - Teste une première activité avant de produire toute la séquence.
 - Si une commande échoue, explique pourquoi, corrige-la et recommence.
-- Une fois `.tools/bin/learning` créé, ne dépends plus du réseau.
+- Une fois `.tools/bin/scenarisation` créé, ne dépends plus du réseau.
 - Ne publie jamais sans autorisation explicite.
 PROMPT;
 
@@ -236,38 +236,38 @@ Adopte un ton bienveillant, professionnel et encourageant. Évite le jargon inut
 PROMPT;
 
 $aiPromptEn = <<<'PROMPT'
-You must create a Learning Designer teaching design using the `learning` CLI.
+You must create a Scenarisation teaching design using the `scenarisation` CLI.
 
 Important:
 You may be working in an isolated sandbox. Select the CLI by capability, not merely by whether a command exists.
 
 Test these candidates in order:
-1. `./bin/learning` when working in the Learning Designer repository;
-2. the global `learning` command;
-3. `./.tools/bin/learning` when that local copy already exists.
+1. `./bin/scenarisation` when working in the Scenarisation repository;
+2. the global `scenarisation` command;
+3. `./.tools/bin/scenarisation` when that local copy already exists.
 
 The selected CLI must support `list school-systems`, `list activity-options`, the `init` options `--school-system` and `--school-level`, explicit pedagogical choices in `add-activity`, and `validate --strict-pedagogy`.
 
-If the global command exists but is incompatible, simply tell me that it must be updated and ask for permission to run `learning upgrade`. After my explicit approval, perform the update and repeat the checks.
+If the global command exists but is incompatible, simply tell me that it must be updated and ask for permission to run `scenarisation upgrade`. After my explicit approval, perform the update and repeat the checks.
 
 If no compatible copy is available, install a local copy in your environment:
 
 mkdir -p .tools/bin
-curl -fsSL https://raw.githubusercontent.com/YannHY/learning-designer/main/bin/learning -o .tools/bin/learning
-chmod +x .tools/bin/learning
-./.tools/bin/learning --help
+curl -fsSL https://raw.githubusercontent.com/YannHY/learning-designer/main/bin/scenarisation -o .tools/bin/scenarisation
+chmod +x .tools/bin/scenarisation
+./.tools/bin/scenarisation --help
 
 If raw.githubusercontent.com is blocked, use web_fetch or another available method to retrieve:
-https://github.com/YannHY/learning-designer/blob/main/bin/learning
+https://github.com/YannHY/learning-designer/blob/main/bin/scenarisation
 
-Then write the file to `.tools/bin/learning`, make it executable, and check its capabilities.
+Then write the file to `.tools/bin/scenarisation`, make it executable, and check its capabilities.
 
-Remember the selected compatible command as `LEARNING`: `./bin/learning`, `learning`, or `./.tools/bin/learning`. Use `$LEARNING` in all commands below. Do not assume that a shell variable set in an earlier command will persist: replace `$LEARNING` with the selected command when necessary.
+Remember the selected compatible command as `SCENARISATION`: `./bin/scenarisation`, `scenarisation`, or `./.tools/bin/scenarisation`. Use `$SCENARISATION` in all commands below. Do not assume that a shell variable set in an earlier command will persist: replace `$SCENARISATION` with the selected command when necessary.
 
-Once `.tools/bin/learning` has been created, do not rely on the network again.
+Once `.tools/bin/scenarisation` has been created, do not rely on the network again.
 
 Mission:
-Create a complete, structured, detailed `design.json` file that can be imported into Learning Designer.
+Create a complete, structured, detailed `design.json` file that can be imported into Scenarisation.
 
 Use the CLI whenever possible. Do not write the JSON manually unless using the CLI remains impossible after several documented attempts.
 
@@ -316,17 +316,17 @@ Before running all creation commands, briefly restate:
 Then use the CLI rather than writing the JSON manually.
 
 Before creating all activities, inspect the useful commands:
-- $LEARNING --help
-- $LEARNING init --help
-- $LEARNING add-moment --help
-- $LEARNING add-activity --help
-- $LEARNING outcome --help
-- $LEARNING list types
-- $LEARNING list bloom
-- $LEARNING list competencies
-- $LEARNING list activity-options
-- $LEARNING list school-systems
-- $LEARNING list school-levels --system SYSTEM_ID
+- $SCENARISATION --help
+- $SCENARISATION init --help
+- $SCENARISATION add-moment --help
+- $SCENARISATION add-activity --help
+- $SCENARISATION outcome --help
+- $SCENARISATION list types
+- $SCENARISATION list bloom
+- $SCENARISATION list competencies
+- $SCENARISATION list activity-options
+- $SCENARISATION list school-systems
+- $SCENARISATION list school-levels --system SYSTEM_ID
 
 For `init` and `add-activity`, use only controlled values accepted by the CLI.
 
@@ -343,7 +343,7 @@ Safe values:
 
 For every activity, explicitly determine and pass `--group`, `--teaching`, `--pacing`, `--mode`, `--evaluation`, and `--aias`. Do not rely on defaults. Choose them as a coherent set based on the objective, learner autonomy, required interactions, delivery constraints, and expected evidence of learning. AIAS 1 means no AI; AIAS 2 limits AI to exploration, research, or planning; AIAS 3 makes AI a collaborator whose output the learner evaluates and transforms; AIAS 4 fully integrates AI under the learner's critical direction; AIAS 5 covers exploring and co-designing new AI uses. Use `not-applicable` only when the AIAS framework genuinely does not apply, and never leave AIAS undecided in a generated design.
 
-For `init`, pass the system and level whenever they are known, for example: `$LEARNING init design.json --school-system france --school-level quatrieme`.
+For `init`, pass the system and level whenever they are known, for example: `$SCENARISATION init design.json --school-system france --school-level quatrieme`.
 
 Use the canonical values above for `--pacing` and `--mode`; the CLI also accepts their main French and English equivalents.
 
@@ -352,12 +352,12 @@ Never put long sentences in controlled fields such as `--school-system`, `--scho
 Use `--description` for the pedagogical description of the activity and `--instructions` for directions addressed directly to students. Put criteria, resources, the teacher’s role, differentiation, and other details in `--notes`, `--objectives`, or `--intentions` according to their scope.
 
 Use these commands whenever possible:
-- $LEARNING init
-- $LEARNING add-moment
-- $LEARNING add-activity
-- $LEARNING outcome
-- $LEARNING validate design.json --strict-pedagogy
-- $LEARNING prompt design.json
+- $SCENARISATION init
+- $SCENARISATION add-moment
+- $SCENARISATION add-activity
+- $SCENARISATION outcome
+- $SCENARISATION validate design.json --strict-pedagogy
+- $SCENARISATION prompt design.json
 
 Recommended process:
 1. Create `design.json` with `init`.
@@ -400,7 +400,7 @@ At the end, give me:
 
 Publishing:
 Do not publish directly from your sandbox unless I explicitly give you a CLI token.
-To publish from my Mac, tell me to use `learning publish ~/Desktop/design.json` if the file is on the Desktop, or `learning publish design.json` if it remains in the current folder.
+To publish from my Mac, tell me to use `scenarisation publish ~/Desktop/design.json` if the file is on the Desktop, or `scenarisation publish design.json` if it remains in the current folder.
 
 Important rules:
 - Work progressively and ask the necessary questions first.
@@ -408,7 +408,7 @@ Important rules:
 - Check accepted values before generating many activities.
 - Test one activity before producing the whole sequence.
 - If a command fails, explain why, correct it, and try again.
-- Once `.tools/bin/learning` has been created, do not rely on the network.
+- Once `.tools/bin/scenarisation` has been created, do not rely on the network.
 - Never publish without explicit permission.
 PROMPT;
 
@@ -456,8 +456,8 @@ PROMPT;
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="assets/favicon.svg?v=20260804" type="image/svg+xml" sizes="any">
-    <title>Aide | Learning Designer</title>
+    <link rel="icon" href="assets/favicon.svg?v=20260906-scenarisation" type="image/svg+xml" sizes="any">
+    <title>Aide | Scenarisation</title>
     <?php render_theme_boot_script(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -499,7 +499,7 @@ PROMPT;
                 <h2>Comprendre le learning design</h2>
                 <p>Le <em>learning design</em> consiste à organiser les activités que les apprenants vont faire pour atteindre les acquis visés.</p>
 
-                <h3 id="learning-designer-scenario-visible">Learning Designer : rendre le scénario visible</h3>
+                <h3 id="learning-designer-scenario-visible">Scenarisation : rendre le scénario visible</h3>
                 <p>Le <a href="https://www.ucl.ac.uk/learning-designer/" title="Learning Designer">Learning Designer</a> original a été développé à l’University College London par l’équipe de Diana Laurillard pour aider les enseignants à concevoir des activités pédagogiques, à analyser leur équilibre et à partager leurs scénarisations. L’application présentée ici s’inscrit dans cette filiation : elle transforme un scénario pédagogique en une structure lisible, analysable et réutilisable.</p>
                 <p>L’outil rend vos choix explicites afin que vous puissiez les interroger&nbsp;:&nbsp;le temps prévu correspond-il au temps effectivement scénarisé&nbsp;? Quelle place est accordée à chaque type d’apprentissage&nbsp;? Les élèves pratiquent-ils, discutent-ils et produisent-ils, ou restent-ils surtout en situation d’acquisition&nbsp;? Les modalités de groupe, le rythme, le mode d’enseignement et les évaluations sont-ils cohérents avec les acquis visés&nbsp;?</p>
                 <div class="help-grid">
@@ -601,7 +601,7 @@ PROMPT;
 
             <article class="help-section" id="types-apprentissage">
                 <h2>Les six types d’apprentissage</h2>
-                <p>Le Learning Designer s’appuie sur les six types d’apprentissage associés au <a href="cadre-conversationnel.php">Cadre conversationnel de Diana Laurillard</a>. Une séquence n’a pas besoin de les utiliser à parts égales, mais leur combinaison aide à varier l’expérience de l’apprenant.</p>
+                <p>Scenarisation s’appuie sur les six types d’apprentissage associés au <a href="cadre-conversationnel.php">Cadre conversationnel de Diana Laurillard</a>. Une séquence n’a pas besoin de les utiliser à parts égales, mais leur combinaison aide à varier l’expérience de l’apprenant.</p>
                 <div class="help-types">
                     <div class="help-type help-type-read"><span class="help-type-dot"></span><div><strong>Lire / Regarder / Écouter</strong><span>Acquérir des informations par un exposé, un texte, une vidéo ou un enregistrement.</span></div></div>
                     <div class="help-type help-type-investigate"><span class="help-type-dot"></span><div><strong>Investiguer</strong><span>Rechercher, sélectionner, comparer et évaluer des informations ou des données.</span></div></div>
@@ -726,7 +726,7 @@ PROMPT;
 
             <article class="help-section" id="markdown">
                 <h2>Importer un design en Markdown</h2>
-                <p>Le plus sûr est de partir d’un fichier Markdown exporté depuis Learning Designer, puis de le modifier sans changer sa structure. Le fichier doit contenir les sections <code>## Paramètres</code> et <code>## Séances</code>, qui permettent à l’application de reconnaître le document.</p>
+                <p>Le plus sûr est de partir d’un fichier Markdown exporté depuis Scenarisation, puis de le modifier sans changer sa structure. Le fichier doit contenir les sections <code>## Paramètres</code> et <code>## Séances</code>, qui permettent à l’application de reconnaître le document.</p>
                 <h3 id="markdown-structure">Structure attendue</h3>
                 <div class="help-code-wrap">
                     <button class="help-copy-btn" type="button" aria-label="Copier l’exemple Markdown" title="Copier"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
@@ -806,7 +806,7 @@ Objectifs généraux de la formation.
                 <p>Évitez de changer les libellés fixes <code>## Paramètres</code>, <code>## Séances</code>, <code>- Système scolaire:</code>, <code>- Niveau:</code>, <code>- Durée:</code>, <code>- Groupe:</code>, <code>- Enseignement:</code>, <code>- Rythme:</code>, <code>- Mode de formation:</code>, <code>- Évaluation:</code>, <code>- AIAS:</code>, <code>- Description:</code> et <code>- Consignes pour les élèves:</code>. S’ils changent trop, certaines informations risquent de ne plus être reconnues.</p>
                 <h3 id="markdown-import">Procédure d’import</h3>
                 <ol>
-                    <li>Ouvrez Learning Designer.</li>
+                    <li>Ouvrez Scenarisation.</li>
                     <li>Cliquez sur <strong>Importer</strong>.</li>
                     <li>Choisissez <strong>Markdown</strong>, puis un fichier <code>.md</code> ou <code>.markdown</code>.</li>
                     <li>Vérifiez les paramètres, les moments, les activités et les durées dans l’interface.</li>
@@ -827,7 +827,7 @@ Objectifs généraux de la formation.
                     </div>
                     <div class="help-card">
                         <strong>2. Vous publiez vous-même</strong>
-                        <span>L’IA vous remet le fichier <code>design.json</code>. Installez ensuite le CLI sur votre ordinateur, connectez-le avec <code>learning login</code>, puis publiez avec <code>learning publish</code>.</span>
+                        <span>L’IA vous remet le fichier <code>design.json</code>. Installez ensuite le CLI sur votre ordinateur, connectez-le avec <code>scenarisation login</code>, puis publiez avec <code>scenarisation publish</code>.</span>
                         <span>Le jeton reste alors sur votre ordinateur.</span>
                     </div>
                 </div>
@@ -848,7 +848,7 @@ Objectifs généraux de la formation.
                     <button class="help-copy-btn" type="button" aria-label="Copier la commande" title="Copier"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
                     <pre class="help-code">curl -fsSL https://raw.githubusercontent.com/YannHY/learning-designer/main/install-skill.sh | sh</pre>
                 </div>
-                <p>Relancez l’outil si nécessaire. Dans Claude Code, utilisez <code>/learning-design</code>. Dans Codex, utilisez <code>$learning-designer</code>.</p>
+                <p>Relancez l’outil si nécessaire. Dans Claude Code, utilisez <code>/scenarisation</code>. Dans Codex, utilisez <code>$scenarisation</code>.</p>
 
                 <h3 id="cli-detaille">Utiliser le CLI</h3>
                 <p>Le CLI permet de créer, valider et publier un design directement depuis votre terminal.</p>
@@ -858,7 +858,7 @@ Objectifs généraux de la formation.
                 <div class="help-code-wrap">
                     <button class="help-copy-btn" type="button" aria-label="Copier la commande" title="Copier"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
                     <pre class="help-code">curl -fsSL https://raw.githubusercontent.com/YannHY/learning-designer/main/install.sh | sh
-learning status</pre>
+scenarisation status</pre>
                 </div>
 
                 <h4>Créer un design</h4>
@@ -868,9 +868,9 @@ learning status</pre>
                         <p><code>init</code> crée le fichier JSON de départ avec le titre, la langue, la durée, la modalité, le système ou la classification et le niveau. Consultez d’abord les catalogues du CLI : ils fournissent les identifiants exacts et empêchent d’associer un niveau au mauvais système.</p>
                         <div class="help-code-wrap">
                             <button class="help-copy-btn" type="button" aria-label="Copier la commande" title="Copier"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
-                            <pre class="help-code">learning list school-systems
-learning list school-levels --system france
-learning init design.json --title "Atelier IA" --lang fr --duration 120 --mode hybride --school-system france --school-level quatrieme --group-size 24</pre>
+                            <pre class="help-code">scenarisation list school-systems
+scenarisation list school-levels --system france
+scenarisation init design.json --title "Atelier IA" --lang fr --duration 120 --mode hybride --school-system france --school-level quatrieme --group-size 24</pre>
                         </div>
                     </div>
                     <div>
@@ -878,7 +878,7 @@ learning init design.json --title "Atelier IA" --lang fr --duration 120 --mode h
                         <p>Un moment correspond à une grande phase de la séance ou de la séquence.</p>
                         <div class="help-code-wrap">
                             <button class="help-copy-btn" type="button" aria-label="Copier la commande" title="Copier"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
-                            <pre class="help-code">learning add-moment design.json --title "Explorer" --objectives "Identifier les usages possibles"</pre>
+                            <pre class="help-code">scenarisation add-moment design.json --title "Explorer" --objectives "Identifier les usages possibles"</pre>
                         </div>
                     </div>
                     <div>
@@ -886,7 +886,7 @@ learning init design.json --title "Atelier IA" --lang fr --duration 120 --mode h
                         <p>Une activité précise le type d’apprentissage, ses paramètres, sa description pédagogique et les consignes directement adressées aux élèves.</p>
                         <div class="help-code-wrap">
                             <button class="help-copy-btn" type="button" aria-label="Copier la commande" title="Copier"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
-                            <pre class="help-code">learning add-activity design.json --type investigate --duration 30 --group subgroups --teaching guided --pacing sync --mode onsite --evaluation formative --aias 3 --competencies A6,P34 --description "Comparer trois exemples d'usages de l'IA." --instructions "Relevez deux points communs et une différence."</pre>
+                            <pre class="help-code">scenarisation add-activity design.json --type investigate --duration 30 --group subgroups --teaching guided --pacing sync --mode onsite --evaluation formative --aias 3 --competencies A6,P34 --description "Comparer trois exemples d'usages de l'IA." --instructions "Relevez deux points communs et une différence."</pre>
                         </div>
                     </div>
                     <div>
@@ -894,7 +894,7 @@ learning init design.json --title "Atelier IA" --lang fr --duration 120 --mode h
                         <p><code>outcome</code> ajoute un acquis d’apprentissage relié à la taxonomie de Bloom.</p>
                         <div class="help-code-wrap">
                             <button class="help-copy-btn" type="button" aria-label="Copier la commande" title="Copier"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
-                            <pre class="help-code">learning outcome design.json --bloom analyser --verb "Comparer" --text "Comparer des réponses générées par IA selon leur fiabilité."</pre>
+                            <pre class="help-code">scenarisation outcome design.json --bloom analyser --verb "Comparer" --text "Comparer des réponses générées par IA selon leur fiabilité."</pre>
                         </div>
                     </div>
                     <div>
@@ -902,8 +902,8 @@ learning init design.json --title "Atelier IA" --lang fr --duration 120 --mode h
                         <p><code>validate</code> vérifie le fichier. <code>prompt</code> produit un prompt de relais utile pour demander à Claude Code ou Codex de continuer le travail.</p>
                         <div class="help-code-wrap">
                             <button class="help-copy-btn" type="button" aria-label="Copier la commande" title="Copier"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
-                            <pre class="help-code">learning validate design.json --strict-pedagogy
-learning prompt design.json</pre>
+                            <pre class="help-code">scenarisation validate design.json --strict-pedagogy
+scenarisation prompt design.json</pre>
                         </div>
                     </div>
                 </div>
@@ -912,13 +912,13 @@ learning prompt design.json</pre>
                 <p>Pour publier depuis votre ordinateur, créez d’abord un jeton dans votre profil, section <strong>Publication depuis le CLI</strong>. Ensuite, connectez le CLI et publiez le fichier.</p>
                 <div class="help-code-wrap">
                     <button class="help-copy-btn" type="button" aria-label="Copier la commande" title="Copier"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
-                    <pre class="help-code">learning login
-learning publish design.json</pre>
+                    <pre class="help-code">scenarisation login
+scenarisation publish design.json</pre>
                 </div>
                 <p>Pour mettre à jour une publication existante, gardez l’identifiant renvoyé lors de la première publication.</p>
                 <div class="help-code-wrap">
                     <button class="help-copy-btn" type="button" aria-label="Copier la commande" title="Copier"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
-                    <pre class="help-code">learning publish design.json --design-id 123</pre>
+                    <pre class="help-code">scenarisation publish design.json --design-id 123</pre>
                 </div>
                 <div class="help-callout warning">
                     <i class="fa-solid fa-key" aria-hidden="true"></i>
@@ -928,14 +928,14 @@ learning publish design.json</pre>
                 <h4>Commandes utiles</h4>
                 <div class="help-code-wrap">
                     <button class="help-copy-btn" type="button" aria-label="Copier la commande" title="Copier"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
-                    <pre class="help-code">learning --help
-learning list types
-learning list bloom
-learning list competencies
-learning list school-systems
-learning list school-levels --system france
-learning status
-learning upgrade</pre>
+                    <pre class="help-code">scenarisation --help
+scenarisation list types
+scenarisation list bloom
+scenarisation list competencies
+scenarisation list school-systems
+scenarisation list school-levels --system france
+scenarisation status
+scenarisation upgrade</pre>
                 </div>
             </article>
             <article class="help-section" id="enrichir-design-ia">
@@ -947,7 +947,7 @@ learning upgrade</pre>
                 <div class="help-grid three">
                     <div class="help-card">
                         <strong><span class="help-card-icon"><i class="fa-solid fa-file-export" aria-hidden="true"></i></span>1. Préparer le design</strong>
-                        <span>Exportez votre design au format JSON depuis Learning Designer, ou préparez une description précise de votre séquence.</span>
+                        <span>Exportez votre design au format JSON depuis Scenarisation, ou préparez une description précise de votre séquence.</span>
                     </div>
                     <div class="help-card">
                         <strong><span class="help-card-icon"><i class="fa-solid fa-robot" aria-hidden="true"></i></span>2. Configurer l’IA</strong>
@@ -1012,7 +1012,7 @@ window.helpPromptTranslations = <?= json_encode([
     ],
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 </script>
-<script src="js/help-i18n.js?v=20260905-claude-installer-v1"></script>
+<script src="js/help-i18n.js?v=20260906-scenarisation"></script>
 <script>
 var initialHelpLanguage = 'fr';
 try {

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Scenarisation Site"
+  short_description: "Build and refine the Scenarisation site."
+  default_prompt: "Use $scenarisation-site to implement and verify this interface change in the Scenarisation website."
+
+policy:
+  allow_implicit_invocation: true

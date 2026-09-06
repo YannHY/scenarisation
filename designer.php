@@ -9,8 +9,8 @@ app_start_session();
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" href="assets/favicon.svg?v=20260804" type="image/svg+xml" sizes="any" />
-    <title>Interface de conception | Learning Designer</title>
+    <link rel="icon" href="assets/favicon.svg?v=20260906-scenarisation" type="image/svg+xml" sizes="any" />
+    <title>Interface de conception | Scenarisation</title>
     <?php render_theme_boot_script(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="css/account-ui.css?v=20260906-highlight" />
@@ -598,11 +598,11 @@ app_start_session();
     <script src="js/competency-digcomp-details.js?v=20260830-digcomp-statements"></script>
     <script src="js/editor/config.js?v=20260905-modules-v1"></script>
     <script src="js/editor/competencies.js?v=20260905-modules-v1"></script>
-    <script src="js/editor/exports.js?v=20260905-modules-v1"></script>
+    <script src="js/editor/exports.js?v=20260906-scenarisation"></script>
     <script src="js/editor/imports.js?v=20260905-modules-v1"></script>
     <script src="js/editor/analysis.js?v=20260905-modules-v1"></script>
     <script src="js/editor/fields.js?v=20260905-modules-v1"></script>
-    <script src="js/interface.js?v=20260905-modules-v1"></script>
+    <script src="js/interface.js?v=20260906-scenarisation"></script>
     <script src="js/account-ui.js?v=20260905-revisions-v1"></script>
   </body>
 </html>

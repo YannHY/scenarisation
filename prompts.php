@@ -1135,11 +1135,11 @@ Ne fournis pas de PDF. N’ajoute ni commentaire sur ta méthode, ni corrigé, n
 PROMPT;
 
 $multilingualMarkdownPrompt = <<<'PROMPT'
-# Créer ou traduire un scénario importable dans Learning Designer
+# Créer ou traduire un scénario importable dans Scenarisation
 
-Tu es un assistant spécialisé dans la création et la traduction de scénarios pédagogiques destinés à Learning Designer.
+Tu es un assistant spécialisé dans la création et la traduction de scénarios pédagogiques destinés à Scenarisation.
 
-Ta mission est de produire un fichier Markdown directement importable dans Learning Designer, quelle que soit la langue du contenu pédagogique.
+Ta mission est de produire un fichier Markdown directement importable dans Scenarisation, quelle que soit la langue du contenu pédagogique.
 
 ## Étape 1 — Recueillir la demande
 
@@ -1154,7 +1154,7 @@ Si l’utilisateur a déjà fourni suffisamment d’informations, ne pose pas ce
 
 ## Étape 2 — Produire le fichier
 
-Le résultat doit être un document Markdown directement importable dans Learning Designer.
+Le résultat doit être un document Markdown directement importable dans Scenarisation.
 
 ### Règle fondamentale
 
@@ -1408,11 +1408,11 @@ Avant de répondre, vérifie silencieusement que :
 PROMPT;
 
 $multilingualMarkdownPromptEn = <<<'PROMPT'
-# Create or translate a learning design importable into Learning Designer
+# Create or translate a learning design importable into Scenarisation
 
-You are an assistant specialising in creating and translating learning designs for Learning Designer.
+You are an assistant specialising in creating and translating learning designs for Scenarisation.
 
-Your task is to produce a Markdown file that can be imported directly into Learning Designer, regardless of the language used for the educational content.
+Your task is to produce a Markdown file that can be imported directly into Scenarisation, regardless of the language used for the educational content.
 
 ## Step 1 — Gather the request
 
@@ -1427,7 +1427,7 @@ If the user has already supplied enough information, do not ask these questions 
 
 ## Step 2 — Produce the file
 
-The result must be a Markdown document that can be imported directly into Learning Designer.
+The result must be a Markdown document that can be imported directly into Scenarisation.
 
 ### Fundamental rule
 
@@ -1618,9 +1618,9 @@ Context or institutional requirement in the requested language.
 General objectives in the requested language.
 
 ### Acquis d'apprentissage
-- Identifier : learning outcome in the requested language
-- Expliquer : learning outcome in the requested language
-- Produire : learning outcome in the requested language
+- Identifier : scenarisation outcome in the requested language
+- Expliquer : scenarisation outcome in the requested language
+- Produire : scenarisation outcome in the requested language
 
 ## Séances
 
@@ -1685,8 +1685,8 @@ PROMPT;
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="assets/favicon.svg?v=20260804" type="image/svg+xml" sizes="any">
-    <title>Prompts pédagogiques | Learning Designer</title>
+    <link rel="icon" href="assets/favicon.svg?v=20260906-scenarisation" type="image/svg+xml" sizes="any">
+    <title>Prompts pédagogiques | Scenarisation</title>
     <?php render_theme_boot_script(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1705,7 +1705,7 @@ PROMPT;
 
     <div class="prompt-library-content">
         <article class="prompt-library">
-            <p id="prompts-intro">Après avoir généré votre scénario pédagogique dans Learning Designer, vous pouvez l’exporter — par exemple au format Markdown — puis le transmettre à une IA comme Claude, ChatGPT ou Gemini. Celle-ci peut alors vous aider à l’enrichir, à l’améliorer, à le compléter ou à l’adapter à des besoins spécifiques. Le dernier prompt permet aussi de créer ou traduire un scénario directement dans un format importable.</p>
+            <p id="prompts-intro">Après avoir généré votre scénario pédagogique dans Scenarisation, vous pouvez l’exporter — par exemple au format Markdown — puis le transmettre à une IA comme Claude, ChatGPT ou Gemini. Celle-ci peut alors vous aider à l’enrichir, à l’améliorer, à le compléter ou à l’adapter à des besoins spécifiques. Le dernier prompt permet aussi de créer ou traduire un scénario directement dans un format importable.</p>
             <p id="prompts-intro-followup">Cliquez sur le titre d’un prompt pour le déplier, puis copiez-le pour l’utiliser avec votre scénario exporté.</p>
 
             <details id="prompt-udl" class="prompt-card prompt-card-details">
@@ -1800,7 +1800,7 @@ document.addEventListener('DOMContentLoaded', function () {
         fr: {
             title: 'Prompts pédagogiques',
             pageTitle: 'Prompts pédagogiques',
-            intro: 'Après avoir généré votre scénario pédagogique dans Learning Designer, vous pouvez l’exporter — par exemple au format Markdown — puis le transmettre à une IA comme Claude, ChatGPT ou Gemini. Celle-ci peut alors vous aider à l’enrichir, à l’améliorer, à le compléter ou à l’adapter à des besoins spécifiques. Le dernier prompt permet aussi de créer ou traduire un scénario directement dans un format importable.',
+            intro: 'Après avoir généré votre scénario pédagogique dans Scenarisation, vous pouvez l’exporter — par exemple au format Markdown — puis le transmettre à une IA comme Claude, ChatGPT ou Gemini. Celle-ci peut alors vous aider à l’enrichir, à l’améliorer, à le compléter ou à l’adapter à des besoins spécifiques. Le dernier prompt permet aussi de créer ou traduire un scénario directement dans un format importable.',
             introFollowup: 'Cliquez sur le titre d’un prompt pour le déplier, puis copiez-le pour l’utiliser avec votre scénario exporté.',
             udlTitle: '1. Révision d’un plan de cours basé sur la CUA',
             udlObjective: 'Repérer les obstacles et améliorer l’accessibilité, l’inclusion et les possibilités d’apprentissage offertes à tous les élèves.',
@@ -1820,7 +1820,7 @@ document.addEventListener('DOMContentLoaded', function () {
         en: {
             title: 'Teaching prompts',
             pageTitle: 'Teaching prompts',
-            intro: 'After generating your learning design in Learning Designer, you can export it — for example as Markdown — and share it with an AI such as Claude, ChatGPT or Gemini. The AI can then help you enrich, improve, complete or adapt it to specific needs. The final prompt can also create or translate a learning design directly in an importable format.',
+            intro: 'After generating your learning design in Scenarisation, you can export it — for example as Markdown — and share it with an AI such as Claude, ChatGPT or Gemini. The AI can then help you enrich, improve, complete or adapt it to specific needs. The final prompt can also create or translate a learning design directly in an importable format.',
             introFollowup: 'Click a prompt title to expand it, then copy it to use with your exported learning design.',
             udlTitle: '1. UDL-based lesson plan review',
             udlObjective: 'Identify barriers and improve accessibility, inclusion and learning opportunities for every student.',
@@ -1848,7 +1848,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var selected = lang === 'en' ? 'en' : 'fr';
         var content = translations[selected];
         document.documentElement.lang = selected;
-        document.title = content.title + ' | Learning Designer';
+        document.title = content.title + ' | Scenarisation';
         document.querySelectorAll('[data-prompt-lang]').forEach(function (prompt) {
             prompt.hidden = prompt.dataset.promptLang !== selected;
         });

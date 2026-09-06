@@ -67,8 +67,8 @@ $levels = [
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="assets/favicon.svg?v=20260804" type="image/svg+xml" sizes="any">
-    <title>Taxonomie de Bloom | Learning Designer</title>
+    <link rel="icon" href="assets/favicon.svg?v=20260906-scenarisation" type="image/svg+xml" sizes="any">
+    <title>Taxonomie de Bloom | Scenarisation</title>
     <?php render_theme_boot_script(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -229,7 +229,7 @@ $levels = [
     <header class="bloom-header">
         <p class="bloom-kicker" data-i18n-fr="Documentation" data-i18n-en="Documentation">Documentation</p>
         <h1 class="bloom-title" data-i18n-fr="Taxonomie révisée de Bloom" data-i18n-en="Revised Bloom's Taxonomy">Taxonomie révisée de Bloom</h1>
-        <p class="bloom-subtitle" data-i18n-fr="Cette page rassemble les six niveaux cognitifs utilisés dans Learning Designer pour formuler des acquis d'apprentissage avec des verbes d'action adaptés." data-i18n-en="This page gathers the six cognitive levels used in Learning Designer to write learning outcomes with suitable action verbs.">Cette page rassemble les six niveaux cognitifs utilisés dans Learning Designer pour formuler des acquis d'apprentissage avec des verbes d'action adaptés.</p>
+        <p class="bloom-subtitle" data-i18n-fr="Cette page rassemble les six niveaux cognitifs utilisés dans Scenarisation pour formuler des acquis d'apprentissage avec des verbes d'action adaptés." data-i18n-en="This page gathers the six cognitive levels used in Scenarisation to write learning outcomes with suitable action verbs.">Cette page rassemble les six niveaux cognitifs utilisés dans Scenarisation pour formuler des acquis d'apprentissage avec des verbes d'action adaptés.</p>
     </header>
     <div class="bloom-poster-title" data-i18n-fr="Verbes d'action de la taxonomie de Bloom" data-i18n-en="Bloom's Taxonomy Action Verbs">Verbes d'action de la taxonomie de Bloom</div>
     <section class="bloom-grid" aria-label="Niveaux de la taxonomie" data-i18n-attr="aria-label" data-i18n-fr="Niveaux de la taxonomie" data-i18n-en="Taxonomy levels">
@@ -262,7 +262,7 @@ $levels = [
 document.addEventListener('DOMContentLoaded', function () {
     function applyBloomLanguage(lang) {
         document.documentElement.lang = lang === 'en' ? 'en' : 'fr';
-        document.title = lang === 'en' ? "Bloom's Taxonomy | Learning Designer" : 'Taxonomie de Bloom | Learning Designer';
+        document.title = lang === 'en' ? "Bloom's Taxonomy | Scenarisation" : 'Taxonomie de Bloom | Scenarisation';
         document.querySelectorAll('[data-i18n-fr]').forEach(function (el) {
             var value = lang === 'en' ? el.dataset.i18nEn : el.dataset.i18nFr;
             if (!value) return;

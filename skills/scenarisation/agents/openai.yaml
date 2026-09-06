@@ -1,0 +1,7 @@
+interface:
+  display_name: "Scenarisation"
+  short_description: "Create designs with the scenarisation CLI."
+  default_prompt: "Use $scenarisation to create a Scenarisation sequence."
+
+policy:
+  allow_implicit_invocation: true

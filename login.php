@@ -62,8 +62,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="assets/favicon.svg?v=20260804" type="image/svg+xml" sizes="any">
-    <title data-site-i18n-en="Sign in | Learning Designer" data-site-i18n-fr="Connexion | Learning Designer">Connexion | Learning Designer</title>
+    <link rel="icon" href="assets/favicon.svg?v=20260906-scenarisation" type="image/svg+xml" sizes="any">
+    <title data-site-i18n-en="Sign in | Scenarisation" data-site-i18n-fr="Connexion | Scenarisation">Connexion | Scenarisation</title>
     <?php render_theme_boot_script(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -77,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <main class="account-shell with-nav login-account-shell">
     <div class="login-layout">
         <section class="login-intro" aria-labelledby="login-intro-title">
-            <h2 id="login-intro-title">Learning Designer</h2>
+            <h2 id="login-intro-title">Scenarisation</h2>
             <p class="login-intro-copy" data-site-i18n-en="Design, analyse and share your learning scenarios." data-site-i18n-fr="Concevez, analysez et partagez vos scénarios pédagogiques.">Concevez, analysez et partagez vos scénarios pédagogiques.</p>
             <ul class="login-benefits">
                 <li><i class="fa-solid fa-diagram-project" aria-hidden="true"></i><span data-site-i18n-en="Structure a learning sequence" data-site-i18n-fr="Structurer une séquence">Structurer une séquence</span></li>
@@ -110,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <p class="account-footer"><a href="verify-email.php" data-site-i18n-en="Resend the verification email" data-site-i18n-fr="Renvoyer l’email de vérification">Renvoyer l’email de vérification</a></p>
         <?php endif; ?>
         <div class="account-signup-action">
-            <p data-site-i18n-en="New to Learning Designer?" data-site-i18n-fr="Pas encore de compte&nbsp;?">Pas encore de compte&nbsp;?</p>
+            <p data-site-i18n-en="New to Scenarisation?" data-site-i18n-fr="Pas encore de compte&nbsp;?">Pas encore de compte&nbsp;?</p>
             <a class="account-secondary-button" href="signup.php">
                 <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
                 <span data-site-i18n-en="Create an account" data-site-i18n-fr="Créer un compte">Créer un compte</span>

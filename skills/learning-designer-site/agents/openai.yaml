@@ -1,7 +1,0 @@
-interface:
-  display_name: "Learning Designer Site"
-  short_description: "Build and refine the Learning Designer site."
-  default_prompt: "Use $learning-designer-site to implement and verify this interface change in the Learning Designer website."
-
-policy:
-  allow_implicit_invocation: true
