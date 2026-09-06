@@ -71,6 +71,7 @@ function renderConic(el, data) {
   if (data.sum <= 0) {
     el.classList.add("is-empty");
     el.style.background = "";
+    el.style.removeProperty("--undefined-start");
     el.style.removeProperty("--undefined-end");
     el.setAttribute("aria-label", t("noData"));
     return;
@@ -80,7 +81,8 @@ function renderConic(el, data) {
     .filter((segment) => segment.pct > 0)
     .map((segment) => `${segment.color} ${segment.start}% ${segment.end}%`);
   el.style.background = `conic-gradient(${parts.join(", ")})`;
-  const undefinedSegment = data.segments.find((segment) => segment.key === "undefined");
+  const undefinedSegment = data.segments.find((segment) => segment.key === "undefined" && segment.pct > 0);
+  el.style.setProperty("--undefined-start", `${undefinedSegment ? undefinedSegment.start : 0}%`);
   el.style.setProperty("--undefined-end", `${undefinedSegment ? undefinedSegment.end : 0}%`);
   el.setAttribute("aria-label", chartSummary(data));
 }

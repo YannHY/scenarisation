@@ -1036,8 +1036,8 @@ body.fullscreen-editor-open {
 }
 
 /* The "Non défini" share is hatched so it cannot be mistaken for a real
-   category. --undefined-end is set by renderConic; it stays 0% on charts
-   that have no undefined bucket, which hides the overlay entirely. */
+   category. renderConic sets both bounds of that share; both stay 0%
+   when it is absent, which hides the overlay entirely. */
 .analysis-big-pie,
 .analysis-small-pie {
   position: relative;
@@ -1056,11 +1056,13 @@ body.fullscreen-editor-open {
     rgba(71, 85, 105, 0.4) 4px 6px
   );
   -webkit-mask-image: conic-gradient(
-    #000 0 var(--undefined-end, 0%),
+    transparent 0 var(--undefined-start, 0%),
+    #000 var(--undefined-start, 0%) var(--undefined-end, 0%),
     transparent var(--undefined-end, 0%) 100%
   );
   mask-image: conic-gradient(
-    #000 0 var(--undefined-end, 0%),
+    transparent 0 var(--undefined-start, 0%),
+    #000 var(--undefined-start, 0%) var(--undefined-end, 0%),
     transparent var(--undefined-end, 0%) 100%
   );
 }
@@ -2660,10 +2662,12 @@ main {
 .grid-add-session-btn:hover { background: var(--hover-bg); border-color: var(--primary); color: var(--primary); }
 
 .add-session-card {
+  --add-card-border: #9ca3af;
+  --add-card-border-hover: #6b7280;
   flex: 0 0 520px;
   min-height: 560px;
   padding: 32px;
-  border: 1px dashed color-mix(in srgb, var(--primary) 42%, var(--line));
+  border: 1px dashed var(--add-card-border);
   border-radius: 16px;
   background: #ffffff;
   color: var(--muted);
@@ -2716,7 +2720,7 @@ main {
 }
 
 .add-session-card:hover {
-  border-color: var(--primary);
+  border-color: var(--add-card-border-hover);
   background: var(--surface-light);
   color: var(--muted);
   box-shadow: 0 18px 40px -22px rgba(36, 90, 143, 0.38);
@@ -2737,7 +2741,7 @@ main {
 .add-session-card:focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: -2px;
-  border-color: var(--primary);
+  border-color: var(--add-card-border-hover);
 }
 
 .board.layout-list .add-session-card {
@@ -4978,8 +4982,9 @@ html[data-theme="dark"] body {
   border-color: rgba(106, 176, 255, 0.3);
 }
 [data-theme="dark"] .add-session-card {
+  --add-card-border: #6b7280;
+  --add-card-border-hover: #9ca3af;
   background: rgba(42, 40, 35, 0.42);
-  border-color: rgba(106, 176, 255, 0.38);
   color: var(--muted);
 }
 [data-theme="dark"] .add-session-card-icon {
@@ -4990,7 +4995,7 @@ html[data-theme="dark"] body {
 }
 [data-theme="dark"] .add-session-card:hover {
   background: rgba(58, 79, 105, 0.28);
-  border-color: #6ab0ff;
+  border-color: var(--add-card-border-hover);
   color: var(--muted);
   box-shadow: 0 20px 44px -22px rgba(0, 0, 0, 0.72);
 }
