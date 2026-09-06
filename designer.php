@@ -13,7 +13,7 @@ app_start_session();
     <title>Interface de conception | Learning Designer</title>
     <?php render_theme_boot_script(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="css/account-ui.css?v=20260903-pagefind-dark" />
+    <link rel="stylesheet" href="css/account-ui.css?v=20260906-highlight" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="css/interface.css?v=20260905-subtle-focus" />

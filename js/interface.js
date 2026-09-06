@@ -2180,6 +2180,7 @@ function renderTopPanel() {
     metaDescriptionInput.value = state.meta.description;
     metaCommandInput.value = state.meta.command;
     metaPersonasInput.value = state.meta.personas;
+    ensureMarkdownPreviews(timelineView);
     renderOutcomes();
   }
 

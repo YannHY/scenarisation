@@ -340,7 +340,8 @@ body.site-search-is-open {
   -webkit-line-clamp: 2;
 }
 
-.site-search-result-excerpt mark {
+.site-search-result-excerpt mark,
+mark.site-search-highlight {
   border-radius: 3px;
   background: rgba(250, 204, 21, 0.28);
   color: inherit;
@@ -358,7 +359,8 @@ body.site-search-is-open {
   border-color: rgba(129, 124, 112, 0.42);
 }
 
-[data-theme="dark"] .site-search-result-excerpt mark {
+[data-theme="dark"] .site-search-result-excerpt mark,
+[data-theme="dark"] mark.site-search-highlight {
   background: rgba(250, 204, 21, 0.2);
 }
 

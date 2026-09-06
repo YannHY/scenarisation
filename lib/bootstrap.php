@@ -1348,7 +1348,7 @@ function render_site_nav(string $active = ''): void
         });
     });
     </script>
-    <script src="js/site-search.js?v=20260904-pagefind-path-v3"></script>
+    <script src="js/site-search.js?v=20260906-highlight"></script>
     <?php
 }
 
