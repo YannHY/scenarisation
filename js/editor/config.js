@@ -120,7 +120,7 @@ const SCHOOL_SYSTEM_OPTIONS = [
   { value: "uk_scotland", labels: { fr: "Royaume-Uni — Écosse", en: "United Kingdom — Scotland" } },
   { value: "uk_northern_ireland", labels: { fr: "Royaume-Uni — Irlande du Nord", en: "United Kingdom — Northern Ireland" } },
   { value: "european_schools", labels: { fr: "Système des Écoles européennes", en: "European Schools system" } },
-  { value: "ib", labels: { fr: "Baccalauréat international (IB)", en: "International Baccalaureate (IB)" } },
+  { value: "ib", labels: { fr: "International Baccalaureate (IB)", en: "International Baccalaureate (IB)" } },
   { value: "isced_2011", labels: { fr: "International — ISCED 2011 (CITE)", en: "International — ISCED 2011" } }
 ];
 
@@ -317,16 +317,16 @@ const SCHOOL_LEVEL_OPTIONS = {
     })
   ],
   ib: [
-    { value: "ib_pyp", labels: { fr: "PP — Programme primaire (3–12 ans)", en: "PYP — Primary Years Programme (ages 3–12)" }, aliases: ["PP", "PYP", "Programme primaire", "Primary Years Programme"] },
-    { value: "ib_myp_1", labels: { fr: "PEI — Programme d’éducation intermédiaire — 1re année", en: "MYP — Middle Years Programme — year 1" }, aliases: ["PEI 1", "MYP 1", "MYP1"] },
-    { value: "ib_myp_2", labels: { fr: "PEI — Programme d’éducation intermédiaire — 2e année", en: "MYP — Middle Years Programme — year 2" }, aliases: ["PEI 2", "MYP 2", "MYP2"] },
-    { value: "ib_myp_3", labels: { fr: "PEI — Programme d’éducation intermédiaire — 3e année", en: "MYP — Middle Years Programme — year 3" }, aliases: ["PEI 3", "MYP 3", "MYP3"] },
-    { value: "ib_myp_4", labels: { fr: "PEI — Programme d’éducation intermédiaire — 4e année", en: "MYP — Middle Years Programme — year 4" }, aliases: ["PEI 4", "MYP 4", "MYP4"] },
-    { value: "ib_myp_5", labels: { fr: "PEI — Programme d’éducation intermédiaire — 5e année", en: "MYP — Middle Years Programme — year 5" }, aliases: ["PEI 5", "MYP 5", "MYP5"] },
-    { value: "ib_dp_1", labels: { fr: "Diplôme — Programme du diplôme — 1re année", en: "DP — Diploma Programme — year 1" }, aliases: ["Diplôme 1", "DP 1", "DP1"] },
-    { value: "ib_dp_2", labels: { fr: "Diplôme — Programme du diplôme — 2e année", en: "DP — Diploma Programme — year 2" }, aliases: ["Diplôme 2", "DP 2", "DP2"] },
-    { value: "ib_cp_1", labels: { fr: "POP — Programme à orientation professionnelle — 1re année", en: "CP — Career-related Programme — year 1" }, aliases: ["POP 1", "CP 1", "CP1"] },
-    { value: "ib_cp_2", labels: { fr: "POP — Programme à orientation professionnelle — 2e année", en: "CP — Career-related Programme — year 2" }, aliases: ["POP 2", "CP 2", "CP2"] },
+    { value: "ib_pyp", labels: { fr: "PYP — Primary Years Programme (ages 3–12)", en: "PYP — Primary Years Programme (ages 3–12)" }, aliases: ["PP", "PYP", "Programme primaire", "Primary Years Programme", "PP — Programme primaire (3–12 ans)"] },
+    { value: "ib_myp_1", labels: { fr: "MYP — Middle Years Programme — year 1", en: "MYP — Middle Years Programme — year 1" }, aliases: ["PEI 1", "MYP 1", "MYP1", "PEI — Programme d’éducation intermédiaire — 1re année"] },
+    { value: "ib_myp_2", labels: { fr: "MYP — Middle Years Programme — year 2", en: "MYP — Middle Years Programme — year 2" }, aliases: ["PEI 2", "MYP 2", "MYP2", "PEI — Programme d’éducation intermédiaire — 2e année"] },
+    { value: "ib_myp_3", labels: { fr: "MYP — Middle Years Programme — year 3", en: "MYP — Middle Years Programme — year 3" }, aliases: ["PEI 3", "MYP 3", "MYP3", "PEI — Programme d’éducation intermédiaire — 3e année"] },
+    { value: "ib_myp_4", labels: { fr: "MYP — Middle Years Programme — year 4", en: "MYP — Middle Years Programme — year 4" }, aliases: ["PEI 4", "MYP 4", "MYP4", "PEI — Programme d’éducation intermédiaire — 4e année"] },
+    { value: "ib_myp_5", labels: { fr: "MYP — Middle Years Programme — year 5", en: "MYP — Middle Years Programme — year 5" }, aliases: ["PEI 5", "MYP 5", "MYP5", "PEI — Programme d’éducation intermédiaire — 5e année"] },
+    { value: "ib_dp_1", labels: { fr: "DP — Diploma Programme — year 1", en: "DP — Diploma Programme — year 1" }, aliases: ["Diplôme 1", "DP 1", "DP1", "Diplôme — Programme du diplôme — 1re année"] },
+    { value: "ib_dp_2", labels: { fr: "DP — Diploma Programme — year 2", en: "DP — Diploma Programme — year 2" }, aliases: ["Diplôme 2", "DP 2", "DP2", "Diplôme — Programme du diplôme — 2e année"] },
+    { value: "ib_cp_1", labels: { fr: "CP — Career-related Programme — year 1", en: "CP — Career-related Programme — year 1" }, aliases: ["POP 1", "CP 1", "CP1", "POP — Programme à orientation professionnelle — 1re année"] },
+    { value: "ib_cp_2", labels: { fr: "CP — Career-related Programme — year 2", en: "CP — Career-related Programme — year 2" }, aliases: ["POP 2", "CP 2", "CP2", "POP — Programme à orientation professionnelle — 2e année"] },
   ],
   isced_2011: [
     { value: "isced_0", labels: { fr: "ISCED 0 — Éducation de la petite enfance", en: "ISCED 0 — Early childhood education" }, aliases: ["CITE 0"] },
@@ -485,7 +485,7 @@ const I18N = {
     schoolSystemUnitedKingdomScotland: "Royaume-Uni — Écosse",
     schoolSystemUnitedKingdomNorthernIreland: "Royaume-Uni — Irlande du Nord",
     schoolSystemEuropeanSchools: "Système des Écoles européennes",
-    schoolSystemIB: "Baccalauréat international (IB)",
+    schoolSystemIB: "International Baccalaureate (IB)",
     schoolSystemIsced: "International — ISCED 2011 (CITE)",
     schoolSystemsNationalGroup: "Systèmes nationaux",
     schoolSystemsTransnationalGroup: "Systèmes transnationaux",

@@ -190,7 +190,7 @@ SCHOOL_SYSTEMS = {
     "uk_scotland": ("Royaume-Uni — Écosse", "United Kingdom — Scotland", ("Écosse", "Ecosse", "Scotland", "Scottish school system")),
     "uk_northern_ireland": ("Royaume-Uni — Irlande du Nord", "United Kingdom — Northern Ireland", ("Irlande du Nord", "Northern Ireland", "Northern Irish school system")),
     "european_schools": ("Système des Écoles européennes", "European Schools system", ("Écoles européennes", "Ecoles europeennes", "European Schools", "Schola Europaea")),
-    "ib": ("Baccalauréat international (IB)", "International Baccalaureate (IB)", ('IB', 'Baccalauréat international', 'Bac international', 'International Baccalaureate')),
+    "ib": ("International Baccalaureate (IB)", "International Baccalaureate (IB)", ('IB', 'Baccalauréat international (IB)', 'Baccalauréat international', 'Bac international', 'International Baccalaureate')),
     "isced_2011": ("International — ISCED 2011 (CITE)", "International — ISCED 2011", ("ISCED", "ISCED 2011", "CITE", "CITE 2011")),
 }
 
@@ -277,16 +277,16 @@ for year in range(1, 8):
     cycle_en = "observation cycle" if year <= 3 else "pre-orientation cycle" if year <= 5 else "European Baccalaureate cycle"
     add_school_level("european_schools", f"eu_school_s{year}", f"S{year} — {cycle_fr}", f"S{year} — {cycle_en}", f"S{year}")
 
-add_school_level("ib", "ib_pyp", "PP — Programme primaire (3–12 ans)", "PYP — Primary Years Programme (ages 3–12)", "PP", "PYP", "Programme primaire", "Primary Years Programme")
-add_school_level("ib", "ib_myp_1", "PEI — Programme d’éducation intermédiaire — 1re année", "MYP — Middle Years Programme — year 1", "PEI 1", "MYP 1", "MYP1")
-add_school_level("ib", "ib_myp_2", "PEI — Programme d’éducation intermédiaire — 2e année", "MYP — Middle Years Programme — year 2", "PEI 2", "MYP 2", "MYP2")
-add_school_level("ib", "ib_myp_3", "PEI — Programme d’éducation intermédiaire — 3e année", "MYP — Middle Years Programme — year 3", "PEI 3", "MYP 3", "MYP3")
-add_school_level("ib", "ib_myp_4", "PEI — Programme d’éducation intermédiaire — 4e année", "MYP — Middle Years Programme — year 4", "PEI 4", "MYP 4", "MYP4")
-add_school_level("ib", "ib_myp_5", "PEI — Programme d’éducation intermédiaire — 5e année", "MYP — Middle Years Programme — year 5", "PEI 5", "MYP 5", "MYP5")
-add_school_level("ib", "ib_dp_1", "Diplôme — Programme du diplôme — 1re année", "DP — Diploma Programme — year 1", "Diplôme 1", "DP 1", "DP1")
-add_school_level("ib", "ib_dp_2", "Diplôme — Programme du diplôme — 2e année", "DP — Diploma Programme — year 2", "Diplôme 2", "DP 2", "DP2")
-add_school_level("ib", "ib_cp_1", "POP — Programme à orientation professionnelle — 1re année", "CP — Career-related Programme — year 1", "POP 1", "CP 1", "CP1")
-add_school_level("ib", "ib_cp_2", "POP — Programme à orientation professionnelle — 2e année", "CP — Career-related Programme — year 2", "POP 2", "CP 2", "CP2")
+add_school_level("ib", "ib_pyp", "PYP — Primary Years Programme (ages 3–12)", "PYP — Primary Years Programme (ages 3–12)", "PP", "PYP", "Programme primaire", "Primary Years Programme", "PP — Programme primaire (3–12 ans)")
+add_school_level("ib", "ib_myp_1", "MYP — Middle Years Programme — year 1", "MYP — Middle Years Programme — year 1", "PEI 1", "MYP 1", "MYP1", "PEI — Programme d’éducation intermédiaire — 1re année")
+add_school_level("ib", "ib_myp_2", "MYP — Middle Years Programme — year 2", "MYP — Middle Years Programme — year 2", "PEI 2", "MYP 2", "MYP2", "PEI — Programme d’éducation intermédiaire — 2e année")
+add_school_level("ib", "ib_myp_3", "MYP — Middle Years Programme — year 3", "MYP — Middle Years Programme — year 3", "PEI 3", "MYP 3", "MYP3", "PEI — Programme d’éducation intermédiaire — 3e année")
+add_school_level("ib", "ib_myp_4", "MYP — Middle Years Programme — year 4", "MYP — Middle Years Programme — year 4", "PEI 4", "MYP 4", "MYP4", "PEI — Programme d’éducation intermédiaire — 4e année")
+add_school_level("ib", "ib_myp_5", "MYP — Middle Years Programme — year 5", "MYP — Middle Years Programme — year 5", "PEI 5", "MYP 5", "MYP5", "PEI — Programme d’éducation intermédiaire — 5e année")
+add_school_level("ib", "ib_dp_1", "DP — Diploma Programme — year 1", "DP — Diploma Programme — year 1", "Diplôme 1", "DP 1", "DP1", "Diplôme — Programme du diplôme — 1re année")
+add_school_level("ib", "ib_dp_2", "DP — Diploma Programme — year 2", "DP — Diploma Programme — year 2", "Diplôme 2", "DP 2", "DP2", "Diplôme — Programme du diplôme — 2e année")
+add_school_level("ib", "ib_cp_1", "CP — Career-related Programme — year 1", "CP — Career-related Programme — year 1", "POP 1", "CP 1", "CP1", "POP — Programme à orientation professionnelle — 1re année")
+add_school_level("ib", "ib_cp_2", "CP — Career-related Programme — year 2", "CP — Career-related Programme — year 2", "POP 2", "CP 2", "CP2", "POP — Programme à orientation professionnelle — 2e année")
 
 for level_id, label_fr, label_en in (
     ("isced_0", "ISCED 0 — Éducation de la petite enfance", "ISCED 0 — Early childhood education"),

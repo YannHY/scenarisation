@@ -1245,7 +1245,7 @@ Système scolaire ou classification :
 - `Royaume-Uni — Écosse`
 - `Royaume-Uni — Irlande du Nord`
 - `Système des Écoles européennes`
-- `Baccalauréat international (IB)`
+- `International Baccalaureate (IB)`
 - `International — ISCED 2011 (CITE)`
 
 Pour `Niveau`, utilise exclusivement un libellé appartenant au système ou à la classification choisi. Ne mélange jamais les nomenclatures. En cas d’ambiguïté sur la communauté belge ou la nation du Royaume-Uni, demande une précision.
@@ -1519,7 +1519,7 @@ School system or classification:
 - `Royaume-Uni — Écosse`
 - `Royaume-Uni — Irlande du Nord`
 - `Système des Écoles européennes`
-- `Baccalauréat international (IB)`
+- `International Baccalaureate (IB)`
 - `International — ISCED 2011 (CITE)`
 
 For `Niveau`, use only a label belonging to the selected system or classification. Never mix naming schemes. If the Belgian Community or UK nation is ambiguous, ask for clarification.

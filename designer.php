@@ -118,7 +118,7 @@ app_start_session();
                 </optgroup>
                 <optgroup id="optgroup-meta-school-systems-transnational" label="Systèmes transnationaux">
                   <option id="opt-meta-school-system-european-schools" value="european_schools">Système des Écoles européennes</option>
-                  <option id="opt-meta-school-system-ib" value="ib">Baccalauréat international (IB)</option>
+                  <option id="opt-meta-school-system-ib" value="ib">International Baccalaureate (IB)</option>
                 </optgroup>
                 <optgroup id="optgroup-meta-school-systems-international" label="Classification internationale">
                   <option id="opt-meta-school-system-isced" value="isced_2011">International — ISCED 2011 (CITE)</option>
@@ -597,13 +597,13 @@ app_start_session();
     <script src="js/competency-catalog.js?v=20260831-framework-i18n"></script>
     <script src="js/competency-greencomp-details.js?v=20260831-framework-i18n"></script>
     <script src="js/competency-digcomp-details.js?v=20260830-digcomp-statements"></script>
-    <script src="js/editor/config.js?v=20260906-ib"></script>
+    <script src="js/editor/config.js?v=20260906-ib-en"></script>
     <script src="js/editor/competencies.js?v=20260905-modules-v1"></script>
     <script src="js/editor/exports.js?v=20260906-scenarisation"></script>
-    <script src="js/editor/imports.js?v=20260906-ib"></script>
+    <script src="js/editor/imports.js?v=20260906-ib-en"></script>
     <script src="js/editor/analysis.js?v=20260905-modules-v1"></script>
     <script src="js/editor/fields.js?v=20260905-modules-v1"></script>
-    <script src="js/interface.js?v=20260906-ib"></script>
+    <script src="js/interface.js?v=20260906-ib-en"></script>
     <script src="js/account-ui.js?v=20260905-revisions-v1"></script>
   </body>
 </html>
