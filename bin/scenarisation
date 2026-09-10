@@ -25,7 +25,7 @@ VERSION = "0.7.0"
 DEFAULT_DAY_HOURS = 7
 AIAS_VERSION = "2.1"
 DEFAULT_SITE = "https://www.ralentirtravaux.com/flo/learning-designer"
-INSTALL_URL = "https://raw.githubusercontent.com/YannHY/learning-designer/main/install.sh"
+INSTALL_URL = "https://raw.githubusercontent.com/YannHY/scenarisation/main/install.sh"
 CONFIG_PATH = Path(os.environ.get("SCENARISATION_CONFIG") or os.environ.get("LEARNING_CONFIG", "~/.learning-designer/config.json")).expanduser()
 
 LEARNING_TYPES = {

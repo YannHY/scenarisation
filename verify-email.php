@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require_once __DIR__ . '/lib/bootstrap.php';
+require_once __DIR__ . '/lib/account-protection.php';
 
 app_start_session();
 $message = '';
@@ -18,11 +18,14 @@ try {
 
 $requestMethod = (string)($_SERVER['REQUEST_METHOD'] ?? 'GET');
 $token = trim((string)($_GET['token'] ?? ''));
-$submittedToken = trim((string)($_POST['token'] ?? ''));
+$submittedToken = trim(account_post_string('token'));
 
 if ($db !== null && $requestMethod === 'POST' && $submittedToken !== '') {
     require_same_origin_post();
-    if (!preg_match('/^[a-f0-9]{64}$/', $submittedToken)) {
+    if (!account_csrf_valid('verify_email')) {
+        $confirmationToken = $submittedToken;
+        $error = 'Le formulaire a expiré ou n’est pas valide. Rechargez la page puis réessayez.';
+    } elseif (!preg_match('/^[a-f0-9]{64}$/', $submittedToken)) {
         $error = 'Ce lien de vérification est invalide.';
     } else {
         $tokenHash = hash('sha256', $submittedToken);
@@ -59,9 +62,11 @@ if ($db !== null && $requestMethod === 'POST' && $submittedToken !== '') {
     }
 } elseif ($db !== null && $requestMethod === 'POST') {
     require_same_origin_post();
-    $pendingEmail = trim((string)($_POST['email'] ?? $pendingEmail));
+    $pendingEmail = trim(account_post_string('email'));
 
-    if (!filter_var($pendingEmail, FILTER_VALIDATE_EMAIL) || !is_florimont_email($pendingEmail)) {
+    if (($protectionError = account_protection_error($db, 'resend_verification', $pendingEmail)) !== '') {
+        $error = $protectionError;
+    } elseif (!filter_var($pendingEmail, FILTER_VALIDATE_EMAIL) || !is_florimont_email($pendingEmail)) {
         $error = 'Saisissez une adresse email @florimont.ch valide.';
     } else {
         $stmt = $db->prepare("SELECT id, username, email, email_verified_at, email_verification_sent_at
@@ -155,6 +160,7 @@ if ($db !== null && $requestMethod === 'POST' && $submittedToken !== '') {
         <?php elseif ($confirmationToken !== ''): ?>
             <p class="account-copy">Cliquez sur le bouton ci-dessous pour confirmer que cette adresse email vous appartient.</p>
             <form method="post" class="account-form">
+                <?php render_account_protection('verify_email', false); ?>
                 <input type="hidden" name="token" value="<?= h($confirmationToken) ?>">
                 <button type="submit">Confirmer mon adresse email</button>
             </form>
@@ -164,7 +170,8 @@ if ($db !== null && $requestMethod === 'POST' && $submittedToken !== '') {
             <form method="post" class="account-form">
                 <label for="email">Renvoyer le lien à</label>
                 <input id="email" name="email" type="email" required autocomplete="email" placeholder="@florimont.ch" value="<?= h($pendingEmail) ?>">
-                <button type="submit">Renvoyer l’email</button>
+                <?php render_account_protection('resend_verification'); ?>
+                <button type="submit"<?= !account_turnstile_ready() ? ' disabled' : '' ?>>Renvoyer l’email</button>
             </form>
             <p class="account-footer"><a href="login.php">Revenir à la connexion</a></p>
         <?php endif; ?>

@@ -7,7 +7,7 @@
                 <span class="site-footer-separator" aria-hidden="true">|</span>
                 <a class="site-footer-link" id="footer-help-btn" href="help.php" data-site-i18n-en="Help" data-site-i18n-fr="Aide">Aide</a>
                 <span class="site-footer-separator" aria-hidden="true">|</span>
-                <a class="site-footer-link" id="footer-shared-designs-btn" href="share.php" data-site-i18n-en="Shared designs" data-site-i18n-fr="Scénarios partagés">Scénarios partagés</a>
+                <a class="site-footer-link" id="footer-shared-designs-btn" href="share.php" data-site-i18n-en="Shared scenarios" data-site-i18n-fr="Scénarios partagés">Scénarios partagés</a>
                 <span class="site-footer-separator" aria-hidden="true">|</span>
                 <a class="site-footer-link" id="footer-models-btn" href="models.php" data-site-i18n-en="Models" data-site-i18n-fr="Modèles">Modèles</a>
                 <span class="site-footer-separator" aria-hidden="true">|</span>
@@ -16,6 +16,8 @@
                 <a class="site-footer-link" id="footer-cli-btn" href="help.php#cli" data-site-i18n-en="Skill and CLI" data-site-i18n-fr="Skill et CLI">Skill et CLI</a>
             </span>
             <span class="site-footer-link-row">
+                <a class="site-footer-link" href="conditions-utilisation.php" data-site-i18n-en="Terms of use" data-site-i18n-fr="Conditions d’utilisation">Conditions d’utilisation</a>
+                <span class="site-footer-separator" aria-hidden="true">|</span>
                 <a class="site-footer-link" href="licence-reutilisation.php" data-site-i18n-en="License and reuse" data-site-i18n-fr="Licence et réutilisation">Licence et réutilisation</a>
                 <span class="site-footer-separator" aria-hidden="true">|</span>
                 <a class="site-footer-link" href="politique-confidentialite.php" data-site-i18n-en="Privacy" data-site-i18n-fr="Confidentialité">Confidentialité</a>

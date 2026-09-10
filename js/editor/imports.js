@@ -573,7 +573,7 @@ function buildStateFromMarkdown(markdownText) {
         if (field.key === "taille du groupe") imported.meta.sizeClass = field.value;
         if (field.key === "concepteur(s)") imported.meta.designers = field.value;
         if (field.key === "enseignant(s)") imported.meta.trainers = field.value;
-        if (field.key === "temps d'apprentissage") {
+        if (["duree prevue", "temps d'apprentissage"].includes(field.key)) {
           const learningTime = parseCsvPedagogicalTime(field.value, imported.meta.dayHours);
           imported.meta.learningDays = learningTime.days;
           imported.meta.learningHours = learningTime.hours;

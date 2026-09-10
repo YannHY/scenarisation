@@ -42,15 +42,15 @@ app_start_session();
         <p class="legal-attribution"><strong>Exemple d’attribution&nbsp;:</strong><br>«&nbsp;Adapté de Scenarisation, Yann Houry et François Jourde, sous licence CC BY-SA 4.0 – [lien vers la ressource d’origine]. Modifications&nbsp;: [description].&nbsp;»</p>
 
         <h2>Code source</h2>
-        <p>Le <a href="https://github.com/YannHY/learning-designer" rel="noopener noreferrer">code source de Scenarisation</a> est réutilisable selon le fichier <a href="https://github.com/YannHY/learning-designer/blob/main/LICENSE" rel="license noopener noreferrer"><code>LICENSE</code></a> présent dans le dépôt. Dans sa version en vigueur à la date indiquée en haut de cette page, ce fichier applique l’outil juridique <a href="https://creativecommons.org/publicdomain/zero/1.0/deed.fr" rel="license noopener noreferrer">CC0 1.0 Universal</a>.</p>
+        <p>Le <a href="https://github.com/YannHY/scenarisation" rel="noopener noreferrer">code source de Scenarisation</a> est réutilisable selon le fichier <a href="https://github.com/YannHY/scenarisation/blob/main/LICENSE" rel="license noopener noreferrer"><code>LICENSE</code></a> présent dans le dépôt. Dans sa version en vigueur à la date indiquée en haut de cette page, ce fichier applique l’outil juridique <a href="https://creativecommons.org/publicdomain/zero/1.0/deed.fr" rel="license noopener noreferrer">CC0 1.0 Universal</a>.</p>
         <p>CC0 ne peut porter que sur les éléments pour lesquels la personne qui l’applique détient les droits nécessaires. Les bibliothèques, polices, icônes, extraits, contributions antérieures et autres composants appartenant à des tiers conservent leurs propres licences.</p>
 
-        <h2>Designs créés et publiés par les utilisateurs</h2>
+        <h2>Scénarios créés et publiés par les utilisateurs</h2>
         <p>Les scénarios pédagogiques créés, importés ou enregistrés dans l’application restent sous la responsabilité de leurs auteurs. Scenarisation ne revendique aucun droit de propriété sur ces productions.</p>
         <ul>
-            <li><strong>Partage par lien&nbsp;:</strong> le design est consultable en lecture seule par toute personne disposant du lien. La mise à disposition du lien n’accorde, à elle seule, aucune licence de réutilisation.</li>
-            <li><strong>Publication dans le catalogue&nbsp;:</strong> l’auteur choisit l’une des licences Creative Commons 4.0 proposées. La licence sélectionnée est affichée avec le design et fixe les droits de réutilisation accordés au public.</li>
-            <li><strong>Retrait&nbsp;:</strong> l’auteur peut retirer un design du catalogue ou révoquer son lien. Une licence Creative Commons déjà accordée demeure toutefois valable pour les copies reçues avant le retrait, conformément à ses conditions.</li>
+            <li><strong>Partage par lien&nbsp;:</strong> le scénario est consultable en lecture seule par toute personne disposant du lien. La mise à disposition du lien n’accorde, à elle seule, aucune licence de réutilisation.</li>
+            <li><strong>Publication dans le catalogue&nbsp;:</strong> l’auteur choisit l’une des licences Creative Commons 4.0 proposées. La licence sélectionnée est affichée avec le scénario et fixe les droits de réutilisation accordés au public.</li>
+            <li><strong>Retrait&nbsp;:</strong> l’auteur peut retirer un scénario du catalogue ou révoquer son lien. Une licence Creative Commons déjà accordée demeure toutefois valable pour les copies reçues avant le retrait, conformément à ses conditions.</li>
         </ul>
         <p>Avant toute publication, l’auteur doit vérifier qu’il possède les droits nécessaires sur l’ensemble du contenu et qu’aucune donnée personnelle, confidentielle ou relative à un élève n’y figure sans base légale et autorisation appropriées.</p>
 

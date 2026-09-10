@@ -16,7 +16,7 @@ app_start_session();
     <link rel="stylesheet" href="css/account-ui.css?v=20260906-highlight" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="css/interface.css?v=20260905-subtle-focus" />
+    <link rel="stylesheet" href="css/interface.css?v=20260910-bloom-on-demand" />
   </head>
   <body class="designer-page">
     <a id="skip-link" class="skip-link" href="#board">Aller au contenu principal</a>
@@ -47,7 +47,7 @@ app_start_session();
               <input id="meta-name" class="panel-input" type="text" />
             </div>
             <div class="form-row">
-              <label id="label-meta-learning" data-tooltip-i18n="metaLearningTooltip">Temps d'apprentissage</label>
+              <label id="label-meta-learning" data-tooltip-i18n="metaLearningTooltip">Durée prévue</label>
               <div class="time-inline">
                 <input id="meta-learning-days" class="panel-input" type="number" min="0" />
                 <span id="unit-learning-days" class="time-unit">jours</span>
@@ -58,7 +58,7 @@ app_start_session();
               </div>
             </div>
             <div class="form-row">
-              <label id="label-meta-designed" data-tooltip-i18n="metaDesignedTooltip">Temps conçu</label>
+              <label id="label-meta-designed" data-tooltip-i18n="metaDesignedTooltip">Durée conçue</label>
               <div class="time-inline">
                 <input id="meta-designed-days" class="panel-input" type="number" readonly />
                 <span id="unit-designed-days" class="time-unit">jours</span>
@@ -152,8 +152,8 @@ app_start_session();
             </div>
             <div class="form-row outcomes-row">
               <div class="outcomes-header">
-                <button id="add-outcome-btn" type="button" class="outcomes-add-btn" aria-label="Ajouter un acquis d'apprentissage"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
-                <label id="label-meta-outcomes" data-tooltip-i18n="outcomesTooltip">Acquis d'apprentissage&nbsp;*</label>
+                <button id="add-outcome-btn" type="button" class="outcomes-add-btn" aria-label="Ajouter un acquis d’apprentissage" aria-haspopup="dialog" aria-controls="bloom-modal-backdrop"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
+                <label id="label-meta-outcomes" data-tooltip-i18n="outcomesTooltip">Acquis d'apprentissage</label>
               </div>
               <div id="outcomes-list" class="outcomes-list"></div>
             </div>
@@ -173,7 +173,7 @@ app_start_session();
               <div id="analysis-learning-legend" class="analysis-legend"></div>
             </div>
             <div class="analysis-block">
-              <h3 id="analysis-delivery-title" class="analysis-chart-title" data-tooltip-i18n="analysisDeliveryTooltip">Mode de formation</h3>
+              <h3 id="analysis-delivery-title" class="analysis-chart-title" data-tooltip-i18n="analysisDeliveryTooltip">Modalité</h3>
               <div id="analysis-delivery-pie" class="analysis-small-pie"></div>
               <div id="analysis-delivery-legend" class="analysis-legend"></div>
             </div>
@@ -213,7 +213,7 @@ app_start_session();
       </div>
     </section>
 
-    <header class="toolbar" role="region" aria-label="Actions du design">
+    <header class="toolbar" role="region" aria-label="Actions du scénario">
       <div class="toolbar-left">
         <div class="toolbar-cluster">
           <button id="toggle-intentions-btn" class="btn btn-light" type="button"><span class="btn-label"><i class="fa-solid fa-eye btn-icon-inline" aria-hidden="true"></i>Intentions</span></button>
@@ -388,7 +388,7 @@ app_start_session();
         <p><a href="https://www.ucl.ac.uk/learning-designer/" target="_blank" rel="noopener noreferrer">https://www.ucl.ac.uk/learning-designer/</a></p>
         <p id="info-modal-p2">(UCL Knowledge Lab, UCL Institute of Education, 2013-2026).</p>
         <p id="info-modal-p3">Traitement local : toutes les données restent dans votre navigateur ; aucune donnée n’est transmise en ligne.</p>
-        <p id="info-modal-p4">François Jourde (2026) • CC BY-SA<br />Code source : <a href="https://github.com/YannHY/learning-designer" target="_blank" rel="noopener noreferrer">https://github.com/YannHY/learning-designer</a> (basé sur <a href="https://github.com/jourde" target="_blank" rel="noopener noreferrer">github.com/jourde</a>)</p>
+        <p id="info-modal-p4">François Jourde (2026) • CC BY-SA<br />Code source : <a href="https://github.com/YannHY/scenarisation" target="_blank" rel="noopener noreferrer">https://github.com/YannHY/scenarisation</a> (basé sur <a href="https://github.com/jourde" target="_blank" rel="noopener noreferrer">github.com/jourde</a>)</p>
         <p id="info-modal-p5"></p>
         <div class="modal-actions">
           <button id="info-modal-close-btn" class="btn btn-primary" type="button">Fermer</button>
@@ -400,7 +400,7 @@ app_start_session();
     <div id="import-modal-backdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="import-modal-title">
       <div class="modal import-modal">
         <h2 id="import-modal-title" class="modal-title">Importer un scénario</h2>
-        <p id="import-modal-desc" class="import-modal-desc">Partez d’un modèle prérempli, ou chargez un fichier exporté depuis cette application. Le design actuel sera remplacé.</p>
+        <p id="import-modal-desc" class="import-modal-desc">Partez d’un modèle prérempli, ou chargez un fichier exporté depuis cette application. Le scénario actuel sera remplacé.</p>
 
         <section class="import-source" aria-labelledby="import-file-section-title">
           <h3 id="import-file-section-title" class="import-section-title">Depuis mon ordinateur</h3>
@@ -453,7 +453,7 @@ app_start_session();
 
     <div id="export-modal-backdrop" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="export-modal-title">
       <div class="modal export-modal">
-        <h2 id="export-modal-title" class="modal-title">Exporter le design</h2>
+        <h2 id="export-modal-title" class="modal-title">Exporter le scénario</h2>
         <fieldset class="export-scope-fieldset">
           <legend id="export-scope-label">Contenu à exporter</legend>
           <div class="export-scope-options">
@@ -518,16 +518,16 @@ app_start_session();
       </div>
     </div>
 
-    <!-- New design confirmation modal -->
+    <!-- New scenario confirmation modal -->
     <div id="new-design-modal-backdrop" class="modal-backdrop hidden"
          role="dialog" aria-modal="true" aria-hidden="true"
          aria-labelledby="new-design-modal-title">
       <div class="modal">
-        <h2 id="new-design-modal-title" class="modal-title">Nouveau design</h2>
-        <p id="new-design-modal-msg" class="new-design-modal-msg">Vous allez créer un nouveau design vierge. Si vous n'avez pas enregistré le design actuel, il sera perdu.</p>
+        <h2 id="new-design-modal-title" class="modal-title">Nouveau scénario</h2>
+        <p id="new-design-modal-msg" class="new-design-modal-msg">Vous allez créer un nouveau scénario vierge. Si vous n'avez pas enregistré le scénario actuel, il sera perdu.</p>
         <div class="modal-actions">
           <button id="new-design-cancel-btn" class="btn btn-light" type="button">Annuler</button>
-          <button id="new-design-confirm-btn" class="btn btn-primary" type="button">Créer un nouveau design</button>
+          <button id="new-design-confirm-btn" class="btn btn-primary" type="button">Créer un nouveau scénario</button>
         </div>
       </div>
     </div>
@@ -537,9 +537,15 @@ app_start_session();
          role="dialog" aria-modal="true" aria-hidden="true"
          aria-labelledby="bloom-modal-title">
       <div class="modal bloom-modal">
-        <h2 id="bloom-modal-title" class="modal-title">Taxonomie de Bloom</h2>
-        <p id="bloom-modal-subtitle" class="bloom-modal-subtitle">Sélectionnez une catégorie ou un verbe d'action</p>
-        <div id="bloom-category-list" class="bloom-category-list"></div>
+        <h2 id="bloom-modal-title" class="modal-title">Acquis d’apprentissage</h2>
+        <p id="outcomes-description" class="outcomes-description"></p>
+        <textarea id="meta-outcomes" class="panel-textarea" rows="4" aria-labelledby="bloom-modal-title" aria-describedby="outcomes-description"></textarea>
+        <div id="bloom-selected-tag" class="bloom-selected-tag hidden"></div>
+        <button id="bloom-toggle-btn" type="button" class="btn btn-light outcomes-taxonomy-btn" aria-expanded="false" aria-controls="bloom-picker">Taxonomie de Bloom</button>
+        <div id="bloom-picker" class="bloom-picker hidden" hidden>
+          <p id="bloom-modal-subtitle" class="bloom-modal-subtitle">Sélectionnez une catégorie ou un verbe d'action</p>
+          <div id="bloom-category-list" class="bloom-category-list"></div>
+        </div>
         <div class="modal-actions">
           <button id="bloom-cancel-btn" class="btn btn-light" type="button">Annuler</button>
           <button id="bloom-add-btn" class="btn btn-primary" type="button">Ajouter</button>
@@ -597,13 +603,13 @@ app_start_session();
     <script src="js/competency-catalog.js?v=20260831-framework-i18n"></script>
     <script src="js/competency-greencomp-details.js?v=20260831-framework-i18n"></script>
     <script src="js/competency-digcomp-details.js?v=20260830-digcomp-statements"></script>
-    <script src="js/editor/config.js?v=20260906-ib-en"></script>
+    <script src="js/editor/config.js?v=20260910-bloom-on-demand"></script>
     <script src="js/editor/competencies.js?v=20260905-modules-v1"></script>
-    <script src="js/editor/exports.js?v=20260906-scenarisation"></script>
+    <script src="js/editor/exports.js?v=20260910-scenario-wording"></script>
     <script src="js/editor/imports.js?v=20260906-ib-en"></script>
     <script src="js/editor/analysis.js?v=20260905-modules-v1"></script>
     <script src="js/editor/fields.js?v=20260905-modules-v1"></script>
-    <script src="js/interface.js?v=20260906-ib-en"></script>
-    <script src="js/account-ui.js?v=20260905-revisions-v1"></script>
+    <script src="js/interface.js?v=20260910-bloom-on-demand"></script>
+    <script src="js/account-ui.js?v=20260910-scenario-wording"></script>
   </body>
 </html>

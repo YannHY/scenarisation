@@ -1,0 +1,45 @@
+/* Category filters complement the shared search dialog styles. */
+.site-search-dialog {
+  display: flex;
+  flex-direction: column;
+  width: min(960px, 100%);
+}
+.site-search-header, .site-search-field, .site-search-status {
+  flex-shrink: 0;
+}
+.site-search-filters {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 7px;
+  margin: 14px 22px 0;
+  flex-shrink: 0;
+  overflow-x: auto;
+  padding: 4px;
+  scrollbar-width: thin;
+}
+.site-search-filter {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.site-search-filter, .site-search-more {
+  border: 1px solid var(--line, #d0d7e2);
+  border-radius: 999px;
+  padding: 6px 12px;
+  background: var(--panel, #fff);
+  color: var(--text-body, #314255);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.site-search-filter[aria-pressed="true"] {
+  background: #2459a6;
+  border-color: #2459a6;
+  color: #fff;
+}
+.site-search-filter:focus-visible, .site-search-more:focus-visible {
+  outline: 2px solid #5689d2;
+  outline-offset: 3px;
+}
+.site-search-results { min-height: 0; }
+.site-search-more { margin: 0 22px 16px; align-self: center; flex-shrink: 0; }
+.site-search-more[hidden] { display: none; }

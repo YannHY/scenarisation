@@ -6,7 +6,7 @@ require_once __DIR__ . '/lib/bootstrap.php';
 app_start_session();
 
 $aiPrompt = <<<'PROMPT'
-Tu dois créer un design pédagogique Scenarisation en utilisant le CLI `scenarisation`.
+Tu dois créer un scénario pédagogique Scenarisation en utilisant le CLI `scenarisation`.
 
 Important :
 Tu es peut-être dans un sandbox isolé. Sélectionne le CLI selon ses capacités, pas seulement selon l’existence d’une commande.
@@ -23,12 +23,12 @@ Si la commande globale existe mais n’est pas compatible, indique-moi simplemen
 Si aucune copie compatible n’est disponible, installe une copie locale dans ton environnement :
 
 mkdir -p .tools/bin
-curl -fsSL https://raw.githubusercontent.com/YannHY/learning-designer/main/bin/scenarisation -o .tools/bin/scenarisation
+curl -fsSL https://raw.githubusercontent.com/YannHY/scenarisation/main/bin/scenarisation -o .tools/bin/scenarisation
 chmod +x .tools/bin/scenarisation
 ./.tools/bin/scenarisation --help
 
 Si raw.githubusercontent.com est bloqué, utilise web_fetch ou une autre méthode disponible pour récupérer :
-https://github.com/YannHY/learning-designer/blob/main/bin/scenarisation
+https://github.com/YannHY/scenarisation/blob/main/bin/scenarisation
 
 Puis écris le fichier dans `.tools/bin/scenarisation`, rends-le exécutable et vérifie ses capacités.
 
@@ -70,7 +70,7 @@ Si certaines informations manquent, fais des hypothèses raisonnables au lieu de
 Pour la Belgique, distingue les communautés française, flamande et germanophone. Pour le Royaume-Uni, distingue l’Angleterre, le pays de Galles, l’Écosse et l’Irlande du Nord. Considère les Écoles européennes comme un système transnational et ISCED 2011 comme une classification internationale. Si le choix est ambigu, demande la précision nécessaire. N’invente jamais un identifiant : consulte les catalogues du CLI.
 
 Cas particulier de la durée :
-- si la durée est donnée en jours, demande ou propose explicitement une durée par séance avant de générer le design ;
+- si la durée est donnée en jours, demande ou propose explicitement une durée par séance avant de générer le scénario ;
 - par défaut, pour le collège, interprète 1 jour comme 1 séance de 55 minutes, sauf indication contraire ;
 - annonce clairement l’hypothèse retenue.
 
@@ -111,7 +111,7 @@ Valeurs sûres :
 - `--evaluation` : `diagnostic`, `formative`, `summative`, `certificative`, `none`
 - `--aias` : `1`, `2`, `3`, `4`, `5` ou `not-applicable`
 
-Pour chaque activité, détermine et transmets explicitement `--group`, `--teaching`, `--pacing`, `--mode`, `--evaluation` et `--aias`. Ne t’appuie pas sur des valeurs par défaut. Choisis-les comme un ensemble cohérent à partir de l’objectif, de l’autonomie des élèves, des interactions nécessaires, des contraintes de formation et des traces d’apprentissage attendues. AIAS 1 signifie sans IA ; AIAS 2 réserve l’IA à l’exploration, la recherche ou la planification ; AIAS 3 en fait une collaboratrice dont l’élève évalue et transforme les productions ; AIAS 4 l’intègre pleinement sous la direction critique de l’élève ; AIAS 5 correspond à l’exploration et à la co-conception de nouveaux usages. Utilise `not-applicable` seulement si le cadre AIAS ne s’applique réellement pas, et ne laisse jamais AIAS indécis dans un design généré.
+Pour chaque activité, détermine et transmets explicitement `--group`, `--teaching`, `--pacing`, `--mode`, `--evaluation` et `--aias`. Ne t’appuie pas sur des valeurs par défaut. Choisis-les comme un ensemble cohérent à partir de l’objectif, de l’autonomie des élèves, des interactions nécessaires, des contraintes de formation et des traces d’apprentissage attendues. AIAS 1 signifie sans IA ; AIAS 2 réserve l’IA à l’exploration, la recherche ou la planification ; AIAS 3 en fait une collaboratrice dont l’élève évalue et transforme les productions ; AIAS 4 l’intègre pleinement sous la direction critique de l’élève ; AIAS 5 correspond à l’exploration et à la co-conception de nouveaux usages. Utilise `not-applicable` seulement si le cadre AIAS ne s’applique réellement pas, et ne laisse jamais AIAS indécis dans un scénario généré.
 
 Pour `init`, transmets le système et le niveau lorsqu’ils sont connus, par exemple : `$SCENARISATION init design.json --school-system france --school-level quatrieme`.
 
@@ -138,7 +138,7 @@ Procédure recommandée :
 6. Valide systématiquement avec `validate --strict-pedagogy`.
 7. Exécute `prompt design.json`.
 
-Le design doit inclure :
+Le scénario doit inclure :
 - des moments clairement titrés ;
 - des intentions pédagogiques explicites ;
 - des activités variées ;
@@ -204,27 +204,27 @@ L’enseignant va te soumettre la description d’une séquence pédagogique (ou
 
 Tu structures ton analyse autour des 11 axes suivants :
 
-1. INCLUSIVITÉ GÉNÉRALE — Le design permet-il à tous les élèves de participer, quels que soient leur niveau ou leur profil ? Les consignes sont-elles claires et accessibles ? Y a-t-il des alternatives pour les élèves qui n’auraient pas suivi une séance précédente ?
+1. INCLUSIVITÉ GÉNÉRALE — Le scénario permet-il à tous les élèves de participer, quels que soient leur niveau ou leur profil ? Les consignes sont-elles claires et accessibles ? Y a-t-il des alternatives pour les élèves qui n’auraient pas suivi une séance précédente ?
 
-2. ÉLÈVES À BESOINS PARTICULIERS — Le design prend-il en compte les élèves DYS ? Des aménagements sont-ils prévus pour les élèves TDAH ? Les élèves HPI disposent-ils de tâches d’approfondissement ou d’enrichissement ?
+2. ÉLÈVES À BESOINS PARTICULIERS — Le scénario prend-il en compte les élèves DYS ? Des aménagements sont-ils prévus pour les élèves TDAH ? Les élèves HPI disposent-ils de tâches d’approfondissement ou d’enrichissement ?
 
-3. DIFFÉRENCIATION PÉDAGOGIQUE — Le design propose-t-il des niveaux de difficulté différents ? Y a-t-il une différenciation de contenu, de processus ou de production ? Les élèves fragiles bénéficient-ils d’un étayage explicite ?
+3. DIFFÉRENCIATION PÉDAGOGIQUE — Le scénario propose-t-il des niveaux de difficulté différents ? Y a-t-il une différenciation de contenu, de processus ou de production ? Les élèves fragiles bénéficient-ils d’un étayage explicite ?
 
-4. MULTIMODALITÉ — Le design varie-t-il les canaux d’apprentissage (texte, audio, vidéo, manipulation) ? Un même contenu est-il proposé sous plusieurs formes ?
+4. MULTIMODALITÉ — Le scénario varie-t-il les canaux d’apprentissage (texte, audio, vidéo, manipulation) ? Un même contenu est-il proposé sous plusieurs formes ?
 
-5. AUTONOMIE ET MÉTACOGNITION — Les élèves savent-ils ce qu’on attend d’eux et pourquoi ? Y a-t-il des moments où l’élève réfléchit à ses propres apprentissages ? Le design favorise-t-il la prise d’initiative ?
+5. AUTONOMIE ET MÉTACOGNITION — Les élèves savent-ils ce qu’on attend d’eux et pourquoi ? Y a-t-il des moments où l’élève réfléchit à ses propres apprentissages ? Le scénario favorise-t-il la prise d’initiative ?
 
-6. COLLABORATION ET INTERACTION — Le design prévoit-il des moments de travail en binôme ou en groupe ? Les élèves ont-ils l’occasion d’apprendre les uns des autres ?
+6. COLLABORATION ET INTERACTION — Le scénario prévoit-il des moments de travail en binôme ou en groupe ? Les élèves ont-ils l’occasion d’apprendre les uns des autres ?
 
 7. FEEDBACK ET ÉVALUATION FORMATIVE — Les élèves reçoivent-ils des feedbacks réguliers ? Y a-t-il des moments d’auto-évaluation ou de co-évaluation ? Une remédiation est-elle prévue en cas de difficulté ?
 
 8. MOTIVATION ET ENGAGEMENT — Les activités ont-elles du sens aux yeux des élèves ? Y a-t-il des éléments déclencheurs (accroche, défi, énigme) ? La variété des formats maintient-elle l’attention ?
 
-9. CHARGE COGNITIVE — Les activités sont-elles progressives ? Le design évite-t-il de surcharger les élèves ? Les temps sont-ils adaptés à la complexité des tâches ?
+9. CHARGE COGNITIVE — Les activités sont-elles progressives ? Le scénario évite-t-il de surcharger les élèves ? Les temps sont-ils adaptés à la complexité des tâches ?
 
-10. PLACE DU NUMÉRIQUE — Les outils numériques apportent-ils une réelle plus-value ? Le design serait-il accessible sans équipement numérique ? L’usage du numérique favorise-t-il l’activité de l’élève ?
+10. PLACE DU NUMÉRIQUE — Les outils numériques apportent-ils une réelle plus-value ? Le scénario serait-il accessible sans équipement numérique ? L’usage du numérique favorise-t-il l’activité de l’élève ?
 
-11. ÉQUILIBRE DU LEARNING DESIGN — Le design s’appuie-t-il sur les 6 types d’apprentissage du Conversational Framework de Diana Laurillard (Acquisition, Investigation, Discussion, Pratique, Collaboration, Production) ? L’un de ces types est-il sur- ou sous-représenté ? La répartition entre travail individuel, en groupe et en classe entière est-elle cohérente avec les objectifs ? Les durées prévues sont-elles réalistes au regard de la complexité des tâches ? Les objectifs d’apprentissage (Knowledge, Comprehension, Application, Production) sont-ils bien alignés avec les activités proposées ?
+11. ÉQUILIBRE DU LEARNING DESIGN — Le scénario s’appuie-t-il sur les 6 types d’apprentissage du Conversational Framework de Diana Laurillard (Acquisition, Investigation, Discussion, Pratique, Collaboration, Production) ? L’un de ces types est-il sur- ou sous-représenté ? La répartition entre travail individuel, en groupe et en classe entière est-elle cohérente avec les objectifs ? Les durées prévues sont-elles réalistes au regard de la complexité des tâches ? Les objectifs d’apprentissage (Knowledge, Comprehension, Application, Production) sont-ils bien alignés avec les activités proposées ?
 
 Pour chaque axe :
 - porte un diagnostic honnête à partir de ce que l’enseignant t’a soumis ;
@@ -236,7 +236,7 @@ Adopte un ton bienveillant, professionnel et encourageant. Évite le jargon inut
 PROMPT;
 
 $aiPromptEn = <<<'PROMPT'
-You must create a Scenarisation teaching design using the `scenarisation` CLI.
+You must create a Scenarisation teaching scenario using the `scenarisation` CLI.
 
 Important:
 You may be working in an isolated sandbox. Select the CLI by capability, not merely by whether a command exists.
@@ -253,12 +253,12 @@ If the global command exists but is incompatible, simply tell me that it must be
 If no compatible copy is available, install a local copy in your environment:
 
 mkdir -p .tools/bin
-curl -fsSL https://raw.githubusercontent.com/YannHY/learning-designer/main/bin/scenarisation -o .tools/bin/scenarisation
+curl -fsSL https://raw.githubusercontent.com/YannHY/scenarisation/main/bin/scenarisation -o .tools/bin/scenarisation
 chmod +x .tools/bin/scenarisation
 ./.tools/bin/scenarisation --help
 
 If raw.githubusercontent.com is blocked, use web_fetch or another available method to retrieve:
-https://github.com/YannHY/learning-designer/blob/main/bin/scenarisation
+https://github.com/YannHY/scenarisation/blob/main/bin/scenarisation
 
 Then write the file to `.tools/bin/scenarisation`, make it executable, and check its capabilities.
 
@@ -300,7 +300,7 @@ If information is missing, make reasonable assumptions instead of blocking, unle
 For Belgium, distinguish the French, Flemish, and German-speaking Communities. For the United Kingdom, distinguish England, Wales, Scotland, and Northern Ireland. Treat the European Schools as a transnational system and ISCED 2011 as an international classification. If the choice is ambiguous, ask for the necessary clarification. Never invent an identifier: consult the CLI catalogs.
 
 Duration rules:
-- if the duration is given in days, ask for or explicitly suggest a duration per session before generating the design;
+- if the duration is given in days, ask for or explicitly suggest a duration per session before generating the scenario;
 - by default, for lower secondary education, interpret one day as one 55-minute session unless stated otherwise;
 - clearly state the assumption you use.
 
@@ -341,7 +341,7 @@ Safe values:
 - `--evaluation`: `diagnostic`, `formative`, `summative`, `certificative`, `none`
 - `--aias`: `1`, `2`, `3`, `4`, `5`, or `not-applicable`
 
-For every activity, explicitly determine and pass `--group`, `--teaching`, `--pacing`, `--mode`, `--evaluation`, and `--aias`. Do not rely on defaults. Choose them as a coherent set based on the objective, learner autonomy, required interactions, delivery constraints, and expected evidence of learning. AIAS 1 means no AI; AIAS 2 limits AI to exploration, research, or planning; AIAS 3 makes AI a collaborator whose output the learner evaluates and transforms; AIAS 4 fully integrates AI under the learner's critical direction; AIAS 5 covers exploring and co-designing new AI uses. Use `not-applicable` only when the AIAS framework genuinely does not apply, and never leave AIAS undecided in a generated design.
+For every activity, explicitly determine and pass `--group`, `--teaching`, `--pacing`, `--mode`, `--evaluation`, and `--aias`. Do not rely on defaults. Choose them as a coherent set based on the objective, learner autonomy, required interactions, delivery constraints, and expected evidence of learning. AIAS 1 means no AI; AIAS 2 limits AI to exploration, research, or planning; AIAS 3 makes AI a collaborator whose output the learner evaluates and transforms; AIAS 4 fully integrates AI under the learner's critical direction; AIAS 5 covers exploring and co-designing new AI uses. Use `not-applicable` only when the AIAS framework genuinely does not apply, and never leave AIAS undecided in a generated scenario.
 
 For `init`, pass the system and level whenever they are known, for example: `$SCENARISATION init design.json --school-system france --school-level quatrieme`.
 
@@ -368,7 +368,7 @@ Recommended process:
 6. Always run `validate --strict-pedagogy`.
 7. Run `prompt design.json`.
 
-The design must include:
+The scenario must include:
 - clearly titled moments;
 - explicit pedagogical intentions;
 - varied activities;
@@ -421,25 +421,25 @@ Structure your analysis around these 11 areas:
 
 1. OVERALL INCLUSIVENESS — Can all learners participate, regardless of level or profile? Are instructions clear and accessible? Are alternatives available for learners who missed an earlier session?
 
-2. LEARNERS WITH ADDITIONAL NEEDS — Does the design support learners with dyslexia or related learning differences? Are accommodations planned for learners with ADHD? Do highly able learners have extension or enrichment tasks?
+2. LEARNERS WITH ADDITIONAL NEEDS — Does the scenario support learners with dyslexia or related learning differences? Are accommodations planned for learners with ADHD? Do highly able learners have extension or enrichment tasks?
 
-3. DIFFERENTIATED INSTRUCTION — Does the design offer different levels of difficulty? Is content, process, or output differentiated? Do learners who need support receive explicit scaffolding?
+3. DIFFERENTIATED INSTRUCTION — Does the scenario offer different levels of difficulty? Is content, process, or output differentiated? Do learners who need support receive explicit scaffolding?
 
-4. MULTIMODALITY — Does the design vary learning channels such as text, audio, video, and hands-on work? Is the same content available in more than one form?
+4. MULTIMODALITY — Does the scenario vary learning channels such as text, audio, video, and hands-on work? Is the same content available in more than one form?
 
-5. AUTONOMY AND METACOGNITION — Do learners know what is expected and why? Are there moments when they reflect on their own learning? Does the design encourage initiative?
+5. AUTONOMY AND METACOGNITION — Do learners know what is expected and why? Are there moments when they reflect on their own learning? Does the scenario encourage initiative?
 
-6. COLLABORATION AND INTERACTION — Does the design include pair or group work? Can learners learn from one another?
+6. COLLABORATION AND INTERACTION — Does the scenario include pair or group work? Can learners learn from one another?
 
 7. FEEDBACK AND FORMATIVE ASSESSMENT — Do learners receive regular feedback? Are self-assessment and peer assessment included? Is remediation planned when difficulties arise?
 
 8. MOTIVATION AND ENGAGEMENT — Are the activities meaningful to learners? Is there a hook, challenge, or puzzle? Does variety help sustain attention?
 
-9. COGNITIVE LOAD — Do activities progress gradually? Does the design avoid overloading learners? Are timings appropriate for task complexity?
+9. COGNITIVE LOAD — Do activities progress gradually? Does the scenario avoid overloading learners? Are timings appropriate for task complexity?
 
-10. ROLE OF DIGITAL TECHNOLOGY — Do digital tools add genuine value? Would the design remain accessible without digital equipment? Does technology support active learning?
+10. ROLE OF DIGITAL TECHNOLOGY — Do digital tools add genuine value? Would the scenario remain accessible without digital equipment? Does technology support active learning?
 
-11. LEARNING DESIGN BALANCE — Does the design use the six learning types from Diana Laurillard’s Conversational Framework: Acquisition, Investigation, Discussion, Practice, Collaboration, and Production? Is any type over- or under-represented? Is the balance between individual, group, and whole-class work consistent with the objectives? Are planned durations realistic for the complexity of the tasks? Are the learning objectives (Knowledge, Comprehension, Application, Production) aligned with the proposed activities?
+11. LEARNING DESIGN BALANCE — Does the scenario use the six learning types from Diana Laurillard’s Conversational Framework: Acquisition, Investigation, Discussion, Practice, Collaboration, and Production? Is any type over- or under-represented? Is the balance between individual, group, and whole-class work consistent with the objectives? Are planned durations realistic for the complexity of the tasks? Are the learning objectives (Knowledge, Comprehension, Application, Production) aligned with the proposed activities?
 
 For each area:
 - give an honest diagnosis based on the submitted material;
@@ -470,8 +470,8 @@ PROMPT;
 <?php render_site_nav('help'); ?>
 <main class="help-shell" id="main-content">
     <header class="help-hero">
-        <h1 class="help-title">Concevoir, analyser et partager un design</h1>
-        <p class="help-lead">Ce guide explique comment concevoir, importer, exporter et publier un design, avec ou sans IA.</p>
+        <h1 class="help-title">Concevoir, analyser et partager un scénario</h1>
+        <p class="help-lead">Ce guide explique comment concevoir, importer, exporter et publier un scénario, avec ou sans IA.</p>
         <div class="help-quick-links" aria-label="Accès rapides">
             <a class="help-quick-link" href="#premiers-pas"><i class="fa-solid fa-rocket" aria-hidden="true"></i>Commencer</a>
             <a class="help-quick-link" href="#import-export"><i class="fa-solid fa-arrow-right-arrow-left" aria-hidden="true"></i>Importer et exporter</a>
@@ -517,17 +517,17 @@ PROMPT;
                     </div>
                     <div class="help-card">
                         <strong><span class="help-card-icon"><i class="fa-solid fa-share-nodes" aria-hidden="true"></i></span>Un outil de partage</strong>
-                        <span>Il permet d’enregistrer, d’exporter, de publier et de réutiliser un design pour le discuter ou l’adapter avec d’autres enseignants.</span>
+                        <span>Il permet d’enregistrer, d’exporter, de publier et de réutiliser un scénario pour le discuter ou l’adapter avec d’autres enseignants.</span>
                     </div>
                 </div>
 
-                <h3 id="creer-premier-design">Créer un premier design, étape par étape</h3>
+                <h3 id="creer-premier-design">Créer un premier scénario, étape par étape</h3>
                 <ol>
-                    <li><strong>Décrire le contexte.</strong> Renseignez le titre, la description, la commande institutionnelle, les objectifs d’enseignement, les concepteurs, les enseignants, la taille du groupe, la modalité et le temps d’apprentissage prévu. Pour le niveau, choisissez d’abord un système ou une classification, puis la classe correspondante. Le catalogue couvre la France, la Suisse, les États-Unis, les trois communautés belges, les quatre systèmes du Royaume-Uni et les systèmes transnationaux des Écoles européennes et du Baccalauréat international (IB). ISCED 2011 est proposé séparément comme classification internationale de comparaison. La durée peut être exprimée en jours, heures et minutes ; le nombre d’heures correspondant à une journée est configurable.</li>
+                    <li><strong>Décrire le contexte.</strong> Renseignez le titre, la description, la commande institutionnelle, les objectifs d’enseignement, les concepteurs, les enseignants, la taille du groupe, la modalité et la durée prévue. Pour le niveau, choisissez d’abord un système ou une classification, puis la classe correspondante. Le catalogue couvre la France, la Suisse, les États-Unis, les trois communautés belges, les quatre systèmes du Royaume-Uni et les systèmes transnationaux des Écoles européennes et du Baccalauréat international (IB). ISCED 2011 est proposé séparément comme classification internationale de comparaison. La durée peut être exprimée en jours, heures et minutes ; le nombre d’heures correspondant à une journée est configurable.</li>
                     <li><strong>Formuler les acquis attendus.</strong> Indiquez ce que les apprenants devront être capables de faire à la fin. Reliez si nécessaire chaque acquis à un niveau de la taxonomie révisée de Bloom et choisissez un verbe d’action observable.</li>
                     <li><strong>Structurer le parcours en moments.</strong> Un moment correspond à une phase cohérente de la séance ou de la séquence : lancement, exploration, entraînement, mise en commun, production ou évaluation.</li>
-                    <li><strong>Ajouter les activités.</strong> Pour chacune, précisez le type d’apprentissage, la durée, l’organisation du groupe, le mode d’enseignement, le rythme, le mode de formation, l’évaluation, les consignes et les ressources.</li>
-                    <li><strong>Visualiser puis ajuster.</strong> Comparez le temps d’apprentissage prévu avec la somme des activités et observez les graphiques de répartition. Ces indicateurs éclairent votre décision ; ils ne remplacent pas votre jugement pédagogique.</li>
+                    <li><strong>Ajouter les activités.</strong> Pour chacune, précisez le type d’apprentissage, la durée, l’organisation du groupe, le mode d’enseignement, le rythme, la modalité, l’évaluation, les consignes et les ressources.</li>
+                    <li><strong>Visualiser puis ajuster.</strong> Comparez la durée prévue avec la somme des activités et observez les graphiques de répartition. Ces indicateurs éclairent votre décision ; ils ne remplacent pas votre jugement pédagogique.</li>
                 </ol>
                 <div class="help-callout">
                     <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
@@ -561,11 +561,11 @@ PROMPT;
                         <thead><tr><th>Champ</th><th>Possibilités</th><th>Usage</th></tr></thead>
                         <tbody>
                             <tr><td>Type d’apprentissage</td><td>Lire, investiguer, pratiquer, produire, discuter, collaborer</td><td>Détermine la catégorie utilisée dans les graphiques d’analyse.</td></tr>
-                            <tr><td>Durée</td><td>Nombre de minutes</td><td>Alimente le temps conçu, la chronologie et toutes les répartitions.</td></tr>
+                            <tr><td>Durée</td><td>Nombre de minutes</td><td>Alimente la durée conçue, la chronologie et toutes les répartitions.</td></tr>
                             <tr><td>Groupe</td><td>Individuel, sous-groupes, groupe entier</td><td>Précise l’organisation sociale de l’activité.</td></tr>
                             <tr><td>Enseignement</td><td>Dirigé, guidé, accompagné ou en autonomie</td><td>Précise qui détermine la méthode, le déroulement et le rythme de l’activité.</td></tr>
                             <tr><td>Rythme</td><td>Synchrone ou asynchrone</td><td>Permet de distinguer les activités simultanées des activités réalisées au rythme de chacun.</td></tr>
-                            <tr><td>Mode de formation</td><td>En classe, sur site, en ligne, hybride ou autre</td><td>Décrit le lieu et le mode de participation.</td></tr>
+                            <tr><td>Modalité</td><td>En classe, sur site, en ligne, hybride ou autre</td><td>Décrit le lieu et le mode de participation.</td></tr>
                             <tr><td>Évaluation</td><td>Aucune, diagnostique, formative, sommative, certificative</td><td>Rend explicite la fonction évaluative de l’activité.</td></tr>
                             <tr><td>AIAS</td><td>À définir, non pertinent ou niveaux 1 à 5</td><td>Décrit le rôle de l’IA dans la tâche, indépendamment de sa fonction évaluative.</td></tr>
                             <tr><td>Description de l’activité</td><td>Texte libre</td><td>Décrit l’intention pédagogique, le déroulement et l’organisation de l’activité du point de vue de l’enseignant.</td></tr>
@@ -666,17 +666,17 @@ PROMPT;
                 <h2>Sauvegarder, publier et réutiliser</h2>
                 <p>Comprenez ce qui reste local, ce qui est enregistré et les options de publication ou de réutilisation.</p>
                 <h3 id="sauvegarde-sans-compte">Sans compte</h3>
-                <p>Vous pouvez concevoir et exporter un design sans vous connecter. Les modifications restent disponibles dans la page tant qu’elle est ouverte. Aucune donnée n’est envoyée au serveur sans action explicite de votre part.</p>
+                <p>Vous pouvez concevoir et exporter un scénario sans vous connecter. Les modifications restent disponibles dans la page tant qu’elle est ouverte. Aucune donnée n’est envoyée au serveur sans action explicite de votre part.</p>
                 <h3 id="sauvegarde-avec-compte">Avec un compte</h3>
-                <p>Le bouton <strong>Enregistrer</strong> associe le design à votre compte. Vous pouvez ensuite le retrouver, le rouvrir, le renommer ou le supprimer depuis la page de vos designs.</p>
+                <p>Le bouton <strong>Enregistrer</strong> associe le scénario à votre compte. Vous pouvez ensuite le retrouver, le rouvrir, le renommer ou le supprimer depuis la page de vos scénarios.</p>
                 <h3 id="publier-lien">Publier un lien consultable</h3>
-                <p>Un design enregistré peut être publié pour générer une page de lecture partageable. Cette page présente les paramètres, les moments, les activités, les durées, les liens et les compétences numériques, mais ne permet pas aux visiteurs de modifier l’original.</p>
+                <p>Un scénario enregistré peut être publié pour générer une page de lecture partageable. Cette page présente les paramètres, les moments, les activités, les durées, les liens et les compétences numériques, mais ne permet pas aux visiteurs de modifier l’original.</p>
                 <ul>
-                    <li>Le lien seul reste non répertorié : seules les personnes qui le possèdent peuvent consulter le design.</li>
-                    <li>Pour rendre le design visible dans la galerie publique, choisissez l’une des six licences Creative Commons 4.0. La fenêtre de partage donne accès au sélecteur officiel et à un comparatif pour vous aider.</li>
+                    <li>Le lien seul reste non répertorié : seules les personnes qui le possèdent peuvent consulter le scénario.</li>
+                    <li>Pour rendre le scénario visible dans la galerie publique, choisissez l’une des six licences Creative Commons 4.0. La fenêtre de partage donne accès au sélecteur officiel et à un comparatif pour vous aider.</li>
                     <li>Vous pouvez révoquer le lien de publication.</li>
-                    <li>Vous pouvez choisir de rendre le design visible dans la galerie publique des designs partagés.</li>
-                    <li>Une personne connectée peut importer un design partagé dans son propre compte afin de l’adapter.</li>
+                    <li>Vous pouvez choisir de rendre le scénario visible dans la galerie publique des scénarios partagés.</li>
+                    <li>Une personne connectée peut importer un scénario partagé dans son propre compte afin de l’adapter.</li>
                 </ul>
                 <div class="help-callout">
                     <i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
@@ -692,7 +692,7 @@ PROMPT;
 
             <article class="help-section" id="import-export">
                 <h2>Importer et exporter dans plusieurs formats</h2>
-                <p>Choisissez le bon format pour relire, partager, modifier ou réimporter votre design.</p>
+                <p>Choisissez le bon format pour relire, partager, modifier ou réimporter votre scénario.</p>
                 <h3 id="formats-export">Formats d’export</h3>
                 <div class="help-table-wrap">
                     <table class="help-table">
@@ -720,17 +720,17 @@ PROMPT;
                 </ul>
                 <div class="help-callout warning">
                     <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
-                    <p>L’import remplace le design en cours. Enregistrez-le sur votre compte ou exportez-le avant d’importer un autre fichier si vous souhaitez le conserver.</p>
+                    <p>L’import remplace le scénario en cours. Enregistrez-le sur votre compte ou exportez-le avant d’importer un autre fichier si vous souhaitez le conserver.</p>
                 </div>
             </article>
 
             <article class="help-section" id="markdown">
-                <h2>Importer un design en Markdown</h2>
+                <h2>Importer un scénario en Markdown</h2>
                 <p>Le plus sûr est de partir d’un fichier Markdown exporté depuis Scenarisation, puis de le modifier sans changer sa structure. Le fichier doit contenir les sections <code>## Paramètres</code> et <code>## Séances</code>, qui permettent à l’application de reconnaître le document.</p>
                 <h3 id="markdown-structure">Structure attendue</h3>
                 <div class="help-code-wrap">
                     <button class="help-copy-btn" type="button" aria-label="Copier l’exemple Markdown" title="Copier"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
-                    <pre class="help-code"># Titre du design
+                    <pre class="help-code"># Titre du scénario
 
 ## Paramètres
 
@@ -740,12 +740,12 @@ PROMPT;
 - Taille du groupe: 24
 - Concepteur(s): Nom
 - Enseignant(s): Nom
-- Temps d'apprentissage: 1 j 2 h 30 min
-- Temps conçu: 0 j 1 h 30 min
+- Durée prévue: 1 j 2 h 30 min
+- Durée conçue: 0 j 1 h 30 min
 - 1 jour = 7 heures
 
 ### Description
-Description générale du design.
+Description générale du scénario.
 
 ### Commande institutionnelle
 Contexte ou demande de départ.
@@ -771,7 +771,7 @@ Objectifs généraux de la formation.
 - Groupe: Sous-groupes
 - Enseignement: Enseignement guidé
 - Rythme: Synchrone
-- Mode de formation: En classe
+- Modalité: En classe
 - Évaluation: Formative
 - AIAS: AIAS 3 · Collaboration avec l’IA
 - Description: Consultez [cet exemple](https://example.com), puis comparez les propositions.
@@ -794,7 +794,7 @@ Objectifs généraux de la formation.
                             <tr><td>Groupe</td><td><code>Groupe entier</code>, <code>Sous-groupes</code>, <code>Individuel</code></td></tr>
                             <tr><td>Enseignement</td><td><code>Enseignement dirigé</code>, <code>Enseignement guidé</code>, <code>Enseignement accompagné</code>, <code>Enseignement en autonomie</code></td></tr>
                             <tr><td>Rythme</td><td><code>Synchrone</code>, <code>Asynchrone</code></td></tr>
-                            <tr><td>Mode de formation</td><td><code>En classe</code>, <code>Sur site</code>, <code>En ligne</code>, <code>Hybride</code>, <code>Autre</code></td></tr>
+                            <tr><td>Modalité</td><td><code>En classe</code>, <code>Sur site</code>, <code>En ligne</code>, <code>Hybride</code>, <code>Autre</code></td></tr>
                             <tr><td>Évaluation</td><td><code>Aucune</code>, <code>Diagnostique</code>, <code>Formative</code>, <code>Sommative</code>, <code>Certificative</code></td></tr>
                             <tr><td>AIAS</td><td><code>À définir</code>, <code>Non pertinent</code>, <code>AIAS 1</code> à <code>AIAS 5</code></td></tr>
                         </tbody>
@@ -803,7 +803,7 @@ Objectifs généraux de la formation.
                 <h3 id="markdown-modifications">Ce que vous pouvez modifier</h3>
                 <p>Vous pouvez modifier le titre, les paramètres, la description, la commande institutionnelle, les objectifs, les acquis d’apprentissage, les titres et contenus des moments, ainsi que les activités et tous leurs champs.</p>
                 <h3 id="markdown-libelles">Libellés à conserver</h3>
-                <p>Évitez de changer les libellés fixes <code>## Paramètres</code>, <code>## Séances</code>, <code>- Système scolaire:</code>, <code>- Niveau:</code>, <code>- Durée:</code>, <code>- Groupe:</code>, <code>- Enseignement:</code>, <code>- Rythme:</code>, <code>- Mode de formation:</code>, <code>- Évaluation:</code>, <code>- AIAS:</code>, <code>- Description:</code> et <code>- Consignes pour les élèves:</code>. S’ils changent trop, certaines informations risquent de ne plus être reconnues.</p>
+                <p>Évitez de changer les libellés fixes <code>## Paramètres</code>, <code>## Séances</code>, <code>- Système scolaire:</code>, <code>- Niveau:</code>, <code>- Durée:</code>, <code>- Groupe:</code>, <code>- Enseignement:</code>, <code>- Rythme:</code>, <code>- Modalité:</code>, <code>- Évaluation:</code>, <code>- AIAS:</code>, <code>- Description:</code> et <code>- Consignes pour les élèves:</code>. S’ils changent trop, certaines informations risquent de ne plus être reconnues.</p>
                 <h3 id="markdown-import">Procédure d’import</h3>
                 <ol>
                     <li>Ouvrez Scenarisation.</li>
@@ -811,7 +811,7 @@ Objectifs généraux de la formation.
                     <li>Choisissez <strong>Markdown</strong>, puis un fichier <code>.md</code> ou <code>.markdown</code>.</li>
                     <li>Vérifiez les paramètres, les moments, les activités et les durées dans l’interface.</li>
                 </ol>
-                <p>Si l’import échoue, exportez un design simple en Markdown depuis l’application et comparez sa structure avec votre fichier.</p>
+                <p>Si l’import échoue, exportez un scénario simple en Markdown depuis l’application et comparez sa structure avec votre fichier.</p>
             </article>
 
             <article class="help-section" id="cli">
@@ -846,22 +846,22 @@ Objectifs généraux de la formation.
                 <p>Depuis la racine de votre projet, cette commande installe ou actualise la skill pour Claude Code et Codex ainsi que le CLI, puis vérifie leur compatibilité.</p>
                 <div class="help-code-wrap">
                     <button class="help-copy-btn" type="button" aria-label="Copier la commande" title="Copier"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
-                    <pre class="help-code">curl -fsSL https://raw.githubusercontent.com/YannHY/learning-designer/main/install-skill.sh | sh</pre>
+                    <pre class="help-code">curl -fsSL https://raw.githubusercontent.com/YannHY/scenarisation/main/install-skill.sh | sh</pre>
                 </div>
                 <p>Relancez l’outil si nécessaire. Dans Claude Code, utilisez <code>/scenarisation</code>. Dans Codex, utilisez <code>$scenarisation</code>.</p>
 
                 <h3 id="cli-detaille">Utiliser le CLI</h3>
-                <p>Le CLI permet de créer, valider et publier un design directement depuis votre terminal.</p>
+                <p>Le CLI permet de créer, valider et publier un scénario directement depuis votre terminal.</p>
 
                 <h4>Installer ou actualiser</h4>
                 <p>Utilisez cet installateur si vous souhaitez travailler vous-même avec la commande <code>learning</code>. Il installe la dernière version ou remplace la version existante.</p>
                 <div class="help-code-wrap">
                     <button class="help-copy-btn" type="button" aria-label="Copier la commande" title="Copier"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
-                    <pre class="help-code">curl -fsSL https://raw.githubusercontent.com/YannHY/learning-designer/main/install.sh | sh
+                    <pre class="help-code">curl -fsSL https://raw.githubusercontent.com/YannHY/scenarisation/main/install.sh | sh
 scenarisation status</pre>
                 </div>
 
-                <h4>Créer un design</h4>
+                <h4>Créer un scénario</h4>
                 <div class="help-details-grid">
                     <div>
                         <strong>1. Initialiser le fichier</strong>
@@ -939,15 +939,15 @@ scenarisation upgrade</pre>
                 </div>
             </article>
             <article class="help-section" id="enrichir-design-ia">
-                <h2>Interroger et enrichir son design avec l’IA</h2>
+                <h2>Interroger et enrichir son scénario avec l’IA</h2>
                 <p>Utilisez l’IA pour questionner un scénario, prioriser des améliorations et produire les ressources nécessaires.</p>
-                <h3 id="analyser-design-ia">Analyser son design</h3>
+                <h3 id="analyser-design-ia">Analyser son scénario</h3>
                 <p>Une IA peut vous aider à questionner votre séquence, repérer ses points forts et envisager des améliorations directement applicables en classe. Son analyse nourrit votre réflexion : vous restez maître des choix pédagogiques et de leur adaptation à vos élèves.</p>
 
                 <div class="help-grid three">
                     <div class="help-card">
-                        <strong><span class="help-card-icon"><i class="fa-solid fa-file-export" aria-hidden="true"></i></span>1. Préparer le design</strong>
-                        <span>Exportez votre design au format JSON depuis Scenarisation, ou préparez une description précise de votre séquence.</span>
+                        <strong><span class="help-card-icon"><i class="fa-solid fa-file-export" aria-hidden="true"></i></span>1. Préparer le scénario</strong>
+                        <span>Exportez votre scénario au format JSON depuis Scenarisation, ou préparez une description précise de votre séquence.</span>
                     </div>
                     <div class="help-card">
                         <strong><span class="help-card-icon"><i class="fa-solid fa-robot" aria-hidden="true"></i></span>2. Configurer l’IA</strong>
@@ -959,10 +959,10 @@ scenarisation upgrade</pre>
                     </div>
                 </div>
 
-                <h4>Prompt d’analyse du design</h4>
-                <p>Copiez ce prompt dans les instructions de votre Gem ou de votre projet. Vous pourrez ensuite lui soumettre autant de designs que vous le souhaitez.</p>
+                <h4>Prompt d’analyse du scénario</h4>
+                <p>Copiez ce prompt dans les instructions de votre Gem ou de votre projet. Vous pourrez ensuite lui soumettre autant de scénarios que vous le souhaitez.</p>
                 <div class="help-prompt-wrap">
-                    <button class="help-copy-btn" type="button" aria-label="Copier le prompt d’analyse du design" title="Copier"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
+                    <button class="help-copy-btn" type="button" aria-label="Copier le prompt d’analyse du scénario" title="Copier"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
                     <textarea class="help-prompt" data-help-prompt="review" readonly><?= h($designReviewPrompt) ?></textarea>
                 </div>
 
@@ -978,7 +978,7 @@ scenarisation upgrade</pre>
                 </div>
 
                 <h3 id="creer-contenus-ia">Créer les contenus nécessaires au scénario</h3>
-                <p>Le design décrit les activités à mener ; l’IA peut ensuite vous aider à fabriquer les ressources dont vous avez besoin pour les mettre en œuvre : consignes, fiches élèves, textes adaptés, études de cas, exercices, quiz, corrigés, grilles d’évaluation, supports de présentation ou variantes différenciées.</p>
+                <p>Le scénario décrit les activités à mener ; l’IA peut ensuite vous aider à fabriquer les ressources dont vous avez besoin pour les mettre en œuvre : consignes, fiches élèves, textes adaptés, études de cas, exercices, quiz, corrigés, grilles d’évaluation, supports de présentation ou variantes différenciées.</p>
 
                 <div class="help-grid three">
                     <div class="help-card">
@@ -1012,7 +1012,7 @@ window.helpPromptTranslations = <?= json_encode([
     ],
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 </script>
-<script src="js/help-i18n.js?v=20260906-ib"></script>
+<script src="js/help-i18n.js?v=20260910-scenario-wording"></script>
 <script>
 var initialHelpLanguage = 'fr';
 try {

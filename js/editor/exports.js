@@ -67,7 +67,7 @@ function totalExportDesignedMinutes(sessionIds = null) {
 function buildStudentInstructionsData(sessionIds = null) {
   return {
     exportType: "student_instructions",
-    title: getState().meta.name || "Design Learning",
+    title: getState().meta.name || "Scénario pédagogique",
     sessions: getExportSessionEntries(sessionIds).map(({ session, sessionIndex }) => ({
       number: sessionIndex + 1,
       title: session.title || `Séance ${sessionIndex + 1}`,
@@ -97,7 +97,7 @@ function buildStudentMarkdownExport(sessionIds = null) {
 function buildMarkdownExport(scope = "full", sessionIds = null) {
   if (normalizeExportScope(scope) === "students") return buildStudentMarkdownExport(sessionIds);
   const designed = splitMinutesToPedagogicalTime(totalExportDesignedMinutes(sessionIds), getDayHours());
-  const lines = [`# ${getState().meta.name || "Design Learning"}`, "", "## Paramètres", ""];
+  const lines = [`# ${getState().meta.name || "Scénario pédagogique"}`, "", "## Paramètres", ""];
   lines.push(`- Mode: ${labelForDeliveryMode(getState().meta.modeDelivery)}`);
   lines.push(`- Système scolaire: ${labelForSchoolSystem(getState().meta.schoolSystem)}`);
   lines.push(`- Niveau: ${labelForSchoolLevel(getState().meta.schoolLevel)}`);
@@ -105,14 +105,14 @@ function buildMarkdownExport(scope = "full", sessionIds = null) {
   lines.push(`- Concepteur(s): ${getState().meta.designers || "-"}`);
   lines.push(`- Enseignant(s): ${getState().meta.trainers || "-"}`);
   lines.push(
-    `- Temps d'apprentissage: ${formatPedagogicalTime(
+    `- Durée prévue: ${formatPedagogicalTime(
       getState().meta.learningDays,
       getState().meta.learningHours,
       getState().meta.learningMinutes
     )}`
   );
   lines.push(
-    `- Temps conçu: ${formatPedagogicalTime(designed.days, designed.hours, designed.minutes)}`
+    `- Durée conçue: ${formatPedagogicalTime(designed.days, designed.hours, designed.minutes)}`
   );
   lines.push(`- 1 jour = ${getDayHours()} heures`);
   lines.push("");
@@ -163,7 +163,7 @@ function buildMarkdownExport(scope = "full", sessionIds = null) {
       lines.push(`- Groupe: ${labelForGroupMode(activity.groupMode)}`);
       lines.push(`- Enseignement: ${labelForTeachingMode(activity.teachingMode)}`);
       lines.push(`- Rythme: ${labelForSyncMode(activity.syncMode)}`);
-      lines.push(`- Mode de formation: ${labelForLocationMode(activity.locationMode)}`);
+      lines.push(`- Modalité: ${labelForLocationMode(activity.locationMode)}`);
       lines.push(`- Évaluation: ${labelForEvaluationMode(activity.evaluationMode)}`);
       lines.push(`- AIAS: ${aiasSummary(activity.aias)}`);
       lines.push(`- Description: ${activity.description || "-"}`);
@@ -238,7 +238,7 @@ function buildHtmlExportDocument(scope = "full", sessionIds = null) {
             <p><strong>Groupe:</strong> ${escapeHtml(labelForGroupMode(activity.groupMode))}</p>
             <p><strong>Enseignement:</strong> ${escapeHtml(labelForTeachingMode(activity.teachingMode))}</p>
             <p><strong>Rythme:</strong> ${escapeHtml(labelForSyncMode(activity.syncMode))}</p>
-            <p><strong>Mode de formation:</strong> ${escapeHtml(labelForLocationMode(activity.locationMode))}</p>
+            <p><strong>Modalité:</strong> ${escapeHtml(labelForLocationMode(activity.locationMode))}</p>
             <p><strong>Évaluation:</strong> ${escapeHtml(labelForEvaluationMode(activity.evaluationMode))}</p>
             <p><strong>AIAS:</strong> ${escapeHtml(aiasSummary(activity.aias))}</p>
             <p><strong>Description:</strong> ${escapeHtmlWithBreaks(activity.description || "")}</p>
@@ -269,14 +269,14 @@ function buildHtmlExportDocument(scope = "full", sessionIds = null) {
     <p><strong>Taille du groupe:</strong> ${escapeHtml(getState().meta.sizeClass || "-")}</p>
     <p><strong>Concepteur(s):</strong> ${escapeHtml(getState().meta.designers || "-")}</p>
     <p><strong>Enseignant(s):</strong> ${escapeHtml(getState().meta.trainers || "-")}</p>
-    <p><strong>Temps d'apprentissage:</strong> ${escapeHtml(
+    <p><strong>Durée prévue:</strong> ${escapeHtml(
       formatPedagogicalTime(
         getState().meta.learningDays,
         getState().meta.learningHours,
         getState().meta.learningMinutes
       )
     )}</p>
-    <p><strong>Temps conçu:</strong> ${escapeHtml(
+    <p><strong>Durée conçue:</strong> ${escapeHtml(
       formatPedagogicalTime(designed.days, designed.hours, designed.minutes)
     )}</p>
     <p><strong>1 jour =</strong> ${escapeHtml(getDayHours())} heures</p>
@@ -325,7 +325,7 @@ function buildHtmlExportDocument(scope = "full", sessionIds = null) {
   </style>
 </head>
 <body>
-  <h1>${escapeHtml(getState().meta.name || "Design Learning")}</h1>
+  <h1>${escapeHtml(getState().meta.name || "Scénario pédagogique")}</h1>
   ${metadata}
   ${sections}
 </body>
@@ -681,7 +681,7 @@ function buildStudentWordBody(sessionIds = null) {
 function buildFullWordBody(sessionIds = null) {
   const designed = splitMinutesToPedagogicalTime(totalExportDesignedMinutes(sessionIds), getDayHours());
   const body = [];
-  body.push(wordParagraph(getState().meta.name || "Design Learning", "Title"));
+  body.push(wordParagraph(getState().meta.name || "Scénario pédagogique", "Title"));
   body.push(wordParagraph("Paramètres", "Heading1"));
   body.push(wordFieldTable([
     ["Mode", labelForDeliveryMode(getState().meta.modeDelivery)],
@@ -691,14 +691,14 @@ function buildFullWordBody(sessionIds = null) {
     ["Concepteur(s)", getState().meta.designers || "-"],
     ["Enseignant(s)", getState().meta.trainers || "-"],
     [
-      "Temps d'apprentissage",
+      "Durée prévue",
       formatPedagogicalTime(
         getState().meta.learningDays,
         getState().meta.learningHours,
         getState().meta.learningMinutes
       )
     ],
-    ["Temps conçu", formatPedagogicalTime(designed.days, designed.hours, designed.minutes)],
+    ["Durée conçue", formatPedagogicalTime(designed.days, designed.hours, designed.minutes)],
     ["1 jour", `${getDayHours()} heures`]
   ]));
   body.push(wordSpacer(120));
@@ -753,7 +753,7 @@ function buildFullWordBody(sessionIds = null) {
         ["Groupe", labelForGroupMode(activity.groupMode)],
         ["Enseignement", labelForTeachingMode(activity.teachingMode)],
         ["Rythme", labelForSyncMode(activity.syncMode)],
-        ["Mode de formation", labelForLocationMode(activity.locationMode)],
+        ["Modalité", labelForLocationMode(activity.locationMode)],
         ["Évaluation", labelForEvaluationMode(activity.evaluationMode)],
         ["AIAS", aiasSummary(activity.aias)],
         ["Description", activity.description || "-"],
@@ -993,24 +993,24 @@ const SPREADSHEET_COLUMNS = [
   { key: "group_size", label: "Organisation du groupe", width: 18 },
   { key: "teaching_mode", label: "Enseignement", width: 24 },
   { key: "pacing", label: "Rythme", width: 14 },
-  { key: "delivery_mode", label: "Mode de formation", width: 22 },
+  { key: "delivery_mode", label: "Modalité", width: 22 },
   { key: "assessment", label: "Évaluation", width: 18 },
   { key: "aias", label: "AIAS", width: 28 },
   { key: "activity_description", label: "Description de l'activité", width: 34 },
   { key: "activity_instructions", label: "Consignes pour les élèves", width: 34 },
   { key: "activity_notes", label: "Notes de l'activité", width: 24 },
   { key: "activity_competencies", label: "Compétences", width: 22 },
-  { key: "design_title", label: "Titre du design", width: 22 },
-  { key: "design_mode", label: "Mode du design", width: 16 },
+  { key: "design_title", label: "Titre du scénario", width: 22 },
+  { key: "design_mode", label: "Mode du scénario", width: 16 },
   { key: "design_school_system", label: "Système scolaire", width: 22 },
   { key: "design_level", label: "Niveau", width: 30 },
   { key: "design_group_size", label: "Taille du groupe", width: 16 },
   { key: "design_designers", label: "Concepteur(s)", width: 18 },
   { key: "design_trainers", label: "Enseignant(s)", width: 18 },
-  { key: "design_learning_time", label: "Temps d'apprentissage prévu", width: 22 },
-  { key: "design_designed_time", label: "Temps conçu", width: 16 },
+  { key: "design_learning_time", label: "Durée prévue", width: 22 },
+  { key: "design_designed_time", label: "Durée conçue", width: 16 },
   { key: "design_day_hours", label: "Heures par jour", width: 14 },
-  { key: "design_description", label: "Description du design", width: 30 },
+  { key: "design_description", label: "Description du scénario", width: 30 },
   { key: "design_institutional_brief", label: "Commande institutionnelle", width: 30 },
   { key: "design_personas", label: "Personas", width: 26 },
   { key: "design_sliders", label: "Objectifs / curseurs", width: 26 }
@@ -1057,7 +1057,7 @@ function buildExcelExportDocument(scope = "full", sessionIds = null) {
   const workbookXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
   <sheets>
-    <sheet name="${normalizedScope === "students" ? "Consignes élèves" : "Design"}" sheetId="1" r:id="rId1"/>
+    <sheet name="${normalizedScope === "students" ? "Consignes élèves" : "Scénario"}" sheetId="1" r:id="rId1"/>
   </sheets>
 </workbook>`;
 

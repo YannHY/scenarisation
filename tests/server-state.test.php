@@ -47,9 +47,21 @@ try {
     check(app_base_url() === 'https://designs.my-school.fr', 'sample subdomain also falls back for root installations');
     putenv('APP_BASE_URL=https://public.my-school.fr');
     $_SERVER['SCRIPT_NAME'] = '/atelier/profile.php';
-    check(app_base_url() === 'https://public.my-school.fr/atelier', 'valid configured domain retains the installation folder');
+    check(app_base_url() === 'https://public.my-school.fr', 'configured root does not inherit the request folder');
     putenv('APP_BASE_URL=https://public.my-school.fr/published');
     check(app_base_url() === 'https://public.my-school.fr/published', 'valid explicit public path remains authoritative');
+    putenv('APP_BASE_URL=https://scenarisation.eu/');
+    $_SERVER['HTTP_HOST'] = 'www.ralentirtravaux.com';
+    $_SERVER['SCRIPT_NAME'] = '/flo/learning-designer/signup.php';
+    check(app_base_url() === 'https://scenarisation.eu', 'alternate hosting URL preserves canonical root and removes trailing slash');
+    check(app_base_url() . '/verify-email.php?token=test' === 'https://scenarisation.eu/verify-email.php?token=test', 'verification link uses canonical root from alternate hosting path');
+    check(app_base_url() . '/reset-password.php?token=test' === 'https://scenarisation.eu/reset-password.php?token=test', 'password reset link uses canonical root from alternate hosting path');
+    check(app_origin_url() === 'https://www.ralentirtravaux.com', 'request origin remains independent of canonical URL');
+    $_SERVER['HTTP_HOST'] = 'scenarisation.eu';
+    $_SERVER['SCRIPT_NAME'] = '/signup.php';
+    check(app_base_url() === 'https://scenarisation.eu', 'both access URLs produce the same public base');
+    putenv('APP_BASE_URL=https://www.ralentirtravaux.com/flo/learning-designer/');
+    check(app_base_url() === 'https://www.ralentirtravaux.com/flo/learning-designer', 'explicit canonical subfolder remains supported');
     unset($_SERVER['HTTPS'], $_SERVER['HTTP_HOST']);
     $_SERVER['SCRIPT_NAME'] = '/learning/designer.php';
     putenv('APP_BASE_URL');
@@ -65,10 +77,12 @@ try {
     $legacy->exec("INSERT INTO learning_designs (owner_user_id,title,document_json) VALUES (1,'Legacy design','{\"sessions\":[]}')");
     $legacy = null;
     $db = app_db();
-    check((int)$db->query('SELECT schema_version FROM app_schema_meta')->fetchColumn() === 5, 'v4 schema upgrades to v5');
+    check((int)$db->query('SELECT schema_version FROM app_schema_meta')->fetchColumn() === APP_SCHEMA_VERSION, 'v4 schema upgrades to current version');
     check((int)$db->query('SELECT revision FROM learning_designs WHERE id=1')->fetchColumn() === 1, 'existing design starts at revision one');
     check($db->query('SELECT email_verified_at FROM users WHERE id=10')->fetchColumn() === null, 'upgrade does not replay old email-verification backfills');
     check($db->query('SELECT title FROM learning_designs WHERE id=1')->fetchColumn() === 'Legacy design', 'migration preserves existing content');
+    check($db->query('SELECT terms_accepted_at FROM users WHERE id=10')->fetchColumn() === null, 'legacy account receives no fabricated acceptance date');
+    check($db->query('SELECT terms_version FROM users WHERE id=10')->fetchColumn() === null, 'legacy account receives no fabricated terms version');
     ensure_app_schema($db);
     check((int)$db->query('SELECT revision FROM learning_designs WHERE id=1')->fetchColumn() === 1, 'migration is idempotent');
 

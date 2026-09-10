@@ -436,9 +436,9 @@ Voici le scénario pédagogique à analyser et à enrichir : *[SCÉNARIO PÉDAGO
 PROMPT;
 
 $samrPromptEn = <<<'PROMPT'
-# Instructions for analysing and enhancing a learning design using the SAMR model
+# Instructions for analysing and enhancing a learning scenario using the SAMR model
 
-You are an instructional advisor specialising in the thoughtful integration of technology. Your task is to analyse a learning design through the lens of the SAMR model, place each use of technology within the model, and then propose concrete ways to enhance or transform the learning experience.
+You are an instructional advisor specialising in the thoughtful integration of technology. Your task is to analyse a learning scenario through the lens of the SAMR model, place each use of technology within the model, and then propose concrete ways to enhance or transform the learning experience.
 
 Before you begin, here are the four levels of the SAMR model, as defined by Dr Ruben Puentedura:
 
@@ -449,9 +449,9 @@ Before you begin, here are the four levels of the SAMR model, as defined by Dr R
 
 The first two levels (S and A) are forms of **enhancement**; the last two (M and R) are forms of **transformation**. A higher level is not always better: substitution may sometimes be the most coherent choice for the learning objective. The aim is not to reach Redefinition at all costs, but to use technology intentionally and with sound pedagogical justification.
 
-## 1. Analyse the existing learning design
+## 1. Analyse the existing learning scenario
 
-- Identify each use of technology or technological tool in the learning design.
+- Identify each use of technology or technological tool in the learning scenario.
 - Place each use within the SAMR model (S, A, M, or R), briefly justifying the classification.
 - Identify activities that do not use technology and note whether digital integration would provide genuine added value.
 - Identify uses whose SAMR level appears misaligned with the pedagogical ambition of the sequence.
@@ -499,10 +499,10 @@ Before making your recommendations, ensure that each proposal:
 
 Present your response as follows:
 
-1. **SAMR map of the learning design**: list each identified use of technology and its S, A, M, or R level, with a brief justification.
+1. **SAMR map of the learning scenario**: list each identified use of technology and its S, A, M, or R level, with a brief justification.
 2. **Overall diagnosis**: summarise the strengths and points of tension between the SAMR levels and the learning objectives.
 3. **Three priority improvements**, ranked by feasibility and expected pedagogical impact.
-4. **Revised learning design or rewritten activities**, incorporating the proposed changes and ready for the teacher to use.
+4. **Revised learning scenario or rewritten activities**, incorporating the proposed changes and ready for the teacher to use.
 5. **Pedagogical justification** for the selected changes.
 6. **Points requiring attention**: uses to avoid, risks of cognitive overload, or unnecessary complexity.
 
@@ -510,7 +510,7 @@ Use a supportive, professional, and encouraging tone. Avoid unnecessary technica
 
 ---
 
-Here is the learning design to analyse and enhance: *[LEARNING DESIGN]*
+Here is the learning scenario to analyse and enhance: *[LEARNING SCENARIO]*
 PROMPT;
 
 $planningPrompt = <<<'PROMPT'
@@ -1215,13 +1215,13 @@ Ces libellés doivent être conservés exactement en français :
 - `- Taille du groupe:`
 - `- Concepteur(s):`
 - `- Enseignant(s):`
-- `- Temps d'apprentissage:`
-- `- Temps conçu:`
+- `- Durée prévue:`
+- `- Durée conçue:`
 - `- Durée:`
 - `- Groupe:`
 - `- Enseignement:`
 - `- Rythme:`
-- `- Mode de formation:`
+- `- Modalité:`
 - `- Évaluation:`
 - `- AIAS:`
 - `- Description:`
@@ -1260,7 +1260,7 @@ Types d’activités :
 - `Discuter`
 - `Collaborer`
 
-Mode de formation :
+Modalité :
 
 - `En classe`
 - `Sur site`
@@ -1312,7 +1312,7 @@ N’invente pas de synonymes et ne traduis jamais ces valeurs.
 3. Chaque activité utilise un titre de niveau 3 numéroté et un type reconnu : `### 1.1 Pratiquer`.
 4. La numérotation doit être continue et cohérente.
 5. Toutes les durées sont indiquées en minutes entières.
-6. Le `Temps conçu` correspond à la somme des durées des activités.
+6. La `Durée conçue` correspond à la somme des durées des activités.
 7. N’utilise aucun autre titre `##` ou `###` dans les descriptions ou les consignes.
 8. Pour créer des sous-parties dans un contenu libre, utilise `####` ou du texte en gras.
 9. Dans les consignes, privilégie les listes numérotées.
@@ -1332,8 +1332,8 @@ N’invente pas de synonymes et ne traduis jamais ces valeurs.
 - Taille du groupe: 24
 - Concepteur(s): Nom du concepteur
 - Enseignant(s): Nom de l’enseignant
-- Temps d'apprentissage: 0 j 1 h 0 min
-- Temps conçu: 0 j 1 h 0 min
+- Durée prévue: 0 j 1 h 0 min
+- Durée conçue: 0 j 1 h 0 min
 - 1 jour = 7 heures
 
 ### Description
@@ -1365,7 +1365,7 @@ Objectifs généraux dans la langue demandée.
 - Groupe: Individuel
 - Enseignement: Enseignement dirigé
 - Rythme: Synchrone
-- Mode de formation: En classe
+- Modalité: En classe
 - Évaluation: Aucune évaluation
 - AIAS: Non pertinent
 - Description: Description dans la langue demandée.
@@ -1376,7 +1376,7 @@ Objectifs généraux dans la langue demandée.
 - Groupe: Sous-groupes
 - Enseignement: Enseignement guidé
 - Rythme: Synchrone
-- Mode de formation: En classe
+- Modalité: En classe
 - Évaluation: Formative
 - AIAS: Non pertinent
 - Description: Description dans la langue demandée.
@@ -1387,7 +1387,7 @@ Objectifs généraux dans la langue demandée.
 - Groupe: Individuel
 - Enseignement: Enseignement en autonomie
 - Rythme: Synchrone
-- Mode de formation: En classe
+- Modalité: En classe
 - Évaluation: Formative
 - AIAS: Non pertinent
 - Description: Description dans la langue demandée.
@@ -1409,9 +1409,9 @@ Avant de répondre, vérifie silencieusement que :
 PROMPT;
 
 $multilingualMarkdownPromptEn = <<<'PROMPT'
-# Create or translate a learning design importable into Scenarisation
+# Create or translate a learning scenario importable into Scenarisation
 
-You are an assistant specialising in creating and translating learning designs for Scenarisation.
+You are an assistant specialising in creating and translating learning scenarios for Scenarisation.
 
 Your task is to produce a Markdown file that can be imported directly into Scenarisation, regardless of the language used for the educational content.
 
@@ -1419,9 +1419,9 @@ Your task is to produce a Markdown file that can be imported directly into Scena
 
 If the user has not yet supplied the necessary information, ask all of the following in a single message:
 
-1. Do you want to create a new learning design or translate an existing one?
+1. Do you want to create a new learning scenario or translate an existing one?
 2. Which language should be used for the educational content?
-3. Paste the learning design to translate or describe the one to create.
+3. Paste the learning scenario to translate or describe the one to create.
 4. If this information is not already provided, what are the target learners, group size and planned duration?
 
 If the user has already supplied enough information, do not ask these questions and start the task immediately.
@@ -1451,7 +1451,7 @@ Free-form content includes:
 - student instructions;
 - resource titles.
 
-If an existing learning design is provided:
+If an existing learning scenario is provided:
 
 - translate only its free-form educational content;
 - preserve or restore every technical label in French;
@@ -1461,14 +1461,14 @@ If an existing learning design is provided:
 
 ### Final response format
 
-When you produce the final learning design:
+When you produce the final learning scenario:
 
 - return only the Markdown content;
 - do not add an introduction, explanation or conclusion;
 - do not surround the result with code fences;
 - do not leave bracketed placeholders or empty fields;
 - fill missing information with reasonable pedagogical assumptions;
-- ensure that the design contains at least one session and one activity.
+- ensure that the scenario contains at least one session and one activity.
 
 ### Mandatory technical labels
 
@@ -1489,13 +1489,13 @@ Keep the following labels exactly as written in French:
 - `- Taille du groupe:`
 - `- Concepteur(s):`
 - `- Enseignant(s):`
-- `- Temps d'apprentissage:`
-- `- Temps conçu:`
+- `- Durée prévue:`
+- `- Durée conçue:`
 - `- Durée:`
 - `- Groupe:`
 - `- Enseignement:`
 - `- Rythme:`
-- `- Mode de formation:`
+- `- Modalité:`
 - `- Évaluation:`
 - `- AIAS:`
 - `- Description:`
@@ -1586,7 +1586,7 @@ Do not invent synonyms or translate these values.
 3. Give every activity a numbered level-three heading containing a recognised activity type: `### 1.1 Pratiquer`.
 4. Keep numbering continuous and consistent.
 5. Express every activity duration as a whole number of minutes.
-6. Make `Temps conçu` equal the sum of all activity durations.
+6. Make `Durée conçue` equal the sum of all activity durations.
 7. Do not use any other `##` or `###` headings inside descriptions or instructions.
 8. Use `####` or bold text for subsections within free-form content.
 9. Prefer numbered lists inside student instructions.
@@ -1606,8 +1606,8 @@ Do not invent synonyms or translate these values.
 - Taille du groupe: 24
 - Concepteur(s): Designer’s name
 - Enseignant(s): Teacher’s name
-- Temps d'apprentissage: 0 j 1 h 0 min
-- Temps conçu: 0 j 1 h 0 min
+- Durée prévue: 0 j 1 h 0 min
+- Durée conçue: 0 j 1 h 0 min
 - 1 jour = 7 heures
 
 ### Description
@@ -1639,7 +1639,7 @@ General objectives in the requested language.
 - Groupe: Individuel
 - Enseignement: Enseignement dirigé
 - Rythme: Synchrone
-- Mode de formation: En classe
+- Modalité: En classe
 - Évaluation: Aucune évaluation
 - AIAS: Non pertinent
 - Description: Activity description in the requested language.
@@ -1650,7 +1650,7 @@ General objectives in the requested language.
 - Groupe: Sous-groupes
 - Enseignement: Enseignement guidé
 - Rythme: Synchrone
-- Mode de formation: En classe
+- Modalité: En classe
 - Évaluation: Formative
 - AIAS: Non pertinent
 - Description: Activity description in the requested language.
@@ -1661,7 +1661,7 @@ General objectives in the requested language.
 - Groupe: Individuel
 - Enseignement: Enseignement en autonomie
 - Rythme: Synchrone
-- Mode de formation: En classe
+- Modalité: En classe
 - Évaluation: Formative
 - AIAS: Non pertinent
 - Description: Description of the expected production in the requested language.
@@ -1822,8 +1822,8 @@ document.addEventListener('DOMContentLoaded', function () {
         en: {
             title: 'Teaching prompts',
             pageTitle: 'Teaching prompts',
-            intro: 'After generating your learning design in Scenarisation, you can export it — for example as Markdown — and share it with an AI such as Claude, ChatGPT or Gemini. The AI can then help you enrich, improve, complete or adapt it to specific needs. The final prompt can also create or translate a learning design directly in an importable format.',
-            introFollowup: 'Click a prompt title to expand it, then copy it to use with your exported learning design.',
+            intro: 'After generating your learning scenario in Scenarisation, you can export it — for example as Markdown — and share it with an AI such as Claude, ChatGPT or Gemini. The AI can then help you enrich, improve, complete or adapt it to specific needs. The final prompt can also create or translate a learning scenario directly in an importable format.',
+            introFollowup: 'Click a prompt title to expand it, then copy it to use with your exported learning scenario.',
             udlTitle: '1. UDL-based lesson plan review',
             udlObjective: 'Identify barriers and improve accessibility, inclusion and learning opportunities for every student.',
             differentiationTitle: '2. Differentiated instruction',
@@ -1833,8 +1833,8 @@ document.addEventListener('DOMContentLoaded', function () {
             planningTitle: '4. Workload and calendar planning',
             planningObjective: 'Check timings, estimate the actual workload and schedule the sequence across the school calendar.',
             studentWorksheetTitle: '5. Generate a student activity worksheet',
-            studentWorksheetObjective: 'Turn a learning design into a simple or detailed student worksheet adapted to the learner profile.',
-            multilingualMarkdownTitle: '6. Create or translate a multilingual learning design',
+            studentWorksheetObjective: 'Turn a learning scenario into a simple or detailed student worksheet adapted to the learner profile.',
+            multilingualMarkdownTitle: '6. Create or translate a multilingual learning scenario',
             multilingualMarkdownObjective: 'Create or translate educational content in any language while preserving the importable Markdown format.',
             copy: 'Copy prompt',
             copied: 'Copied'

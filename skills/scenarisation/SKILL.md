@@ -45,7 +45,7 @@ If `.tools/bin/scenarisation` already exists, apply the same capability check to
 
 ```bash
 mkdir -p .tools/bin
-curl -fsSL https://raw.githubusercontent.com/YannHY/learning-designer/main/bin/scenarisation -o .tools/bin/scenarisation
+curl -fsSL https://raw.githubusercontent.com/YannHY/scenarisation/main/bin/scenarisation -o .tools/bin/scenarisation
 chmod +x .tools/bin/scenarisation
 ./.tools/bin/scenarisation --version
 ./.tools/bin/scenarisation list school-systems
@@ -57,7 +57,7 @@ chmod +x .tools/bin/scenarisation
 If `raw.githubusercontent.com` is blocked, use the environment’s web fetch/browser capability to retrieve:
 
 ```text
-https://github.com/YannHY/learning-designer/blob/main/bin/scenarisation
+https://github.com/YannHY/scenarisation/blob/main/bin/scenarisation
 ```
 
 Write the retrieved file to `.tools/bin/scenarisation`, make it executable, and use `./.tools/bin/scenarisation` for all later commands.

@@ -146,6 +146,7 @@ const metaDescriptionInput = document.getElementById("meta-description");
 const metaCommandInput = document.getElementById("meta-command");
 const metaPersonasInput = document.getElementById("meta-personas");
 const outcomesListEl = document.getElementById("outcomes-list");
+const metaOutcomesInput = document.getElementById("meta-outcomes");
 const addOutcomeBtn = document.getElementById("add-outcome-btn");
 const newDesignModalBackdrop = document.getElementById("new-design-modal-backdrop");
 const newDesignModalMsg = document.getElementById("new-design-modal-msg");
@@ -530,6 +531,13 @@ function applyLocalizedUI() {
   document.getElementById("label-meta-trainers").textContent = t("metaTrainersLabel");
   document.getElementById("label-meta-personas").textContent = t("metaPersonasLabel");
   document.getElementById("label-meta-outcomes").textContent = t("outcomesLabel");
+  document.getElementById("outcomes-description").textContent = t("outcomesDescription");
+  metaOutcomesInput.placeholder = t("outcomesFreePlaceholder");
+  addOutcomeBtn.setAttribute("aria-label", t("addOutcome"));
+  document.getElementById("bloom-toggle-btn").textContent = t("bloomTitle");
+  document.getElementById("bloom-modal-title").textContent = t("outcomesLabel");
+  document.getElementById("bloom-modal-subtitle").textContent = t("bloomSubtitle");
+  bloomCancelBtn.textContent = t("cancel");
   document.querySelectorAll("[data-tooltip-i18n]").forEach((element) => {
     element.dataset.tooltip = t(element.dataset.tooltipI18n);
   });
@@ -884,6 +892,30 @@ let bloomEditOutcomeId = null;
 let bloomSelectedCategory = null;
 let bloomSelectedVerb = null;
 
+function renderBloomSelection() {
+  const tag = document.getElementById("bloom-selected-tag");
+  tag.replaceChildren();
+  tag.classList.toggle("hidden", !bloomSelectedCategory);
+  tag.dataset.bloom = bloomSelectedCategory || "";
+  if (bloomSelectedCategory) {
+    const taxonomy = [...BLOOM_TAXONOMY.fr, ...BLOOM_TAXONOMY.en];
+    const label = document.createElement("span");
+    label.textContent = bloomSelectedVerb || taxonomy.find((cat) => cat.id === bloomSelectedCategory)?.label || bloomSelectedCategory;
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.textContent = "×";
+    remove.setAttribute("aria-label", t("removeBloomTag"));
+    remove.addEventListener("click", () => {
+      bloomSelectedCategory = null;
+      bloomSelectedVerb = null;
+      renderBloomModal();
+      renderBloomSelection();
+    });
+    tag.append(label, remove);
+  }
+  bloomAddBtn.disabled = !metaOutcomesInput.value.trim() && !bloomSelectedCategory;
+}
+
 function renderOutcomes() {
   if (!outcomesListEl) return;
   const outcomes = Array.isArray(state.meta.sliders) ? state.meta.sliders : [];
@@ -892,6 +924,7 @@ function renderOutcomes() {
     const item = document.createElement("div");
     item.className = "outcome-item";
     item.dataset.id = outcome.id;
+    item.dataset.bloom = outcome.category;
 
     const header = document.createElement("div");
     header.className = "outcome-item-header";
@@ -916,34 +949,48 @@ function renderOutcomes() {
       renderOutcomes();
     });
 
-    header.appendChild(verbBtn);
+    if (outcome.category || outcome.categoryLabel || outcome.verb) header.appendChild(verbBtn);
+
+    const textBtn = document.createElement("button");
+    textBtn.type = "button";
+    textBtn.className = "outcome-summary-btn";
+    textBtn.textContent = outcome.text || t("outcomeTextPlaceholder");
+    textBtn.setAttribute("aria-label", `${t("editOutcome")} : ${outcome.text || verbLabel}`);
+    textBtn.addEventListener("click", () => openBloomModal("edit", outcome.id));
+    header.appendChild(textBtn);
     header.appendChild(deleteBtn);
-
-    const textarea = document.createElement("textarea");
-    textarea.className = "outcome-text panel-textarea";
-    textarea.rows = 1;
-    textarea.placeholder = t("outcomeTextPlaceholder");
-    textarea.value = outcome.text || "";
-    textarea.addEventListener("input", () => {
-      const found = (Array.isArray(state.meta.sliders) ? state.meta.sliders : []).find((o) => o.id === outcome.id);
-      if (found) found.text = textarea.value;
-      saveState();
-    });
-
     item.appendChild(header);
-    item.appendChild(textarea);
     outcomesListEl.appendChild(item);
   });
 }
 
+function setBloomPickerOpen(open) {
+  const picker = document.getElementById("bloom-picker");
+  picker.hidden = !open;
+  picker.classList.toggle("hidden", !open);
+  document.getElementById("bloom-toggle-btn").setAttribute("aria-expanded", String(open));
+  if (open) renderBloomModal();
+  else bloomCategoryList.replaceChildren();
+}
+
+function selectBloomTag(category, verb = null) {
+  bloomSelectedCategory = category;
+  bloomSelectedVerb = verb;
+  renderBloomSelection();
+  setBloomPickerOpen(false);
+  document.getElementById("bloom-toggle-btn").focus();
+}
+
 function renderBloomModal() {
   if (!bloomCategoryList) return;
-  bloomCategoryList.innerHTML = "";
+  bloomCategoryList.replaceChildren();
+  if (document.getElementById("bloom-picker").hidden) return;
   const taxonomy = BLOOM_TAXONOMY[currentLang()] || BLOOM_TAXONOMY.fr;
 
   taxonomy.forEach((cat) => {
     const details = document.createElement("details");
     details.className = "bloom-category";
+    details.dataset.bloom = cat.id;
     if (bloomSelectedCategory === cat.id) details.open = true;
 
     const summary = document.createElement("summary");
@@ -952,28 +999,24 @@ function renderBloomModal() {
       summary.classList.add("selected");
     }
     summary.textContent = cat.label;
-    summary.addEventListener("click", () => {
-      bloomSelectedCategory = cat.id;
-      bloomSelectedVerb = null;
-      bloomCategoryList.querySelectorAll(".bloom-category-summary, .bloom-verb-item").forEach((el) => el.classList.remove("selected"));
-      summary.classList.add("selected");
-    });
-
     details.appendChild(summary);
 
+    const categoryButton = document.createElement("button");
+    categoryButton.type = "button";
+    categoryButton.className = "bloom-verb-item";
+    categoryButton.textContent = `${t("bloomSelectLevel")} : ${cat.label}`;
+    categoryButton.addEventListener("click", () => selectBloomTag(cat.id));
+    details.appendChild(categoryButton);
+
     cat.verbs.forEach((verb) => {
-      const verbItem = document.createElement("div");
+      const verbItem = document.createElement("button");
+      verbItem.type = "button";
       verbItem.className = "bloom-verb-item";
       if (bloomSelectedVerb === verb && bloomSelectedCategory === cat.id) {
         verbItem.classList.add("selected");
       }
       verbItem.textContent = verb;
-      verbItem.addEventListener("click", () => {
-        bloomSelectedCategory = cat.id;
-        bloomSelectedVerb = verb;
-        bloomCategoryList.querySelectorAll(".bloom-category-summary, .bloom-verb-item").forEach((el) => el.classList.remove("selected"));
-        verbItem.classList.add("selected");
-      });
+      verbItem.addEventListener("click", () => selectBloomTag(cat.id, verb));
       details.appendChild(verbItem);
     });
 
@@ -989,35 +1032,39 @@ function openBloomModal(mode, outcomeId = null) {
     const outcome = (Array.isArray(state.meta.sliders) ? state.meta.sliders : []).find((o) => o.id === outcomeId);
     bloomSelectedCategory = outcome?.category || null;
     bloomSelectedVerb = outcome?.verb || null;
+    metaOutcomesInput.value = outcome?.text || "";
   } else {
+    metaOutcomesInput.value = "";
     bloomSelectedCategory = null;
     bloomSelectedVerb = null;
   }
 
   if (bloomAddBtn) bloomAddBtn.textContent = mode === "edit" ? t("bloomEdit") : t("bloomAdd");
-  renderBloomModal();
-  openModal(bloomModalBackdrop, "#bloom-cancel-btn");
+  setBloomPickerOpen(false);
+  renderBloomSelection();
+  openModal(bloomModalBackdrop, "#meta-outcomes");
 }
 
 function confirmBloom() {
-  if (!bloomSelectedCategory) return;
+  if (!bloomSelectedCategory && !metaOutcomesInput.value.trim()) return;
   const taxonomy = BLOOM_TAXONOMY[currentLang()] || BLOOM_TAXONOMY.fr;
-  const cat = taxonomy.find((c) => c.id === bloomSelectedCategory);
+  const cat = [...taxonomy, ...BLOOM_TAXONOMY.fr, ...BLOOM_TAXONOMY.en].find((c) => c.id === bloomSelectedCategory);
   const categoryLabel = cat?.label || "";
 
   if (bloomModalMode === "add") {
     if (!Array.isArray(state.meta.sliders)) state.meta.sliders = [];
     state.meta.sliders.push({
       id: nextId(),
-      category: bloomSelectedCategory,
+      category: bloomSelectedCategory || "",
       categoryLabel,
       verb: bloomSelectedVerb || "",
-      text: ""
+      text: metaOutcomesInput.value
     });
   } else if (bloomModalMode === "edit" && bloomEditOutcomeId) {
     const outcome = (Array.isArray(state.meta.sliders) ? state.meta.sliders : []).find((o) => o.id === bloomEditOutcomeId);
     if (outcome) {
-      outcome.category = bloomSelectedCategory;
+      outcome.category = bloomSelectedCategory || "";
+      outcome.text = metaOutcomesInput.value;
       outcome.categoryLabel = categoryLabel;
       outcome.verb = bloomSelectedVerb || "";
     }
@@ -2656,16 +2703,6 @@ function buildModelCard(entry) {
   });
   if (types.childElementCount) card.appendChild(types);
 
-  const placeholders = currentLang() === "en"
-    ? (entry.placeholdersEn || entry.placeholders || [])
-    : (entry.placeholdersFr || entry.placeholders || []);
-  if (Array.isArray(placeholders) && placeholders.length) {
-    const todo = document.createElement("span");
-    todo.className = "import-model-todo";
-    todo.textContent = `${t("importModelsToComplete")} ${placeholders.join(" · ")}`;
-    card.appendChild(todo);
-  }
-
   const actions = document.createElement("span");
   actions.className = "import-model-actions";
 
@@ -4195,6 +4232,10 @@ function bindTopPanelEvents() {
   metaPersonasInput.addEventListener("input", (event) => {
     state.meta.personas = event.target.value;
     saveState();
+  });
+  metaOutcomesInput.addEventListener("input", renderBloomSelection);
+  document.getElementById("bloom-toggle-btn").addEventListener("click", () => {
+    setBloomPickerOpen(document.getElementById("bloom-picker").hidden);
   });
   addOutcomeBtn.addEventListener("click", () => openBloomModal("add"));
   bloomCancelBtn.addEventListener("click", () => closeModal(bloomModalBackdrop));

@@ -25,7 +25,7 @@ app_start_session();
 <main class="legal-shell">
     <article class="legal-card">
         <h1>Politique de confidentialité</h1>
-        <p class="legal-updated"><strong>Dernière mise à jour&nbsp;: <time datetime="2026-09-05">5 septembre 2026</time></strong></p>
+        <p class="legal-updated"><strong>Dernière mise à jour&nbsp;: <time datetime="2026-09-10">10 septembre 2026</time></strong></p>
 
         <p class="legal-lead">Cette politique explique quelles données sont traitées lors de l’utilisation de Scenarisation, pour quelles finalités, pendant combien de temps et quels sont vos droits.</p>
 
@@ -36,25 +36,29 @@ app_start_session();
 
         <h3>Navigation, fonctionnement et sécurité</h3>
         <p>À chaque requête, l’infrastructure d’hébergement reçoit les informations techniques nécessaires à la transmission de la page, notamment l’adresse IP, la date et l’heure ainsi que la ressource demandée. OVHcloud peut enregistrer certaines de ces informations dans les journaux techniques de l’hébergement, avec notamment le type de navigateur transmis par le navigateur.</p>
-        <p>Scenarisation ne constitue pas de journal de navigation propre et n’utilise pas l’adresse IP pour suivre ses visiteurs. Lors de certaines opérations sensibles, l’application vérifie uniquement l’en-tête <code>Origin</code> ou <code>Referer</code>, lorsqu’il est disponible, afin de s’assurer que la requête provient du site. Certaines erreurs techniques peuvent également être consignées dans le journal du serveur.</p>
+        <p>Scenarisation ne constitue pas de journal de navigation propre et n’utilise pas l’adresse IP pour suivre ses visiteurs. Pour limiter les inscriptions automatisées et les demandes répétées d’emails de vérification, le service conserve des compteurs temporaires associés à des empreintes cryptographiques de l’adresse IP et de l’adresse email. Ces empreintes sont calculées avec une clé secrète ; les adresses brutes ne sont pas enregistrées dans ces compteurs. Les fenêtres de limitation durent 15 minutes pour l’adresse IP et une heure pour l’adresse email. Les compteurs expirés sont supprimés lors de la prochaine tentative soumise à cette protection. Lors de certaines opérations sensibles, l’application vérifie uniquement l’en-tête <code>Origin</code> ou <code>Referer</code>, lorsqu’il est disponible, afin de s’assurer que la requête provient du site. Certaines erreurs techniques peuvent également être consignées dans le journal du serveur.</p>
         <p>Ces traitements reposent sur l’intérêt légitime de l’éditeur à assurer le fonctionnement, la sécurité et le diagnostic technique du service.</p>
 
         <h3>Création et gestion d’un compte</h3>
-        <p>La création d’un compte entraîne l’enregistrement du nom d’utilisateur choisi, de l’adresse électronique <code>@florimont.ch</code>, du mot de passe sous forme hachée, du rôle et de l’état du compte, ainsi que des dates de création, de vérification de l’adresse et de dernière connexion.</p>
+        <p>La création d’un compte entraîne l’enregistrement du nom d’utilisateur choisi, de l’adresse électronique <code>@florimont.ch</code>, du mot de passe sous forme hachée, du rôle et de l’état du compte, ainsi que des dates de création, de vérification de l’adresse et de dernière connexion. Pour les inscriptions soumises à acceptation des conditions générales d’utilisation, la date d’acceptation et la version acceptée sont également conservées avec le compte afin de documenter cet accord.</p>
         <p>Des jetons temporaires, enregistrés sous forme hachée, sont utilisés pour vérifier l’adresse électronique et réinitialiser le mot de passe. Ces données servent à créer et sécuriser le compte, permettre la connexion, envoyer les messages indispensables au service et administrer les accès. Leur traitement est nécessaire à l’exécution du service demandé par l’utilisateur.</p>
         <p>Le nom d’utilisateur, l’adresse électronique et le mot de passe sont obligatoires pour créer un compte. L’application reste consultable sans compte, mais la sauvegarde sur le serveur, la publication et certaines fonctions de gestion ne sont alors pas disponibles.</p>
 
+        <h3>Vérification anti-robot</h3>
+        <p>Les formulaires d’inscription, de création du premier compte administrateur et de renvoi d’un email de vérification utilisent Cloudflare Turnstile pour limiter les abus automatisés. Cloudflare reçoit les informations techniques nécessaires à cette vérification, notamment l’adresse IP et des informations relatives au navigateur et à l’appareil. Le serveur vérifie ensuite un jeton temporaire auprès de Cloudflare avant d’autoriser la demande. L’application ne transmet ni le mot de passe, ni l’adresse email, ni le contenu des scénarios à cette API de vérification et ne conserve pas les jetons Turnstile dans sa base de données.</p>
+        <p>Ce traitement répond à l’intérêt légitime de l’éditeur de sécuriser les comptes et de prévenir les envois abusifs. Pour les modalités du traitement effectué par Cloudflare, consultez sa <a href="https://www.cloudflare.com/fr-fr/privacypolicy/" rel="noopener noreferrer">politique de confidentialité</a>.</p>
+
         <h3>Scénarios pédagogiques enregistrés</h3>
-        <p>Lorsque vous sauvegardez un design dans votre compte, le serveur conserve son titre, son contenu structuré, ses métadonnées pédagogiques, ses dates de création et de mise à jour, ainsi que son rattachement à votre compte. Ces données servent à enregistrer, retrouver, modifier, importer et exporter vos travaux.</p>
-        <p>Le contenu d’un design est librement saisi par son auteur. Il ne doit pas contenir de données personnelles ou sensibles concernant des élèves, collègues ou tiers, sauf si l’auteur dispose d’une base légale et des autorisations nécessaires. Scenarisation n’est pas conçu comme un dossier scolaire ni comme un outil de suivi individuel des élèves.</p>
+        <p>Lorsque vous sauvegardez un scénario dans votre compte, le serveur conserve son titre, son contenu structuré, ses métadonnées pédagogiques, ses dates de création et de mise à jour, ainsi que son rattachement à votre compte. Ces données servent à enregistrer, retrouver, modifier, importer et exporter vos travaux.</p>
+        <p>Le contenu d’un scénario est librement saisi par son auteur. Il ne doit pas contenir de données personnelles ou sensibles concernant des élèves, collègues ou tiers, sauf si l’auteur dispose d’une base légale et des autorisations nécessaires. Scenarisation n’est pas conçu comme un dossier scolaire ni comme un outil de suivi individuel des élèves.</p>
 
         <h3>Partage et publication</h3>
-        <p>Lorsque vous publiez un design, le serveur enregistre un identifiant de partage, son état de publication et, le cas échéant, la licence Creative Commons choisie et la date d’inscription au catalogue.</p>
+        <p>Lorsque vous publiez un scénario, le serveur enregistre un identifiant de partage, son état de publication et, le cas échéant, la licence Creative Commons choisie et la date d’inscription au catalogue.</p>
         <ul>
-            <li>Un design publié <strong>par lien</strong> devient accessible à toute personne qui possède ce lien.</li>
-            <li>Un design ajouté au <strong>catalogue public</strong> rend également visibles son contenu, son titre, sa description, le nom d’utilisateur de son auteur, sa date de mise à jour et la licence choisie.</li>
+            <li>Un scénario publié <strong>par lien</strong> devient accessible à toute personne qui possède ce lien.</li>
+            <li>Un scénario ajouté au <strong>catalogue public</strong> rend également visibles son contenu, son titre, sa description, le nom d’utilisateur de son auteur, sa date de mise à jour et la licence choisie.</li>
         </ul>
-        <p>La publication est facultative et résulte de l’action de l’utilisateur. Un design peut être retiré du catalogue ou dépublié depuis le compte. Des copies déjà téléchargées ou réutilisées par des tiers peuvent toutefois subsister.</p>
+        <p>La publication est facultative et résulte de l’action de l’utilisateur. Un scénario peut être retiré du catalogue ou dépublié depuis le compte. Des copies déjà téléchargées ou réutilisées par des tiers peuvent toutefois subsister.</p>
 
         <h3>Jetons de ligne de commande</h3>
         <p>Si vous créez un jeton pour le CLI <code>learning</code>, le serveur conserve son nom, son empreinte cryptographique, un préfixe permettant de l’identifier, sa date de création, sa dernière date d’utilisation et, le cas échéant, sa date de révocation. Le jeton complet n’est affiché qu’au moment de sa création.</p>
@@ -64,7 +68,7 @@ app_start_session();
         <p>Pour limiter les envois automatisés, l’application produit une empreinte technique pseudonyme à partir de l’adresse IP et du type de navigateur. L’adresse IP et le type de navigateur ne sont pas conservés dans la base de retours. L’empreinte change chaque jour et est effacée des retours après 24 heures.</p>
 
         <h3>Préférences et brouillon dans le navigateur</h3>
-        <p>Scenarisation utilise le stockage local du navigateur pour mémoriser la langue, le thème clair ou sombre, certains réglages d’affichage et le design en cours d’édition. Le brouillon est séparé entre l’espace invité et le compte connecté. Ces informations restent normalement sur l’appareil jusqu’à leur remplacement ou leur suppression depuis les réglages du navigateur.</p>
+        <p>Scenarisation utilise le stockage local du navigateur pour mémoriser la langue, le thème clair ou sombre, certains réglages d’affichage et le scénario en cours d’édition. Le brouillon est séparé entre l’espace invité et le compte connecté. Ces informations restent normalement sur l’appareil jusqu’à leur remplacement ou leur suppression depuis les réglages du navigateur.</p>
 
         <h2>Cookies et traceurs</h2>
         <p>Un cookie de session est utilisé pour maintenir la connexion, protéger l’accès au compte, sécuriser les requêtes et délivrer le jeton temporaire du formulaire d’avis. Il est configuré pour ne pas être accessible au JavaScript, n’est envoyé que sur une connexion sécurisée lorsque HTTPS est actif, et expire à la fermeture du navigateur. Il est strictement nécessaire au service.</p>
@@ -76,22 +80,24 @@ app_start_session();
         <ul>
             <li><a href="https://fonts.google.com/" rel="noopener noreferrer">Google Fonts</a> pour les polices d’interface&nbsp;;</li>
             <li><a href="https://cdnjs.com/" rel="noopener noreferrer">cdnjs, opéré par Cloudflare</a>, pour les icônes Font Awesome et, lors de certaines opérations d’import Excel, la bibliothèque SheetJS&nbsp;;</li>
+            <li>Cloudflare Turnstile pour la vérification anti-robot des formulaires de compte concernés&nbsp;;</li>
             <li><a href="https://www.ovhcloud.com/" rel="noopener noreferrer">OVHcloud</a> pour l’hébergement du site et de sa base de données.</li>
         </ul>
         <p>Ces prestataires peuvent recevoir l’adresse IP, l’adresse de la ressource demandée et des informations techniques nécessaires à sa transmission. Selon leur organisation, certaines données techniques peuvent être traitées hors de l’Espace économique européen avec les garanties prévues par leurs politiques. Consultez les politiques de confidentialité de <a href="https://policies.google.com/privacy?hl=fr" rel="noopener noreferrer">Google</a>, de <a href="https://www.cloudflare.com/fr-fr/privacypolicy/" rel="noopener noreferrer">Cloudflare</a> et d’<a href="https://www.ovhcloud.com/fr/personal-data-protection/" rel="noopener noreferrer">OVHcloud</a>.</p>
-        <p>Lorsque vous ouvrez un lien ajouté à un design ou suivez un lien vers un autre site, la politique de confidentialité de ce service externe s’applique.</p>
+        <p>Lorsque vous ouvrez un lien ajouté à un scénario ou suivez un lien vers un autre site, la politique de confidentialité de ce service externe s’applique.</p>
 
         <h2>Destinataires</h2>
-        <p>Les données des comptes et des designs sont accessibles à Yann Houry et, lorsque cela est nécessaire à l’administration technique, aux administrateurs autorisés de Scenarisation. Les appréciations et commentaires transmis par le formulaire d’avis sont également consultables par ces administrateurs. OVHcloud peut traiter ces données pour assurer l’hébergement. Les prestataires externes cités ci-dessus ne reçoivent que les informations techniques nécessaires lorsque leurs ressources sont appelées.</p>
-        <p>Les données des comptes et des designs privés ne sont ni vendues, ni louées, ni utilisées à des fins publicitaires.</p>
+        <p>Les données des comptes et des scénarios sont accessibles à Yann Houry et, lorsque cela est nécessaire à l’administration technique, aux administrateurs autorisés de Scenarisation. Les appréciations et commentaires transmis par le formulaire d’avis sont également consultables par ces administrateurs. OVHcloud peut traiter ces données pour assurer l’hébergement. Les prestataires externes cités ci-dessus ne reçoivent que les informations techniques nécessaires lorsque leurs ressources sont appelées.</p>
+        <p>Les données des comptes et des scénarios privés ne sont ni vendues, ni louées, ni utilisées à des fins publicitaires.</p>
 
         <h2>Durées de conservation</h2>
         <ul>
-            <li><strong>Compte et designs enregistrés&nbsp;:</strong> jusqu’à la suppression du design ou du compte par son titulaire, ou par un administrateur habilité lorsque la gestion du service l’exige. La suppression du compte entraîne celle des designs et des jetons CLI associés.</li>
+            <li><strong>Compte et scénarios enregistrés&nbsp;:</strong> jusqu’à la suppression du scénario ou du compte par son titulaire, ou par un administrateur habilité lorsque la gestion du service l’exige. La suppression du compte entraîne celle des scénarios et des jetons CLI associés.</li>
             <li><strong>Lien de vérification de l’adresse électronique&nbsp;:</strong> validité de 24 heures. Son empreinte peut rester associée au compte jusqu’à sa validation, son remplacement ou la suppression du compte.</li>
             <li><strong>Lien de réinitialisation du mot de passe&nbsp;:</strong> validité d’une heure. Son empreinte est supprimée lors de son utilisation et peut sinon rester associée au compte jusqu’à son remplacement ou la suppression du compte.</li>
             <li><strong>Jeton CLI&nbsp;:</strong> jusqu’à sa révocation ou la suppression du compte. Les informations relatives à un jeton révoqué peuvent rester associées au compte à des fins de sécurité jusqu’à la suppression de celui-ci.</li>
-            <li><strong>Design public&nbsp;:</strong> jusqu’à sa dépublication, son retrait du catalogue ou la suppression du design ou du compte.</li>
+            <li><strong>Scénario public&nbsp;:</strong> jusqu’à sa dépublication, son retrait du catalogue ou la suppression du scénario ou du compte.</li>
+            <li><strong>Compteurs anti-abus des comptes&nbsp;:</strong> validité de 15 minutes à une heure ; suppression à la prochaine tentative protégée suivant leur expiration.</li>
             <li><strong>Retours sur l’application&nbsp;:</strong> 24 mois au maximum. L’empreinte technique utilisée contre les envois abusifs est effacée après 24 heures.</li>
             <li><strong>Stockage local&nbsp;:</strong> jusqu’à son remplacement ou sa suppression dans le navigateur.</li>
             <li><strong>Journaux techniques&nbsp;:</strong> selon les durées nécessaires à la sécurité et au diagnostic, ainsi que les durées appliquées par l’hébergeur.</li>
@@ -102,7 +108,7 @@ app_start_session();
         <p>Aucun système ne pouvant garantir une sécurité absolue, chaque utilisateur doit choisir un mot de passe robuste, conserver ses jetons CLI secrets et révoquer sans délai tout jeton suspect.</p>
 
         <h2>Vos droits</h2>
-        <p>Selon le traitement concerné et la réglementation applicable, vous pouvez demander l’accès à vos données, leur rectification ou leur effacement, la limitation de leur traitement, leur portabilité, ou vous opposer à certains traitements. Vous pouvez modifier les informations du compte, supprimer vos designs, révoquer vos jetons et supprimer votre compte depuis l’espace personnel.</p>
+        <p>Selon le traitement concerné et la réglementation applicable, vous pouvez demander l’accès à vos données, leur rectification ou leur effacement, la limitation de leur traitement, leur portabilité, ou vous opposer à certains traitements. Vous pouvez modifier les informations du compte, supprimer vos scénarios, révoquer vos jetons et supprimer votre compte depuis l’espace personnel.</p>
         <p>Un retour anonyme n’étant pas rattaché à un compte, son identification pour répondre à une demande d’accès ou d’effacement peut être impossible sans indications précises sur sa date, sa page et son contenu. Pour toute demande, utilisez la <a href="https://www.ralentirtravaux.com/contact/contact.php" rel="noopener noreferrer">page de contact</a>. Une vérification raisonnable de l’identité du demandeur peut être nécessaire. Vous pouvez également adresser une réclamation à la <a href="https://www.cnil.fr/" rel="noopener noreferrer">Commission nationale de l’informatique et des libertés (CNIL)</a>.</p>
 
         <h2>Mise à jour</h2>

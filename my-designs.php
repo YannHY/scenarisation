@@ -20,8 +20,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             ? 'Production supprimée.'
             : 'Production introuvable.';
         $flashMessageEn = $stmt->rowCount() > 0
-            ? 'Design deleted.'
-            : 'Design not found.';
+            ? 'Scenario deleted.'
+            : 'Scenario not found.';
         $flashKind = $stmt->rowCount() > 0 ? 'success' : 'warning';
     } elseif ($action === 'unlist' && $designId > 0) {
         $stmt = $db->prepare('UPDATE learning_designs
@@ -29,10 +29,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             WHERE id = ? AND owner_user_id = ? AND is_published = 1 AND is_listed = 1');
         $stmt->execute([$designId, (int)$user['id']]);
         $flashMessage = $stmt->rowCount() > 0
-            ? 'Design retiré de la page des partages. Son lien reste actif.'
+            ? 'Scénario retiré de la page des partages. Son lien reste actif.'
             : 'Publication introuvable ou déjà retirée des partages.';
         $flashMessageEn = $stmt->rowCount() > 0
-            ? 'Design removed from the shared catalog. Its link remains active.'
+            ? 'Scenario removed from the shared catalog. Its link remains active.'
             : 'Publication not found or already removed from the shared catalog.';
         $flashKind = $stmt->rowCount() > 0 ? 'success' : 'warning';
     } elseif ($action === 'revoke_share' && $designId > 0) {
@@ -65,7 +65,7 @@ function e(string $value): string
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="assets/favicon.svg?v=20260906-scenarisation" type="image/svg+xml" sizes="any" />
-    <title data-site-i18n-en="My designs | Scenarisation" data-site-i18n-fr="Mes designs | Scenarisation">Mes designs | Scenarisation</title>
+    <title data-site-i18n-en="My scenarios | Scenarisation" data-site-i18n-fr="Mes scénarios | Scenarisation">Mes scénarios | Scenarisation</title>
     <?php render_theme_boot_script(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -250,8 +250,8 @@ function e(string $value): string
     <main class="saved-shell">
       <div class="saved-header">
         <div>
-          <h1 class="saved-title" data-site-i18n-en="My designs" data-site-i18n-fr="Mes designs">Mes designs</h1>
-          <p class="saved-subtitle" data-site-i18n-en="Find, open, or delete your saved designs." data-site-i18n-fr="Retrouvez, ouvrez ou supprimez vos designs enregistrés.">Retrouvez, ouvrez ou supprimez vos designs enregistrés.</p>
+          <h1 class="saved-title" data-site-i18n-en="My scenarios" data-site-i18n-fr="Mes scénarios">Mes scénarios</h1>
+          <p class="saved-subtitle" data-site-i18n-en="Find, open, or delete your saved scenarios." data-site-i18n-fr="Retrouvez, ouvrez ou supprimez vos scénarios enregistrés.">Retrouvez, ouvrez ou supprimez vos scénarios enregistrés.</p>
         </div>
       </div>
 
@@ -261,11 +261,11 @@ function e(string $value): string
 
       <?php if (!$items): ?>
         <p class="saved-empty"
-          data-site-i18n-en="No saved designs yet. Return to the editor and use the Save button."
+          data-site-i18n-en="No saved scenarios yet. Return to the editor and use the Save button."
           data-site-i18n-fr="Aucune sauvegarde pour le moment. Revenez dans l’éditeur puis utilisez le bouton Enregistrer.">Aucune sauvegarde pour le moment. Revenez dans l’éditeur puis utilisez le bouton Enregistrer.</p>
       <?php else: ?>
         <section class="saved-grid" aria-label="Liste des productions sauvegardées"
-          data-site-i18n-attr="aria-label" data-site-i18n-en="Saved designs list" data-site-i18n-fr="Liste des productions sauvegardées">
+          data-site-i18n-attr="aria-label" data-site-i18n-en="Saved scenarios list" data-site-i18n-fr="Liste des productions sauvegardées">
           <?php foreach ($items as $item): ?>
             <article class="saved-card">
               <div>
@@ -287,34 +287,34 @@ function e(string $value): string
               </div>
               <div class="saved-card-actions">
                 <a class="btn btn-primary saved-action-btn" href="designer.php?remote_design_id=<?= (int)$item['id'] ?>"
-                  aria-label="Ouvrir le design" title="Ouvrir le design"
-                  data-site-i18n-attr="aria-label,title" data-site-i18n-en="Open design" data-site-i18n-fr="Ouvrir le design">
+                  aria-label="Ouvrir le scénario" title="Ouvrir le scénario"
+                  data-site-i18n-attr="aria-label,title" data-site-i18n-en="Open scenario" data-site-i18n-fr="Ouvrir le scénario">
                   <i class="fa-regular fa-folder-open" aria-hidden="true"></i>
                 </a>
                 <?php if ($isPublished && trim((string)$item['share_token']) !== ''): ?>
                   <a class="btn btn-light saved-action-btn" href="view.php?token=<?= urlencode((string)$item['share_token']) ?>" target="_blank" rel="noopener noreferrer"
-                    aria-label="Voir le design partagé" title="Voir le design partagé"
-                    data-site-i18n-attr="aria-label,title" data-site-i18n-en="View shared design" data-site-i18n-fr="Voir le design partagé">
+                    aria-label="Voir le scénario partagé" title="Voir le scénario partagé"
+                    data-site-i18n-attr="aria-label,title" data-site-i18n-en="View shared scenario" data-site-i18n-fr="Voir le scénario partagé">
                     <i class="fa-regular fa-eye" aria-hidden="true"></i>
                   </a>
                 <?php endif; ?>
                 <?php if ($isListed): ?>
                   <form class="saved-action-confirm" method="post" action="my-designs.php"
-                    data-confirm-fr="Retirer ce design de la page des partages ? Son lien de consultation restera actif."
-                    data-confirm-en="Remove this design from the shared catalog? Its view link will remain active.">
+                    data-confirm-fr="Retirer ce scénario de la page des partages ? Son lien de consultation restera actif."
+                    data-confirm-en="Remove this scenario from the shared catalog? Its view link will remain active.">
                     <input type="hidden" name="action" value="unlist" />
                     <input type="hidden" name="design_id" value="<?= (int)$item['id'] ?>" />
                     <button class="btn btn-light saved-action-btn saved-action-unlist" type="submit"
-                      aria-label="Retirer le design des partages" title="Retirer le design des partages"
-                      data-site-i18n-attr="aria-label,title" data-site-i18n-en="Remove design from shared catalog" data-site-i18n-fr="Retirer le design des partages">
+                      aria-label="Retirer le scénario des partages" title="Retirer le scénario des partages"
+                      data-site-i18n-attr="aria-label,title" data-site-i18n-en="Remove scenario from shared catalog" data-site-i18n-fr="Retirer le scénario des partages">
                       <i class="fa-regular fa-eye-slash" aria-hidden="true"></i>
                     </button>
                   </form>
                 <?php endif; ?>
                 <?php if ($isPublished): ?>
                   <form class="saved-action-confirm" method="post" action="my-designs.php"
-                    data-confirm-fr="Révoquer ce lien de partage ? Il cessera immédiatement de fonctionner et le design sera retiré des partages."
-                    data-confirm-en="Revoke this share link? It will stop working immediately and the design will be removed from the shared catalog.">
+                    data-confirm-fr="Révoquer ce lien de partage ? Il cessera immédiatement de fonctionner et le scénario sera retiré des partages."
+                    data-confirm-en="Revoke this share link? It will stop working immediately and the scenario will be removed from the shared catalog.">
                     <input type="hidden" name="action" value="revoke_share" />
                     <input type="hidden" name="design_id" value="<?= (int)$item['id'] ?>" />
                     <button class="btn btn-light saved-action-btn saved-action-revoke" type="submit"
@@ -325,13 +325,13 @@ function e(string $value): string
                   </form>
                 <?php endif; ?>
                 <form class="saved-action-confirm" method="post" action="my-designs.php"
-                  data-confirm-fr="Supprimer définitivement ce design ? Cette action est irréversible."
-                  data-confirm-en="Permanently delete this design? This action cannot be undone.">
+                  data-confirm-fr="Supprimer définitivement ce scénario ? Cette action est irréversible."
+                  data-confirm-en="Permanently delete this scenario? This action cannot be undone.">
                   <input type="hidden" name="action" value="delete" />
                   <input type="hidden" name="design_id" value="<?= (int)$item['id'] ?>" />
                   <button class="btn btn-light saved-action-btn saved-action-delete" type="submit"
-                    aria-label="Supprimer le design" title="Supprimer le design"
-                    data-site-i18n-attr="aria-label,title" data-site-i18n-en="Delete design" data-site-i18n-fr="Supprimer le design">
+                    aria-label="Supprimer le scénario" title="Supprimer le scénario"
+                    data-site-i18n-attr="aria-label,title" data-site-i18n-en="Delete scenario" data-site-i18n-fr="Supprimer le scénario">
                     <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
                   </button>
                 </form>
@@ -369,7 +369,7 @@ function e(string $value): string
             var english = document.documentElement.lang === 'en';
             var deleting = form.elements.action.value === 'delete';
             dialog.querySelector('h2').textContent = deleting
-              ? (english ? 'Delete design' : 'Supprimer le design')
+              ? (english ? 'Delete scenario' : 'Supprimer le scénario')
               : (english ? 'Revoke share link' : 'Révoquer le lien de partage');
             dialog.querySelector('p').textContent = english ? form.dataset.confirmEn : form.dataset.confirmFr;
             cancel.textContent = english ? 'Cancel' : 'Annuler';

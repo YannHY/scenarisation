@@ -10,13 +10,25 @@
   var previousFocus = null;
   var searchTimer = 0;
   var searchSequence = 0;
+  var selectedCategory = "all";
+  var nextOffset = 0;
+  var categoryFiles = {
+    help: ["help.php"], models: ["models.php"], scenarios: ["view.php", "share.php"],
+    competencies: ["competencies.php"], prompts: ["prompts.php"],
+    references: ["bloom.php", "cadre-conversationnel.php", "learning-design.php", "competencies.php"],
+    other: ["index.php", "about.php", "licence-reutilisation.php", "mentions-legales.php", "politique-confidentialite.php"]
+  };
 
   var translations = {
     fr: {
       button: "Rechercher sur le site",
       title: "Rechercher",
       close: "Fermer la recherche",
-      placeholder: "Aide, modèles, compétences…",
+      placeholder: "Aide, modèles, scénarios partagés…",
+      filtersLabel: "Filtrer par catégorie",
+      filters: { all: "Tout", help: "Aide", models: "Modèles", scenarios: "Scénarios partagés", competencies: "Compétences", prompts: "Prompts", references: "Références", other: "Autres pages" },
+      more: "Afficher plus de résultats",
+      partial: "Une partie de la recherche est indisponible ; les résultats disponibles sont affichés.",
       invitation: "Saisissez au moins deux caractères pour lancer la recherche.",
       loading: "Chargement de la recherche…",
       searching: "Recherche en cours…",
@@ -26,6 +38,8 @@
       manyResults: "{count} résultats pour « {query} »",
       untitled: "Page sans titre",
       categories: {
+        "view.php": "Scénarios partagés",
+        "share.php": "Scénarios partagés",
         "index.php": "Accueil",
         "about.php": "À propos",
         "bloom.php": "Taxonomie de Bloom",
@@ -44,7 +58,11 @@
       button: "Search the site",
       title: "Search",
       close: "Close search",
-      placeholder: "Help, templates, competencies…",
+      placeholder: "Help, templates, shared scenarios…",
+      filtersLabel: "Filter by category",
+      filters: { all: "All", help: "Help", models: "Templates", scenarios: "Shared scenarios", competencies: "Competencies", prompts: "Prompts", references: "References", other: "Other pages" },
+      more: "Show more results",
+      partial: "Some search sources are unavailable; available results are shown.",
       invitation: "Enter at least two characters to start searching.",
       loading: "Loading search…",
       searching: "Searching…",
@@ -54,6 +72,8 @@
       manyResults: "{count} results for “{query}”",
       untitled: "Untitled page",
       categories: {
+        "view.php": "Shared scenarios",
+        "share.php": "Shared scenarios",
         "index.php": "Home",
         "about.php": "About",
         "bloom.php": "Bloom’s Taxonomy",
@@ -96,11 +116,13 @@
     '  <div class="site-search-field">',
     '    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>',
     '    <label class="sr-only" for="site-search-input"></label>',
-    '    <input id="site-search-input" type="search" autocomplete="off" spellcheck="false">',
+    '    <input id="site-search-input" type="search" maxlength="200" autocomplete="off" spellcheck="false">',
     '    <kbd>Esc</kbd>',
     "  </div>",
+    '  <div class="site-search-filters" role="group"></div>',
     '  <p class="site-search-status" role="status" aria-live="polite"></p>',
     '  <ol class="site-search-results"></ol>',
+    '  <button class="site-search-more" type="button" hidden></button>',
     "</section>"
   ].join("");
   document.body.appendChild(overlay);
@@ -113,11 +135,35 @@
   var status = overlay.querySelector(".site-search-status");
   var results = overlay.querySelector(".site-search-results");
 
+  var filters = overlay.querySelector(".site-search-filters");
+  var moreButton = overlay.querySelector(".site-search-more");
+  Object.keys(translations.fr.filters).forEach(function (key) {
+    var button = document.createElement("button");
+    button.type = "button";
+    button.className = "site-search-filter";
+    button.dataset.category = key;
+    button.addEventListener("click", function () {
+      selectedCategory = key;
+      applyLanguage();
+      queueSearch();
+    });
+    filters.appendChild(button);
+  });
+  moreButton.addEventListener("click", function () {
+    runSearch(input.value.trim(), nextOffset);
+  });
+
   function applyLanguage() {
     var strings = copy();
     openButton.setAttribute("aria-label", strings.button);
     openButton.setAttribute("title", strings.button);
     title.textContent = strings.title;
+    filters.setAttribute("aria-label", strings.filtersLabel);
+    filters.querySelectorAll("button").forEach(function (button) {
+      button.textContent = strings.filters[button.dataset.category];
+      button.setAttribute("aria-pressed", String(button.dataset.category === selectedCategory));
+    });
+    moreButton.textContent = strings.more;
     closeButton.setAttribute("aria-label", strings.close);
     closeButton.setAttribute("title", strings.close);
     inputLabel.textContent = strings.button;
@@ -134,6 +180,7 @@
 
   function clearResults() {
     results.replaceChildren();
+    moreButton.hidden = true;
   }
 
   function resultUrl(url) {
@@ -264,7 +311,7 @@
 
     var category = document.createElement("span");
     category.className = "site-search-result-category";
-    category.textContent = categoryFor(data.url || "");
+    category.textContent = data.referenceLabel || categoryFor(data.url || "");
 
     var heading = document.createElement("span");
     heading.className = "site-search-result-title";
@@ -297,46 +344,79 @@
     return pagefindPromises[selectedLanguage];
   }
 
-  async function runSearch(query) {
+  function matchesCategory(data, category) {
+    if (category === "all") return true;
+    var filename = new URL(data.url, appRootUrl).pathname.split("/").pop() || "index.php";
+    return (categoryFiles[category] || []).includes(filename);
+  }
+
+  function filterCategoryResult(data, category) {
+    if (matchesCategory(data, category)) return data;
+    var filename = new URL(data.url, appRootUrl).pathname.split("/").pop();
+    if (category !== "references" || filename !== "help.php") return null;
+    var isAias = function (section) {
+      return /\bAIAS\b|AI Assessment Scale/i.test(
+        String(section.title || "") + " " + String(section.excerpt || "").replace(/<[^>]*>/g, "")
+      );
+    };
+    var sections = (data.sub_results || []).filter(isAias);
+    if (!sections.length && !isAias(data)) return null;
+    return Object.assign({}, data, { sub_results: sections, referenceLabel: "AIAS" });
+  }
+
+  async function searchPages(query, language, category) {
+    var pagefind = await loadPagefind(language);
+    var search = await pagefind.search(query);
+    var loaded = await Promise.all(search.results.map(function (result) { return result.data(); }));
+    return loaded.map(function (data) { return filterCategoryResult(data, category); }).filter(Boolean);
+  }
+
+  async function searchScenarios(query, offset) {
+    var url = new URL("search_public_designs.php", appRootUrl);
+    url.searchParams.set("q", query);
+    url.searchParams.set("offset", offset);
+    var response = await fetch(url, { cache: "no-store" });
+    if (!response.ok) throw new Error("Public search unavailable");
+    return response.json();
+  }
+
+  async function runSearch(query, offset) {
+    offset = offset || 0;
     var sequence = ++searchSequence;
     var language = currentLanguage();
-    clearResults();
+    var category = selectedCategory;
+    if (!offset) clearResults();
+    moreButton.disabled = true;
     setStatus(copy().searching, "loading");
 
-    try {
-      var pagefind = await loadPagefind(language);
-      var search = await pagefind.search(query);
-      var loaded = await Promise.all(search.results.slice(0, 12).map(function (result) {
-        return result.data();
-      }));
-      if (sequence !== searchSequence) return;
-
-      var strings = copy();
-      var count = search.results.length;
-      if (!count) {
-        setStatus(interpolate(strings.empty, { query: query }), "empty");
-        return;
-      }
-
-      var formattedCount = new Intl.NumberFormat(currentLanguage()).format(count);
-      setStatus(interpolate(count === 1 ? strings.oneResult : strings.manyResults, {
-        count: formattedCount,
-        query: query
-      }), "results");
-      loaded.forEach(function (data) {
-        results.appendChild(createResultItem(data, query));
-      });
-    } catch (error) {
-      if (sequence !== searchSequence) return;
-      clearResults();
-      setStatus(copy().unavailable, "error");
-      console.warn("Pagefind search could not be loaded.", error);
-    }
+    var sources = await Promise.allSettled([
+      category === "scenarios" ? Promise.resolve([]) : searchPages(query, language, category),
+      category === "all" || category === "scenarios" ? searchScenarios(query, offset) : Promise.resolve({ results: [], count: 0 })
+    ]);
+    if (sequence !== searchSequence) return;
+    moreButton.disabled = false;
+    var pages = sources[0].status === "fulfilled" ? sources[0].value : [];
+    var scenarios = sources[1].status === "fulfilled" ? sources[1].value : { results: [], count: 0 };
+    var failed = sources.some(function (source) { return source.status === "rejected"; });
+    var count = pages.length + scenarios.count;
+    var strings = copy();
+    var message = count ? interpolate(count === 1 ? strings.oneResult : strings.manyResults, {
+      count: new Intl.NumberFormat(language).format(count), query: query
+    }) : interpolate(strings.empty, { query: query });
+    if (failed) message = count ? message + " — " + strings.partial : strings.partial;
+    setStatus(message, failed ? "error" : count ? "results" : "empty");
+    scenarios.results.concat(pages.slice(offset, offset + 12)).forEach(function (data) {
+      results.appendChild(createResultItem(data, query));
+    });
+    nextOffset = offset + 12;
+    moreButton.hidden = nextOffset >= Math.max(pages.length, scenarios.count);
   }
 
   function queueSearch() {
     window.clearTimeout(searchTimer);
-    var query = input.value.trim();
+    searchSequence += 1;
+    moreButton.hidden = true;
+    var query = input.value.trim().slice(0, 200);
     if (query.length < 2) {
       searchSequence += 1;
       clearResults();
@@ -344,11 +424,15 @@
       return;
     }
 
-    loadPagefind(currentLanguage()).then(function (pagefind) {
-      pagefind.preload(query);
-    }).catch(function () {
-      // runSearch displays the actionable error state after the debounce.
-    });
+    clearResults();
+    setStatus(copy().searching, "loading");
+    if (selectedCategory !== "scenarios") {
+      loadPagefind(currentLanguage()).then(function (pagefind) {
+        pagefind.preload(query);
+      }).catch(function () {
+        // runSearch reports any unavailable source after the debounce.
+      });
+    }
     searchTimer = window.setTimeout(function () {
       runSearch(query);
     }, 180);
@@ -374,9 +458,7 @@
       input.select();
     });
     loadPagefind(currentLanguage()).catch(function () {
-      if (!overlay.hidden && input.value.trim().length < 2) {
-        setStatus(copy().unavailable, "error");
-      }
+      // A missing static index must not prevent searching public scenarios.
     });
   }
 

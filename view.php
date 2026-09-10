@@ -1237,8 +1237,8 @@ $displayDesignedMinutes = $designedMinutes > 0 ? $designedMinutes : $totalMinute
   $metaCards = [];
   if (count($sessions) > 0) $metaCards[] = ['Moments', count($sessions)];
   if ($totalActivities > 0) $metaCards[] = ['Activités', $totalActivities];
-  if ($displayDesignedMinutes > 0) $metaCards[] = ['Temps conçu', formatDuration($displayDesignedMinutes)];
-  if ($learningMinutes > 0)        $metaCards[] = ['Temps d\'apprentissage', $learningTime];
+  if ($displayDesignedMinutes > 0) $metaCards[] = ['Durée conçue', formatDuration($displayDesignedMinutes)];
+  if ($learningMinutes > 0)        $metaCards[] = ['Durée prévue', $learningTime];
   if ($metaDelivery !== '')  $metaCards[] = ['Mode', labelFor($DELIVERY_MODES, $metaDelivery, $metaDelivery)];
   if ($metaSchoolSystem !== '') {
       $metaCards[] = [

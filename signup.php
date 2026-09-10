@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
-require_once __DIR__ . '/lib/bootstrap.php';
+require_once __DIR__ . '/lib/account-protection.php';
+
+app_start_session();
 
 $error = '';
 try {
@@ -21,12 +23,16 @@ try {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_same_origin_post();
-    $username = sanitize_username((string)($_POST['username'] ?? ''));
-    $email = trim((string)($_POST['email'] ?? ''));
-    $password = (string)($_POST['password'] ?? '');
+    $username = sanitize_username(account_post_string('username'));
+    $email = trim(account_post_string('email'));
+    $password = account_post_string('password');
 
     if ($db === null) {
         $error = 'Le stockage utilisateur n’est pas disponible pour le moment.';
+    } elseif (($protectionError = account_protection_error($db, 'signup', $email)) !== '') {
+        $error = $protectionError;
+    } elseif (($_POST['accept_terms'] ?? null) !== '1') {
+        $error = 'Vous devez accepter les conditions générales d’utilisation pour créer un compte.';
     } elseif ($username === '' || $email === '' || $password === '') {
         $error = 'Nom d’utilisateur, email et mot de passe requis.';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -45,14 +51,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 role,
                 status,
                 email_verification_token_hash,
-                email_verification_expires_at
-            ) VALUES (?, ?, ?, 'designer', 'active', ?, ?)");
+                email_verification_expires_at,
+                terms_accepted_at,
+                terms_version
+            ) VALUES (?, ?, ?, 'designer', 'active', ?, ?, CURRENT_TIMESTAMP, ?)");
             $stmt->execute([
                 $username,
                 $email,
                 password_hash($password, PASSWORD_DEFAULT),
                 hash('sha256', $token),
                 time() + EMAIL_VERIFICATION_TTL_SECONDS,
+                TERMS_VERSION,
             ]);
 
             $userId = (int)$db->lastInsertId();
@@ -85,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="css/interface.css?v=20260905-subtle-focus">
     <link rel="stylesheet" href="css/account-ui.css?v=20260906-highlight">
-    <link rel="stylesheet" href="css/account-pages.css?v=20260904-content-rhythm">
+    <link rel="stylesheet" href="css/account-pages.css?v=20260910-signup-login-link">
 </head>
 <body class="signup-page">
 <?php render_site_nav('signup'); ?>
@@ -101,13 +110,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input id="email" name="email" type="email" required autocomplete="username" placeholder="@florimont.ch">
             <label for="password">Mot de passe</label>
             <input id="password" name="password" type="password" minlength="8" required autocomplete="new-password">
-            <button type="submit">Créer mon compte</button>
+            <label class="account-terms" for="accept_terms">
+                <input id="accept_terms" name="accept_terms" type="checkbox" value="1" required<?= ($_POST['accept_terms'] ?? null) === '1' ? ' checked' : '' ?>>
+                <span>J’accepte les <a href="conditions-utilisation.php" target="_blank" rel="noopener">conditions générales d’utilisation</a> (nouvel onglet).</span>
+            </label>
+            <?php render_account_protection('signup'); ?>
+            <button type="submit"<?= !account_turnstile_ready() ? ' disabled' : '' ?>>Créer mon compte</button>
         </form>
         <p class="account-privacy-notice">Les informations saisies sont nécessaires à la création et à la sécurisation du compte. Consultez la <a href="politique-confidentialite.php">politique de confidentialité</a> pour connaître leur utilisation et vos droits.</p>
         <?php if ($error !== ''): ?>
             <p class="account-message error"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></p>
         <?php endif; ?>
-        <p class="account-footer"><a href="login.php">J’ai déjà un compte</a></p>
+        <div class="signup-login-action">
+            <a class="signup-login-link" href="login.php">
+                <i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i>
+                <span>J’ai déjà un compte</span>
+            </a>
+        </div>
     </section>
 </main>
 <?php render_site_footer(); ?>

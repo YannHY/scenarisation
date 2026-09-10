@@ -2583,7 +2583,7 @@ current_user();
             <li data-i18n-fr="Dans le concepteur, cliquez sur « Importer » : la fenêtre propose la bibliothèque de modèles ou un fichier de votre ordinateur." data-i18n-en="In the designer, click “Import”: the dialog offers the template library or a file from your computer.">Dans le concepteur, cliquez sur « Importer » : la fenêtre propose la bibliothèque de modèles ou un fichier de votre ordinateur.</li>
             <li data-i18n-fr="Choisissez un modèle : le scénario complet est chargé, avec ses moments, ses durées et ses consignes." data-i18n-en="Pick a template: the full scenario is loaded, with its moments, durations and instructions.">Choisissez un modèle : le scénario complet est chargé, avec ses moments, ses durées et ses consignes.</li>
             <li data-i18n-fr="Remplacez chaque jalon entre crochets — [MATIÈRE], [CHAPITRE], [NOTION 1] — par le contenu de votre séance, puis ajustez les durées." data-i18n-en="Replace each bracketed placeholder — [SUBJECT], [CHAPTER], [CONCEPT 1] — with your own content, then adjust the durations.">Remplacez chaque jalon entre crochets — [MATIÈRE], [CHAPITRE], [NOTION 1] — par le contenu de votre séance, puis ajustez les durées.</li>
-            <li data-i18n-fr="Enregistrez, exportez ou partagez le scénario comme n’importe quel design." data-i18n-en="Save, export or share the scenario like any other design.">Enregistrez, exportez ou partagez le scénario comme n’importe quel design.</li>
+            <li data-i18n-fr="Enregistrez, exportez ou partagez le scénario comme n’importe quel scénario." data-i18n-en="Save, export or share the scenario like any other scenario.">Enregistrez, exportez ou partagez le scénario comme n’importe quel scénario.</li>
         </ol>
     </section>
 

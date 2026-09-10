@@ -686,6 +686,9 @@ body.login-page .site-breadcrumb {
   font-size: 15px;
   font-weight: 650;
 }
+body.signup-page .site-breadcrumb {
+  width: min(640px, calc(100vw - 36px));
+}
 body.about-page .site-breadcrumb {
   width: min(760px, calc(100vw - var(--content-shell-gutter)));
 }
@@ -832,7 +835,7 @@ html body.login-page .login-intro h2 {
   align-items: center;
   gap: 12px;
   color: var(--text);
-  font-weight: 750;
+  font-weight: 400;
 }
 .login-benefits i {
   display: inline-flex;
@@ -922,6 +925,9 @@ body.login-page .site-footer-links {
 }
 .account-card.wide {
   width: 100%;
+}
+body.signup-page .account-card {
+  width: min(100%, 640px);
 }
 .account-kicker {
   margin: 0 0 10px;
@@ -1055,7 +1061,8 @@ h1, h2 {
   font-size: 12px;
   line-height: 1.55;
 }
-.account-privacy-notice a {
+.account-privacy-notice a,
+.account-form .account-terms a {
   color: var(--primary);
   text-decoration: underline;
   text-underline-offset: 2px;
@@ -1064,6 +1071,26 @@ h1, h2 {
 .subtle-link {
   color: var(--primary);
   text-decoration: none;
+}
+.signup-login-action {
+  margin-top: 22px;
+  text-align: center;
+}
+.signup-login-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  color: inherit;
+  font-weight: 800;
+  text-decoration: none;
+}
+.signup-login-link:hover,
+.signup-login-link:focus-visible {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 .account-signup-action {
   margin-top: 22px;
@@ -1074,8 +1101,9 @@ h1, h2 {
 .account-signup-action p {
   margin: 0 0 12px;
   color: var(--text);
-  font-size: 16px;
-  font-weight: 800;
+  font-size: 18px;
+  line-height: 1.4;
+  font-weight: 700;
 }
 .account-secondary-button {
   display: flex;
@@ -1097,6 +1125,14 @@ h1, h2 {
   border-color: color-mix(in srgb, var(--action-primary) 45%, var(--action-secondary-border));
   color: var(--action-primary);
   text-decoration: none;
+}
+.account-signup-action .account-secondary-button {
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 600;
+}
+.account-signup-action .account-secondary-button i {
+  font-size: 14px;
 }
 .account-topbar {
   display: flex;
@@ -2179,4 +2215,21 @@ body.model-library-preview-open {
     margin: 0;
     text-align: left;
   }
+}
+
+/* Registration acceptance: keep the native checkbox compact beside its label. */
+.account-form .account-terms {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+.account-form .account-terms input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  margin: 2px 0 0;
+  padding: 0;
+  accent-color: var(--primary, #2563eb);
 }

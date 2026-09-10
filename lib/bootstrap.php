@@ -1,7 +1,8 @@
 <?php
 declare(strict_types=1);
 
-const APP_SCHEMA_VERSION = 5;
+const APP_SCHEMA_VERSION = 6;
+const TERMS_VERSION = '2026-09-10';
 const EMAIL_VERIFICATION_TTL_SECONDS = 86400;
 const EMAIL_VERIFICATION_RESEND_DELAY_SECONDS = 60;
 const PASSWORD_RESET_TTL_SECONDS = 3600;
@@ -119,14 +120,9 @@ function app_base_url(): string
         $configured = '';
     }
     if ($configured !== '') {
-        $base = rtrim($configured, '/');
-        $configuredPath = (string)(parse_url($base, PHP_URL_PATH) ?? '');
-        if ($configuredPath !== '' && $configuredPath !== '/') {
-            return $base;
-        }
-
-        $scriptDir = app_script_base_path();
-        return $base . $scriptDir;
+        // The configured URL is canonical, including an explicitly chosen root.
+        // An alternate access path must not be appended to another public host.
+        return rtrim($configured, '/');
     }
 
     $scheme = app_is_https() ? 'https' : 'http';
@@ -239,6 +235,7 @@ function ensure_app_schema(PDO $db): void
         ensure_app_migrations($db);
     }
     ensure_design_revision_column($db);
+    ensure_terms_acceptance_columns($db);
     ensure_app_schema_meta_table($db);
 
     $stmt = $db->prepare("SELECT schema_version FROM app_schema_meta WHERE id = 1");
@@ -256,6 +253,29 @@ function ensure_app_schema(PDO $db): void
     } else {
         $db->prepare("UPDATE app_schema_meta SET schema_version = ? WHERE id = 1")
             ->execute([APP_SCHEMA_VERSION]);
+    }
+}
+
+/** Existing accounts retain access; NULL is not evidence of explicit acceptance. */
+function ensure_terms_acceptance_columns(PDO $db): void
+{
+    $isSqlite = $db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite';
+    foreach (['terms_accepted_at' => 'DATETIME', 'terms_version' => 'VARCHAR(32)'] as $column => $type) {
+        $exists = static function () use ($db, $isSqlite, $column): bool {
+            if ($isSqlite) {
+                return in_array($column, array_column($db->query('PRAGMA table_info(users)')->fetchAll(PDO::FETCH_ASSOC), 'name'), true);
+            }
+            $stmt = $db->prepare("SELECT COUNT(*) FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = ?");
+            $stmt->execute([$column]);
+            return (int)$stmt->fetchColumn() > 0;
+        };
+        if ($exists()) continue;
+        try {
+            $db->exec("ALTER TABLE users ADD COLUMN $column " . ($isSqlite ? 'TEXT' : $type) . ' NULL');
+        } catch (PDOException $error) {
+            if (!$exists()) throw $error;
+        }
     }
 }
 
@@ -631,7 +651,7 @@ function ensure_app_migrations(PDO $db): void
 }
 
 /**
- * Creative Commons 4.0 licenses available when publishing a design.
+ * Creative Commons 4.0 licenses available when publishing a scenario.
  *
  * @return array<string, array{label: string, url: string}>
  */
@@ -945,7 +965,7 @@ function h(string $value): string
  *
  * La source de vérité est js/competency-catalog.js, un fichier dédié à cette
  * seule constante pour que le JS y accède sans requête réseau et que le PHP
- * n'ait pas à lire les 356 Ko de interface.js à chaque affichage d'un design
+ * n'ait pas à lire les 356 Ko de interface.js à chaque affichage d'un scénario
  * public. view.php et competencies.php passent tous les deux par ici : c'est
  * le seul endroit qui connaît l'emplacement du catalogue.
  *
@@ -1158,15 +1178,15 @@ function render_site_nav(string $active = ''): void
             </button>
             <div class="account-toolbar-cluster">
                 <?php if ($isDesigner): ?>
-                    <button id="nav-new-design-btn" class="nav-icon-btn" type="button" title="Nouveau scénario" aria-label="Nouveau scénario" data-site-i18n-attr="title,aria-label" data-site-i18n-en="New design" data-site-i18n-fr="Nouveau scénario">
+                    <button id="nav-new-design-btn" class="nav-icon-btn" type="button" title="Nouveau scénario" aria-label="Nouveau scénario" data-site-i18n-attr="title,aria-label" data-site-i18n-en="New scenario" data-site-i18n-fr="Nouveau scénario">
                         <i class="fa-solid fa-file-circle-plus" aria-hidden="true"></i>
                     </button>
                 <?php else: ?>
-                    <a class="nav-icon-btn" href="designer.php" title="Nouveau scénario" aria-label="Nouveau scénario" data-site-i18n-attr="title,aria-label" data-site-i18n-en="New design" data-site-i18n-fr="Nouveau scénario">
+                    <a class="nav-icon-btn" href="designer.php" title="Nouveau scénario" aria-label="Nouveau scénario" data-site-i18n-attr="title,aria-label" data-site-i18n-en="New scenario" data-site-i18n-fr="Nouveau scénario">
                         <i class="fa-solid fa-file-circle-plus" aria-hidden="true"></i>
                     </a>
                 <?php endif; ?>
-                <a class="nav-account-btn nav-account-icon-btn<?= $savesClass ?>" href="my-designs.php" title="Scénarios" aria-label="Scénarios" data-site-i18n-attr="title,aria-label" data-site-i18n-en="Designs" data-site-i18n-fr="Scénarios">
+                <a class="nav-account-btn nav-account-icon-btn<?= $savesClass ?>" href="my-designs.php" title="Scénarios" aria-label="Scénarios" data-site-i18n-attr="title,aria-label" data-site-i18n-en="Scenarios" data-site-i18n-fr="Scénarios">
                     <i class="fa-regular fa-folder-open" aria-hidden="true"></i>
                 </a>
                 <?php if ($user): ?>
@@ -1353,7 +1373,8 @@ function render_site_nav(string $active = ''): void
         });
     });
     </script>
-    <script src="js/site-search.js?v=20260906-scenarisation"></script>
+    <link rel="stylesheet" href="css/site-search.css?v=20260910-single-row" />
+    <script src="js/site-search.js?v=20260910-scenario-wording"></script>
     <?php
 }
 
@@ -1420,10 +1441,10 @@ function site_breadcrumb_items(string $active = ''): array
             ['fr' => 'Prompts pédagogiques', 'en' => 'Teaching prompts'],
         ],
         'share' => [
-            ['fr' => 'Scénarios partagés', 'en' => 'Shared designs'],
+            ['fr' => 'Scénarios partagés', 'en' => 'Shared scenarios'],
         ],
         'saves' => [
-            ['fr' => 'Mes designs', 'en' => 'My designs'],
+            ['fr' => 'Mes scénarios', 'en' => 'My scenarios'],
         ],
         'setup_admin' => [
             ['fr' => 'Administration', 'en' => 'Administration'],

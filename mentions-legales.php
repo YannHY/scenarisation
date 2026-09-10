@@ -45,7 +45,7 @@ $publicUrl = app_base_url();
         <p><a href="https://www.ovhcloud.com/fr/terms-and-conditions/" rel="noopener noreferrer">Site et informations légales d’OVHcloud</a></p>
 
         <h2>Propriété intellectuelle</h2>
-        <p>Les conditions applicables aux contenus originaux du site, au code source et aux designs publiés par les utilisateurs sont détaillées dans la page <a href="licence-reutilisation.php">Licence et réutilisation</a>.</p>
+        <p>Les conditions applicables aux contenus originaux du site, au code source et aux scénarios publiés par les utilisateurs sont détaillées dans la page <a href="licence-reutilisation.php">Licence et réutilisation</a>.</p>
         <p>Les marques, dénominations, bibliothèques, ressources et contenus appartenant à des tiers demeurent la propriété de leurs titulaires respectifs et sont soumis à leurs propres conditions.</p>
 
         <h2>Contenus publiés par les utilisateurs</h2>
@@ -57,7 +57,7 @@ $publicUrl = app_base_url();
         <p>Les commentaires ne sont pas publiés. Ils peuvent être consultés par les administrateurs autorisés, exploités sous forme agrégée pour améliorer le service, puis supprimés conformément à la <a href="politique-confidentialite.php">politique de confidentialité</a>. Les soumissions abusives peuvent être bloquées.</p>
 
         <h2>Données personnelles</h2>
-        <p>Les informations relatives aux comptes, aux designs enregistrés, aux retours utilisateurs, aux cookies, au stockage local et aux services externes figurent dans la <a href="politique-confidentialite.php">politique de confidentialité</a>.</p>
+        <p>Les informations relatives aux comptes, aux scénarios enregistrés, aux retours utilisateurs, aux cookies, au stockage local et aux services externes figurent dans la <a href="politique-confidentialite.php">politique de confidentialité</a>.</p>
 
         <h2>Liens externes et disponibilité</h2>
         <p>Scenarisation peut contenir des liens vers des ressources externes choisies par l’éditeur ou ajoutées par les utilisateurs. L’éditeur ne contrôle pas en permanence ces sites et ne peut garantir leur disponibilité, leur exactitude ou leurs pratiques. Tout contenu manifestement illicite ou lien problématique peut être signalé.</p>

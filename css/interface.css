@@ -1895,6 +1895,7 @@ html body:not(.home-page) h3.analysis-section-title {
 /* --- Outcomes (Acquis d'apprentissage) --- */
 
 .outcomes-row {
+  display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 6px;
@@ -1907,6 +1908,7 @@ html body:not(.home-page) h3.analysis-section-title {
 }
 
 .outcomes-header label {
+  padding-top: 0;
   font-size: 13px;
   font-weight: 700;
   color: var(--text-label);
@@ -1940,6 +1942,26 @@ html body:not(.home-page) h3.analysis-section-title {
   border-color: var(--accent);
 }
 
+.outcomes-description {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.outcomes-taxonomy-btn {
+  align-self: flex-start;
+  width: fit-content;
+  background: var(--panel);
+}
+
+[data-bloom="souvenir"], [data-bloom="remember"] { --bloom-bg: #c7b7e6; --bloom-ink: #2d2452; }
+[data-bloom="comprendre"], [data-bloom="understand"] { --bloom-bg: #b9cef0; --bloom-ink: #19355f; }
+[data-bloom="appliquer"], [data-bloom="apply"] { --bloom-bg: #c5d8b5; --bloom-ink: #243f24; }
+[data-bloom="analyser"], [data-bloom="analyze"] { --bloom-bg: #ffe69a; --bloom-ink: #5c4300; }
+[data-bloom="evaluer"], [data-bloom="evaluate"] { --bloom-bg: #ffc889; --bloom-ink: #603109; }
+[data-bloom="creer"], [data-bloom="create"] { --bloom-bg: #f69a96; --bloom-ink: #651f25; }
+
 .outcomes-list {
   display: flex;
   flex-direction: column;
@@ -1960,28 +1982,27 @@ html body:not(.home-page) h3.analysis-section-title {
   gap: 4px;
   padding: 2px 5px 2px 7px;
   background: var(--panel);
-  border-bottom: 1px solid var(--line);
 }
 
 .outcome-verb-btn {
   display: flex;
   align-items: center;
   gap: 5px;
-  flex: 1;
   min-width: 0;
-  background: none;
-  border: none;
+  background: var(--bloom-bg, var(--panel));
+  border: 1px solid transparent;
   cursor: pointer;
-  padding: 1px 3px;
-  border-radius: 4px;
+  padding: 4px 9px;
+  border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-body);
+  color: var(--bloom-ink, var(--text-body));
   text-align: left;
 }
 
 .outcome-verb-btn:hover {
-  background: var(--hover);
+  background: var(--bloom-bg, var(--hover));
+  border-color: currentColor;
 }
 
 .outcome-verb-text {
@@ -2011,18 +2032,55 @@ html body:not(.home-page) h3.analysis-section-title {
   height: 8px !important;
 }
 
-.outcome-text {
-  border: none !important;
-  border-radius: 0 !important;
-  resize: none;
-  box-sizing: border-box;
-  height: 32px;
-  min-height: 32px;
+.outcome-summary-btn {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-body);
+  font: inherit;
   font-size: 13px;
-  line-height: 22px;
-  padding-top: 4px;
-  padding-bottom: 4px;
-  overflow: hidden;
+  line-height: 1.5;
+  padding: 4px;
+  text-align: left;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.outcome-summary-btn:hover {
+  background: var(--hover);
+}
+
+.bloom-picker {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.bloom-picker .bloom-modal-subtitle {
+  margin-bottom: 8px;
+}
+
+.bloom-selected-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--bloom-bg);
+  color: var(--bloom-ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.bloom-selected-tag button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 18px;
+  cursor: pointer;
 }
 
 /* --- Bloom taxonomy modal --- */
@@ -2088,17 +2146,25 @@ html body:not(.home-page) h3.analysis-section-title {
 }
 
 .bloom-category-summary:hover,
+.bloom-category-summary,
+.bloom-category-summary:hover,
 .bloom-category-summary.selected {
-  background: var(--hover);
+  background: var(--bloom-bg);
+  color: var(--bloom-ink);
 }
 
 .bloom-category-summary.selected {
-  color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  box-shadow: inset 0 0 0 2px var(--bloom-ink);
 }
 
 .bloom-verb-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: var(--panel);
   padding: 6px 10px 6px 28px;
+  font: inherit;
   font-size: 13px;
   cursor: pointer;
   border-radius: 4px;
@@ -2111,9 +2177,16 @@ html body:not(.home-page) h3.analysis-section-title {
 }
 
 .bloom-verb-item.selected {
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-  color: var(--accent);
+  background: var(--bloom-bg);
+  color: var(--bloom-ink);
   font-weight: 600;
+}
+
+.bloom-verb-item:focus-visible,
+.bloom-category-summary:focus-visible,
+.outcome-verb-btn:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -2px;
 }
 
 /* --- end outcomes --- */

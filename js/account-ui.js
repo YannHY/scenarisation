@@ -302,8 +302,8 @@
       if (!await confirmAccountAction({
         title: tr("Enregistrer une copie", "Save a copy"),
         message: tr(
-          "Votre brouillon sera enregistré comme un nouveau design. La version distante sera conservée.",
-          "Your draft will be saved as a new design. The remote version will be preserved."
+          "Votre brouillon sera enregistré comme un nouveau scénario. La version distante sera conservée.",
+          "Your draft will be saved as a new scenario. The remote version will be preserved."
         ),
         cancelLabel: tr("Revenir au brouillon", "Back to draft"),
         confirmLabel: tr("Enregistrer une copie", "Save a copy")
@@ -326,7 +326,7 @@
     const stillCurrent = () => generation === app()?.getDocumentGeneration?.()
       && userId === authState.user?.id && sourceId === currentDesignId();
     const document = JSON.parse(signature);
-    const title = String(state.meta?.name || "").trim() || tr("Production sans titre", "Untitled design");
+    const title = String(state.meta?.name || "").trim() || tr("Production sans titre", "Untitled scenario");
     setAutoSaveStatus("saving", tr("Sauvegarde…", "Saving…"));
     saveInFlight = (async () => {
       try {
@@ -378,8 +378,8 @@
     const data = await persistRemoteDesign();
     if (!data) return null;
     const message = tr(
-      "Production sauvegardée sur votre compte. Ouvrez Designs pour la retrouver.",
-      "Design saved to your account. Open Designs to find it again."
+      "Production sauvegardée sur votre compte. Ouvrez Scénarios pour la retrouver.",
+      "Scenario saved to your account. Open Scenarios to find it again."
     );
     app()?.showNotice?.(message, "success");
     app()?.announce?.(message);
@@ -395,7 +395,7 @@
     cluster.className = "account-toolbar-cluster";
     cluster.id = "account-toolbar-cluster";
     cluster.innerHTML = `
-      <a id="saved-designs-btn" class="nav-account-btn nav-account-icon-btn nav-saves-btn" href="my-designs.php" title="${tr("Designs", "Designs")}" aria-label="${tr("Designs", "Designs")}">
+      <a id="saved-designs-btn" class="nav-account-btn nav-account-icon-btn nav-saves-btn" href="my-designs.php" title="${tr("Scénarios", "Scenarios")}" aria-label="${tr("Scénarios", "Scenarios")}">
         <i class="fa-regular fa-folder-open" aria-hidden="true"></i>
       </a>
       <span id="account-pill" class="account-pill" style="display:none"></span>
@@ -479,7 +479,7 @@
     if (!authState.user) {
       const message = tr(
         "Connectez-vous pour ouvrir cette production sauvegardée.",
-        "Sign in to open this saved design."
+        "Sign in to open this saved scenario."
       );
       app()?.showNotice?.(message, "warning");
       app()?.announce?.(message);
@@ -532,13 +532,13 @@
               "La version de votre brouillon ne correspond pas à la version distante. Charger la version distante remplacera vos modifications locales. Vous pouvez conserver votre brouillon pour l’enregistrer comme une copie.",
               "Your draft’s version does not match the remote version. Loading the remote version will replace your local changes. You can keep your draft and save it as a copy."
             ) : tr(
-              "Vous avez des modifications qui ne sont pas encore sauvegardées sur votre compte. Ouvrir l’autre design remplacera ce brouillon. Conservez-le pour sauvegarder votre travail d’abord.",
-              "You have changes that have not yet been saved to your account. Opening the other design will replace this draft. Keep it to save your work first."
+              "Vous avez des modifications qui ne sont pas encore sauvegardées sur votre compte. Ouvrir l’autre scénario remplacera ce brouillon. Conservez-le pour sauvegarder votre travail d’abord.",
+              "You have changes that have not yet been saved to your account. Opening the other scenario will replace this draft. Keep it to save your work first."
             ),
             cancelLabel: tr("Conserver mon brouillon", "Keep my draft"),
             confirmLabel: sameDesign
               ? tr("Charger la version distante", "Load remote version")
-              : tr("Ouvrir l’autre design", "Open other design")
+              : tr("Ouvrir l’autre scénario", "Open other scenario")
           });
           if (generation !== app()?.getDocumentGeneration?.()
             || contentSignature(local) !== contentSignature(app().getState())) return false;
@@ -570,7 +570,7 @@
         canResumeAutoSave = true;
         setRemoteDesignUrl(data.design.id);
         if (showLoadedMessage) {
-          const message = tr("Production chargée.", "Design loaded.");
+          const message = tr("Production chargée.", "Scenario loaded.");
           app()?.showNotice?.(message, "success");
           app()?.announce?.(message);
         }
@@ -643,7 +643,7 @@
     backdrop.className = "modal-backdrop";
     backdrop.setAttribute("role", "dialog");
     backdrop.setAttribute("aria-modal", "true");
-    backdrop.setAttribute("aria-label", tr("Partager la production", "Share design"));
+    backdrop.setAttribute("aria-label", tr("Partager la production", "Share scenario"));
 
     const urlHtml = shareUrl
       ? `<div class="publish-url-row">
@@ -685,25 +685,25 @@
             aria-controls="publish-license-panel" aria-expanded="${isListed ? "true" : "false"}">
           <span>
             <strong id="publish-catalog-title">${tr("Publier aussi dans le catalogue", "Also publish in the catalog")}</strong>
-            <small>${tr("Votre design devient visible par tous sur la page de partage et peut être importé par d’autres enseignants.", "Your design becomes visible to everyone on the shared designs page and can be imported by other teachers.")}</small>
+            <small>${tr("Votre scénario devient visible par tous sur la page de partage et peut être importé par d’autres enseignants.", "Your scenario becomes visible to everyone on the shared scenarios page and can be imported by other teachers.")}</small>
           </span>
         </label>
         ${licenseHtml}
         ${shareUrl && isListed
-          ? `<p class="publish-catalog-link"><a href="${escapeHtml(listingUrl)}">${tr("Voir le design dans le catalogue", "View the design in the catalog")}</a></p>`
+          ? `<p class="publish-catalog-link"><a href="${escapeHtml(listingUrl)}">${tr("Voir le scénario dans le catalogue", "View the scenario in the catalog")}</a></p>`
           : ""}
       </section>`;
 
     backdrop.innerHTML = `
       <div class="modal-card publish-modal-card">
-        <h2 class="modal-title">${tr("Partager la production", "Share design")}</h2>
-        <p class="publish-modal-intro">${tr("Choisissez comment vous souhaitez diffuser votre design.", "Choose how you want to share your design.")}</p>
+        <h2 class="modal-title">${tr("Partager la production", "Share scenario")}</h2>
+        <p class="publish-modal-intro">${tr("Choisissez comment vous souhaitez diffuser votre scénario.", "Choose how you want to share your scenario.")}</p>
         <section class="publish-option publish-link-option" aria-labelledby="publish-link-title">
           <div class="publish-option-heading">
             <span class="publish-option-icon" aria-hidden="true"><i class="fa-solid fa-link"></i></span>
             <div>
               <h3 id="publish-link-title">${tr("Partager avec un lien", "Share with a link")}</h3>
-              <p>${tr("Seules les personnes qui possèdent le lien peuvent consulter le design, en lecture seule. Aucune licence n’est nécessaire.", "Only people who have the link can view the design, read-only. No license is required.")}</p>
+              <p>${tr("Seules les personnes qui possèdent le lien peuvent consulter le scénario, en lecture seule. Aucune licence n’est nécessaire.", "Only people who have the link can view the scenario, read-only. No license is required.")}</p>
             </div>
           </div>
           ${shareUrl

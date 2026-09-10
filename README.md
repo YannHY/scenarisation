@@ -11,7 +11,7 @@ Le projet est inspiré de l'[UCL Learning Designer](https://www.ucl.ac.uk/learni
 - **Concevoir avec un cadre pédagogique commun** : chaque scénario est structuré en moments et activités, reliés à des types d'apprentissage, des modalités, des compétences issues de sept cadres (Florimont, Socle commun, GreenComp, DigComp 3.0, CRCN, Pix et Pix IA), des niveaux AIAS et des acquis issus de la taxonomie de Bloom.
 - **Partir d'un modèle plutôt que d'une page blanche** : 28 scénarios génériques, répartis en huit familles, sont prêts à être adaptés à une discipline et à un contexte.
 - **Relire un scénario sous plusieurs angles** : la répartition du temps et des types d'apprentissage aide à repérer les déséquilibres, les enchaînements trop denses ou les modalités trop peu variées.
-- **Partager et réutiliser les productions** : un design peut être sauvegardé dans un compte, publié par lien, consulté en lecture seule et proposé dans le catalogue public sous licence Creative Commons.
+- **Partager et réutiliser les productions** : un scénario peut être sauvegardé dans un compte, publié par lien, consulté en lecture seule et proposé dans le catalogue public sous licence Creative Commons.
 - **Travailler avec les outils déjà utilisés** : les imports et exports permettent de poursuivre le travail dans un tableur, un traitement de texte, une plateforme web ou un autre outil compatible.
 - **Choisir un référentiel scolaire cohérent** : le niveau dépend du système sélectionné. Le catalogue couvre la France, la Suisse, les États-Unis, les communautés belge française, flamande et germanophone, l’Angleterre, le pays de Galles, l’Écosse, l’Irlande du Nord les Écoles européennes et le Baccalauréat international (IB), ainsi que la classification internationale ISCED 2011.
 - **Concevoir avec une IA sans perdre la structure pédagogique** : une Skill réutilisable, une bibliothèque de prompts et le CLI `scenarisation` accompagnent la création, la validation et la publication des scénarios.
@@ -30,7 +30,7 @@ Le projet est inspiré de l'[UCL Learning Designer](https://www.ucl.ac.uk/learni
 
 La loupe de la barre de navigation, ainsi que le raccourci `⌘K` sur macOS ou `Ctrl+K` sur les autres systèmes, ouvrent une recherche locale propulsée par [Pagefind](https://pagefind.app/). Aucun contenu de recherche n'est envoyé à un service tiers.
 
-L'index couvre les pages publiques de contenu (aide, modèles, prompts, référentiels, cadre pédagogique et pages d'information). Les comptes, l'administration, les designs privés et les pages de consultation dynamiques ne sont pas indexés.
+L'index couvre les pages publiques de contenu (aide, modèles, prompts, référentiels, cadre pédagogique et pages d'information). Les comptes, l'administration, les scénarios privés et les pages de consultation dynamiques ne sont pas indexés.
 
 Après une modification du contenu, régénérez l'index :
 
@@ -48,7 +48,7 @@ Scenarisation propose trois niveaux d'intégration, selon le besoin :
 
 1. **Les prompts** servent à enrichir ponctuellement un scénario : différenciation, conception universelle de l'apprentissage, modèle SAMR, charge de travail ou création d'une fiche destinée aux élèves.
 2. **La Skill Scenarisation** donne à un agent une méthode de travail complète : recueillir les choix pédagogiques, construire le scénario avec le CLI, le valider, puis préparer sa publication.
-3. **Le CLI `scenarisation`** permet de créer et modifier un design depuis le terminal, de contrôler sa structure, de transmettre le travail à Codex et de le publier ou le mettre à jour sur le site.
+3. **Le CLI `scenarisation`** permet de créer et modifier un scénario depuis le terminal, de contrôler sa structure, de transmettre le travail à Codex et de le publier ou le mettre à jour sur le site.
 
 La Skill ne se contente donc pas de générer du texte libre : elle guide l'agent vers le format attendu par l'application et impose une validation avant publication.
 
@@ -57,7 +57,7 @@ La Skill ne se contente donc pas de générer du texte libre : elle guide l'agen
 Depuis la racine de votre projet, une seule commande installe ou actualise la Skill pour Claude Code et Codex ainsi que le CLI, puis vérifie leur compatibilité :
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YannHY/learning-designer/main/install-skill.sh | sh
+curl -fsSL https://raw.githubusercontent.com/YannHY/scenarisation/main/install-skill.sh | sh
 ```
 
 Utilisez ensuite `/scenarisation` dans Claude Code ou `$scenarisation` dans Codex.
@@ -65,7 +65,7 @@ Utilisez ensuite `/scenarisation` dans Claude Code ou `$scenarisation` dans Code
 ### Installer le CLI
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/YannHY/learning-designer/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/YannHY/scenarisation/main/install.sh | sh
 scenarisation status
 ```
 
@@ -97,15 +97,15 @@ Chaque modèle contient déjà des moments, des activités, des durées, des mod
 
 Scenarisation accepte les scénarios issus de son ancien format LDJ ainsi que des fichiers JSON, CSV, Excel et Markdown.
 
-Un scénario peut être exporté en Markdown, HTML, JSON, Excel ou Word. L'export peut produire une version enseignant ou élève et se limiter aux moments sélectionnés. La publication en ligne crée une page de consultation partageable ; les auteurs qui le souhaitent peuvent également rendre leur design visible dans le catalogue public.
+Un scénario peut être exporté en Markdown, HTML, JSON, Excel ou Word. L'export peut produire une version enseignant ou élève et se limiter aux moments sélectionnés. La publication en ligne crée une page de consultation partageable ; les auteurs qui le souhaitent peuvent également rendre leur scénario visible dans le catalogue public.
 
 ## Installation locale
 
 Le projet ne nécessite pas d'étape de compilation. PHP avec PDO SQLite suffit pour le lancer. L’export de tous les scénarios depuis le profil nécessite aussi l’extension PHP `zip` et fournit une archive contenant un fichier JSON par scénario, réimportable dans l’éditeur après extraction :
 
 ```bash
-git clone https://github.com/YannHY/learning-designer.git
-cd learning-designer
+git clone https://github.com/YannHY/scenarisation.git
+cd scenarisation
 php -S localhost:8000
 ```
 
@@ -128,7 +128,7 @@ Conservez les secrets dans un fichier local non versionné, par exemple `learnin
 - [designer.php](./designer.php) et [interface.js](./js/interface.js) : concepteur de scénarios ;
 - [models.php](./models.php) : bibliothèque et API JSON des modèles ;
 - [prompts.php](./prompts.php) : bibliothèque de prompts pédagogiques ;
-- [share.php](./share.php) et [view.php](./view.php) : catalogue public et consultation des designs publiés ;
+- [share.php](./share.php) et [view.php](./view.php) : catalogue public et consultation des scénarios publiés ;
 - [skills/scenarisation](./skills/scenarisation) : Skill et configuration de l'agent ;
 - [skills/scenarisation-site](./skills/scenarisation-site) : Skill de développement et de maintenance du site ;
 - [bin/scenarisation](./bin/scenarisation) : CLI de création, de validation et de publication ;
@@ -145,7 +145,7 @@ Conservez les secrets dans un fichier local non versionné, par exemple `learnin
 - `analysis.js` : répartitions du temps, graphiques et alertes ;
 - `fields.js` : champs extensibles, aperçu Markdown et raccourcis clavier.
 
-Ces scripts classiques partagent uniquement l'espace de noms `window.LearningDesignerModules`. Les modules qui consultent le document reçoivent une fonction `getState` pour toujours lire le document courant après un import ou un changement de design. L'API `window.learningDesignerApp` utilisée par le compte reste inchangée.
+Ces scripts classiques partagent uniquement l'espace de noms `window.LearningDesignerModules`. Les modules qui consultent le document reçoivent une fonction `getState` pour toujours lire le document courant après un import ou un changement de scénario. L'API `window.learningDesignerApp` utilisée par le compte reste inchangée.
 
 L'ordre de chargement est explicite dans `designer.php` : sources des compétences, configuration, autres modules, `interface.js`, puis `account-ui.js`. Aucune compilation n'est nécessaire. Pour déployer ce découpage, transférez **tout le dossier `js/editor/`**, `js/interface.js` et `designer.php` ensemble ; les nouveaux modules sont nécessaires au fonctionnement du concepteur.
 
@@ -164,10 +164,10 @@ php tests/server-state.test.php
 
 Le dossier `tests/` reste versionné mais n’est pas nécessaire sur le serveur web.
 
-Les sauvegardes web utilisent une révision entière pour détecter les écritures concurrentes. La colonne `learning_designs.revision` est ajoutée automatiquement lors du passage au schéma 5, sans modifier le contenu des designs. Déployez les fichiers PHP et JavaScript correspondants ensemble. Un ancien onglet sans révision sera bloqué comme un conflit et pourra conserver son brouillon dans une copie.
+Les sauvegardes web utilisent une révision entière pour détecter les écritures concurrentes. La colonne `learning_designs.revision` est ajoutée automatiquement lors du passage au schéma 5, sans modifier le contenu des scénarios. Déployez les fichiers PHP et JavaScript correspondants ensemble. Un ancien onglet sans révision sera bloqué comme un conflit et pourra conserver son brouillon dans une copie.
 
 La configuration suit cet ordre de priorité : variables d’environnement, paramètres du serveur, fichiers locaux ou secrets, puis valeurs par défaut de `app-config.php`.
 
 ## Renommage en Scenarisation
 
-Le CLI s’utilise désormais avec `scenarisation`, et la skill avec `$scenarisation` dans Codex ou `/scenarisation` dans Claude Code. Relancez les installateurs ci-dessus pour obtenir ces nouvelles commandes. Les URL du dépôt et du site restent inchangées. La configuration de connexion existante dans `~/.learning-designer/config.json` est conservée ; `SCENARISATION_CONFIG` permet de choisir un autre fichier. Les variables d’installation `SCENARISATION_*` acceptent aussi leurs anciens équivalents `LEARNING_*`.
+Le CLI s’utilise désormais avec `scenarisation`, et la skill avec `$scenarisation` dans Codex ou `/scenarisation` dans Claude Code. Relancez les installateurs ci-dessus pour obtenir ces nouvelles commandes. Le dépôt GitHub est désormais `YannHY/scenarisation`. La configuration de connexion existante dans `~/.learning-designer/config.json` est conservée ; `SCENARISATION_CONFIG` permet de choisir un autre fichier. Les variables d’installation `SCENARISATION_*` acceptent aussi leurs anciens équivalents `LEARNING_*`.
