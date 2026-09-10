@@ -186,12 +186,15 @@ body.admin-page .admin-feedback-panel {
 }
 
 .admin-tab > span {
+  font: inherit;
+}
+
+.admin-tab > .admin-tab-count {
   min-width: 22px;
   border-radius: 999px;
   background: var(--surface-light);
   color: var(--text-subtle);
   padding: 3px 7px;
-  font-size: 11px;
   text-align: center;
 }
 
@@ -2375,4 +2378,65 @@ body.model-library-preview-open {
   margin: 2px 0 0;
   padding: 0;
   accent-color: var(--primary, #2563eb);
+}
+
+/* Account list pagination. */
+.admin-account-page-size {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  color: var(--text-strong);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.admin-account-page-size select,
+.admin-account-pagination button {
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text-strong);
+  font: inherit;
+}
+
+.admin-account-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.admin-account-pagination[hidden] {
+  display: none;
+}
+
+.admin-account-pagination button {
+  min-width: 40px;
+  cursor: pointer;
+}
+
+.admin-account-pagination button:hover:not(:disabled),
+.admin-account-pagination button[aria-current="page"] {
+  background: var(--surface-light);
+  border-color: var(--text-strong);
+}
+
+.admin-account-pagination button[aria-current="page"] {
+  font-weight: 700;
+}
+
+.admin-account-page-size select:focus-visible,
+.admin-account-pagination button:focus-visible {
+  outline: 2px solid var(--text-strong);
+  outline-offset: 2px;
+}
+
+.admin-account-pagination button:disabled {
+  opacity: 0.45;
+  cursor: default;
 }

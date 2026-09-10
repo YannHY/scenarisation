@@ -30,9 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 admin_moderate_user($db, (int)$admin['id'], (int)($_POST['target_user_id'] ?? 0),
                     (string)($_POST['security_action'] ?? ''), (string)($_POST['reason'] ?? ''),
                     (string)($_POST['confirmation'] ?? ''));
-                $_SESSION['admin_security_message'] = 'Intervention enregistrée avec succès.';
-                header('Location: admin.php?tab=security');
-                exit;
+                $message = 'Intervention enregistrée avec succès.';
             } catch (InvalidArgumentException $e) {
                 $error = $e->getMessage();
             } catch (Throwable $e) {
@@ -55,6 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 : 'Ce retour avait déjà été supprimé.';
         }
     } elseif ($adminAction === 'create_account') {
+        $activeAdminTab = 'accounts';
         $username = sanitize_username((string)($_POST['username'] ?? ''));
         $email = trim((string)($_POST['email'] ?? ''));
         $password = (string)($_POST['password'] ?? '');
@@ -77,11 +76,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     }
+    if ($message !== '') {
+        $_SESSION['admin_flash'] = ['tab' => $activeAdminTab, 'message' => $message];
+        header('Location: admin.php?tab=' . rawurlencode($activeAdminTab), true, 303);
+        exit;
+    }
 }
 
-if (isset($_SESSION['admin_security_message'])) {
-    $message = (string)$_SESSION['admin_security_message'];
-    unset($_SESSION['admin_security_message']);
+// Consume confirmations once, after redirecting successful form submissions.
+$flash = $_SESSION['admin_flash'] ?? null;
+unset($_SESSION['admin_flash']);
+if (is_array($flash) && ($flash['tab'] ?? '') === $activeAdminTab) {
+    $message = (string)($flash['message'] ?? '');
 }
 $securityLog = $db->query('SELECT * FROM admin_security_log ORDER BY id DESC LIMIT 100')->fetchAll();
 $securityLabels = ['suspend' => 'Suspension', 'reactivate' => 'Réactivation', 'delete' => 'Suppression'];
@@ -184,7 +190,7 @@ function admin_stat_percentage(int $value, int $total): int
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="css/interface.css?v=20260905-subtle-focus">
     <link rel="stylesheet" href="css/account-ui.css?v=20260906-highlight">
-    <link rel="stylesheet" href="css/account-pages.css?v=20260906-admin-backup-section">
+    <link rel="stylesheet" href="css/account-pages.css?v=20260910-admin-tab-font">
 </head>
 <body class="admin-page">
 <?php render_site_nav('admin'); ?>
@@ -205,7 +211,7 @@ function admin_stat_percentage(int $value, int $total): int
             <button id="admin-tab-feedback" class="admin-tab<?= $activeAdminTab === 'feedback' ? ' is-active' : '' ?>" type="button" role="tab" aria-selected="<?= $activeAdminTab === 'feedback' ? 'true' : 'false' ?>" aria-controls="admin-panel-feedback" data-admin-tab="feedback">
                 <i class="fa-regular fa-message" aria-hidden="true"></i>
                 Feedback
-                <span><?= $feedbackTotal ?></span>
+                <span class="admin-tab-count"><?= $feedbackTotal ?></span>
             </button>
             <button id="admin-tab-statistics" class="admin-tab<?= $activeAdminTab === 'statistics' ? ' is-active' : '' ?>" type="button" role="tab" aria-selected="<?= $activeAdminTab === 'statistics' ? 'true' : 'false' ?>" aria-controls="admin-panel-statistics" data-admin-tab="statistics">
                 <i class="fa-solid fa-chart-column" aria-hidden="true"></i>
@@ -216,14 +222,13 @@ function admin_stat_percentage(int $value, int $total): int
             </button>
         </div>
 
-        <?php if ($message !== ''): ?>
-            <p class="account-message success"><?= admin_i18n($message) ?></p>
-        <?php endif; ?>
-        <?php if ($error !== ''): ?>
-            <p class="account-message error"><?= admin_i18n($error) ?></p>
-        <?php endif; ?>
-
         <div id="admin-panel-security" class="admin-tab-panel" role="tabpanel" aria-labelledby="admin-tab-security"<?= $activeAdminTab === 'security' ? '' : ' hidden' ?>>
+            <?php if ($activeAdminTab === 'security' && $message !== ''): ?>
+                <p class="account-message success" role="status" data-admin-notice="security" data-admin-success><?= admin_i18n($message) ?></p>
+            <?php endif; ?>
+            <?php if ($activeAdminTab === 'security' && $error !== ''): ?>
+                <p class="account-message error" role="alert" data-admin-notice="security"><?= admin_i18n($error) ?></p>
+            <?php endif; ?>
             <form method="post" action="admin.php?tab=security" class="account-form panel">
                 <h2 <?= admin_i18n_attributes('Modérer un compte') ?>>Modérer un compte</h2>
                 <p class="account-copy" <?= admin_i18n_attributes('La suspension bloque l’accès au compte, révoque ses jetons CLI et retire ses scénarios du catalogue et du partage. La réactivation ne republie pas les scénarios et ne restaure pas les jetons.') ?>>La suspension bloque l’accès au compte, révoque ses jetons CLI et retire ses scénarios du catalogue et du partage. La réactivation ne republie pas les scénarios et ne restaure pas les jetons.</p>
@@ -397,6 +402,12 @@ function admin_stat_percentage(int $value, int $total): int
         </div>
 
         <div id="admin-panel-feedback" class="admin-tab-panel" role="tabpanel" aria-labelledby="admin-tab-feedback"<?= $activeAdminTab === 'feedback' ? '' : ' hidden' ?>>
+            <?php if ($activeAdminTab === 'feedback' && $message !== ''): ?>
+                <p class="account-message success" role="status" data-admin-notice="feedback" data-admin-success><?= admin_i18n($message) ?></p>
+            <?php endif; ?>
+            <?php if ($activeAdminTab === 'feedback' && $error !== ''): ?>
+                <p class="account-message error" role="alert" data-admin-notice="feedback"><?= admin_i18n($error) ?></p>
+            <?php endif; ?>
         <section class="panel admin-feedback-panel">
             <div class="admin-section-head">
                 <div>
@@ -469,6 +480,12 @@ function admin_stat_percentage(int $value, int $total): int
         </div>
 
         <div id="admin-panel-accounts" class="admin-tab-panel" role="tabpanel" aria-labelledby="admin-tab-accounts"<?= $activeAdminTab === 'accounts' ? '' : ' hidden' ?>>
+            <?php if ($activeAdminTab === 'accounts' && $message !== ''): ?>
+                <p class="account-message success" role="status" data-admin-notice="accounts" data-admin-success><?= admin_i18n($message) ?></p>
+            <?php endif; ?>
+            <?php if ($activeAdminTab === 'accounts' && $error !== ''): ?>
+                <p class="account-message error" role="alert" data-admin-notice="accounts"><?= admin_i18n($error) ?></p>
+            <?php endif; ?>
         <form method="post" class="account-form panel">
             <input type="hidden" name="admin_tab" value="accounts">
             <h2 <?= admin_i18n_attributes('Créer un compte') ?>>Créer un compte</h2>
@@ -532,8 +549,17 @@ function admin_stat_percentage(int $value, int $total): int
                 </label>
                 <p class="admin-filter-result" id="admin-account-filter-result" role="status" aria-live="polite"></p>
             </div>
+            <div class="admin-account-page-size">
+                <label for="admin-account-page-size" <?= admin_i18n_attributes('Comptes par page', 'Accounts per page') ?>>Comptes par page</label>
+                <select id="admin-account-page-size" aria-controls="admin-account-table">
+                    <option value="10" selected>10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
             <div class="table-wrap">
-                <table class="admin-accounts-table">
+                <table class="admin-accounts-table" id="admin-account-table">
                     <thead>
                     <tr>
                         <th <?= admin_i18n_attributes('Nom') ?>>Nom</th>
@@ -560,6 +586,7 @@ function admin_stat_percentage(int $value, int $total): int
                     </tbody>
                 </table>
             </div>
+            <nav id="admin-account-pagination" class="admin-account-pagination" aria-label="Pages des comptes" <?= admin_i18n_attributes('Pages des comptes', 'Account pages') ?> data-site-i18n-attr="aria-label"></nav>
         </section>
             <section class="panel admin-backup-panel" aria-labelledby="admin-backup-title">
                 <h2 id="admin-backup-title" <?= admin_i18n_attributes('Sauvegarde des scénarios') ?>>Sauvegarde des scénarios</h2>
@@ -585,6 +612,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function activateTab(name, updateUrl) {
         if (!panels[name]) return;
+        document.querySelectorAll('[data-admin-notice]').forEach(function (notice) {
+            if (notice.dataset.adminNotice !== name) notice.remove();
+        });
         tabs.forEach(function (tab) {
             var active = tab.dataset.adminTab === name;
             tab.classList.toggle('is-active', active);
@@ -640,6 +670,9 @@ document.addEventListener('DOMContentLoaded', function () {
     var verification = document.getElementById('admin-account-verification');
     var result = document.getElementById('admin-account-filter-result');
     var rows = Array.from(document.querySelectorAll('[data-account-row]'));
+    var pageSize = document.getElementById('admin-account-page-size');
+    var pagination = document.getElementById('admin-account-pagination');
+    var currentPage = 1;
 
     function normalize(value) {
         return String(value || '').toLocaleLowerCase('fr').normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -647,28 +680,68 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function filterAccounts() {
         var query = normalize(search.value.trim());
-        var visible = 0;
-        rows.forEach(function (row) {
-            var matches = (!query || normalize(row.dataset.search).includes(query))
+        var matchingRows = rows.filter(function (row) {
+            return (!query || normalize(row.dataset.search).includes(query))
                 && (!role.value || row.dataset.role === role.value)
                 && (!status.value || row.dataset.status === status.value)
                 && (!verification.value || row.dataset.verification === verification.value);
-            row.hidden = !matches;
-            row.classList.toggle('is-even-visible', matches && visible % 2 === 1);
-            if (matches) visible += 1;
         });
-        result.textContent = document.documentElement.lang === 'en'
-            ? visible + ' account' + (visible !== 1 ? 's' : '') + ' displayed'
-            : visible + ' compte' + (visible !== 1 ? 's' : '') + ' affiché' + (visible !== 1 ? 's' : '');
+        var limit = Number(pageSize.value);
+        var pageCount = Math.max(1, Math.ceil(matchingRows.length / limit));
+        currentPage = Math.min(currentPage, pageCount);
+        var start = (currentPage - 1) * limit;
+        var end = Math.min(start + limit, matchingRows.length);
+        rows.forEach(function (row) {
+            row.hidden = true;
+            row.classList.remove('is-even-visible');
+        });
+        matchingRows.slice(start, end).forEach(function (row, index) {
+            row.hidden = false;
+            row.classList.toggle('is-even-visible', index % 2 === 1);
+        });
+        var english = document.documentElement.lang === 'en';
+        result.textContent = matchingRows.length === 0
+            ? (english ? 'No accounts found' : 'Aucun compte trouvé')
+            : (english ? 'Accounts ' : 'Comptes ') + (start + 1) + '–' + end
+                + (english ? ' of ' : ' sur ') + matchingRows.length;
+        pagination.replaceChildren();
+        pagination.hidden = pageCount <= 1;
+        function addPageButton(label, page, disabled, active) {
+            var button = document.createElement('button');
+            button.type = 'button';
+            button.textContent = label;
+            button.dataset.page = String(page);
+            button.disabled = disabled;
+            button.setAttribute('aria-controls', 'admin-account-table');
+            if (active) button.setAttribute('aria-current', 'page');
+            button.addEventListener('click', function () {
+                currentPage = page;
+                filterAccounts();
+                var selected = pagination.querySelector('[aria-current="page"]');
+                if (selected) selected.focus();
+            });
+            pagination.appendChild(button);
+        }
+        addPageButton(english ? 'Previous' : 'Précédent', currentPage - 1, currentPage === 1, false);
+        for (var page = 1; page <= pageCount; page += 1) {
+            addPageButton(String(page), page, false, page === currentPage);
+        }
+        addPageButton(english ? 'Next' : 'Suivant', currentPage + 1, currentPage === pageCount, false);
     }
 
-    [search, role, status, verification].forEach(function (control) {
-        control.addEventListener(control === search ? 'input' : 'change', filterAccounts);
+    [search, role, status, verification, pageSize].forEach(function (control) {
+        control.addEventListener(control === search ? 'input' : 'change', function () {
+            currentPage = 1;
+            filterAccounts();
+        });
     });
     document.querySelectorAll('[data-feedback-delete-form]').forEach(function (form) {
         form.addEventListener('submit', function (event) {
             if (!window.confirm(document.documentElement.lang === 'en' ? 'Permanently delete this feedback?' : 'Supprimer définitivement ce retour ?')) event.preventDefault();
         });
+    });
+    document.querySelectorAll('[data-admin-success]').forEach(function (notice) {
+        window.setTimeout(function () { notice.remove(); }, 8000);
     });
     activateTab('<?= h($activeAdminTab) ?>', false);
     filterAccounts();
