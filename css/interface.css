@@ -5808,8 +5808,16 @@ body.help-page {
 .help-toc-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 30px;
-    gap: 2px;
-    align-items: start;
+    align-items: stretch;
+    border-radius: 8px;
+    transition: background 140ms ease;
+}
+.help-toc-row:has(.help-toc-link.is-active) {
+    background: var(--help-accent-soft);
+}
+.help-toc-row:hover,
+.help-toc-row:focus-within {
+    background: var(--surface-light);
 }
 .help-toc-link {
     display: grid;
@@ -5835,6 +5843,9 @@ body.help-page {
     color: var(--help-accent);
     font-weight: 800;
 }
+.help-toc-row > .help-toc-link {
+    background: transparent;
+}
 .help-toc-index {
     color: inherit;
     font-variant-numeric: tabular-nums;
@@ -5844,10 +5855,10 @@ body.help-page {
     display: grid;
     place-items: center;
     width: 30px;
-    height: 34px;
+    min-height: 34px;
     padding: 0;
     border: 0;
-    border-radius: 8px;
+    border-radius: 0 8px 8px 0;
     background: transparent;
     color: var(--muted);
     cursor: pointer;
