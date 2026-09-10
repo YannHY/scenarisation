@@ -5,8 +5,6 @@
             <span class="site-footer-link-row">
                 <a class="site-footer-link" id="footer-about-btn" href="about.php" data-site-i18n-en="About" data-site-i18n-fr="À propos">À propos</a>
                 <span class="site-footer-separator" aria-hidden="true">|</span>
-                <a class="site-footer-link" id="footer-help-btn" href="help.php" data-site-i18n-en="Help" data-site-i18n-fr="Aide">Aide</a>
-                <span class="site-footer-separator" aria-hidden="true">|</span>
                 <a class="site-footer-link" id="footer-shared-designs-btn" href="share.php" data-site-i18n-en="Shared scenarios" data-site-i18n-fr="Scénarios partagés">Scénarios partagés</a>
                 <span class="site-footer-separator" aria-hidden="true">|</span>
                 <a class="site-footer-link" id="footer-models-btn" href="models.php" data-site-i18n-en="Models" data-site-i18n-fr="Modèles">Modèles</a>

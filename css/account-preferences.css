@@ -1,0 +1,192 @@
+.site-nav .nav-help-link:hover,
+.site-nav .nav-help-link:focus-visible,
+[data-theme="dark"] .site-nav .nav-help-link:hover,
+[data-theme="dark"] .site-nav .nav-help-link:focus-visible {
+  background: #353535;
+  border-color: #555;
+  color: #fff;
+}
+
+.site-nav .account-preferences-menu {
+  width: 328px;
+  min-width: 0;
+  max-width: calc(100vw - 32px);
+  background: #fff;
+  border-color: #ddd;
+  color: #292929;
+}
+
+.account-preferences {
+  margin: 6px 0;
+  padding: 12px;
+  border-block: 1px solid #e5e5e5;
+}
+
+.account-preferences:last-child {
+  margin-bottom: 0;
+  border-bottom: 0;
+}
+
+html body .site-nav .account-preferences h2 {
+  margin: 0 0 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: #666;
+}
+
+.account-preference-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.account-preference-row + .account-preference-row {
+  margin-top: 10px;
+}
+
+.account-preference-row label,
+.account-preference-label {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: inherit;
+}
+
+.account-preference-options {
+  display: flex;
+  width: 168px;
+  flex-shrink: 0;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid #e3e1dd;
+  border-radius: 11px;
+  background: #f1f0ed;
+}
+
+.site-nav .account-preference-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  flex: 1;
+  min-width: 0;
+  min-height: 36px;
+  margin: 0;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #68655f;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: none;
+  cursor: pointer;
+  transition: background-color .15s, color .15s, box-shadow .15s;
+}
+
+.site-nav .account-preference-option:hover,
+.site-nav .account-preferences-menu .account-menu-link:hover,
+.site-nav .account-preferences-menu .account-menu-link:focus-visible {
+  background: #e7e5e0;
+}
+
+.site-nav .account-preference-option[aria-pressed="true"] {
+  background: #fff;
+  border-color: #dedbd5;
+  color: #292724;
+  box-shadow: 0 1px 3px #00000012;
+}
+
+.site-nav .account-preference-option:focus-visible {
+  outline: 2px solid #827565;
+  outline-offset: 2px;
+}
+
+.account-theme-icon {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+}
+
+.account-preference-option[aria-pressed="true"] .account-theme-icon {
+  color: #9b6b22;
+}
+
+[data-theme="dark"] .site-nav .account-preferences-menu {
+  background: #252525;
+  border-color: #484848;
+  color: #eee;
+}
+
+[data-theme="dark"] .account-preferences {
+  border-color: #484848;
+}
+
+html[data-theme="dark"] body .site-nav .account-preferences h2 {
+  color: #bbb;
+}
+
+[data-theme="dark"] .account-preference-options {
+  background: #1f1f1e;
+  border-color: #42413e;
+}
+
+[data-theme="dark"] .site-nav .account-preference-option {
+  color: #bdb9b1;
+}
+
+[data-theme="dark"] .site-nav .account-preference-option:hover,
+[data-theme="dark"] .site-nav .account-preferences-menu .account-menu-link:hover,
+[data-theme="dark"] .site-nav .account-preferences-menu .account-menu-link:focus-visible {
+  background: #3a3936;
+}
+
+[data-theme="dark"] .site-nav .account-preference-option[aria-pressed="true"] {
+  background: #45423c;
+  border-color: #615b50;
+  color: #fff;
+}
+
+[data-theme="dark"] .account-preference-option[aria-pressed="true"] .account-theme-icon {
+  color: #e4c58e;
+}
+
+.site-nav #account-menu-btn:hover,
+.site-nav #account-menu-btn:focus-visible,
+.site-nav #account-menu-btn[aria-expanded="true"],
+[data-theme="dark"] .site-nav #account-menu-btn:hover,
+[data-theme="dark"] .site-nav #account-menu-btn:focus-visible,
+[data-theme="dark"] .site-nav #account-menu-btn[aria-expanded="true"] {
+  background: #353535;
+  border-color: #555;
+  color: #fff;
+}
+
+@media (max-width: 720px) {
+  .site-nav .account-preferences-menu {
+    left: 0;
+    right: auto;
+  }
+}
+
+@media (max-width: 360px) {
+  .account-preference-row {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .account-preference-option {
+    flex: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-nav .account-preference-option {
+    transition: none;
+  }
+}

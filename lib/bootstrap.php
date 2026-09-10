@@ -1134,9 +1134,9 @@ function render_theme_boot_script(): void
     <?php
 }
 
-function render_site_nav(string $active = ''): void
+function render_site_nav(string $active = '', bool $accountAvailable = true): void
 {
-    $user = current_user();
+    $user = $accountAvailable ? current_user() : null;
     $isDesigner = $active === 'designer';
     $isAdmin = (string)($user['role'] ?? '') === 'admin';
     $username = trim((string)($user['username'] ?? $user['email'] ?? ''));
@@ -1155,27 +1155,12 @@ function render_site_nav(string $active = ''): void
             </a>
         </div>
         <div id="site-nav-actions" class="site-nav-actions">
-            <label for="lang-select" class="sr-only" data-site-i18n-en="Interface language" data-site-i18n-fr="Langue de l'interface">Langue de l'interface</label>
-            <div class="nav-language-switch" aria-label="Langue de l'interface" data-site-i18n-attr="aria-label" data-site-i18n-en="Interface language" data-site-i18n-fr="Langue de l'interface">
-                <button class="nav-language-toggle" type="button" aria-label="Passer en anglais" title="Passer en anglais">
-                    <span class="nav-language-label">FR</span>
-                </button>
-            </div>
-            <select id="lang-select" hidden tabindex="-1" aria-hidden="true">
-                <option value="fr">FR</option>
-                <option value="en">EN</option>
-            </select>
-            <button id="theme-toggle-btn" class="theme-toggle-btn" type="button" aria-label="Basculer le thème sombre/clair" title="Thème sombre / clair" data-site-i18n-attr="aria-label,title" data-site-i18n-en="Toggle dark/light theme" data-site-i18n-fr="Basculer le thème sombre/clair">
-                <svg class="theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true" width="18" height="18">
-                    <path fill="currentColor" d="M12 7a5 5 0 1 0 0 10A5 5 0 0 0 12 7zm0-5a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0V3a1 1 0 0 1 1-1zm0 18a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0v-1a1 1 0 0 1 1-1zM5 12a1 1 0 0 1-1 1H3a1 1 0 0 1 0-2h1a1 1 0 0 1 1 1zm16 0a1 1 0 0 1-1 1h-1a1 1 0 0 1 0-2h1a1 1 0 0 1 1 1zM6.34 7.76a1 1 0 0 1 0-1.42l.7-.7a1 1 0 1 1 1.42 1.42l-.71.71a1 1 0 0 1-1.41-.01zm9.9 9.9a1 1 0 0 1 0-1.42l.7-.7a1 1 0 0 1 1.42 1.42l-.71.71a1 1 0 0 1-1.41-.01zM6.34 17.66a1 1 0 0 1-1.41.01l-.71-.71a1 1 0 0 1 1.42-1.42l.7.7a1 1 0 0 1 0 1.42zM17.66 6.34a1 1 0 0 1-1.41.01l-.71-.71a1 1 0 0 1 1.42-1.42l.7.7a1 1 0 0 1 0 1.42z"/>
-                </svg>
-                <svg class="theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true" width="18" height="18">
-                    <path fill="currentColor" d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/>
-                </svg>
-            </button>
             <button id="site-search-open" class="nav-icon-btn site-search-open" type="button" aria-label="Rechercher sur le site" title="Rechercher sur le site" aria-keyshortcuts="Meta+K Control+K">
                 <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
             </button>
+            <a class="nav-icon-btn nav-help-link" href="help.php" aria-label="Aide" title="Aide" data-site-i18n-attr="title,aria-label" data-site-i18n-en="Help" data-site-i18n-fr="Aide">
+                <i class="fa-solid fa-book-open" aria-hidden="true"></i>
+            </a>
             <div class="account-toolbar-cluster">
                 <?php if ($isDesigner): ?>
                     <button id="nav-new-design-btn" class="nav-icon-btn" type="button" title="Nouveau scénario" aria-label="Nouveau scénario" data-site-i18n-attr="title,aria-label" data-site-i18n-en="New scenario" data-site-i18n-fr="Nouveau scénario">
@@ -1189,24 +1174,51 @@ function render_site_nav(string $active = ''): void
                 <a class="nav-account-btn nav-account-icon-btn<?= $savesClass ?>" href="my-designs.php" title="Scénarios" aria-label="Scénarios" data-site-i18n-attr="title,aria-label" data-site-i18n-en="Scenarios" data-site-i18n-fr="Scénarios">
                     <i class="fa-regular fa-folder-open" aria-hidden="true"></i>
                 </a>
-                <?php if ($user): ?>
-                    <div class="account-menu-wrap">
-                        <button id="account-menu-btn" class="nav-account-btn nav-account-icon-btn<?= $profileClass !== '' || $adminClass !== '' ? ' nav-account-btn-active' : '' ?>" type="button" aria-expanded="false" aria-controls="account-menu" title="Compte" aria-label="Compte" data-site-i18n-attr="title,aria-label" data-site-i18n-en="Account" data-site-i18n-fr="Compte">
-                            <i class="fa-solid fa-user-check" aria-hidden="true"></i>
-                        </button>
-                        <div id="account-menu" class="account-menu hidden" role="menu" aria-hidden="true">
-                            <a class="account-menu-link<?= $profileClass ?>" role="menuitem" href="profile.php" data-site-i18n-en="Profile" data-site-i18n-fr="Profil">Profil</a>
+                <div class="account-menu-wrap">
+                    <button id="account-menu-btn" class="nav-account-btn nav-account-icon-btn<?= $profileClass !== '' || $adminClass !== '' ? ' nav-account-btn-active' : '' ?>" type="button" aria-expanded="false" aria-controls="account-menu" title="Compte" aria-label="Compte" data-site-i18n-attr="title,aria-label" data-site-i18n-en="Account" data-site-i18n-fr="Compte">
+                        <i class="<?= $user ? 'fa-solid fa-user-check' : 'fa-regular fa-user' ?>" aria-hidden="true"></i>
+                    </button>
+                    <div id="account-menu" class="account-menu account-preferences-menu hidden" aria-hidden="true">
+                        <?php if ($user): ?>
+                            <a class="account-menu-link<?= $profileClass ?>" href="profile.php" data-site-i18n-en="Profile" data-site-i18n-fr="Profil">Profil</a>
                             <?php if ($isAdmin): ?>
-                                <a class="account-menu-link<?= $adminClass ?>" role="menuitem" href="admin.php" data-site-i18n-en="Administration" data-site-i18n-fr="Administration">Administration</a>
+                                <a class="account-menu-link<?= $adminClass ?>" href="admin.php" data-site-i18n-en="Administration" data-site-i18n-fr="Administration">Administration</a>
                             <?php endif; ?>
-                            <a class="account-menu-link" role="menuitem" href="logout.php" data-site-i18n-en="Sign out" data-site-i18n-fr="Déconnexion">Déconnexion</a>
-                        </div>
+                        <?php else: ?>
+                            <a class="account-menu-link" href="login.php" data-site-i18n-en="Sign in" data-site-i18n-fr="Se connecter">Se connecter</a>
+                        <?php endif; ?>
+                        <section class="account-preferences" aria-labelledby="account-preferences-title">
+                            <h2 id="account-preferences-title" data-site-i18n-en="Preferences" data-site-i18n-fr="Préférences">Préférences</h2>
+                            <div class="account-preference-row">
+                                <label id="account-language-label" for="lang-select" data-site-i18n-en="Language" data-site-i18n-fr="Langue">Langue</label>
+                                <select id="lang-select" hidden aria-hidden="true" tabindex="-1">
+                                    <option value="fr" lang="fr">Français</option>
+                                    <option value="en" lang="en">English</option>
+                                </select>
+                                <div class="account-preference-options" role="group" aria-labelledby="account-language-label">
+                                    <button type="button" class="account-preference-option" data-account-language="fr" aria-pressed="true" lang="fr">Français</button>
+                                    <button type="button" class="account-preference-option" data-account-language="en" aria-pressed="false" lang="en">English</button>
+                                </div>
+                            </div>
+                            <div class="account-preference-row">
+                                <span id="account-appearance-label" class="account-preference-label" data-site-i18n-en="Appearance" data-site-i18n-fr="Apparence">Apparence</span>
+                                <div class="account-preference-options" role="group" aria-labelledby="account-appearance-label">
+                                    <button type="button" class="account-preference-option" data-account-theme="light" aria-pressed="true">
+                                        <svg class="account-theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></svg>
+                                        <span data-site-i18n-en="Light" data-site-i18n-fr="Clair">Clair</span>
+                                    </button>
+                                    <button type="button" class="account-preference-option" data-account-theme="dark" aria-pressed="false">
+                                        <svg class="account-theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 13.1A8.5 8.5 0 0 1 10.9 3.5a8.5 8.5 0 1 0 9.6 9.6Z"/></svg>
+                                        <span data-site-i18n-en="Dark" data-site-i18n-fr="Sombre">Sombre</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </section>
+                        <?php if ($user): ?>
+                            <a class="account-menu-link" href="logout.php" data-site-i18n-en="Sign out" data-site-i18n-fr="Déconnexion">Déconnexion</a>
+                        <?php endif; ?>
                     </div>
-                <?php else: ?>
-                    <a class="nav-account-btn nav-account-icon-btn<?= $active === 'login' ? ' nav-account-btn-active' : '' ?>" href="login.php" title="Connexion" aria-label="Connexion" data-site-i18n-attr="title,aria-label" data-site-i18n-en="Sign in" data-site-i18n-fr="Connexion">
-                        <i class="fa-regular fa-user" aria-hidden="true"></i>
-                    </a>
-                <?php endif; ?>
+                </div>
             </div>
         </div>
         <button id="nav-hamburger" class="nav-hamburger" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="site-nav-actions" data-site-i18n-attr="aria-label" data-site-i18n-en="Open menu" data-site-i18n-fr="Ouvrir le menu">
@@ -1229,25 +1241,26 @@ function render_site_nav(string $active = ''): void
             html.setAttribute('data-theme', 'dark');
         }
 
-        var themeButton = document.getElementById('theme-toggle-btn');
-        if (themeButton) {
-            themeButton.addEventListener('click', function () {
-                var isDark = html.getAttribute('data-theme') === 'dark';
-                if (isDark) {
-                    html.removeAttribute('data-theme');
-                    try {
-                        localStorage.setItem('learningDesignerTheme', 'light');
-                    } catch (error) {
-                    }
-                } else {
-                    html.setAttribute('data-theme', 'dark');
-                    try {
-                        localStorage.setItem('learningDesignerTheme', 'dark');
-                    } catch (error) {
-                    }
-                }
+        var themeOptions = document.querySelectorAll('[data-account-theme]');
+        function syncThemeOptions() {
+            var theme = html.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+            themeOptions.forEach(function (option) {
+                option.setAttribute('aria-pressed', option.dataset.accountTheme === theme ? 'true' : 'false');
             });
         }
+        syncThemeOptions();
+        themeOptions.forEach(function (option) {
+            option.addEventListener('click', function () {
+                var theme = option.dataset.accountTheme;
+                if (theme === 'dark') html.setAttribute('data-theme', 'dark');
+                else html.removeAttribute('data-theme');
+                syncThemeOptions();
+                try {
+                    localStorage.setItem('learningDesignerTheme', theme);
+                } catch (error) {
+                }
+            });
+        });
 
         function applySiteNavLanguage(lang) {
             document.querySelectorAll('[data-site-i18n-en]').forEach(function (el) {
@@ -1267,36 +1280,20 @@ function render_site_nav(string $active = ''): void
         }
 
         var langSelect = document.getElementById('lang-select');
-        var languageButton = document.querySelector('.nav-language-toggle');
-        var languageToggleManagedByPage = <?= $isDesigner ? 'true' : 'false' ?>;
-        function syncLanguageSwitch(lang) {
-            if (!languageButton) return;
-            var isEnglish = lang === 'en';
-            var label = languageButton.querySelector('.nav-language-label');
-            if (label) label.textContent = isEnglish ? 'EN' : 'FR';
-            var actionLabel = isEnglish ? 'Switch to French' : 'Passer en anglais';
-            languageButton.setAttribute('aria-label', actionLabel);
-            languageButton.setAttribute('title', actionLabel);
+        var languageOptions = document.querySelectorAll('[data-account-language]');
+        function syncLanguageOptions() {
+            languageOptions.forEach(function (option) {
+                option.setAttribute('aria-pressed', option.dataset.accountLanguage === html.lang ? 'true' : 'false');
+            });
         }
-        function changeLanguage(nextLang) {
-            if (!langSelect || langSelect.value === nextLang) return;
-            var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-            if (!languageButton || reduceMotion) {
-                langSelect.value = nextLang;
+        new MutationObserver(syncLanguageOptions).observe(html, { attributes: true, attributeFilter: ['lang'] });
+        languageOptions.forEach(function (option) {
+            option.addEventListener('click', function () {
+                if (!langSelect || langSelect.value === option.dataset.accountLanguage) return;
+                langSelect.value = option.dataset.accountLanguage;
                 langSelect.dispatchEvent(new Event('change', { bubbles: true }));
-                return;
-            }
-            languageButton.classList.add('is-leaving');
-            window.setTimeout(function () {
-                langSelect.value = nextLang;
-                langSelect.dispatchEvent(new Event('change', { bubbles: true }));
-                languageButton.classList.remove('is-leaving');
-                languageButton.classList.add('is-entering');
-                window.setTimeout(function () {
-                    languageButton.classList.remove('is-entering');
-                }, 180);
-            }, 90);
-        }
+            });
+        });
         if (langSelect) {
             var savedLang = 'fr';
             try {
@@ -1308,11 +1305,10 @@ function render_site_nav(string $active = ''): void
                 savedLang = 'fr';
             }
             langSelect.value = savedLang;
-            syncLanguageSwitch(savedLang);
             html.setAttribute('lang', savedLang);
             applySiteNavLanguage(savedLang);
+            syncLanguageOptions();
             langSelect.addEventListener('change', function () {
-                syncLanguageSwitch(langSelect.value);
                 html.setAttribute('lang', langSelect.value);
                 applySiteNavLanguage(langSelect.value);
                 try {
@@ -1320,11 +1316,7 @@ function render_site_nav(string $active = ''): void
                 } catch (error) {
                 }
             });
-            if (languageButton && !languageToggleManagedByPage) {
-                languageButton.addEventListener('click', function () {
-                    changeLanguage(langSelect.value === 'en' ? 'fr' : 'en');
-                });
-            }
+
         }
 
         var hamburger = document.getElementById('nav-hamburger');
@@ -1366,6 +1358,15 @@ function render_site_nav(string $active = ''): void
             }
         });
 
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && !menu.classList.contains('hidden')) {
+                closeMenu();
+                button.focus();
+            }
+        });
+        document.addEventListener('focusin', function (event) {
+            if (!menu.contains(event.target) && !button.contains(event.target)) closeMenu();
+        });
         document.addEventListener('click', function (event) {
             if (!menu.contains(event.target) && !button.contains(event.target)) {
                 closeMenu();
@@ -1373,6 +1374,9 @@ function render_site_nav(string $active = ''): void
         });
     });
     </script>
+    <link rel="stylesheet" href="css/site-tooltip.css?v=<?= hash_file('sha256', __DIR__ . '/../css/site-tooltip.css') ?>" />
+    <script defer src="js/site-tooltip.js?v=<?= hash_file('sha256', __DIR__ . '/../js/site-tooltip.js') ?>"></script>
+    <link rel="stylesheet" href="css/account-preferences.css?v=<?= hash_file('sha256', __DIR__ . '/../css/account-preferences.css') ?>" />
     <link rel="stylesheet" href="css/site-search.css?v=20260910-single-row" />
     <script src="js/site-search.js?v=20260910-scenario-wording"></script>
     <?php

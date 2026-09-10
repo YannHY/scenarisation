@@ -5435,66 +5435,6 @@ html[data-theme="dark"] body {
 /* ═══════════════════════════════════════════════════════════
    TOOLTIP PERSONNALISÉ (#app-tooltip)
    ═══════════════════════════════════════════════════════════ */
-#app-tooltip {
-  position: fixed;
-  z-index: 9999;
-  padding: 5px 11px 6px;
-  border-radius: 7px;
-  background: #1e2433;
-  color: #eef2ff;
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.4;
-  max-width: 220px;
-  white-space: normal;
-  text-align: center;
-  pointer-events: none;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.30);
-  opacity: 0;
-  transform: translateY(5px) scale(0.96);
-  transition:
-    opacity 140ms ease,
-    transform 140ms cubic-bezier(0.34, 1.4, 0.64, 1);
-  will-change: opacity, transform;
-}
-
-#app-tooltip.tip-visible {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
-#app-tooltip::after {
-  content: '';
-  position: absolute;
-  left: var(--tip-arrow, 50%);
-  transform: translateX(-50%);
-  border: 5px solid transparent;
-}
-
-#app-tooltip.tip-above::after {
-  top: 100%;
-  border-top-color: #1e2433;
-}
-
-#app-tooltip.tip-below::after {
-  bottom: 100%;
-  border-bottom-color: #1e2433;
-}
-
-[data-theme="dark"] #app-tooltip {
-  background: #e7e4dc;
-  color: #201f1c;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.55);
-}
-
-[data-theme="dark"] #app-tooltip.tip-above::after {
-  border-top-color: #e7e4dc;
-}
-
-[data-theme="dark"] #app-tooltip.tip-below::after {
-  border-bottom-color: #e7e4dc;
-}
-
 /* ═══════════════════════════════════════════════════════════
    RIPPLE AU CLIC
    ═══════════════════════════════════════════════════════════ */

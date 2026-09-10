@@ -2,29 +2,43 @@
 declare(strict_types=1);
 require_once __DIR__ . '/lib/bootstrap.php';
 
-$db = app_db();
-$user = current_user();
-
-$pageSize = 24;
-$itemCount = (int)$db->query("SELECT COUNT(*)
-    FROM learning_designs
-    WHERE is_published = 1 AND is_listed = 1 AND share_token IS NOT NULL")->fetchColumn();
-$pageCount = max(1, (int)ceil($itemCount / $pageSize));
-$currentPage = min($pageCount, max(1, (int)($_GET['page'] ?? 1)));
-$offset = ($currentPage - 1) * $pageSize;
-
-$stmt = $db->prepare("SELECT d.title, d.document_json, d.share_token, d.license_code, d.updated_at, d.listed_at, u.username
-    FROM learning_designs d
-    JOIN users u ON u.id = d.owner_user_id
-    WHERE d.is_published = 1 AND d.is_listed = 1 AND d.share_token IS NOT NULL
-    ORDER BY d.listed_at DESC, d.id DESC
-    LIMIT :limit OFFSET :offset");
-$stmt->bindValue(':limit', $pageSize, PDO::PARAM_INT);
-$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-$stmt->execute();
 $items = [];
+$rows = [];
+$user = null;
+$pageSize = 24;
+$pageCount = 1;
+$currentPage = 1;
+$galleryUnavailable = false;
 
-foreach ($stmt->fetchAll() as $row) {
+try {
+    $db = app_db();
+    $user = current_user();
+
+    $itemCount = (int)$db->query("SELECT COUNT(*)
+        FROM learning_designs
+        WHERE is_published = 1 AND is_listed = 1 AND share_token IS NOT NULL")->fetchColumn();
+    $pageCount = max(1, (int)ceil($itemCount / $pageSize));
+    $currentPage = min($pageCount, max(1, (int)($_GET['page'] ?? 1)));
+    $offset = ($currentPage - 1) * $pageSize;
+
+    $stmt = $db->prepare("SELECT d.title, d.document_json, d.share_token, d.license_code, d.updated_at, d.listed_at, u.username
+        FROM learning_designs d
+        JOIN users u ON u.id = d.owner_user_id
+        WHERE d.is_published = 1 AND d.is_listed = 1 AND d.share_token IS NOT NULL
+        ORDER BY d.listed_at DESC, d.id DESC
+        LIMIT :limit OFFSET :offset");
+    $stmt->bindValue(':limit', $pageSize, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->execute();
+    $rows = $stmt->fetchAll();
+} catch (PDOException | RuntimeException $error) {
+    $galleryUnavailable = true;
+    http_response_code(503);
+    header('Retry-After: 60');
+    error_log('Shared scenarios: database unavailable (' . get_class($error) . ').');
+}
+
+foreach ($rows as $row) {
     $document = json_decode((string)$row['document_json'], true);
     if (!is_array($document)) {
         $document = ['sessions' => [], 'meta' => []];
@@ -307,7 +321,7 @@ function share_count_label(int $count, string $singular, ?string $plural = null)
     </style>
   </head>
   <body class="shared-page">
-    <?php render_site_nav('share'); ?>
+    <?php render_site_nav('share', !$galleryUnavailable); ?>
     <main class="shared-shell">
       <div class="shared-header">
         <div>
@@ -316,7 +330,12 @@ function share_count_label(int $count, string $singular, ?string $plural = null)
         </div>
       </div>
 
-      <?php if (!$items): ?>
+      <?php if ($galleryUnavailable): ?>
+        <div class="shared-empty" role="status">
+          <p data-site-i18n-en="Shared scenarios are temporarily unavailable. Please try again later." data-site-i18n-fr="Les scénarios partagés sont temporairement indisponibles. Veuillez réessayer un peu plus tard.">Les scénarios partagés sont temporairement indisponibles. Veuillez réessayer un peu plus tard.</p>
+          <a class="shared-link" href="share.php" data-site-i18n-en="Try again" data-site-i18n-fr="Réessayer">Réessayer</a>
+        </div>
+      <?php elseif (!$items): ?>
         <p class="shared-empty" data-site-i18n-en="No scenarios are currently visible in the shared scenarios catalog." data-site-i18n-fr="Aucun scénario n’est encore visible dans la page de partage.">Aucun scénario n’est encore visible dans la page de partage.</p>
       <?php else: ?>
         <section class="shared-grid" aria-label="Scénarios publiés dans le catalogue" data-site-i18n-attr="aria-label" data-site-i18n-en="Scenarios published in the catalog" data-site-i18n-fr="Scénarios publiés dans le catalogue">

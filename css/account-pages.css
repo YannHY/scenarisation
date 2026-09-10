@@ -844,8 +844,8 @@ html body.login-page .login-intro h2 {
   width: 24px;
   height: 24px;
   border-radius: 8px;
-  background: rgba(83, 105, 130, 0.1);
-  color: #536982;
+  background: #f0f0f0;
+  color: #111;
   font-size: 15px;
 }
 .login-learning-rhythm {
@@ -1475,8 +1475,8 @@ th {
 }
 
 [data-theme="dark"] .login-benefits i {
-  background: rgba(199, 210, 229, 0.09);
-  color: #aebccc;
+  background: #111;
+  color: #fff;
 }
 
 [data-theme="dark"] .profile-primary-link {
