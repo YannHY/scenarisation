@@ -3011,6 +3011,13 @@ main {
   cursor: grabbing;
 }
 
+.published-design-page .session-card,
+.published-design-page .activity-card,
+.published-design-page .session-card:active,
+.published-design-page .activity-card:active {
+  cursor: auto;
+}
+
 .dragging {
   opacity: 0.55;
 }

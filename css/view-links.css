@@ -1,0 +1,54 @@
+.published-design-page a {
+  color: inherit;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+.published-design-page .markdown-content a {
+  text-decoration-line: underline;
+  overflow-wrap: anywhere;
+}
+
+.published-design-page a:hover {
+  text-decoration-line: underline;
+  text-decoration-thickness: 2px;
+}
+
+.published-design-page a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+.published-design-page .activity-link-public {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  padding: 4px 9px;
+  border-radius: 99px;
+  border: 1px solid #d4d4d4;
+  background: #f5f5f5;
+  color: #262626;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.published-design-page .activity-link-public:hover,
+.published-design-page .activity-link-public:focus-visible {
+  background: #e5e5e5;
+  text-decoration: underline;
+}
+
+[data-theme="dark"] .published-design-page .activity-link-public {
+  border-color: #525252;
+  background: #171717;
+  color: #f5f5f5;
+}
+
+[data-theme="dark"] .published-design-page .activity-link-public:hover,
+[data-theme="dark"] .published-design-page .activity-link-public:focus-visible {
+  background: #262626;
+}

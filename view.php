@@ -786,7 +786,6 @@ function totalSessionDuration(array $session): int {
 
 // ── Meta info helpers ────────────────────────────────────────
 $metaDesigners  = safeText($meta['designers'] ?? $meta['author'] ?? '');
-$metaTrainers   = safeText($meta['trainers'] ?? '');
 $metaDescription= safeText($meta['description'] ?? '');
 $metaDelivery   = safeText($meta['modeDelivery'] ?? '');
 $metaSchoolSystem= safeText($meta['schoolSystem'] ?? '');
@@ -860,7 +859,10 @@ $displayDesignedMinutes = $designedMinutes > 0 ? $designedMinutes : $totalMinute
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="assets/favicon.svg?v=20260906-scenarisation" type="image/svg+xml" sizes="any">
   <title><?= esc($title) ?> — Scenarisation</title>
-  <link rel="stylesheet" href="css/interface.css?v=20260905-subtle-focus">
+  <link rel="stylesheet" href="css/interface.css?v=20260910-public-cursor">
+  <link rel="stylesheet" href="css/view-footer.css?v=20260910">
+  <link rel="stylesheet" href="css/view-toolbar.css?v=20260910">
+  <link rel="stylesheet" href="css/view-links.css?v=20260910">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
   <style>
     :root {
@@ -883,7 +885,6 @@ $displayDesignedMinutes = $designedMinutes > 0 ? $designedMinutes : $totalMinute
       color: var(--text-1);
       font: 15px/1.6 Inter, system-ui, sans-serif;
     }
-    a { color: var(--accent); }
     .page { max-width: 1000px; margin: 0 auto; padding: 32px 20px 60px; }
     /* Header */
     .hero { margin-bottom: 32px; }
@@ -933,18 +934,6 @@ $displayDesignedMinutes = $designedMinutes > 0 ? $designedMinutes : $totalMinute
       font-size: 14px;
       color: var(--text-1);
       line-height: 1.65;
-    }
-    .sessions-toolbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin: 0 0 14px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--border);
-    }
-    .sessions-toolbar-title {
-      margin: 0;
     }
     .activity-data-toggle-btn {
       display: inline-flex;
@@ -1097,11 +1086,6 @@ $displayDesignedMinutes = $designedMinutes > 0 ? $designedMinutes : $totalMinute
       text-transform: uppercase;
       letter-spacing: .04em;
     }
-    .markdown-content a {
-      color: var(--accent);
-      text-decoration: underline;
-      text-underline-offset: 2px;
-    }
     .activity-chips { display: flex; flex-wrap: wrap; gap: 5px; }
     .chip {
       font-size: 11px;
@@ -1131,21 +1115,6 @@ $displayDesignedMinutes = $designedMinutes > 0 ? $designedMinutes : $totalMinute
       gap: 6px;
       margin-top: 8px;
     }
-    .activity-link-public {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      max-width: 100%;
-      padding: 4px 9px;
-      border-radius: 99px;
-      border: 1px solid rgba(47,91,234,.18);
-      background: var(--accent-soft);
-      color: var(--accent);
-      font-size: 12px;
-      font-weight: 600;
-      text-decoration: none;
-    }
-    .activity-link-public:hover { text-decoration: underline; }
     .activity-notes {
       margin-top: 8px;
       font-size: 13px;
@@ -1154,21 +1123,6 @@ $displayDesignedMinutes = $designedMinutes > 0 ? $designedMinutes : $totalMinute
       line-height: 1.5;
     }
 
-    /* Footer */
-    .view-footer {
-      margin-top: 40px;
-      text-align: center;
-      font-size: 13px;
-      color: var(--text-2);
-    }
-    .view-footer a { color: var(--accent); text-decoration: none; }
-    .view-footer a:hover { text-decoration: underline; }
-    .view-license {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin: 0 0 6px;
-    }
     #app-tooltip {
       position: fixed;
       z-index: 9999;
@@ -1222,10 +1176,7 @@ $displayDesignedMinutes = $designedMinutes > 0 ? $designedMinutes : $totalMinute
     <h1><?= esc($title) ?></h1>
     <div class="hero-meta">
       <?php if ($metaDesigners !== ''): ?>
-        <span>✏️ <?= esc($metaDesigners) ?></span>
-      <?php endif; ?>
-      <?php if ($metaTrainers !== ''): ?>
-        <span>🎓 Enseignant(s) : <?= esc($metaTrainers) ?></span>
+        <span><?= esc($metaDesigners) ?></span>
       <?php endif; ?>
       <?php if ($updatedAt !== ''): ?>
         <span>Mis à jour le <?= esc($updatedAt) ?></span>
@@ -1264,9 +1215,8 @@ $displayDesignedMinutes = $designedMinutes > 0 ? $designedMinutes : $totalMinute
   <div class="meta-description markdown-content"><?= markdownHtml($metaDescription) ?></div>
   <?php endif; ?>
 
+  <?php if ($hasActivityContextData): ?>
   <div class="sessions-toolbar">
-    <h2 class="sessions-toolbar-title">Moments</h2>
-    <?php if ($hasActivityContextData): ?>
     <button
       id="activity-context-toggle"
       class="activity-data-toggle-btn"
@@ -1278,14 +1228,13 @@ $displayDesignedMinutes = $designedMinutes > 0 ? $designedMinutes : $totalMinute
       <i class="fa-solid fa-eye-slash" aria-hidden="true"></i>
       <span>Masquer les données</span>
     </button>
-    <?php endif; ?>
   </div>
+  <?php endif; ?>
 
   <div class="sessions">
   <?php foreach ($sessions as $si => $session):
     $sTitle      = safeText($session['title'] ?? '');
     $sObjectives = safeText($session['objectives'] ?? '');
-    $sIntentions = safeText($session['intentions'] ?? '');
     $sNotes      = safeText($session['notes'] ?? '');
     $activities  = is_array($session['activities'] ?? null) ? $session['activities'] : [];
     $sDuration   = totalSessionDuration($session);
@@ -1314,9 +1263,6 @@ $displayDesignedMinutes = $designedMinutes > 0 ? $designedMinutes : $totalMinute
 
     <?php if ($sObjectives !== ''): ?>
     <div class="session-text"><strong>Objectifs</strong><div class="markdown-content"><?= markdownHtml($sObjectives) ?></div></div>
-    <?php endif; ?>
-    <?php if ($sIntentions !== ''): ?>
-    <div class="session-text"><strong>Intentions pédagogiques</strong><div class="markdown-content"><?= markdownHtml($sIntentions) ?></div></div>
     <?php endif; ?>
 
     <?php if ($activities): ?>
@@ -1432,8 +1378,8 @@ $displayDesignedMinutes = $designedMinutes > 0 ? $designedMinutes : $totalMinute
     <?php if ($license): ?>
     <p class="view-license">
       <i class="fa-brands fa-creative-commons" aria-hidden="true"></i>
-      Cette production est mise à disposition sous
-      <a href="<?= esc($license['url']) ?>" target="_blank" rel="license noopener noreferrer"><?= esc($license['label']) ?></a>.
+      <span>Cette production est mise à disposition sous
+      <a href="<?= esc($license['url']) ?>" target="_blank" rel="license noopener noreferrer"><?= esc($license['label']) ?></a>.</span>
     </p>
     <?php endif; ?>
     <p>Partagé avec Scenarisation</p>
