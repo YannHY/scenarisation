@@ -128,7 +128,7 @@ body.admin-page .panel {
 }
 
 body.profile-page #profile-cli-active-title {
-  margin-top: 24px;
+  margin-top: clamp(32px, 3vw, 40px);
 }
 
 body.admin-page .account-form.panel {
@@ -1244,6 +1244,54 @@ body.profile-page .account-topbar {
   display: grid;
   gap: 16px;
 }
+.profile-table-scroll {
+  overflow-x: auto;
+}
+.profile-publications-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 14px;
+}
+.profile-publications-table th,
+.profile-publications-table td {
+  padding: 16px;
+  border-bottom: 1px solid #e9e9e9;
+  vertical-align: middle;
+}
+.profile-publications-table th {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.profile-publications-table tbody tr {
+  background: #fff;
+}
+.profile-publications-table tbody tr:nth-child(even) {
+  background: #f7f7f7;
+}
+.profile-publications-table .profile-publication-main {
+  width: 100%;
+  min-width: 200px;
+}
+.profile-publication-date {
+  min-width: 150px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.profile-publication-action-cell {
+  text-align: center;
+}
+[data-theme="dark"] .profile-publications-table tbody tr {
+  background: #181816;
+}
+[data-theme="dark"] .profile-publications-table tbody tr:nth-child(even) {
+  background: #222220;
+}
+[data-theme="dark"] .profile-publications-table th,
+[data-theme="dark"] .profile-publications-table td {
+  border-bottom-color: #353533;
+}
 .profile-publication {
   display: flex;
   align-items: center;
@@ -1589,6 +1637,79 @@ th {
   border-color: rgba(129, 124, 112, 0.42);
 }
 
+/* Profile sections share the page surface instead of nesting framed cards. */
+body.profile-page {
+  --page-section-gap: clamp(40px, 4vw, 56px);
+}
+
+body.profile-page .account-card > .account-copy {
+  margin-bottom: var(--page-section-gap);
+}
+
+body.profile-page .profile-subtitle {
+  margin-bottom: 16px;
+}
+
+html:not([data-theme="dark"]) body.profile-page h2.title-with-icon,
+html:not([data-theme="dark"]) body.profile-page h2.title-with-icon i {
+  color: #000;
+}
+
+body.profile-page .account-card,
+[data-theme="dark"] body.profile-page .account-card {
+  padding-inline: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+body.profile-page .panel:not(.danger-panel),
+[data-theme="dark"] body.profile-page .panel:not(.danger-panel) {
+  position: relative;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  padding: var(--page-section-gap) 0 0;
+}
+
+body.profile-page .profile-delete {
+  position: relative;
+  padding-top: var(--page-section-gap);
+}
+
+body.profile-page .account-card > .panel:not(.danger-panel)::before,
+body.profile-page .profile-delete::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--line) 14%, var(--line) 86%, transparent);
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+body.profile-page .account-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+}
+
+body.profile-page #profile-settings-title,
+body.profile-page #profile-delete-title {
+  margin: 0 0 24px;
+}
+
+body.profile-page .profile-settings .panel {
+  padding-top: 0;
+}
+
+body.profile-page .profile-settings h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
 /* White actions stay readable in both themes, including the scenario counter. */
 body.profile-page .profile-productions .profile-primary-link,
 body.profile-page .profile-productions .profile-stat {
@@ -1625,10 +1746,24 @@ body.profile-page .account-form.danger-panel {
   --heading-ink: #fff;
   --text: #b83645;
   --focus: #fff;
-  background: #b83645;
-  border-color: #b83645;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 12px 20px;
+  padding: 20px;
+  background: #b84452;
+  border-color: #b84452;
   color: #fff;
   box-shadow: none;
+}
+
+body.profile-page .danger-panel .account-copy {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+body.profile-page .danger-panel .account-copy {
+  font-size: 14px;
 }
 
 body.profile-page .danger-panel .account-copy,
@@ -1660,6 +1795,7 @@ body.profile-page .danger-panel input:autofill {
 }
 
 body.profile-page .danger-panel .danger-button {
+  margin-top: 0;
   background: #fff !important;
   border-color: #fff;
   color: #b83645;
@@ -1674,6 +1810,13 @@ body.profile-page .danger-panel .danger-button:focus-visible {
 
 body.profile-page .danger-panel .danger-button:focus-visible {
   outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+  body.profile-page .account-form.danger-panel {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 16px;
+  }
 }
 
 [data-theme="dark"] td {

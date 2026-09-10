@@ -13,10 +13,10 @@ app_start_session();
     <title>Interface de conception | Scenarisation</title>
     <?php render_theme_boot_script(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="css/account-ui.css?v=20260906-highlight" />
+    <link rel="stylesheet" href="css/account-ui.css?v=<?= hash_file('sha256', __DIR__ . '/css/account-ui.css') ?>" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="css/interface.css?v=20260910-bloom-on-demand" />
+    <link rel="stylesheet" href="css/interface.css?v=<?= hash_file('sha256', __DIR__ . '/css/interface.css') ?>" />
   </head>
   <body class="designer-page">
     <a id="skip-link" class="skip-link" href="#board">Aller au contenu principal</a>
@@ -262,7 +262,6 @@ app_start_session();
       </div>
       <div class="toolbar-right">
         <div class="toolbar-cluster">
-          <button id="new-design-btn" class="btn" type="button"><span class="btn-label"><i class="fa-regular fa-file btn-icon-inline" aria-hidden="true"></i>Nouveau</span></button>
           <button id="import-design-btn" class="btn" type="button"><span class="btn-label"><i class="fa-solid fa-file-arrow-up btn-icon-inline" aria-hidden="true"></i>Importer</span></button>
         </div>
         <span class="toolbar-sep" aria-hidden="true"></span>
@@ -600,16 +599,16 @@ app_start_session();
       </div>
     </div>
     <!-- Les sources précèdent les modules ; interface.js les assemble avant account-ui.js. -->
-    <script src="js/competency-catalog.js?v=20260831-framework-i18n"></script>
-    <script src="js/competency-greencomp-details.js?v=20260831-framework-i18n"></script>
-    <script src="js/competency-digcomp-details.js?v=20260830-digcomp-statements"></script>
-    <script src="js/editor/config.js?v=20260910-bloom-on-demand"></script>
-    <script src="js/editor/competencies.js?v=20260905-modules-v1"></script>
-    <script src="js/editor/exports.js?v=20260910-scenario-wording"></script>
-    <script src="js/editor/imports.js?v=20260906-ib-en"></script>
-    <script src="js/editor/analysis.js?v=20260905-modules-v1"></script>
-    <script src="js/editor/fields.js?v=20260905-modules-v1"></script>
-    <script src="js/interface.js?v=20260910-bloom-on-demand"></script>
-    <script src="js/account-ui.js?v=20260910-scenario-wording"></script>
+    <script src="js/competency-catalog.js?v=<?= hash_file('sha256', __DIR__ . '/js/competency-catalog.js') ?>"></script>
+    <script src="js/competency-greencomp-details.js?v=<?= hash_file('sha256', __DIR__ . '/js/competency-greencomp-details.js') ?>"></script>
+    <script src="js/competency-digcomp-details.js?v=<?= hash_file('sha256', __DIR__ . '/js/competency-digcomp-details.js') ?>"></script>
+    <script src="js/editor/config.js?v=<?= hash_file('sha256', __DIR__ . '/js/editor/config.js') ?>"></script>
+    <script src="js/editor/competencies.js?v=<?= hash_file('sha256', __DIR__ . '/js/editor/competencies.js') ?>"></script>
+    <script src="js/editor/exports.js?v=<?= hash_file('sha256', __DIR__ . '/js/editor/exports.js') ?>"></script>
+    <script src="js/editor/imports.js?v=<?= hash_file('sha256', __DIR__ . '/js/editor/imports.js') ?>"></script>
+    <script src="js/editor/analysis.js?v=<?= hash_file('sha256', __DIR__ . '/js/editor/analysis.js') ?>"></script>
+    <script src="js/editor/fields.js?v=<?= hash_file('sha256', __DIR__ . '/js/editor/fields.js') ?>"></script>
+    <script src="js/interface.js?v=<?= hash_file('sha256', __DIR__ . '/js/interface.js') ?>"></script>
+    <script src="js/account-ui.js?v=<?= hash_file('sha256', __DIR__ . '/js/account-ui.js') ?>"></script>
   </body>
 </html>

@@ -84,7 +84,6 @@ const boardLayoutListText = document.getElementById("board-layout-list-text");
 const boardLayoutColumnsText = document.getElementById("board-layout-columns-text");
 const boardLayoutGridBtn  = document.getElementById("board-layout-grid-btn");
 const boardLayoutGridText = document.getElementById("board-layout-grid-text");
-const newDesignBtn = document.getElementById("new-design-btn");
 const navNewDesignBtn = document.getElementById("nav-new-design-btn");
 const importDesignBtn = document.getElementById("import-design-btn");
 const exportDesignBtn = document.getElementById("export-design-btn");
@@ -570,7 +569,6 @@ function applyLocalizedUI() {
   boardLayoutListBtn.setAttribute("aria-pressed",    activeLayout === "list"    ? "true" : "false");
   boardLayoutColumnsBtn.setAttribute("aria-pressed", activeLayout === "columns" ? "true" : "false");
   boardLayoutGridBtn.setAttribute("aria-pressed",    activeLayout === "grid"    ? "true" : "false");
-  setButtonLabel(newDesignBtn, "fa-regular fa-file", t("new"));
   setButtonLabel(importDesignBtn, "fa-solid fa-file-arrow-up", t("import"));
   setButtonLabel(exportDesignBtn, "fa-solid fa-file-export", t("export"));
   const saveLabel = Number(state.meta.remoteDesignId) > 0
@@ -578,7 +576,6 @@ function applyLocalizedUI() {
     ? t("saveCopy") : t("save");
   setButtonLabel(saveBtn, "fa-regular fa-floppy-disk", saveLabel);
   [
-    [newDesignBtn, t("new")],
     [importDesignBtn, t("import")],
     [saveBtn, saveLabel],
     [document.getElementById("publish-btn"), t("share")],
@@ -4319,7 +4316,6 @@ function openNewDesignModal() {
   openModal(newDesignModalBackdrop, "#new-design-cancel-btn");
 }
 
-newDesignBtn.addEventListener("click", openNewDesignModal);
 navNewDesignBtn?.addEventListener("click", openNewDesignModal);
 newDesignCancelBtn.addEventListener("click", () => closeModal(newDesignModalBackdrop));
 newDesignConfirmBtn.addEventListener("click", () => {

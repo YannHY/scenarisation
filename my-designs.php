@@ -72,178 +72,8 @@ function e(string $value): string
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="css/interface.css?v=20260905-subtle-focus" />
     <link rel="stylesheet" href="css/account-ui.css?v=20260906-highlight" />
-    <link rel="stylesheet" href="css/account-pages.css?v=20260904-content-rhythm" />
-    <style>
-      .saved-shell {
-        border: 0;
-        border-radius: 0;
-      }
-
-      .saved-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 24px;
-        margin-bottom: var(--page-section-gap);
-      }
-
-      .saved-subtitle {
-        margin: 10px 0 0;
-        color: var(--muted);
-        line-height: var(--content-leading);
-      }
-
-      .saved-flash {
-        margin: 0 0 20px;
-        padding: 12px 14px;
-        border-radius: 14px;
-        border: 1px solid var(--line);
-        background: var(--surface-light);
-        color: var(--text-strong);
-      }
-
-      .saved-flash-success {
-        border-color: rgba(20, 140, 80, 0.22);
-      }
-
-      .saved-flash-warning {
-        border-color: rgba(209, 140, 19, 0.22);
-      }
-
-      .saved-grid {
-        display: grid;
-        gap: var(--page-section-gap);
-      }
-
-      .saved-empty {
-        margin: 0;
-        padding: var(--card-padding);
-        border: 1px dashed var(--line);
-        border-radius: 18px;
-        color: var(--muted);
-        background: var(--surface-light);
-      }
-
-      .saved-card {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 28px;
-        padding: var(--card-padding);
-        border: 1px solid var(--line);
-        border-radius: 18px;
-        background: var(--panel-2);
-      }
-
-      .saved-card-title {
-        margin: 0 0 10px;
-      }
-
-      .saved-card-meta {
-        margin: 0;
-        color: var(--muted);
-        font-size: 14px;
-        line-height: 1.68;
-      }
-
-      .saved-status {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        margin-top: 14px;
-        padding: 6px 9px;
-        border: 1px solid var(--line);
-        border-radius: 999px;
-        color: var(--muted);
-        font-size: 13px;
-        background: var(--surface-light);
-      }
-
-      .saved-card-actions {
-        display: inline-flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        align-items: center;
-      }
-
-      .saved-card-actions form {
-        margin: 0;
-      }
-
-      .saved-card-actions a.btn,
-      .saved-card-actions a.btn:hover,
-      .saved-card-actions a.btn:focus {
-        text-decoration: none;
-      }
-
-      .saved-action-btn {
-        width: 40px;
-        min-width: 40px;
-        height: 40px;
-        padding: 0;
-      }
-
-      .saved-action-delete:hover,
-      .saved-action-delete:focus-visible,
-      .saved-action-revoke:hover,
-      .saved-action-revoke:focus-visible {
-        border-color: rgba(184, 54, 69, 0.28);
-        color: var(--danger);
-        background: rgba(184, 54, 69, 0.08);
-      }
-
-      .saved-action-unlist:hover,
-      .saved-action-unlist:focus-visible {
-        border-color: rgba(209, 140, 19, 0.32);
-        color: #a45f00;
-        background: rgba(209, 140, 19, 0.1);
-      }
-
-      [data-theme="dark"] .saved-subtitle,
-      [data-theme="dark"] .saved-card-meta,
-      [data-theme="dark"] .saved-status,
-      [data-theme="dark"] .saved-empty {
-        color: var(--text-body);
-      }
-
-      [data-theme="dark"] .saved-flash {
-        border-color: var(--line);
-        background: var(--surface-light);
-        color: #e8edf5;
-      }
-
-      [data-theme="dark"] .saved-flash-success {
-        border-color: rgba(106, 176, 255, 0.28);
-      }
-
-      [data-theme="dark"] .saved-flash-warning {
-        border-color: rgba(251, 191, 36, 0.24);
-        color: #fde68a;
-      }
-
-      [data-theme="dark"] .saved-empty {
-        border-color: var(--line);
-        background: var(--surface-light);
-      }
-
-      [data-theme="dark"] .saved-card {
-        border-color: var(--line);
-        background: var(--panel-2);
-      }
-
-      [data-theme="dark"] .saved-status {
-        border-color: var(--line);
-        background: var(--surface-light);
-      }
-
-      @media (max-width: 760px) {
-        .saved-header,
-        .saved-card {
-          flex-direction: column;
-          align-items: stretch;
-        }
-      }
-    </style>
+    <link rel="stylesheet" href="css/account-pages.css?v=20260910-saved-table" />
+    <link rel="stylesheet" href="css/my-designs.css?v=20260910-no-heading-divider" />
   </head>
   <body class="designs-page">
     <?php render_site_nav('saves'); ?>
@@ -266,16 +96,24 @@ function e(string $value): string
       <?php else: ?>
         <section class="saved-grid" aria-label="Liste des productions sauvegardées"
           data-site-i18n-attr="aria-label" data-site-i18n-en="Saved scenarios list" data-site-i18n-fr="Liste des productions sauvegardées">
+          <div class="saved-table-scroll">
+          <table class="profile-publications-table saved-table" aria-label="Scénarios enregistrés" data-site-i18n-attr="aria-label" data-site-i18n-en="Saved scenarios" data-site-i18n-fr="Scénarios enregistrés">
+            <thead><tr>
+              <th scope="col" data-site-i18n-en="Scenario" data-site-i18n-fr="Scénario">Scénario</th>
+              <th scope="col" data-site-i18n-en="Last updated" data-site-i18n-fr="Dernière mise à jour">Dernière mise à jour</th>
+              <th scope="col" data-site-i18n-en="Created on" data-site-i18n-fr="Créée le">Créée le</th>
+              <th scope="col" data-site-i18n-en="Visibility" data-site-i18n-fr="Visibilité">Visibilité</th>
+              <th scope="col" data-site-i18n-en="Actions" data-site-i18n-fr="Actions">Actions</th>
+            </tr></thead>
+            <tbody>
           <?php foreach ($items as $item): ?>
-            <article class="saved-card">
-              <div>
+            <tr>
+              <td>
                 <h2 class="saved-card-title"><?= e((string)$item['title']) ?></h2>
-                <p class="saved-card-meta">
-                  <span data-site-i18n-en="Last updated:" data-site-i18n-fr="Dernière mise à jour :">Dernière mise à jour :</span>
-                  <?= e((string)$item['updated_at']) ?><br />
-                  <span data-site-i18n-en="Created:" data-site-i18n-fr="Créée le :">Créée le :</span>
-                  <?= e((string)$item['created_at']) ?>
-                </p>
+              </td>
+              <td class="saved-card-meta"><?= e((string)$item['updated_at']) ?></td>
+              <td class="saved-card-meta"><?= e((string)$item['created_at']) ?></td>
+              <td>
                 <?php
                   $isPublished = (bool)$item['is_published'];
                   $isListed = (bool)$item['is_listed'];
@@ -284,8 +122,8 @@ function e(string $value): string
                   $statusIcon = $isListed ? 'fa-solid fa-share-nodes' : ($isPublished ? 'fa-regular fa-eye' : 'fa-solid fa-lock');
                 ?>
                 <span class="saved-status"><i class="<?= e($statusIcon) ?>" aria-hidden="true"></i><span data-site-i18n-en="<?= e($statusTextEn) ?>" data-site-i18n-fr="<?= e($statusTextFr) ?>"><?= e($statusTextFr) ?></span></span>
-              </div>
-              <div class="saved-card-actions">
+              </td>
+              <td><div class="saved-card-actions">
                 <a class="btn btn-primary saved-action-btn" href="designer.php?remote_design_id=<?= (int)$item['id'] ?>"
                   aria-label="Ouvrir le scénario" title="Ouvrir le scénario"
                   data-site-i18n-attr="aria-label,title" data-site-i18n-en="Open scenario" data-site-i18n-fr="Ouvrir le scénario">
@@ -335,9 +173,12 @@ function e(string $value): string
                     <i class="fa-regular fa-trash-can" aria-hidden="true"></i>
                   </button>
                 </form>
-              </div>
-            </article>
+              </div></td>
+            </tr>
           <?php endforeach; ?>
+            </tbody>
+          </table>
+          </div>
         </section>
       <?php endif; ?>
     </main>

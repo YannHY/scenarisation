@@ -199,7 +199,7 @@ function e(string $value): string
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="css/interface.css?v=20260905-subtle-focus">
     <link rel="stylesheet" href="css/account-ui.css?v=20260906-highlight">
-    <link rel="stylesheet" href="css/account-pages.css?v=20260906-profile-role-spacing">
+    <link rel="stylesheet" href="css/account-pages.css?v=20260910-profile-alignment">
 </head>
 <body class="profile-page">
 <?php render_site_nav('profile'); ?>
@@ -219,10 +219,12 @@ function e(string $value): string
             <p class="account-message error" data-profile-flash><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></p>
         <?php endif; ?>
 
+        <section class="profile-settings" aria-labelledby="profile-settings-title">
+        <h2 id="profile-settings-title" class="title-with-icon"><i class="fa-solid fa-sliders" aria-hidden="true"></i>Paramètres du compte</h2>
         <div class="account-grid">
             <form method="post" class="account-form panel">
                 <input type="hidden" name="action" value="identity">
-                <h2 id="profile-info-title" class="title-with-icon"><i class="fa-solid fa-address-card" aria-hidden="true"></i>Informations</h2>
+                <h3 id="profile-info-title" class="title-with-icon"><i class="fa-solid fa-address-card" aria-hidden="true"></i>Informations</h3>
                 <div class="field">
                     <label id="profile-username-label" for="username">Nom d’utilisateur</label>
                     <input id="username" name="username" type="text" value="<?= e((string)$me['username']) ?>" required>
@@ -236,7 +238,7 @@ function e(string $value): string
 
             <form method="post" class="account-form panel">
                 <input type="hidden" name="action" value="password">
-                <h2 id="profile-password-title" class="title-with-icon"><i class="fa-solid fa-key" aria-hidden="true"></i>Mot de passe</h2>
+                <h3 id="profile-password-title" class="title-with-icon"><i class="fa-solid fa-key" aria-hidden="true"></i>Mot de passe</h3>
                 <div class="field">
                     <label id="profile-current-password-label" for="current_password">Mot de passe actuel</label>
                     <input id="current_password" name="current_password" type="password" required>
@@ -252,6 +254,8 @@ function e(string $value): string
                 <button id="profile-update-password" type="submit">Mettre à jour</button>
             </form>
         </div>
+
+        </section>
 
         <section class="panel profile-productions" aria-labelledby="profile-productions-title">
             <div class="profile-section-head">
@@ -274,15 +278,25 @@ function e(string $value): string
             <?php if (!$publishedDesigns): ?>
                 <p id="profile-empty-publications" class="profile-empty">Aucun scénario publié pour le moment.</p>
             <?php else: ?>
-                <div class="profile-publication-list">
+                <div class="profile-table-scroll">
+                <table class="profile-publications-table" aria-labelledby="profile-publications-title">
+                    <thead>
+                        <tr>
+                            <th scope="col" id="profile-table-scenario">Scénario</th>
+                            <th scope="col" data-profile-updated-label>Dernière mise à jour</th>
+                            <th scope="col" id="profile-table-actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                     <?php foreach ($publishedDesigns as $design): ?>
                         <?php $shareUrl = app_base_url() . '/view.php?token=' . urlencode((string)$design['share_token']); ?>
-                        <article class="profile-publication">
-                            <div class="profile-publication-main">
+                        <tr>
+                            <td class="profile-publication-main">
                                 <h4><?= e((string)$design['title']) ?></h4>
                                 <a href="<?= e($shareUrl) ?>" target="_blank" rel="noopener noreferrer"><?= e($shareUrl) ?></a>
-                                <p><span data-profile-updated-label>Dernière mise à jour</span> : <?= e((string)$design['updated_at']) ?></p>
-                            </div>
+                            </td>
+                            <td class="profile-publication-date"><?= e((string)$design['updated_at']) ?></td>
+                            <td class="profile-publication-action-cell">
                             <form method="post" class="profile-publication-actions" data-confirm-fr="Supprimer cette publication et désactiver son lien public ?" data-confirm-en="Delete this publication and disable its public link?" onsubmit="return window.confirm(this.dataset.confirm || this.dataset.confirmFr);">
                                 <input type="hidden" name="action" value="unpublish_design">
                                 <input type="hidden" name="design_id" value="<?= (int)$design['id'] ?>">
@@ -290,8 +304,11 @@ function e(string $value): string
                                     <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
                                 </button>
                             </form>
-                        </article>
+                            </td>
+                        </tr>
                     <?php endforeach; ?>
+                    </tbody>
+                </table>
                 </div>
             <?php endif; ?>
         </section>
@@ -300,7 +317,7 @@ function e(string $value): string
             <div class="profile-section-head">
                 <div>
                     <h2 id="profile-cli-title" class="title-with-icon"><i class="fa-solid fa-terminal" aria-hidden="true"></i>Publication depuis le CLI</h2>
-                    <p id="profile-cli-copy" class="account-copy">Créez un jeton personnel pour publier depuis la commande <code>scenarisation publish</code>.</p>
+                    <p id="profile-cli-copy" class="account-copy">Créez un jeton personnel pour publier vos scénarios depuis votre terminal.</p>
                 </div>
             </div>
 
@@ -327,31 +344,52 @@ function e(string $value): string
             <?php if (!$cliTokens): ?>
                 <p id="profile-cli-empty" class="profile-empty">Aucun jeton CLI actif.</p>
             <?php else: ?>
-                <div class="profile-publication-list">
+                <div class="profile-table-scroll">
+                <table class="profile-publications-table" aria-labelledby="profile-cli-active-title">
+                    <thead>
+                        <tr>
+                            <th scope="col" id="profile-cli-table-name">Jeton</th>
+                            <th scope="col" id="profile-cli-table-created">Créé le</th>
+                            <th scope="col" id="profile-cli-table-used">Dernière utilisation</th>
+                            <th scope="col" id="profile-cli-table-actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                     <?php foreach ($cliTokens as $token): ?>
-                        <article class="profile-publication">
-                            <div class="profile-publication-main">
+                        <tr>
+                            <td class="profile-publication-main">
                                 <h4><?= e((string)$token['name']) ?></h4>
-                                <p>Préfixe : <code><?= e((string)$token['token_prefix']) ?>…</code></p>
-                                <p>Créé : <?= e((string)$token['created_at']) ?></p>
-                                <p>Dernière utilisation : <?= e((string)($token['last_used_at'] ?? 'Jamais')) ?></p>
-                            </div>
+                                <p><code><?= e((string)$token['token_prefix']) ?>…</code></p>
+                            </td>
+                            <td class="profile-publication-date"><?= e((string)$token['created_at']) ?></td>
+                            <td class="profile-publication-date">
+                                <?php if ($token['last_used_at'] === null): ?>
+                                    <span data-profile-token-never>Jamais</span>
+                                <?php else: ?>
+                                    <?= e((string)$token['last_used_at']) ?>
+                                <?php endif; ?>
+                            </td>
+                            <td class="profile-publication-action-cell">
                             <form method="post" class="profile-publication-actions" data-confirm-fr="Révoquer ce jeton CLI ?" data-confirm-en="Revoke this CLI token?" onsubmit="return window.confirm(this.dataset.confirm || this.dataset.confirmFr);">
                                 <input type="hidden" name="action" value="revoke_cli_token">
                                 <input type="hidden" name="cli_token_id" value="<?= (int)$token['id'] ?>">
-                                <button class="btn-icon-danger" type="submit" title="Révoquer le jeton" aria-label="Révoquer le jeton">
+                                <button class="btn-icon-danger" type="submit" title="Révoquer le jeton" aria-label="Révoquer le jeton" data-profile-revoke-token-btn>
                                     <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
                                 </button>
                             </form>
-                        </article>
+                            </td>
+                        </tr>
                     <?php endforeach; ?>
+                    </tbody>
+                </table>
                 </div>
             <?php endif; ?>
         </section>
 
+        <section class="profile-delete" aria-labelledby="profile-delete-title">
+        <h2 id="profile-delete-title" class="title-with-icon"><i class="fa-solid fa-trash-can" aria-hidden="true"></i>Supprimer mon compte</h2>
         <form method="post" class="account-form panel danger-panel" data-confirm-fr="Supprimer définitivement votre compte ?" data-confirm-en="Permanently delete your account?" onsubmit="return window.confirm(this.dataset.confirm || this.dataset.confirmFr);">
             <input type="hidden" name="action" value="delete_account">
-            <h2 id="profile-delete-title" class="title-with-icon"><i class="fa-solid fa-trash-can" aria-hidden="true"></i>Supprimer mon compte</h2>
             <p id="profile-delete-copy" class="account-copy">Toutes vos productions seront supprimées avec votre compte.</p>
             <div class="field">
                 <label id="profile-delete-password-label" for="delete_current_password">Mot de passe actuel</label>
@@ -359,6 +397,7 @@ function e(string $value): string
             </div>
             <button id="profile-delete-button" type="submit" class="danger-button">Supprimer mon compte</button>
         </form>
+        </section>
     </section>
 </main>
 <?php render_site_footer(); ?>
@@ -367,6 +406,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var translations = {
         'profile-title': 'Profile',
         'profile-role-label': 'Role',
+        'profile-settings-title': 'Account settings',
         'profile-info-title': 'Information',
         'profile-username-label': 'Username',
         'profile-save-identity': 'Save',
@@ -380,12 +420,18 @@ document.addEventListener('DOMContentLoaded', function () {
         'profile-export-link': 'Export all my scenarios',
         'profile-competencies-link': 'View my competencies',
         'profile-publications-title': 'Active publications',
+        'profile-table-scenario': 'Scenario',
+        'profile-table-actions': 'Actions',
         'profile-empty-publications': 'No published scenario yet.',
         'profile-cli-title': 'CLI publishing',
-        'profile-cli-copy': 'Create a personal token to publish with the `scenarisation publish` command.',
+        'profile-cli-copy': 'Create a personal token to publish your scenarios from your terminal.',
         'profile-cli-token-name-label': 'Token name',
         'profile-cli-create-button': 'Create CLI token',
         'profile-cli-active-title': 'Active tokens',
+        'profile-cli-table-name': 'Token',
+        'profile-cli-table-created': 'Created on',
+        'profile-cli-table-used': 'Last used',
+        'profile-cli-table-actions': 'Actions',
         'profile-cli-empty': 'No active CLI token.',
         'profile-delete-title': 'Delete my account',
         'profile-delete-copy': 'All your scenarios will be deleted with your account.',
@@ -464,6 +510,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
         document.querySelectorAll('[data-profile-updated-label]').forEach(function (el) {
             el.textContent = lang === 'en' ? 'Last updated' : 'Dernière mise à jour';
+        });
+
+        document.querySelectorAll('[data-profile-token-never]').forEach(function (el) {
+            el.textContent = lang === 'en' ? 'Never' : 'Jamais';
+        });
+
+        document.querySelectorAll('[data-profile-revoke-token-btn]').forEach(function (button) {
+            var label = lang === 'en' ? 'Revoke token' : 'Révoquer le jeton';
+            button.title = label;
+            button.setAttribute('aria-label', label);
         });
 
         document.querySelectorAll('[data-profile-delete-publication-btn]').forEach(function (button) {
