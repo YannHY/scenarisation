@@ -262,10 +262,6 @@ app_start_session();
       </div>
       <div class="toolbar-right">
         <div class="toolbar-cluster">
-          <button id="import-design-btn" class="btn" type="button"><span class="btn-label"><i class="fa-solid fa-file-arrow-up btn-icon-inline" aria-hidden="true"></i>Importer</span></button>
-        </div>
-        <span class="toolbar-sep" aria-hidden="true"></span>
-        <div class="toolbar-cluster">
           <button id="save-btn" class="btn btn-light" type="button" hidden aria-live="polite" aria-atomic="true"><span class="btn-label"><i class="fa-regular fa-floppy-disk btn-icon-inline" aria-hidden="true"></i>Enregistrer</span></button>
           <button id="publish-btn" class="btn btn-light" type="button" hidden><span class="btn-label"><i class="fa-solid fa-share-nodes btn-icon-inline" aria-hidden="true"></i>Partager</span></button>
           <button id="export-design-btn" class="btn" type="button"><span class="btn-label"><i class="fa-solid fa-file-export btn-icon-inline" aria-hidden="true"></i>Exporter</span></button>
@@ -608,6 +604,7 @@ app_start_session();
     <script src="js/editor/imports.js?v=<?= hash_file('sha256', __DIR__ . '/js/editor/imports.js') ?>"></script>
     <script src="js/editor/analysis.js?v=<?= hash_file('sha256', __DIR__ . '/js/editor/analysis.js') ?>"></script>
     <script src="js/editor/fields.js?v=<?= hash_file('sha256', __DIR__ . '/js/editor/fields.js') ?>"></script>
+    <script src="js/scenario-file-transfer.js?v=<?= hash_file('sha256', __DIR__ . '/js/scenario-file-transfer.js') ?>"></script>
     <script src="js/interface.js?v=<?= hash_file('sha256', __DIR__ . '/js/interface.js') ?>"></script>
     <script src="js/account-ui.js?v=<?= hash_file('sha256', __DIR__ . '/js/account-ui.js') ?>"></script>
   </body>

@@ -84,8 +84,6 @@ const boardLayoutListText = document.getElementById("board-layout-list-text");
 const boardLayoutColumnsText = document.getElementById("board-layout-columns-text");
 const boardLayoutGridBtn  = document.getElementById("board-layout-grid-btn");
 const boardLayoutGridText = document.getElementById("board-layout-grid-text");
-const navNewDesignBtn = document.getElementById("nav-new-design-btn");
-const importDesignBtn = document.getElementById("import-design-btn");
 const exportDesignBtn = document.getElementById("export-design-btn");
 const infoBtn = document.getElementById("info-btn");
 const saveBtn = document.getElementById("save-btn");
@@ -483,10 +481,6 @@ function applyLocalizedUI() {
   const partAddBtn = document.getElementById("partition-add-line-btn");
   if (partAddBtn) partAddBtn.textContent = t("partitionAdd");
   document.getElementById("new-design-modal-title").textContent = t("newDesignModalTitle");
-  if (navNewDesignBtn) {
-    navNewDesignBtn.setAttribute("aria-label", t("newDesignModalTitle"));
-    navNewDesignBtn.setAttribute("title", t("newDesignModalTitle"));
-  }
   newDesignModalMsg.textContent = t("newDesignModalMsg");
   newDesignCancelBtn.textContent = t("cancel");
   newDesignConfirmBtn.textContent = t("newDesignModalConfirm");
@@ -569,14 +563,12 @@ function applyLocalizedUI() {
   boardLayoutListBtn.setAttribute("aria-pressed",    activeLayout === "list"    ? "true" : "false");
   boardLayoutColumnsBtn.setAttribute("aria-pressed", activeLayout === "columns" ? "true" : "false");
   boardLayoutGridBtn.setAttribute("aria-pressed",    activeLayout === "grid"    ? "true" : "false");
-  setButtonLabel(importDesignBtn, "fa-solid fa-file-arrow-up", t("import"));
   setButtonLabel(exportDesignBtn, "fa-solid fa-file-export", t("export"));
   const saveLabel = Number(state.meta.remoteDesignId) > 0
     && Number(state.meta.remoteSaveConflict) === Number(state.meta.remoteDesignId)
     ? t("saveCopy") : t("save");
   setButtonLabel(saveBtn, "fa-regular fa-floppy-disk", saveLabel);
   [
-    [importDesignBtn, t("import")],
     [saveBtn, saveLabel],
     [document.getElementById("publish-btn"), t("share")],
     [exportDesignBtn, t("export")]
@@ -594,7 +586,6 @@ function applyLocalizedUI() {
   if (footerAboutBtn) footerAboutBtn.textContent = t("infoTitle");
   if (footerHelpBtn) footerHelpBtn.textContent = t("footerHelp");
   if (footerSharedDesignsBtn) footerSharedDesignsBtn.textContent = t("footerSharedDesigns");
-  importDesignBtn.setAttribute("aria-haspopup", "dialog");
   const importModalTitle = document.getElementById("import-modal-title");
   if (importModalTitle) importModalTitle.textContent = t("importTitle");
   const importModalDesc = document.getElementById("import-modal-desc");
@@ -865,7 +856,31 @@ function initializeStorageScope(userId = null) {
   state = scopedState;
   documentGeneration++;
   render();
-  void maybeApplyRequestedModel();
+  const params = new URLSearchParams(window.location.search);
+  if (params.has("import_file") && !params.has("model") && !params.has("remote_design_id")) {
+    const fileId = params.get("import_file");
+    params.delete("import_file");
+    const query = params.toString();
+    window.history.replaceState({}, "", `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`);
+    void window.learningDesignerFileTransfer.take(fileId).then(async file => {
+      if (!file) throw new Error("Missing import file");
+      if (!await importScenarioFile(file)) openImportModal();
+    }).catch(() => {
+      showNotice(t("importInvalid"), "error");
+      openImportModal();
+    });
+  } else if (params.get("new") === "1" && !params.has("model") && !params.has("remote_design_id")) {
+    params.delete("new");
+    const query = params.toString();
+    window.history.replaceState({}, "", `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`);
+    if (state.sessions.length || state.meta.name) {
+      openNewDesignModal();
+    } else {
+      createBlankDesign();
+    }
+  } else {
+    void maybeApplyRequestedModel();
+  }
 }
 
 function saveState({ markDirty = true } = {}) {
@@ -4316,9 +4331,8 @@ function openNewDesignModal() {
   openModal(newDesignModalBackdrop, "#new-design-cancel-btn");
 }
 
-navNewDesignBtn?.addEventListener("click", openNewDesignModal);
 newDesignCancelBtn.addEventListener("click", () => closeModal(newDesignModalBackdrop));
-newDesignConfirmBtn.addEventListener("click", () => {
+function createBlankDesign() {
   closeModal(newDesignModalBackdrop);
   state = createNewDesignState();
   documentGeneration++;
@@ -4326,7 +4340,8 @@ newDesignConfirmBtn.addEventListener("click", () => {
   saveState();
   render();
   announce(t("moved"));
-});
+}
+newDesignConfirmBtn.addEventListener("click", createBlankDesign);
 newDesignModalBackdrop.addEventListener("click", (e) => {
   if (e.target === newDesignModalBackdrop) closeModal(newDesignModalBackdrop);
 });
@@ -4507,10 +4522,6 @@ exportResultCopyBtn?.addEventListener("click", async () => {
     exportResultText.focus();
     exportResultText.select();
   }
-});
-
-importDesignBtn.addEventListener("click", () => {
-  openImportModal();
 });
 
 importModalCancelBtn?.addEventListener("click", () => {

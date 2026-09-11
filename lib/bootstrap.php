@@ -1137,7 +1137,6 @@ function render_theme_boot_script(): void
 function render_site_nav(string $active = '', bool $accountAvailable = true): void
 {
     $user = $accountAvailable ? current_user() : null;
-    $isDesigner = $active === 'designer';
     $isAdmin = (string)($user['role'] ?? '') === 'admin';
     $username = trim((string)($user['username'] ?? $user['email'] ?? ''));
     $savesClass = $active === 'saves' ? ' nav-account-btn-active' : '';
@@ -1162,15 +1161,9 @@ function render_site_nav(string $active = '', bool $accountAvailable = true): vo
                 <i class="fa-solid fa-book-open" aria-hidden="true"></i>
             </a>
             <div class="account-toolbar-cluster">
-                <?php if ($isDesigner): ?>
-                    <button id="nav-new-design-btn" class="nav-icon-btn" type="button" title="Nouveau scénario" aria-label="Nouveau scénario" data-site-i18n-attr="title,aria-label" data-site-i18n-en="New scenario" data-site-i18n-fr="Nouveau scénario">
-                        <i class="fa-solid fa-file-circle-plus" aria-hidden="true"></i>
-                    </button>
-                <?php else: ?>
-                    <a class="nav-icon-btn" href="designer.php" title="Nouveau scénario" aria-label="Nouveau scénario" data-site-i18n-attr="title,aria-label" data-site-i18n-en="New scenario" data-site-i18n-fr="Nouveau scénario">
-                        <i class="fa-solid fa-file-circle-plus" aria-hidden="true"></i>
-                    </a>
-                <?php endif; ?>
+                <a class="nav-icon-btn" href="new-design.php" title="Nouveau scénario" aria-label="Nouveau scénario" data-site-i18n-attr="title,aria-label" data-site-i18n-en="New scenario" data-site-i18n-fr="Nouveau scénario">
+                    <i class="fa-solid fa-file-circle-plus" aria-hidden="true"></i>
+                </a>
                 <a class="nav-account-btn nav-account-icon-btn<?= $savesClass ?>" href="my-designs.php" title="Scénarios" aria-label="Scénarios" data-site-i18n-attr="title,aria-label" data-site-i18n-en="Scenarios" data-site-i18n-fr="Scénarios">
                     <i class="fa-regular fa-folder-open" aria-hidden="true"></i>
                 </a>
@@ -1389,6 +1382,9 @@ function site_breadcrumb_items(string $active = ''): array
     $map = [
         'home' => [],
         'designer' => [],
+        'new-design' => [
+            ['fr' => 'Nouveau scénario', 'en' => 'New scenario'],
+        ],
         'about' => [
             ['fr' => 'À propos', 'en' => 'About'],
         ],

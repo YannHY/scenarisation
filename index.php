@@ -59,8 +59,8 @@ $homeOgImageUrl = rtrim(app_base_url(), '/') . '/assets/og-home.png?v=20260906-s
                data-site-i18n-en="Design, analyse and share learning scenarios centred on what learners actually do, from the initial intention to the flow of each session."
                data-site-i18n-fr="Concevez, analysez et partagez des scénarios pédagogiques centrés sur l’activité des élèves, de l’intention initiale au déroulement de chaque séance.">Concevez, analysez et partagez des scénarios pédagogiques centrés sur l’activité des élèves, de l’intention initiale au déroulement de chaque séance.</p>
             <div class="home-hero-actions">
-                <a class="home-primary-action" href="designer.php">
-                    <span data-site-i18n-en="Open the scenario workspace" data-site-i18n-fr="Ouvrir l’interface de conception">Ouvrir l’interface de conception</span>
+                <a class="home-primary-action" href="new-design.php">
+                    <span data-site-i18n-en="Create a scenario" data-site-i18n-fr="Créer un scénario">Créer un scénario</span>
                     <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
                 </a>
                 <a class="home-text-action" href="#features"
@@ -290,7 +290,7 @@ $homeOgImageUrl = rtrim(app_base_url(), '/') . '/assets/og-home.png?v=20260906-s
                 <h2 id="home-final-title"
                     data-site-i18n-en="Start designing"
                     data-site-i18n-fr="À vous de concevoir">À vous de concevoir</h2>
-                <a class="home-primary-action" href="designer.php">
+                <a class="home-primary-action" href="new-design.php">
                     <span data-site-i18n-en="Create a scenario" data-site-i18n-fr="Créer un scénario">Créer un scénario</span>
                     <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
                 </a>
