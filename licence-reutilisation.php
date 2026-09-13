@@ -25,7 +25,7 @@ app_start_session();
 <main class="legal-shell">
     <article class="legal-card">
         <h1>Licence et réutilisation</h1>
-        <p class="legal-updated"><strong>Dernière mise à jour&nbsp;: <time datetime="2026-09-05">5 septembre 2026</time></strong></p>
+        <p class="legal-updated"><strong>Dernière mise à jour&nbsp;: <time datetime="2026-09-13">13 septembre 2026</time></strong></p>
 
         <p class="legal-lead">Cette page distingue les contenus propres à Scenarisation, son code source, les créations publiées par les utilisateurs et les éléments appartenant à des tiers.</p>
 
@@ -42,8 +42,8 @@ app_start_session();
         <p class="legal-attribution"><strong>Exemple d’attribution&nbsp;:</strong><br>«&nbsp;Adapté de Scenarisation, Yann Houry et François Jourde, sous licence CC BY-SA 4.0 – [lien vers la ressource d’origine]. Modifications&nbsp;: [description].&nbsp;»</p>
 
         <h2>Code source</h2>
-        <p>Le <a href="https://github.com/YannHY/scenarisation" rel="noopener noreferrer">code source de Scenarisation</a> est réutilisable selon le fichier <a href="https://github.com/YannHY/scenarisation/blob/main/LICENSE" rel="license noopener noreferrer"><code>LICENSE</code></a> présent dans le dépôt. Dans sa version en vigueur à la date indiquée en haut de cette page, ce fichier applique l’outil juridique <a href="https://creativecommons.org/publicdomain/zero/1.0/deed.fr" rel="license noopener noreferrer">CC0 1.0 Universal</a>.</p>
-        <p>CC0 ne peut porter que sur les éléments pour lesquels la personne qui l’applique détient les droits nécessaires. Les bibliothèques, polices, icônes, extraits, contributions antérieures et autres composants appartenant à des tiers conservent leurs propres licences.</p>
+        <p>Le <a href="https://github.com/YannHY/scenarisation" rel="noopener noreferrer">code source de Scenarisation</a> est proposé sous licence <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.fr" rel="license noopener noreferrer">Creative Commons Attribution – Partage dans les mêmes conditions 4.0 International (CC BY-SA 4.0)</a>, dont le texte intégral figure dans le fichier <a href="https://github.com/YannHY/scenarisation/blob/main/LICENSE" rel="license noopener noreferrer"><code>LICENSE</code></a> présent dans le dépôt.</p>
+        <p>Cette licence ne porte que sur les éléments pour lesquels les auteurs détiennent les droits nécessaires. Les bibliothèques, polices, icônes, extraits, contributions antérieures et autres composants appartenant à des tiers conservent leurs propres licences.</p>
 
         <h2>Scénarios créés et publiés par les utilisateurs</h2>
         <p>Les scénarios pédagogiques créés, importés ou enregistrés dans l’application restent sous la responsabilité de leurs auteurs. Scenarisation ne revendique aucun droit de propriété sur ces productions.</p>
