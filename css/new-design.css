@@ -5,7 +5,7 @@
   flex-direction: column;
 }
 .new-design-main {
-  width: min(1180px, calc(100% - 48px));
+  width: min(var(--content-shell-width, 1180px), calc(100% - var(--content-shell-gutter, 36px)));
   margin: auto;
   padding: 52px 0 72px;
   flex: 1;
@@ -58,6 +58,9 @@
   .new-design-choices { grid-template-columns: 1fr; }
   .new-design-choice { min-height: 280px; }
   .new-design-main { max-width: 600px; padding-top: 32px; }
+  .new-design-page .site-breadcrumb {
+    width: min(600px, calc(100vw - var(--content-shell-gutter, 36px)));
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .new-design-choice, .new-design-choice-icon { transition: none; }

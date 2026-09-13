@@ -1,12 +1,12 @@
-# Scenarisation
+# Scénarisation
 
-Scenarisation est une application libre pour concevoir, analyser et partager des scénarios pédagogiques.
+Scénarisation est une application libre pour concevoir, analyser et partager des scénarios pédagogiques.
 
 Elle aide à passer d'une intention pédagogique à une séquence exploitable : organiser les étapes, préciser les activités et les consignes, formuler les acquis d'apprentissage, estimer les durées et vérifier l'équilibre des modalités proposées aux élèves.
 
 Le projet est inspiré de l'[UCL Learning Designer](https://www.ucl.ac.uk/learning-designer/) et s'appuie sur le travail de [François Jourde](https://github.com/jourde/learning-designer-revised).
 
-## Ce que Scenarisation apporte
+## Ce que Scénarisation apporte
 
 - **Concevoir avec un cadre pédagogique commun** : chaque scénario est structuré en moments et activités, reliés à des types d'apprentissage, des modalités, des compétences issues de sept cadres (Florimont, Socle commun, GreenComp, DigComp 3.0, CRCN, Pix et Pix IA), des niveaux AIAS et des acquis issus de la taxonomie de Bloom.
 - **Partir d'un modèle plutôt que d'une page blanche** : 28 scénarios génériques, répartis en huit familles, sont prêts à être adaptés à une discipline et à un contexte.
@@ -20,7 +20,7 @@ Le projet est inspiré de l'[UCL Learning Designer](https://www.ucl.ac.uk/learni
 
 - [Aide complète](./help.php) : prise en main, conception, sauvegarde, partage et import/export
 - [Créer avec une IA, la Skill et le CLI](./help.php#cli) : trois manières d'utiliser un agent pour produire un scénario structuré
-- [Skill Scenarisation](./skills/scenarisation/SKILL.md) : méthode réutilisable par un agent compatible
+- [Skill Scénarisation](./skills/scenarisation/SKILL.md) : méthode réutilisable par un agent compatible
 - [Skill de développement du site](./skills/scenarisation-site/SKILL.md) : conventions techniques et direction visuelle pour maintenir l’application
 - [Modèles de scénarios](./models.php) : bibliothèque de scénarios génériques préremplis
 - [Bibliothèque de prompts](./prompts.php) : prompts prêts à copier pour analyser, adapter ou prolonger un scénario
@@ -44,10 +44,10 @@ Google Chrome ou Chromium, Node.js 22 (ou une version ultérieure) et PHP doiven
 
 ## Concevoir avec une IA
 
-Scenarisation propose trois niveaux d'intégration, selon le besoin :
+Scénarisation propose trois niveaux d'intégration, selon le besoin :
 
 1. **Les prompts** servent à enrichir ponctuellement un scénario : différenciation, conception universelle de l'apprentissage, modèle SAMR, charge de travail ou création d'une fiche destinée aux élèves.
-2. **La Skill Scenarisation** donne à un agent une méthode de travail complète : recueillir les choix pédagogiques, construire le scénario avec le CLI, le valider, puis préparer sa publication.
+2. **La Skill Scénarisation** donne à un agent une méthode de travail complète : recueillir les choix pédagogiques, construire le scénario avec le CLI, le valider, puis préparer sa publication.
 3. **Le CLI `scenarisation`** permet de créer et modifier un scénario depuis le terminal, de contrôler sa structure, de transmettre le travail à Codex et de le publier ou le mettre à jour sur le site.
 
 La Skill ne se contente donc pas de générer du texte libre : elle guide l'agent vers le format attendu par l'application et impose une validation avant publication.
@@ -95,7 +95,7 @@ Chaque modèle contient déjà des moments, des activités, des durées, des mod
 
 ## Importer, exporter et publier
 
-Scenarisation accepte les scénarios issus de son ancien format LDJ ainsi que des fichiers JSON, CSV, Excel et Markdown.
+Scénarisation accepte les scénarios issus de son ancien format LDJ ainsi que des fichiers JSON, CSV, Excel et Markdown.
 
 Un scénario peut être exporté en Markdown, HTML, JSON, Excel ou Word. L'export peut produire une version enseignant ou élève et se limiter aux moments sélectionnés. La publication en ligne crée une page de consultation partageable ; les auteurs qui le souhaitent peuvent également rendre leur scénario visible dans le catalogue public.
 
@@ -168,6 +168,6 @@ Les sauvegardes web utilisent une révision entière pour détecter les écritur
 
 La configuration suit cet ordre de priorité : variables d’environnement, paramètres du serveur, fichiers locaux ou secrets, puis valeurs par défaut de `app-config.php`.
 
-## Renommage en Scenarisation
+## Renommage en Scénarisation
 
 Le CLI s’utilise désormais avec `scenarisation`, et la skill avec `$scenarisation` dans Codex ou `/scenarisation` dans Claude Code. Relancez les installateurs ci-dessus pour obtenir ces nouvelles commandes. Le dépôt GitHub est désormais `YannHY/scenarisation`. La configuration de connexion existante dans `~/.learning-designer/config.json` est conservée ; `SCENARISATION_CONFIG` permet de choisir un autre fichier. Les variables d’installation `SCENARISATION_*` acceptent aussi leurs anciens équivalents `LEARNING_*`.

@@ -36,10 +36,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             try {
                 $token = create_password_reset_token($db, (int)$account['id']);
                 if (!send_password_reset_message((string)$account['email'], (string)$account['username'], $token)) {
-                    error_log('Scenarisation : échec d’envoi d’un email de réinitialisation pour le compte ' . (int)$account['id'] . '.');
+                    error_log('Scénarisation : échec d’envoi d’un email de réinitialisation pour le compte ' . (int)$account['id'] . '.');
                 }
             } catch (Throwable $exception) {
-                error_log('Scenarisation : échec de préparation d’une réinitialisation de mot de passe : ' . $exception->getMessage());
+                error_log('Scénarisation : échec de préparation d’une réinitialisation de mot de passe : ' . $exception->getMessage());
             }
         }
 
@@ -55,20 +55,20 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="assets/favicon.svg?v=20260906-scenarisation" type="image/svg+xml" sizes="any">
-    <title>Mot de passe oublié | Scenarisation</title>
+    <title>Mot de passe oublié | Scénarisation</title>
     <?php render_theme_boot_script(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="css/interface.css?v=20260905-subtle-focus">
     <link rel="stylesheet" href="css/account-ui.css?v=20260906-highlight">
-    <link rel="stylesheet" href="css/account-pages.css?v=20260904-content-rhythm">
+    <link rel="stylesheet" href="css/account-pages.css?v=20260912-breadcrumb-alignment">
 </head>
-<body class="login-page">
+<body class="login-page forgot-password-page">
 <?php render_site_nav('forgot_password'); ?>
 <main class="account-shell with-nav">
     <section class="account-card">
-        <p class="account-kicker">Scenarisation</p>
+        <p class="account-kicker">Scénarisation</p>
         <h1>Mot de passe oublié</h1>
         <p class="account-copy">Indiquez l’adresse email de votre compte. Vous recevrez un lien valable pendant une heure pour choisir un nouveau mot de passe.</p>
 

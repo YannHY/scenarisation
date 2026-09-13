@@ -132,7 +132,7 @@ if ($db !== null && $requestMethod === 'POST' && $submittedToken !== '') {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="assets/favicon.svg?v=20260906-scenarisation" type="image/svg+xml" sizes="any">
-    <title>Vérifier l’email | Scenarisation</title>
+    <title>Vérifier l’email | Scénarisation</title>
     <?php render_theme_boot_script(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -145,7 +145,7 @@ if ($db !== null && $requestMethod === 'POST' && $submittedToken !== '') {
 <?php render_site_nav('verify_email'); ?>
 <main class="account-shell with-nav">
     <section class="account-card">
-        <p class="account-kicker">Scenarisation</p>
+        <p class="account-kicker">Scénarisation</p>
         <h1>Vérifier votre email</h1>
 
         <?php if ($message !== ''): ?>

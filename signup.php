@@ -87,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="assets/favicon.svg?v=20260906-scenarisation" type="image/svg+xml" sizes="any">
-    <title>Créer un compte | Scenarisation</title>
+    <title>Créer un compte | Scénarisation</title>
     <?php render_theme_boot_script(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -100,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <?php render_site_nav('signup'); ?>
 <main class="account-shell with-nav">
     <section class="account-card">
-        <p class="account-kicker">Scenarisation</p>
+        <p class="account-kicker">Scénarisation</p>
         <h1>Créer un compte</h1>
         <p class="account-copy">Inscrivez-vous avec votre adresse @florimont.ch. Un lien de vérification vous sera envoyé avant votre première connexion.</p>
         <form method="post" class="account-form">

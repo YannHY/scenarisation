@@ -6,13 +6,13 @@ require_once __DIR__ . '/lib/bootstrap.php';
 app_start_session();
 
 $aiPrompt = <<<'PROMPT'
-Tu dois créer un scénario pédagogique Scenarisation en utilisant le CLI `scenarisation`.
+Tu dois créer un scénario pédagogique Scénarisation en utilisant le CLI `scenarisation`.
 
 Important :
 Tu es peut-être dans un sandbox isolé. Sélectionne le CLI selon ses capacités, pas seulement selon l’existence d’une commande.
 
 Teste dans cet ordre :
-1. `./bin/scenarisation` si tu travailles dans le dépôt Scenarisation ;
+1. `./bin/scenarisation` si tu travailles dans le dépôt Scénarisation ;
 2. la commande globale `scenarisation` ;
 3. `./.tools/bin/scenarisation` si cette copie locale existe déjà.
 
@@ -37,7 +37,7 @@ Mémorise la commande compatible retenue sous la variable `SCENARISATION` : `./b
 Une fois `.tools/bin/scenarisation` créé, ne dépends plus du réseau.
 
 Mission :
-Créer un fichier `design.json` complet, structuré, détaillé et importable dans Scenarisation.
+Créer un fichier `design.json` complet, structuré, détaillé et importable dans Scénarisation.
 
 Utilise le CLI autant que possible. N’écris pas le JSON à la main sauf si le CLI est impossible à utiliser après plusieurs tentatives documentées.
 
@@ -236,13 +236,13 @@ Adopte un ton bienveillant, professionnel et encourageant. Évite le jargon inut
 PROMPT;
 
 $aiPromptEn = <<<'PROMPT'
-You must create a Scenarisation teaching scenario using the `scenarisation` CLI.
+You must create a Scénarisation teaching scenario using the `scenarisation` CLI.
 
 Important:
 You may be working in an isolated sandbox. Select the CLI by capability, not merely by whether a command exists.
 
 Test these candidates in order:
-1. `./bin/scenarisation` when working in the Scenarisation repository;
+1. `./bin/scenarisation` when working in the Scénarisation repository;
 2. the global `scenarisation` command;
 3. `./.tools/bin/scenarisation` when that local copy already exists.
 
@@ -267,7 +267,7 @@ Remember the selected compatible command as `SCENARISATION`: `./bin/scenarisatio
 Once `.tools/bin/scenarisation` has been created, do not rely on the network again.
 
 Mission:
-Create a complete, structured, detailed `design.json` file that can be imported into Scenarisation.
+Create a complete, structured, detailed `design.json` file that can be imported into Scénarisation.
 
 Use the CLI whenever possible. Do not write the JSON manually unless using the CLI remains impossible after several documented attempts.
 
@@ -457,7 +457,7 @@ PROMPT;
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="assets/favicon.svg?v=20260906-scenarisation" type="image/svg+xml" sizes="any">
-    <title>Aide | Scenarisation</title>
+    <title>Aide | Scénarisation</title>
     <?php render_theme_boot_script(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -499,7 +499,7 @@ PROMPT;
                 <h2>Comprendre le learning design</h2>
                 <p>Le <em>learning design</em> consiste à organiser les activités que les apprenants vont faire pour atteindre les acquis visés.</p>
 
-                <h3 id="learning-designer-scenario-visible">Scenarisation : rendre le scénario visible</h3>
+                <h3 id="learning-designer-scenario-visible">Scénarisation : rendre le scénario visible</h3>
                 <p>Le <a href="https://www.ucl.ac.uk/learning-designer/" title="Learning Designer">Learning Designer</a> original a été développé à l’University College London par l’équipe de Diana Laurillard pour aider les enseignants à concevoir des activités pédagogiques, à analyser leur équilibre et à partager leurs scénarisations. L’application présentée ici s’inscrit dans cette filiation : elle transforme un scénario pédagogique en une structure lisible, analysable et réutilisable.</p>
                 <p>L’outil rend vos choix explicites afin que vous puissiez les interroger&nbsp;:&nbsp;le temps prévu correspond-il au temps effectivement scénarisé&nbsp;? Quelle place est accordée à chaque type d’apprentissage&nbsp;? Les élèves pratiquent-ils, discutent-ils et produisent-ils, ou restent-ils surtout en situation d’acquisition&nbsp;? Les modalités de groupe, le rythme, le mode d’enseignement et les évaluations sont-ils cohérents avec les acquis visés&nbsp;?</p>
                 <div class="help-grid">
@@ -601,7 +601,7 @@ PROMPT;
 
             <article class="help-section" id="types-apprentissage">
                 <h2>Les six types d’apprentissage</h2>
-                <p>Scenarisation s’appuie sur les six types d’apprentissage associés au <a href="cadre-conversationnel.php">Cadre conversationnel de Diana Laurillard</a>. Une séquence n’a pas besoin de les utiliser à parts égales, mais leur combinaison aide à varier l’expérience de l’apprenant.</p>
+                <p>Scénarisation s’appuie sur les six types d’apprentissage associés au <a href="cadre-conversationnel.php">Cadre conversationnel de Diana Laurillard</a>. Une séquence n’a pas besoin de les utiliser à parts égales, mais leur combinaison aide à varier l’expérience de l’apprenant.</p>
                 <div class="help-types">
                     <div class="help-type help-type-read"><span class="help-type-dot"></span><div><strong>Lire / Regarder / Écouter</strong><span>Acquérir des informations par un exposé, un texte, une vidéo ou un enregistrement.</span></div></div>
                     <div class="help-type help-type-investigate"><span class="help-type-dot"></span><div><strong>Investiguer</strong><span>Rechercher, sélectionner, comparer et évaluer des informations ou des données.</span></div></div>
@@ -726,7 +726,7 @@ PROMPT;
 
             <article class="help-section" id="markdown">
                 <h2>Importer un scénario en Markdown</h2>
-                <p>Le plus sûr est de partir d’un fichier Markdown exporté depuis Scenarisation, puis de le modifier sans changer sa structure. Le fichier doit contenir les sections <code>## Paramètres</code> et <code>## Séances</code>, qui permettent à l’application de reconnaître le document.</p>
+                <p>Le plus sûr est de partir d’un fichier Markdown exporté depuis Scénarisation, puis de le modifier sans changer sa structure. Le fichier doit contenir les sections <code>## Paramètres</code> et <code>## Séances</code>, qui permettent à l’application de reconnaître le document.</p>
                 <h3 id="markdown-structure">Structure attendue</h3>
                 <div class="help-code-wrap">
                     <button class="help-copy-btn" type="button" aria-label="Copier l’exemple Markdown" title="Copier"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
@@ -806,7 +806,7 @@ Objectifs généraux de la formation.
                 <p>Évitez de changer les libellés fixes <code>## Paramètres</code>, <code>## Séances</code>, <code>- Système scolaire:</code>, <code>- Niveau:</code>, <code>- Durée:</code>, <code>- Groupe:</code>, <code>- Enseignement:</code>, <code>- Rythme:</code>, <code>- Modalité:</code>, <code>- Évaluation:</code>, <code>- AIAS:</code>, <code>- Description:</code> et <code>- Consignes pour les élèves:</code>. S’ils changent trop, certaines informations risquent de ne plus être reconnues.</p>
                 <h3 id="markdown-import">Procédure d’import</h3>
                 <ol>
-                    <li>Ouvrez Scenarisation.</li>
+                    <li>Ouvrez Scénarisation.</li>
                     <li>Cliquez sur <strong>Importer</strong>.</li>
                     <li>Choisissez <strong>Markdown</strong>, puis un fichier <code>.md</code> ou <code>.markdown</code>.</li>
                     <li>Vérifiez les paramètres, les moments, les activités et les durées dans l’interface.</li>
@@ -947,7 +947,7 @@ scenarisation upgrade</pre>
                 <div class="help-grid three">
                     <div class="help-card">
                         <strong><span class="help-card-icon"><i class="fa-solid fa-file-export" aria-hidden="true"></i></span>1. Préparer le scénario</strong>
-                        <span>Exportez votre scénario au format JSON depuis Scenarisation, ou préparez une description précise de votre séquence.</span>
+                        <span>Exportez votre scénario au format JSON depuis Scénarisation, ou préparez une description précise de votre séquence.</span>
                     </div>
                     <div class="help-card">
                         <strong><span class="help-card-icon"><i class="fa-solid fa-robot" aria-hidden="true"></i></span>2. Configurer l’IA</strong>

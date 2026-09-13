@@ -771,9 +771,9 @@ const I18N = {
     gridSessionPrefix: "Séance"
   },
   en: {
-    docTitle: "Scenarisation",
+    docTitle: "Scénarisation",
     skipLink: "Skip to main content",
-    appTitle: "Scenarisation",
+    appTitle: "Scénarisation",
     tabSettings: "Settings",
     tabAnalysis: "Analysis",
     collapsePanel: "Collapse panel",

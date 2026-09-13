@@ -689,11 +689,18 @@ body.login-page .site-breadcrumb {
   font-size: 15px;
   font-weight: 650;
 }
+body.forgot-password-page .site-breadcrumb,
+body.reset-password-page .site-breadcrumb {
+  width: min(480px, calc(100vw - 36px));
+}
 body.signup-page .site-breadcrumb {
   width: min(640px, calc(100vw - 36px));
 }
 body.about-page .site-breadcrumb {
   width: min(760px, calc(100vw - var(--content-shell-gutter)));
+}
+body.legal-page .site-breadcrumb {
+  width: min(880px, calc(100vw - var(--content-shell-gutter)));
 }
 .site-breadcrumb ol {
   display: flex;

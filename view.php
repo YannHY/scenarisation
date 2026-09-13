@@ -858,7 +858,7 @@ $displayDesignedMinutes = $designedMinutes > 0 ? $designedMinutes : $totalMinute
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="assets/favicon.svg?v=20260906-scenarisation" type="image/svg+xml" sizes="any">
-  <title><?= esc($title) ?> — Scenarisation</title>
+  <title><?= esc($title) ?> — Scénarisation</title>
   <link rel="stylesheet" href="css/interface.css?v=20260910-public-cursor">
   <link rel="stylesheet" href="css/view-footer.css?v=20260910">
   <link rel="stylesheet" href="css/view-toolbar.css?v=20260910">
@@ -1382,7 +1382,7 @@ $displayDesignedMinutes = $designedMinutes > 0 ? $designedMinutes : $totalMinute
       <a href="<?= esc($license['url']) ?>" target="_blank" rel="license noopener noreferrer"><?= esc($license['label']) ?></a>.</span>
     </p>
     <?php endif; ?>
-    <p>Partagé avec Scenarisation</p>
+    <p>Partagé avec Scénarisation</p>
   </footer>
 
 </main>

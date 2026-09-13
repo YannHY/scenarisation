@@ -9,16 +9,16 @@ app_start_session();
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Conditions générales d’utilisation du service Scenarisation.">
+    <meta name="description" content="Conditions générales d’utilisation du service Scénarisation.">
     <link rel="icon" href="assets/favicon.svg?v=20260906-scenarisation" type="image/svg+xml" sizes="any">
-    <title>Conditions générales d’utilisation | Scenarisation</title>
+    <title>Conditions générales d’utilisation | Scénarisation</title>
     <?php render_theme_boot_script(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="css/interface.css?v=20260905-subtle-focus">
     <link rel="stylesheet" href="css/account-ui.css?v=20260906-highlight">
-    <link rel="stylesheet" href="css/account-pages.css?v=20260904-content-rhythm">
+    <link rel="stylesheet" href="css/account-pages.css?v=20260912-breadcrumb-alignment">
 </head>
 <body class="legal-page">
 <?php render_site_nav('terms'); ?>
@@ -26,10 +26,10 @@ app_start_session();
     <article class="legal-card">
         <h1>Conditions générales d’utilisation</h1>
         <p class="legal-updated"><strong>Version du <time datetime="<?= h(TERMS_VERSION) ?>">10 septembre 2026</time></strong></p>
-        <p class="legal-lead">Ces conditions encadrent l’utilisation de Scenarisation, un service non commercial de création, de sauvegarde et de partage de scénarios pédagogiques.</p>
+        <p class="legal-lead">Ces conditions encadrent l’utilisation de Scénarisation, un service non commercial de création, de sauvegarde et de partage de scénarios pédagogiques.</p>
 
         <h2>Service et accès</h2>
-        <p>Scenarisation est édité par Yann Houry, avec la contribution de François Jourde. Les coordonnées de l’éditeur et de l’hébergeur figurent dans les <a href="mentions-legales.php">mentions légales</a>.</p>
+        <p>Scénarisation est édité par Yann Houry, avec la contribution de François Jourde. Les coordonnées de l’éditeur et de l’hébergeur figurent dans les <a href="mentions-legales.php">mentions légales</a>.</p>
         <p>L’application peut être consultée sans compte. Un compte permet notamment de sauvegarder des scénarios sur le serveur et de les publier. L’inscription en libre-service est réservée aux adresses <code>@florimont.ch</code> et nécessite la vérification de l’adresse électronique.</p>
 
         <h2>Création et sécurité du compte</h2>
@@ -39,7 +39,7 @@ app_start_session();
         <h2>Contenus et usages autorisés</h2>
         <p>L’utilisateur est responsable des textes, scénarios, liens et ressources qu’il importe, enregistre ou publie. Il doit disposer des droits et autorisations nécessaires et respecter les droits des tiers.</p>
         <p>L’utilisateur s’engage à ne pas publier ni partager dans ses scénarios de contenus protégés par le droit d’auteur (copyright) dont il ne détient pas les droits nécessaires, sauf autorisation du titulaire des droits, licence compatible avec le partage envisagé ou exception légale applicable. Cette obligation concerne notamment les textes, extraits de manuels, images, photographies, vidéos et fichiers joints. La mention de la source ou de l’auteur ne suffit pas, à elle seule, à autoriser leur publication.</p>
-        <p>Les scénarios et commentaires ne doivent pas contenir de contenus illicites ni d’informations confidentielles. Les scénarios ne doivent pas contenir de données personnelles concernant des élèves, collègues ou tiers sans base légale et autorisations appropriées. Scenarisation n’est pas un outil de suivi individuel des élèves.</p>
+        <p>Les scénarios et commentaires ne doivent pas contenir de contenus illicites ni d’informations confidentielles. Les scénarios ne doivent pas contenir de données personnelles concernant des élèves, collègues ou tiers sans base légale et autorisations appropriées. Scénarisation n’est pas un outil de suivi individuel des élèves.</p>
         <p>Les avis doivent porter sur l’utilisation du service. Les envois injurieux, publicitaires ou automatisés sont interdits. Les commentaires sont réservés aux administrateurs et ne sont pas publiés.</p>
 
         <h2>Partage, publication et réutilisation</h2>
@@ -53,7 +53,7 @@ app_start_session();
         <p>Le service peut être interrompu pour maintenance, mise à jour ou incident technique. Une disponibilité continue n’est pas garantie. Des incidents peuvent entraîner la perte, l’altération ou l’indisponibilité de scénarios et de données. L’utilisateur est responsable de la conservation de copies de sauvegarde et s’engage à exporter régulièrement ses scénarios sur un support distinct du service.</p>
 
         <h2>Responsabilité</h2>
-        <p>Les contenus partagés ou publiés sont placés sous la responsabilité de leurs auteurs. Leur mise à disposition sur Scenarisation ne vaut pas validation ni approbation par l’éditeur ou les contributeurs du service. Il appartient à chaque utilisateur de vérifier leur exactitude, les droits de réutilisation et leur adéquation à son contexte pédagogique.</p>
+        <p>Les contenus partagés ou publiés sont placés sous la responsabilité de leurs auteurs. Leur mise à disposition sur Scénarisation ne vaut pas validation ni approbation par l’éditeur ou les contributeurs du service. Il appartient à chaque utilisateur de vérifier leur exactitude, les droits de réutilisation et leur adéquation à son contexte pédagogique.</p>
         <p>Dans les limites autorisées par la loi applicable, l’éditeur et les contributeurs du service déclinent toute responsabilité pour les contenus partagés par les utilisateurs et les conséquences de leur utilisation, ainsi que pour les pertes de scénarios ou de données et les préjudices qui en résultent en cas de panne, d’erreur, d’interruption ou d’autre incident technique.</p>
         <p>Ces limitations n’excluent ni les obligations légales propres à l’éditeur, notamment concernant le traitement des signalements de contenus illicites, ni les responsabilités qui ne peuvent être exclues ou limitées par la loi. Elles ne privent pas l’utilisateur des droits impératifs dont il bénéficie, notamment en cas de manquement du service à ses obligations.</p>
 

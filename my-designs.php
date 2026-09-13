@@ -65,7 +65,7 @@ function e(string $value): string
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="assets/favicon.svg?v=20260906-scenarisation" type="image/svg+xml" sizes="any" />
-    <title data-site-i18n-en="My scenarios | Scenarisation" data-site-i18n-fr="Mes scénarios | Scenarisation">Mes scénarios | Scenarisation</title>
+    <title data-site-i18n-en="My scenarios | Scénarisation" data-site-i18n-fr="Mes scénarios | Scénarisation">Mes scénarios | Scénarisation</title>
     <?php render_theme_boot_script(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer" />
     <link rel="preconnect" href="https://fonts.googleapis.com">

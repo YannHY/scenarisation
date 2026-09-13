@@ -5,8 +5,8 @@ require_once __DIR__ . '/lib/bootstrap.php';
 // La navigation lit la session : elle doit démarrer avant tout HTML.
 app_start_session();
 
-$homeTitle = 'Scenarisation | Concevoir des expériences d’apprentissage';
-$homeDescription = 'Scenarisation aide les enseignants à concevoir, analyser et partager des scénarios pédagogiques.';
+$homeTitle = 'Scénarisation | Concevoir des expériences d’apprentissage';
+$homeDescription = 'Scénarisation aide les enseignants à concevoir, analyser et partager des scénarios pédagogiques.';
 $homeUrl = rtrim(app_base_url(), '/') . '/';
 $homeOgImageUrl = rtrim(app_base_url(), '/') . '/assets/og-home.png?v=20260906-scenarisation';
 ?>
@@ -19,7 +19,7 @@ $homeOgImageUrl = rtrim(app_base_url(), '/') . '/assets/og-home.png?v=20260906-s
     <meta name="description" content="<?= h($homeDescription) ?>">
     <link rel="canonical" href="<?= h($homeUrl) ?>">
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Scenarisation">
+    <meta property="og:site_name" content="Scénarisation">
     <meta property="og:locale" content="fr_FR">
     <meta property="og:title" content="<?= h($homeTitle) ?>">
     <meta property="og:description" content="<?= h($homeDescription) ?>">
@@ -29,7 +29,7 @@ $homeOgImageUrl = rtrim(app_base_url(), '/') . '/assets/og-home.png?v=20260906-s
     <meta property="og:image:type" content="image/png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="Scenarisation — Donnez forme aux expériences d’apprentissage">
+    <meta property="og:image:alt" content="Scénarisation — Donnez forme aux expériences d’apprentissage">
     <title><?= h($homeTitle) ?></title>
     <?php render_theme_boot_script(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">

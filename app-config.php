@@ -5,7 +5,7 @@ return [
     'APP_DB_PASS' => '',
     'APP_BASE_URL' => 'https://www.ralentirtravaux.com',
     'APP_MAIL_FROM' => 'no-reply@ralentirtravaux.com',
-    'APP_MAIL_FROM_NAME' => 'Scenarisation',
+    'APP_MAIL_FROM_NAME' => 'Scénarisation',
     'APP_FEEDBACK_HASH_KEY' => '',
     // Configure real keys in learning-design-secret.php, never in this file.
     'APP_TURNSTILE_SITE_KEY' => '',

@@ -371,6 +371,7 @@ body.cf-page {
 }
 
 @media (max-width: 620px) {
+    .cf-page .site-breadcrumb,
     .cf-hero,
     .cf-article-layout {
         width: min(var(--content-shell-width, 1180px), calc(100vw - 24px));

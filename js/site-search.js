@@ -207,7 +207,7 @@
     } catch (_) {
       filename = "";
     }
-    return copy().categories[filename] || "Scenarisation";
+    return copy().categories[filename] || "Scénarisation";
   }
 
   function normalizedWords(value) {

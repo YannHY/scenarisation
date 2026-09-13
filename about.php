@@ -11,7 +11,7 @@ app_start_session();
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="assets/favicon.svg?v=20260906-scenarisation" type="image/svg+xml" sizes="any">
-    <title>À propos | Scenarisation</title>
+    <title>À propos | Scénarisation</title>
     <?php render_theme_boot_script(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,7 +26,7 @@ app_start_session();
     <div class="about-card">
         <h1 id="about-title" class="about-title">À propos</h1>
         <p class="about-version">Version 0.9</p>
-        <p id="about-intro" class="about-intro">Scenarisation est un outil de scénarisation pédagogique. <a href="help.php">Consultez la page d’aide</a> pour découvrir ses fonctionnalités et apprendre à l’utiliser.</p>
+        <p id="about-intro" class="about-intro">Scénarisation est un outil de scénarisation pédagogique. <a href="help.php">Consultez la page d’aide</a> pour découvrir ses fonctionnalités et apprendre à l’utiliser.</p>
 
         <hr class="about-divider">
 
@@ -43,12 +43,12 @@ document.addEventListener('DOMContentLoaded', function () {
     var translations = {
         fr: {
             title: 'À propos',
-            intro: 'Scenarisation est un outil de scénarisation pédagogique. <a href="help.php">Consultez la page d’aide</a> pour découvrir ses fonctionnalités et apprendre à l’utiliser.',
+            intro: 'Scénarisation est un outil de scénarisation pédagogique. <a href="help.php">Consultez la page d’aide</a> pour découvrir ses fonctionnalités et apprendre à l’utiliser.',
             meta: 'Inspiré de l\'<a href="https://www.ucl.ac.uk/learning-designer/" target="_blank" rel="noopener noreferrer">UCL Learning Designer</a> (UCL Knowledge Lab, UCL Institute of Education, 2013–2026).<br>Conçu et développé par Yann Houry &amp; François Jourde (2026) · <abbr title="Creative Commons Attribution - Partage dans les mêmes conditions">CC BY-SA</abbr><br>Code source&nbsp;: <a href="https://github.com/YannHY/scenarisation" target="_blank" rel="noopener noreferrer">github.com/YannHY/scenarisation</a> (basé sur <a href="https://github.com/jourde" target="_blank" rel="noopener noreferrer">github.com/jourde</a>)'
         },
         en: {
             title: 'About',
-            intro: 'Scenarisation is a learning design tool. <a href="help.php">Visit the help page</a> to discover its features and learn how to use it.',
+            intro: 'Scénarisation is a learning design tool. <a href="help.php">Visit the help page</a> to discover its features and learn how to use it.',
             meta: 'Inspired by the <a href="https://www.ucl.ac.uk/learning-designer/" target="_blank" rel="noopener noreferrer">UCL Learning Designer</a> (UCL Knowledge Lab, UCL Institute of Education, 2013–2026).<br>Designed and developed by Yann Houry &amp; François Jourde (2026) · <abbr title="Creative Commons Attribution - ShareAlike">CC BY-SA</abbr><br>Source code: <a href="https://github.com/YannHY/scenarisation" target="_blank" rel="noopener noreferrer">github.com/YannHY/scenarisation</a> (based on <a href="https://github.com/jourde" target="_blank" rel="noopener noreferrer">github.com/jourde</a>)'
         }
     };
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var selected = lang === 'en' ? 'en' : 'fr';
         var content = translations[selected];
         document.documentElement.lang = selected;
-        document.title = content.title + ' | Scenarisation';
+        document.title = content.title + ' | Scénarisation';
         document.getElementById('about-title').textContent = content.title;
         document.getElementById('about-intro').innerHTML = content.intro;
         document.getElementById('about-meta').innerHTML = content.meta;

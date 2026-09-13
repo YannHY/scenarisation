@@ -9,16 +9,16 @@ app_start_session();
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Politique de confidentialité de Scenarisation.">
+    <meta name="description" content="Politique de confidentialité de Scénarisation.">
     <link rel="icon" href="assets/favicon.svg?v=20260906-scenarisation" type="image/svg+xml" sizes="any">
-    <title>Politique de confidentialité | Scenarisation</title>
+    <title>Politique de confidentialité | Scénarisation</title>
     <?php render_theme_boot_script(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="css/interface.css?v=20260905-subtle-focus">
     <link rel="stylesheet" href="css/account-ui.css?v=20260906-highlight">
-    <link rel="stylesheet" href="css/account-pages.css?v=20260904-content-rhythm">
+    <link rel="stylesheet" href="css/account-pages.css?v=20260912-breadcrumb-alignment">
 </head>
 <body class="legal-page">
 <?php render_site_nav('privacy'); ?>
@@ -27,16 +27,16 @@ app_start_session();
         <h1>Politique de confidentialité</h1>
         <p class="legal-updated"><strong>Dernière mise à jour&nbsp;: <time datetime="2026-09-10">10 septembre 2026</time></strong></p>
 
-        <p class="legal-lead">Cette politique explique quelles données sont traitées lors de l’utilisation de Scenarisation, pour quelles finalités, pendant combien de temps et quels sont vos droits.</p>
+        <p class="legal-lead">Cette politique explique quelles données sont traitées lors de l’utilisation de Scénarisation, pour quelles finalités, pendant combien de temps et quels sont vos droits.</p>
 
         <h2>Responsable du traitement</h2>
-        <p>Le responsable du traitement est <strong>Yann Houry</strong>, éditeur de Scenarisation. Pour toute question relative à vos données personnelles ou pour exercer vos droits, utilisez la <a href="https://www.ralentirtravaux.com/contact/contact.php" rel="noopener noreferrer">page de contact de Ralentir Travaux</a>.</p>
+        <p>Le responsable du traitement est <strong>Yann Houry</strong>, éditeur de Scénarisation. Pour toute question relative à vos données personnelles ou pour exercer vos droits, utilisez la <a href="https://www.ralentirtravaux.com/contact/contact.php" rel="noopener noreferrer">page de contact de Ralentir Travaux</a>.</p>
 
         <h2>Données traitées et finalités</h2>
 
         <h3>Navigation, fonctionnement et sécurité</h3>
         <p>À chaque requête, l’infrastructure d’hébergement reçoit les informations techniques nécessaires à la transmission de la page, notamment l’adresse IP, la date et l’heure ainsi que la ressource demandée. OVHcloud peut enregistrer certaines de ces informations dans les journaux techniques de l’hébergement, avec notamment le type de navigateur transmis par le navigateur.</p>
-        <p>Scenarisation ne constitue pas de journal de navigation propre et n’utilise pas l’adresse IP pour suivre ses visiteurs. Pour limiter les inscriptions automatisées et les demandes répétées d’emails de vérification, le service conserve des compteurs temporaires associés à des empreintes cryptographiques de l’adresse IP et de l’adresse email. Ces empreintes sont calculées avec une clé secrète ; les adresses brutes ne sont pas enregistrées dans ces compteurs. Les fenêtres de limitation durent 15 minutes pour l’adresse IP et une heure pour l’adresse email. Les compteurs expirés sont supprimés lors de la prochaine tentative soumise à cette protection. Lors de certaines opérations sensibles, l’application vérifie uniquement l’en-tête <code>Origin</code> ou <code>Referer</code>, lorsqu’il est disponible, afin de s’assurer que la requête provient du site. Certaines erreurs techniques peuvent également être consignées dans le journal du serveur.</p>
+        <p>Scénarisation ne constitue pas de journal de navigation propre et n’utilise pas l’adresse IP pour suivre ses visiteurs. Pour limiter les inscriptions automatisées et les demandes répétées d’emails de vérification, le service conserve des compteurs temporaires associés à des empreintes cryptographiques de l’adresse IP et de l’adresse email. Ces empreintes sont calculées avec une clé secrète ; les adresses brutes ne sont pas enregistrées dans ces compteurs. Les fenêtres de limitation durent 15 minutes pour l’adresse IP et une heure pour l’adresse email. Les compteurs expirés sont supprimés lors de la prochaine tentative soumise à cette protection. Lors de certaines opérations sensibles, l’application vérifie uniquement l’en-tête <code>Origin</code> ou <code>Referer</code>, lorsqu’il est disponible, afin de s’assurer que la requête provient du site. Certaines erreurs techniques peuvent également être consignées dans le journal du serveur.</p>
         <p>Ces traitements reposent sur l’intérêt légitime de l’éditeur à assurer le fonctionnement, la sécurité et le diagnostic technique du service.</p>
 
         <h3>Création et gestion d’un compte</h3>
@@ -50,7 +50,7 @@ app_start_session();
 
         <h3>Scénarios pédagogiques enregistrés</h3>
         <p>Lorsque vous sauvegardez un scénario dans votre compte, le serveur conserve son titre, son contenu structuré, ses métadonnées pédagogiques, ses dates de création et de mise à jour, ainsi que son rattachement à votre compte. Ces données servent à enregistrer, retrouver, modifier, importer et exporter vos travaux.</p>
-        <p>Le contenu d’un scénario est librement saisi par son auteur. Il ne doit pas contenir de données personnelles ou sensibles concernant des élèves, collègues ou tiers, sauf si l’auteur dispose d’une base légale et des autorisations nécessaires. Scenarisation n’est pas conçu comme un dossier scolaire ni comme un outil de suivi individuel des élèves.</p>
+        <p>Le contenu d’un scénario est librement saisi par son auteur. Il ne doit pas contenir de données personnelles ou sensibles concernant des élèves, collègues ou tiers, sauf si l’auteur dispose d’une base légale et des autorisations nécessaires. Scénarisation n’est pas conçu comme un dossier scolaire ni comme un outil de suivi individuel des élèves.</p>
 
         <h3>Partage et publication</h3>
         <p>Lorsque vous publiez un scénario, le serveur enregistre un identifiant de partage, son état de publication et, le cas échéant, la licence Creative Commons choisie et la date d’inscription au catalogue.</p>
@@ -64,16 +64,16 @@ app_start_session();
         <p>Si vous créez un jeton pour le CLI <code>learning</code>, le serveur conserve son nom, son empreinte cryptographique, un préfixe permettant de l’identifier, sa date de création, sa dernière date d’utilisation et, le cas échéant, sa date de révocation. Le jeton complet n’est affiché qu’au moment de sa création.</p>
 
         <h3>Retours sur l’application</h3>
-        <p>Le bouton d’avis permet d’enregistrer une appréciation, un commentaire facultatif, la page consultée, la langue de l’interface et la date de l’envoi. Le retour n’est pas rattaché au compte de l’utilisateur. Il sert exclusivement à comprendre la satisfaction générale et à améliorer Scenarisation.</p>
+        <p>Le bouton d’avis permet d’enregistrer une appréciation, un commentaire facultatif, la page consultée, la langue de l’interface et la date de l’envoi. Le retour n’est pas rattaché au compte de l’utilisateur. Il sert exclusivement à comprendre la satisfaction générale et à améliorer Scénarisation.</p>
         <p>Pour limiter les envois automatisés, l’application produit une empreinte technique pseudonyme à partir de l’adresse IP et du type de navigateur. L’adresse IP et le type de navigateur ne sont pas conservés dans la base de retours. L’empreinte change chaque jour et est effacée des retours après 24 heures.</p>
 
         <h3>Préférences et brouillon dans le navigateur</h3>
-        <p>Scenarisation utilise le stockage local du navigateur pour mémoriser la langue, le thème clair ou sombre, certains réglages d’affichage et le scénario en cours d’édition. Le brouillon est séparé entre l’espace invité et le compte connecté. Ces informations restent normalement sur l’appareil jusqu’à leur remplacement ou leur suppression depuis les réglages du navigateur.</p>
+        <p>Scénarisation utilise le stockage local du navigateur pour mémoriser la langue, le thème clair ou sombre, certains réglages d’affichage et le scénario en cours d’édition. Le brouillon est séparé entre l’espace invité et le compte connecté. Ces informations restent normalement sur l’appareil jusqu’à leur remplacement ou leur suppression depuis les réglages du navigateur.</p>
 
         <h2>Cookies et traceurs</h2>
         <p>Un cookie de session est utilisé pour maintenir la connexion, protéger l’accès au compte, sécuriser les requêtes et délivrer le jeton temporaire du formulaire d’avis. Il est configuré pour ne pas être accessible au JavaScript, n’est envoyé que sur une connexion sécurisée lorsque HTTPS est actif, et expire à la fermeture du navigateur. Il est strictement nécessaire au service.</p>
         <p>Les éléments enregistrés dans le stockage local servent aux préférences d’interface, à la sauvegarde locale demandée par l’utilisateur et au fonctionnement de l’éditeur. Ils ne sont pas utilisés pour établir un profil publicitaire.</p>
-        <p><strong>Scenarisation n’intègre, à la date de cette politique, aucun outil de mesure d’audience, réseau publicitaire ou traceur de profilage.</strong></p>
+        <p><strong>Scénarisation n’intègre, à la date de cette politique, aucun outil de mesure d’audience, réseau publicitaire ou traceur de profilage.</strong></p>
 
         <h2>Services externes et transferts</h2>
         <p>Le site charge certaines ressources techniques depuis des services externes&nbsp;:</p>
@@ -87,7 +87,7 @@ app_start_session();
         <p>Lorsque vous ouvrez un lien ajouté à un scénario ou suivez un lien vers un autre site, la politique de confidentialité de ce service externe s’applique.</p>
 
         <h2>Destinataires</h2>
-        <p>Les données des comptes et des scénarios sont accessibles à Yann Houry et, lorsque cela est nécessaire à l’administration technique, aux administrateurs autorisés de Scenarisation. Les appréciations et commentaires transmis par le formulaire d’avis sont également consultables par ces administrateurs. OVHcloud peut traiter ces données pour assurer l’hébergement. Les prestataires externes cités ci-dessus ne reçoivent que les informations techniques nécessaires lorsque leurs ressources sont appelées.</p>
+        <p>Les données des comptes et des scénarios sont accessibles à Yann Houry et, lorsque cela est nécessaire à l’administration technique, aux administrateurs autorisés de Scénarisation. Les appréciations et commentaires transmis par le formulaire d’avis sont également consultables par ces administrateurs. OVHcloud peut traiter ces données pour assurer l’hébergement. Les prestataires externes cités ci-dessus ne reçoivent que les informations techniques nécessaires lorsque leurs ressources sont appelées.</p>
         <p>Les données des comptes et des scénarios privés ne sont ni vendues, ni louées, ni utilisées à des fins publicitaires.</p>
 
         <h2>Durées de conservation</h2>
@@ -112,7 +112,7 @@ app_start_session();
         <p>Un retour anonyme n’étant pas rattaché à un compte, son identification pour répondre à une demande d’accès ou d’effacement peut être impossible sans indications précises sur sa date, sa page et son contenu. Pour toute demande, utilisez la <a href="https://www.ralentirtravaux.com/contact/contact.php" rel="noopener noreferrer">page de contact</a>. Une vérification raisonnable de l’identité du demandeur peut être nécessaire. Vous pouvez également adresser une réclamation à la <a href="https://www.cnil.fr/" rel="noopener noreferrer">Commission nationale de l’informatique et des libertés (CNIL)</a>.</p>
 
         <h2>Mise à jour</h2>
-        <p>Cette politique peut évoluer avec les fonctionnalités de Scenarisation, les services utilisés ou la réglementation. La date de sa dernière mise à jour est indiquée en haut de la page.</p>
+        <p>Cette politique peut évoluer avec les fonctionnalités de Scénarisation, les services utilisés ou la réglementation. La date de sa dernière mise à jour est indiquée en haut de la page.</p>
     </article>
 </main>
 <?php render_site_footer(); ?>

@@ -6,7 +6,7 @@ Les inscriptions, la création du premier administrateur et les renvois d’emai
 
 Dans le tableau de bord Cloudflare, ouvrir **Turnstile → Add widget** :
 
-- Nom : **Scenarisation — comptes**.
+- Nom : **Scénarisation — comptes**.
 - Hostnames : `scenarisation.eu` et `www.scenarisation.eu` si cette seconde adresse est utilisée.
 - Mode : **Managed**.
 - Pre-clearance : désactivé.

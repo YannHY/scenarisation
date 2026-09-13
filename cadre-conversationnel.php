@@ -12,7 +12,7 @@ app_start_session();
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="assets/favicon.svg?v=20260906-scenarisation" type="image/svg+xml" sizes="any">
     <meta name="description" content="Le Cadre conversationnel de Diana Laurillard : concepts, pratiques, cycles et six types d'apprentissage.">
-    <title>Le Cadre conversationnel de Diana Laurillard | Scenarisation</title>
+    <title>Le Cadre conversationnel de Diana Laurillard | Scénarisation</title>
     <?php render_theme_boot_script(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,7 +20,7 @@ app_start_session();
     <link rel="stylesheet" href="css/interface.css?v=20260905-subtle-focus">
     <link rel="stylesheet" href="css/account-ui.css?v=20260906-highlight">
     <link rel="stylesheet" href="css/account-pages.css?v=20260904-content-rhythm">
-    <link rel="stylesheet" href="css/cadre-conversationnel.css?v=20260730-toc-align">
+    <link rel="stylesheet" href="css/cadre-conversationnel.css?v=20260912-breadcrumb-alignment">
 </head>
 <body class="cf-page">
 <a class="skip-link" href="#main-content">Aller au contenu principal</a>

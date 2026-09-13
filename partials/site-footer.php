@@ -1,6 +1,6 @@
 <footer class="site-footer">
     <div class="site-footer-copy-stack">
-        <span class="site-footer-copy">Scenarisation — Yann Houry &amp; François Jourde</span>
+        <span class="site-footer-copy">Scénarisation — Yann Houry &amp; François Jourde</span>
         <nav class="site-footer-links" aria-label="Liens du pied de page" data-site-i18n-attr="aria-label" data-site-i18n-en="Footer links" data-site-i18n-fr="Liens du pied de page">
             <span class="site-footer-link-row">
                 <a class="site-footer-link" id="footer-about-btn" href="about.php" data-site-i18n-en="About" data-site-i18n-fr="À propos">À propos</a>

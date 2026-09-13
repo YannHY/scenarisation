@@ -192,7 +192,7 @@ function e(string $value): string
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="assets/favicon.svg?v=20260906-scenarisation" type="image/svg+xml" sizes="any">
-    <title>Profil | Scenarisation</title>
+    <title>Profil | Scénarisation</title>
     <?php render_theme_boot_script(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -488,7 +488,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function applyProfileLanguage(lang) {
         document.documentElement.lang = lang === 'en' ? 'en' : 'fr';
-        document.title = lang === 'en' ? 'Profile | Scenarisation' : 'Profil | Scenarisation';
+        document.title = lang === 'en' ? 'Profile | Scénarisation' : 'Profil | Scénarisation';
         document.getElementById('cli_token_name').placeholder = lang === 'en'
             ? 'Give your token a name'
             : 'Donnez un nom à votre jeton';

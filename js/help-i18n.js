@@ -11,7 +11,7 @@
         "IA et CLI": "AI and CLI",
         "Sur cette page": "On this page",
         "Comprendre le learning design": "Understand learning design",
-        "Scenarisation : rendre le scénario visible": "Scenarisation: make the learning sequence visible",
+        "Scénarisation : rendre le scénario visible": "Scénarisation: make the learning sequence visible",
         "Créer un premier scénario, étape par étape": "Create your first scenario, step by step",
         "Organiser les moments et les activités": "Organise moments and activities",
         "Les six types d’apprentissage": "The six learning types",
@@ -158,7 +158,7 @@
         "lorsque l’élément est vide pour terminer la liste, ou sur": "when the item is empty to end the list, or",
         "pour insérer un simple saut de ligne.": "to insert a plain line break.",
         "Cadre pédagogique": "Pedagogical framework",
-        "Scenarisation s’appuie sur les six types d’apprentissage associés au": "Scenarisation uses the six learning types associated with the",
+        "Scénarisation s’appuie sur les six types d’apprentissage associés au": "Scénarisation uses the six learning types associated with the",
         "Cadre conversationnel de Diana Laurillard": "Conversational Framework by Diana Laurillard",
         ". Une séquence n’a pas besoin de les utiliser à parts égales, mais leur combinaison aide à varier l’expérience de l’apprenant.": ". A sequence does not need to use them equally, but combining them helps vary the learner experience.",
         "Lire / Regarder / Écouter": "Read / Watch / Listen",
@@ -290,7 +290,7 @@
         "ou": "or",
         "L’import remplace le scénario en cours. Enregistrez-le sur votre compte ou exportez-le avant d’importer un autre fichier si vous souhaitez le conserver.": "Importing replaces the current scenario. Save it to your account or export it before importing another file if you want to keep it.",
         "Format éditable": "Editable format",
-        "Le plus sûr est de partir d’un fichier Markdown exporté depuis Scenarisation, puis de le modifier sans changer sa structure. Le fichier doit contenir les sections": "The safest approach is to start with a Markdown file exported from Scenarisation and edit it without changing its structure. The file must contain the sections",
+        "Le plus sûr est de partir d’un fichier Markdown exporté depuis Scénarisation, puis de le modifier sans changer sa structure. Le fichier doit contenir les sections": "The safest approach is to start with a Markdown file exported from Scénarisation and edit it without changing its structure. The file must contain the sections",
         ", qui permettent à l’application de reconnaître le document.": ", which allow the application to recognise the document.",
         "Chaque moment doit commencer par un titre de niveau 2 numéroté, et chaque activité par un titre de niveau 3 :": "Each moment must begin with a numbered level-two heading, and each activity with a level-three heading:",
         "Valeurs conseillées": "Recommended values",
@@ -298,7 +298,7 @@
         "Vous pouvez modifier le titre, les paramètres, la description, la commande institutionnelle, les objectifs, les acquis d’apprentissage, les titres et contenus des moments, ainsi que les activités et tous leurs champs.": "You can edit the title, settings, description, institutional brief, objectives, learning outcomes, moment titles and content, activities, and all their fields.",
         "Évitez de changer les libellés fixes": "Avoid changing the fixed labels",
         ". S’ils changent trop, certaines informations risquent de ne plus être reconnues.": ". If they change too much, some information may no longer be recognised.",
-        "Ouvrez Scenarisation.": "Open Scenarisation.",
+        "Ouvrez Scénarisation.": "Open Scénarisation.",
         "Cliquez sur": "Select",
         "Choisissez": "Choose",
         ", puis un fichier": ", then select a",
@@ -347,7 +347,7 @@
         "Réflexion pédagogique": "Pedagogical reflection",
         "Une IA peut vous aider à questionner votre séquence, repérer ses points forts et envisager des améliorations directement applicables en classe. Son analyse nourrit votre réflexion : vous restez maître des choix pédagogiques et de leur adaptation à vos élèves.": "AI can help you question your sequence, identify its strengths, and consider improvements that can be applied directly in class. Its analysis supports your reflection; you remain responsible for pedagogical choices and adapting them to your learners.",
         "1. Préparer le scénario": "1. Prepare the scenario",
-        "Exportez votre scénario au format JSON depuis Scenarisation, ou préparez une description précise de votre séquence.": "Export your scenario as JSON from Scenarisation, or prepare a precise description of your sequence.",
+        "Exportez votre scénario au format JSON depuis Scénarisation, ou préparez une description précise de votre séquence.": "Export your scenario as JSON from Scénarisation, or prepare a precise description of your sequence.",
         "2. Configurer l’IA": "2. Configure the AI",
         "Créez un Gem dans Gemini ou un projet dans ChatGPT ou Claude, puis copiez le prompt ci-dessous dans ses instructions.": "Create a Gem in Gemini or a project in ChatGPT or Claude, then copy the prompt below into its instructions.",
         "3. Engager le dialogue": "3. Start the dialogue",
@@ -414,7 +414,7 @@
         if (lang !== 'en') return;
         var root = document.querySelector('.help-shell');
         if (!root) return;
-        document.title = 'Help | Scenarisation';
+        document.title = 'Help | Scénarisation';
         replaceTextNodes(root);
         replaceAttributes(root);
         root.querySelectorAll('[data-help-prompt]').forEach(function (field) {

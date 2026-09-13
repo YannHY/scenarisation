@@ -2554,7 +2554,7 @@ current_user();
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="assets/favicon.svg?v=20260906-scenarisation" type="image/svg+xml" sizes="any">
-    <title>Modèles de scénarios | Scenarisation</title>
+    <title>Modèles de scénarios | Scénarisation</title>
     <?php render_theme_boot_script(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2687,8 +2687,8 @@ document.addEventListener('DOMContentLoaded', function () {
     function applyModelsLanguage(lang) {
         document.documentElement.lang = lang === 'en' ? 'en' : 'fr';
         document.title = lang === 'en'
-            ? 'Scenario templates | Scenarisation'
-            : 'Modèles de scénarios | Scenarisation';
+            ? 'Scenario templates | Scénarisation'
+            : 'Modèles de scénarios | Scénarisation';
         document.querySelectorAll('[data-i18n-fr]').forEach(function (el) {
             var value = lang === 'en' ? el.dataset.i18nEn : el.dataset.i18nFr;
             if (!value) return;
