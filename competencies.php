@@ -163,7 +163,7 @@ function parse_additional_competency_frameworks(string $source): array
         if (!is_array($framework) || !is_array($group)) {
             continue;
         }
-        [$code, $labelFr, $descFr, $labelEn, $descEn] = array_pad(explode("\t", $line, 5), 5, '');
+        [$code, $labelFr, $descFr, $labelEn, $descEn, $sourceUrl] = array_pad(explode("\t", $line, 6), 6, '');
         $code = trim($code);
         $labelFr = trim($labelFr);
         if ($code === '' || $labelFr === '') {
@@ -184,6 +184,7 @@ function parse_additional_competency_frameworks(string $source): array
             'shortCode' => $framework['labelFr'] . ' ' . $code,
             'shortCodeEn' => $framework['labelEn'] . ' ' . $code,
             'legacyCode' => $code,
+            'sourceUrl' => trim($sourceUrl),
             'labelFr' => $labelFr,
             'labelEn' => trim($labelEn) ?: $labelFr,
             'descFr' => trim($descFr),
@@ -514,6 +515,7 @@ foreach ($sectionGroups as $sectionKey => $group) {
     <link rel="stylesheet" href="css/interface.css?v=20260905-subtle-focus">
     <link rel="stylesheet" href="css/account-ui.css?v=20260906-highlight">
     <link rel="stylesheet" href="css/account-pages.css?v=20260904-content-rhythm">
+    <link rel="stylesheet" href="css/competencies.css?v=20260915-source-links">
     <style>
         body.competencies-page {
             background: #fff;
@@ -735,28 +737,6 @@ foreach ($sectionGroups as $sectionKey => $group) {
         }
         .competencies-level-heading-row .competencies-level-toggle {
             flex: 1 1 auto;
-        }
-        .competencies-framework-source {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            margin: 5px 8px 5px 0;
-            border: 1px solid color-mix(in srgb, var(--link-color) 45%, var(--line));
-            border-radius: 6px;
-            color: var(--link-color);
-            padding: 2px 6px;
-            font-size: 10.5px;
-            font-weight: 700;
-            text-decoration: none;
-            white-space: nowrap;
-        }
-        .competencies-framework-source:visited {
-            color: var(--link-color);
-        }
-        .competencies-framework-source:hover {
-            border-color: var(--link-color);
-            background: color-mix(in srgb, var(--link-color) 7%, transparent);
-            color: var(--link-hover);
         }
         .competencies-section-row td {
             background: #f7f9fc;
@@ -1094,7 +1074,7 @@ foreach ($sectionGroups as $sectionKey => $group) {
     <header class="competencies-header">
         <p class="competencies-kicker" data-i18n-fr="Documentation" data-i18n-en="Documentation">Documentation</p>
         <h1 class="competencies-title" data-i18n-fr="Référentiels de compétences" data-i18n-en="Competency frameworks">Référentiels de compétences</h1>
-        <p class="competencies-subtitle" data-i18n-fr="Catalogue complet des sept cadres proposés dans le sélecteur de Scénarisation. Chaque cadre est organisé par domaines et renvoie à sa source de référence." data-i18n-en="Complete catalogue of the seven frameworks available in Scénarisation’s picker. Each framework is organised by domain and links to its reference source.">Catalogue complet des sept cadres proposés dans le sélecteur de Scénarisation. Chaque cadre est organisé par domaines et renvoie à sa source de référence.</p>
+        <p class="competencies-subtitle" data-i18n-fr="Catalogue complet des huit cadres proposés dans le sélecteur de Scénarisation. Chaque cadre est organisé par domaines et renvoie à sa source de référence." data-i18n-en="Complete catalogue of the eight frameworks available in Scénarisation’s picker. Each framework is organised by domain and links to its reference source.">Catalogue complet des huit cadres proposés dans le sélecteur de Scénarisation. Chaque cadre est organisé par domaines et renvoie à sa source de référence.</p>
     </header>
 
     <section class="competencies-controls" aria-label="Filtres" data-i18n-attr="aria-label" data-i18n-fr="Filtres" data-i18n-en="Filters">
@@ -1140,7 +1120,7 @@ foreach ($sectionGroups as $sectionKey => $group) {
                                         ? str_replace(['/fr/publication-detail/', '/language-fr'], ['/en/publication-detail/', '/language-en'], $levelGroup['sourceUrl'])
                                         : $levelGroup['sourceUrl'];
                                     ?>
-                                    <a class="competencies-framework-source" href="<?= h($levelGroup['sourceUrl']) ?>" target="_blank" rel="noopener noreferrer" data-i18n-attr="href" data-i18n-fr="<?= h($levelGroup['sourceUrl']) ?>" data-i18n-en="<?= h($sourceUrlEn) ?>"><span data-i18n-fr="Consulter la source" data-i18n-en="View source">Consulter la source</span> ↗</a>
+                                    <a class="competencies-framework-source" href="<?= h($levelGroup['sourceUrl']) ?>" target="_blank" rel="noopener noreferrer" data-i18n-attr="href" data-i18n-fr="<?= h($levelGroup['sourceUrl']) ?>" data-i18n-en="<?= h($sourceUrlEn) ?>"><span data-i18n-fr="Consulter la source" data-i18n-en="View source">Consulter la source</span> <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
                                 <?php endif; ?>
                             </div>
                         </td>
@@ -1218,6 +1198,9 @@ foreach ($sectionGroups as $sectionKey => $group) {
                                 </td>
                                 <td class="competencies-description">
                                     <span data-i18n-fr="<?= h($descriptionFr) ?>" data-i18n-en="<?= h($descriptionEn) ?>"><?= h($descriptionFr) ?></span>
+                                    <?php if (in_array($item['levelId'], ['per-romand', 'crcn'], true) && !empty($item['sourceUrl'])): ?>
+                                        <a class="competencies-framework-source" href="<?= h($item['sourceUrl']) ?>" target="_blank" rel="noopener noreferrer">Source <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></a>
+                                    <?php endif; ?>
                                     <?php if ($pixThemesFr !== '' || $pixThemesEn !== ''): ?>
                                         <span class="competencies-associated-themes">
                                             <strong data-i18n-fr="Thématiques associées :" data-i18n-en="Associated topics:">Thématiques associées :</strong>

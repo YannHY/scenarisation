@@ -3582,38 +3582,50 @@ main {
 .tool-picker-source-link {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   min-height: 26px;
-  border: 1px solid color-mix(in srgb, var(--link-color) 45%, var(--line));
-  border-radius: 6px;
-  background: #fff;
-  color: var(--link-color);
-  padding: 3px 7px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #595959;
+  padding: 3px 6px;
   font-size: 11px;
-  font-weight: 650;
-  line-height: 1;
+  font-weight: 400;
+  line-height: 1.4;
   text-decoration: none;
   white-space: nowrap;
 }
 
-.tool-picker-source-link::after {
-  content: "↗";
-  font-size: 11px;
+.tool-picker-source-link .fa-solid {
+  font-size: 0.85em;
 }
 
 .tool-picker-source-link:visited {
-  color: var(--link-color);
+  color: #595959;
 }
 
-.tool-picker-source-link:hover {
-  border-color: var(--link-color);
-  background: color-mix(in srgb, var(--link-color) 7%, #fff);
-  color: var(--link-hover);
+.tool-picker-source-link:hover,
+.tool-picker-source-link:focus-visible {
+  background: #e5e5e5;
+  color: #262626;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .tool-picker-source-link:focus-visible {
-  outline: 2px solid var(--link-color);
+  outline: 2px solid currentColor;
   outline-offset: 2px;
+}
+
+[data-theme="dark"] .tool-picker-source-link,
+[data-theme="dark"] .tool-picker-source-link:visited {
+  color: #bdbdbd;
+}
+
+[data-theme="dark"] .tool-picker-source-link:hover,
+[data-theme="dark"] .tool-picker-source-link:focus-visible {
+  background: #333333;
+  color: #f5f5f5;
 }
 
 .tool-picker-close {
@@ -7644,4 +7656,32 @@ html body .feedback-panel h2 {
     animation: none;
     transition: none;
   }
+}
+
+/* PER romand: neutral colours shared by the catalogue and activity picker. */
+[data-level="per-romand"],
+.competency-per-romand {
+  --competency-bg: #f5f5f5 !important;
+  --competency-border: #a3a3a3 !important;
+  --competency-text: #262626 !important;
+  --competency-active: #e5e5e5 !important;
+  --domain-row: #ffffff !important;
+  --domain-alt: #f5f5f5 !important;
+}
+[data-theme="dark"] [data-level="per-romand"],
+[data-theme="dark"] .competency-per-romand {
+  --competency-bg: #171717 !important;
+  --competency-border: #737373 !important;
+  --competency-text: #fafafa !important;
+  --competency-active: #404040 !important;
+  --domain-row: #171717 !important;
+  --domain-alt: #262626 !important;
+}
+
+.tool-picker-objective-title {
+  margin: 6px 8px 14px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
 }

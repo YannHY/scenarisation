@@ -1150,12 +1150,19 @@ let activeChoiceIndex = -1;
 
 let activeToolPicker = null;
 let activeToolPickerTrigger = null;
-let activeToolPickerFramework = "florimont";
-let activeToolPickerTab = "acquerir";
+let activeToolPickerFramework = "";
+let activeToolPickerTab = "";
+
+function getSortedCompetencyFrameworks(lang = currentLang()) {
+  const labelKey = lang === "en" ? "labelEn" : "labelFr";
+  return [...COMPETENCY_FRAMEWORKS].sort((a, b) =>
+    a[labelKey].localeCompare(b[labelKey], lang, { sensitivity: "base" })
+  );
+}
 
 function getCompetencyFramework(frameworkId = activeToolPickerFramework) {
   return COMPETENCY_FRAMEWORKS.find((framework) => framework.id === frameworkId)
-    || COMPETENCY_FRAMEWORKS[0];
+    || getSortedCompetencyFrameworks()[0];
 }
 
 function focusChoiceItem(index) {
@@ -1196,6 +1203,16 @@ function closeToolPicker(restoreFocus = false) {
 function renderPickerBody(body, groupId, activity) {
   body.innerHTML = "";
   const lang = currentLang();
+  const framework = getCompetencyFramework();
+  const group = framework?.groups.find(entry => entry.id === groupId);
+  if (activeToolPickerFramework === "per-romand" && group) {
+    const heading = document.createElement("h3");
+    heading.className = "tool-picker-objective-title";
+    heading.textContent = group.labelFr;
+    body.appendChild(heading);
+    const source = body.parentElement?.querySelector(".tool-picker-source-link");
+    if (source && group.sourceUrl) source.href = group.sourceUrl;
+  }
   const groupTools = SELECTABLE_TOOLS_DATA.filter(
     (tool) => tool.frameworkId === activeToolPickerFramework
       && tool.groupId === groupId
@@ -1212,7 +1229,10 @@ function renderPickerBody(body, groupId, activity) {
       const sectionTitle = document.createElement("div");
       sectionTitle.className = "tool-picker-section-title";
       sectionTitle.setAttribute("aria-hidden", "true");
-      sectionTitle.textContent = applyLanguageTypography(categoryTitle, lang);
+      const visibleTitle = activeToolPickerFramework === "per-romand" && categoryKey.endsWith(":composantes")
+        ? (lang === "en" ? "Components" : "Composantes")
+        : categoryTitle;
+      sectionTitle.textContent = applyLanguageTypography(visibleTitle, lang);
       applyCompetencyTheme(
         sectionTitle,
         tools[0]?.platform || activeToolPickerFramework,
@@ -1260,7 +1280,7 @@ function renderPickerBody(body, groupId, activity) {
       if (helperText) {
         const descEl = document.createElement("span");
         descEl.className = "tool-picker-item-desc";
-        descEl.textContent = `(${applyLanguageTypography(helperText, lang)})`;
+        descEl.textContent = applyLanguageTypography(helperText, lang);
         textWrapper.appendChild(descEl);
       }
       item.appendChild(checkBox);
@@ -1332,6 +1352,11 @@ function renderPickerTabs(tabsRow, body, activity) {
       activeToolPickerFramework === "florimont" ? "" : id
     );
     tab.textContent = lang === "en" ? labelEn : labelFr;
+    if (activeToolPickerFramework === "per-romand") {
+      tab.title = labelFr;
+      tab.setAttribute("aria-label", labelFr);
+      tab.textContent = labelFr.split(" - ")[0];
+    }
     tab.setAttribute("role", "tab");
     tab.setAttribute("aria-selected", String(isActive));
     tab.addEventListener("click", () => switchPickerTab(id, body, activity));
@@ -1348,7 +1373,9 @@ function openToolPicker(trigger, activity) {
   closeToolPicker();
   closeChoiceMenu();
   if (!COMPETENCY_FRAMEWORKS.some((framework) => framework.id === activeToolPickerFramework)) {
-    activeToolPickerFramework = COMPETENCY_FRAMEWORKS[0]?.id || "florimont";
+    const firstFramework = getSortedCompetencyFrameworks()[0];
+    activeToolPickerFramework = firstFramework?.id || "";
+    activeToolPickerTab = firstFramework?.groups?.[0]?.id || "";
   }
 
   const panel = document.createElement("div");
@@ -1383,7 +1410,8 @@ function openToolPicker(trigger, activity) {
   const frameworkSelect = document.createElement("select");
   frameworkSelect.id = "tool-picker-framework-select";
   frameworkSelect.className = "tool-picker-framework-select";
-  COMPETENCY_FRAMEWORKS.forEach((framework) => {
+  const sortedFrameworks = getSortedCompetencyFrameworks(lang);
+  sortedFrameworks.forEach((framework) => {
     const option = document.createElement("option");
     option.value = framework.id;
     option.textContent = lang === "en" ? framework.labelEn : framework.labelFr;
@@ -1395,9 +1423,14 @@ function openToolPicker(trigger, activity) {
   sourceLink.target = "_blank";
   sourceLink.rel = "noopener noreferrer";
   sourceLink.textContent = t("toolPickerSource");
+  const sourceIcon = document.createElement("i");
+  sourceIcon.className = "fa-solid fa-arrow-up-right-from-square";
+  sourceIcon.setAttribute("aria-hidden", "true");
+  sourceLink.appendChild(sourceIcon);
   const updateSourceLink = () => {
     const framework = getCompetencyFramework();
-    let sourceUrl = framework?.sourceUrl || "";
+    const selectedGroup = framework?.groups.find(group => group.id === activeToolPickerTab);
+    let sourceUrl = selectedGroup?.sourceUrl || framework?.sourceUrl || "";
     if (lang === "en" && framework?.id === "greencomp") {
       sourceUrl = sourceUrl
         .replace("/fr/publication-detail/", "/en/publication-detail/")

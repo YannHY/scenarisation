@@ -8,7 +8,7 @@ Le projet est inspiré de l'[UCL Learning Designer](https://www.ucl.ac.uk/learni
 
 ## Ce que Scénarisation apporte
 
-- **Concevoir avec un cadre pédagogique commun** : chaque scénario est structuré en moments et activités, reliés à des types d'apprentissage, des modalités, des compétences issues de sept cadres (Florimont, Socle commun, GreenComp, DigComp 3.0, CRCN, Pix et Pix IA), des niveaux AIAS et des acquis issus de la taxonomie de Bloom.
+- **Concevoir avec un cadre pédagogique commun** : chaque scénario est structuré en moments et activités, reliés à des types d'apprentissage, des modalités, des compétences issues de huit cadres (Florimont, Socle commun, GreenComp, DigComp 3.0, CRCN, Pix, Pix IA et le PER romand), des niveaux AIAS et des acquis issus de la taxonomie de Bloom.
 - **Partir d'un modèle plutôt que d'une page blanche** : 28 scénarios génériques, répartis en huit familles, sont prêts à être adaptés à une discipline et à un contexte.
 - **Relire un scénario sous plusieurs angles** : la répartition du temps et des types d'apprentissage aide à repérer les déséquilibres, les enchaînements trop denses ou les modalités trop peu variées.
 - **Partager et réutiliser les productions** : un scénario peut être sauvegardé dans un compte, publié par lien, consulté en lecture seule et proposé dans le catalogue public sous licence Creative Commons.

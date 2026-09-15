@@ -204,8 +204,8 @@ function parseAdditionalCompetencyFrameworkCatalog(source) {
     }
 
     if (line.startsWith("## group\t") && framework) {
-      const [, id = "", labelFr = "", labelEn = ""] = line.split("\t");
-      group = { id, labelFr, labelEn };
+      const [, id = "", labelFr = "", labelEn = "", sourceUrl = ""] = line.split("\t");
+      group = { id, labelFr, labelEn, sourceUrl };
       framework.groups.push(group);
       subgroup = null;
       return;
@@ -218,7 +218,7 @@ function parseAdditionalCompetencyFrameworkCatalog(source) {
     }
 
     if (!framework || !group) return;
-    const [code = "", labelFr = "", descFr = "", labelEn = "", descEn = ""] = line.split("\t");
+    const [code = "", labelFr = "", descFr = "", labelEn = "", descEn = "", sourceUrl = ""] = line.split("\t");
     if (!code.trim() || !labelFr.trim()) return;
     const sectionFr = subgroup?.labelFr || group.labelFr;
     const sectionEn = subgroup?.labelEn || group.labelEn;
@@ -238,6 +238,7 @@ function parseAdditionalCompetencyFrameworkCatalog(source) {
       levelBadge: framework.labelFr,
       number: code.trim(),
       displayCode: code.trim(),
+      sourceUrl: sourceUrl.trim() || group.sourceUrl || framework.sourceUrl,
       shortCode: `${framework.labelFr} ${code.trim()}`,
       shortCodeFr: `${framework.labelFr} ${code.trim()}`,
       shortCodeEn: `${framework.labelEn} ${code.trim()}`,
@@ -563,6 +564,7 @@ function getCompetencyStyle(level, groupId = "") {
 
 function applyCompetencyTheme(element, level, groupId = "") {
   if (!element) return;
+  element.classList.toggle("competency-per-romand", level === "per-romand");
   const theme = getCompetencyStyle(level, groupId);
   element.style.setProperty("--competency-bg", theme.bg);
   element.style.setProperty("--competency-border", theme.border);
@@ -605,6 +607,9 @@ function formatCompetencyLabel(toolDef, lang = currentLang()) {
 
 function formatCompetencyShortCode(toolDef, lang = currentLang()) {
   if (!toolDef) return "";
+  if (toolDef.frameworkId === "per-romand") {
+    return `PER romand · ${toolDef.displayCode || toolDef.number}`;
+  }
   return lang === "en" ? toolDef.shortCodeEn : toolDef.shortCodeFr;
 }
 
