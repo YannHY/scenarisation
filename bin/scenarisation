@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any
 
 
-VERSION = "0.8.4"
+VERSION = "0.8.5"
 DEFAULT_DAY_HOURS = 7
 AIAS_VERSION = "2.1"
 DEFAULT_SITE = "https://www.ralentirtravaux.com/flo/learning-designer"
@@ -1091,19 +1091,57 @@ def command_status(args: argparse.Namespace) -> None:
 
 
 def command_upgrade(args: argparse.Namespace) -> None:
-    print("Downloading the latest Scenarisation CLI installer...")
+    language = getattr(args, "help_language", "fr")
+    print(localized(
+        language,
+        f"Mise à jour de Scénarisation {VERSION}…",
+        f"Updating Scenarisation {VERSION}…",
+    ))
+    separator = "&" if "?" in INSTALL_URL else "?"
+    installer_url = f"{INSTALL_URL}{separator}v={int(time.time())}"
     try:
-        with urllib.request.urlopen(INSTALL_URL, timeout=args.timeout) as response:
+        request = urllib.request.Request(installer_url, headers={"Cache-Control": "no-cache"})
+        with urllib.request.urlopen(request, timeout=args.timeout) as response:
             script = response.read()
     except urllib.error.HTTPError as exc:
         die(f"upgrade failed ({exc.code}): {exc.reason}")
     except urllib.error.URLError as exc:
         die(f"upgrade failed: {exc.reason}")
 
+    installed_command = shutil.which("scenarisation")
+    current_executable = Path(installed_command).resolve() if installed_command else Path(sys.argv[0]).resolve()
+    install_env = os.environ.copy()
+    install_env.update({
+        "SCENARISATION_INSTALL_NONINTERACTIVE": "1",
+        "SCENARISATION_INSTALL_QUIET": "1",
+    })
+    if str(current_executable.parent) in os.environ.get("PATH", "").split(os.pathsep):
+        install_env["SCENARISATION_INSTALL_DIR"] = str(current_executable.parent)
+
     try:
-        subprocess.run(["sh"], input=script, check=True)
+        subprocess.run(["sh"], input=script, check=True, env=install_env)
     except subprocess.CalledProcessError as exc:
         die(f"upgrade installer failed with exit code {exc.returncode}", exc.returncode)
+
+    updated_command = shutil.which("scenarisation") or str(current_executable)
+    version_env = os.environ.copy()
+    version_env["SCENARISATION_NO_BANNER"] = "1"
+    try:
+        result = subprocess.run(
+            [updated_command, "--version"],
+            check=True,
+            capture_output=True,
+            text=True,
+            env=version_env,
+        )
+        installed_version = result.stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        installed_version = localized(language, "nouvelle version installée", "new version installed")
+    print(localized(
+        language,
+        f"Mise à jour terminée : {installed_version}",
+        f"Upgrade complete: {installed_version}",
+    ))
 
 
 def localized(language: str, french: str, english: str) -> str:
@@ -1422,7 +1460,9 @@ def build_parser(language: str = "fr") -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     arguments = sys.argv[1:] if argv is None else argv
     language = requested_help_language(arguments)
-    print_banner(language)
+    quiet_commands = {"upgrade", "update", "mise-a-jour"}
+    if "--version" not in arguments and not quiet_commands.intersection(arguments):
+        print_banner(language)
     parser = build_parser(language)
     if not arguments:
         parser.print_help()

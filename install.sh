@@ -175,7 +175,8 @@ fi
 if [ -f "./bin/scenarisation" ]; then
   cp "./bin/scenarisation" "$TMP_FILE"
 else
-  URL="https://raw.githubusercontent.com/$REPO/$REF/bin/scenarisation"
+  CACHE_BUSTER="$(date +%s 2>/dev/null || printf '%s' "$$")"
+  URL="https://raw.githubusercontent.com/$REPO/$REF/bin/scenarisation?v=$CACHE_BUSTER"
   if command -v curl >/dev/null 2>&1; then
     curl -fsSL "$URL" -o "$TMP_FILE"
   elif command -v wget >/dev/null 2>&1; then
@@ -210,6 +211,6 @@ fi
 say ""
 say "Installed scenarisation to $TARGET"
 if [ "${SCENARISATION_INSTALL_QUIET:-0}" != "1" ]; then
-  "$TARGET" --version
+  SCENARISATION_NO_BANNER=1 "$TARGET" --version
 fi
 say "Run: scenarisation --help"
