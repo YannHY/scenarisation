@@ -28,6 +28,9 @@
 }
 
 html body .site-nav .account-preferences h2 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
   margin: 0 0 12px;
   font-size: 11px;
   font-weight: 600;

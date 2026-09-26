@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-const APP_SCHEMA_VERSION = 6;
+const APP_SCHEMA_VERSION = 8;
 const TERMS_VERSION = '2026-09-10';
 const EMAIL_VERIFICATION_TTL_SECONDS = 86400;
 const EMAIL_VERIFICATION_RESEND_DELAY_SECONDS = 60;
@@ -236,6 +236,8 @@ function ensure_app_schema(PDO $db): void
     }
     ensure_design_revision_column($db);
     ensure_terms_acceptance_columns($db);
+    ensure_manager_role($db);
+    ensure_manager_permission_columns($db);
     ensure_app_schema_meta_table($db);
 
     $stmt = $db->prepare("SELECT schema_version FROM app_schema_meta WHERE id = 1");
@@ -275,6 +277,112 @@ function ensure_terms_acceptance_columns(PDO $db): void
             $db->exec("ALTER TABLE users ADD COLUMN $column " . ($isSqlite ? 'TEXT' : $type) . ' NULL');
         } catch (PDOException $error) {
             if (!$exists()) throw $error;
+        }
+    }
+}
+
+/** Allow limited administration accounts on both new and existing installs. */
+function ensure_manager_role(PDO $db): void
+{
+    $isSqlite = $db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite';
+    if (!$isSqlite) {
+        $stmt = $db->query("SELECT COLUMN_TYPE FROM information_schema.COLUMNS
+            WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'role'");
+        $columnType = strtolower((string)$stmt->fetchColumn());
+        if (!str_contains($columnType, "'manager'")) {
+            $db->exec("ALTER TABLE users MODIFY role ENUM('admin','manager','designer') NOT NULL DEFAULT 'designer'");
+        }
+        return;
+    }
+
+    $tableSql = (string)$db->query("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'users'")
+        ->fetchColumn();
+    if ($tableSql === '' || preg_match("/['\"]manager['\"]/i", $tableSql) === 1) {
+        return;
+    }
+
+    $upgradedSql = preg_replace(
+        "/CHECK\s*\(\s*role\s+IN\s*\(\s*'admin'\s*,\s*'designer'\s*\)\s*\)/i",
+        "CHECK (role IN ('admin','manager','designer'))",
+        $tableSql,
+        1,
+        $replacementCount
+    );
+    if (!is_string($upgradedSql) || $replacementCount !== 1) {
+        throw new RuntimeException('Impossible de préparer la migration des rôles utilisateur.');
+    }
+    $upgradedSql = preg_replace(
+        '/^CREATE TABLE\s+(?:IF NOT EXISTS\s+)?(?:"users"|`users`|\[users\]|users)/i',
+        'CREATE TABLE users_role_upgrade',
+        $upgradedSql,
+        1,
+        $tableReplacementCount
+    );
+    if (!is_string($upgradedSql) || $tableReplacementCount !== 1) {
+        throw new RuntimeException('Impossible de préparer la table des rôles utilisateur.');
+    }
+
+    $dependentObjects = $db->query("SELECT sql FROM sqlite_master
+        WHERE tbl_name = 'users' AND type IN ('index', 'trigger') AND sql IS NOT NULL")
+        ->fetchAll(PDO::FETCH_COLUMN);
+    $foreignKeysEnabled = (int)$db->query('PRAGMA foreign_keys')->fetchColumn() === 1;
+    if ($foreignKeysEnabled) {
+        $db->exec('PRAGMA foreign_keys = OFF');
+    }
+    try {
+        $db->beginTransaction();
+        $db->exec($upgradedSql);
+        $db->exec('INSERT INTO users_role_upgrade SELECT * FROM users');
+        $db->exec('DROP TABLE users');
+        $db->exec('ALTER TABLE users_role_upgrade RENAME TO users');
+        foreach ($dependentObjects as $objectSql) {
+            $db->exec((string)$objectSql);
+        }
+        $db->commit();
+    } catch (Throwable $error) {
+        if ($db->inTransaction()) {
+            $db->rollBack();
+        }
+        throw $error;
+    } finally {
+        if ($foreignKeysEnabled) {
+            $db->exec('PRAGMA foreign_keys = ON');
+        }
+    }
+
+    if ($db->query('PRAGMA foreign_key_check')->fetch() !== false) {
+        throw new RuntimeException('La migration des rôles a détecté une relation invalide.');
+    }
+}
+
+function ensure_manager_permission_columns(PDO $db): void
+{
+    $isSqlite = $db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite';
+    $columns = [
+        'manager_manage_accounts',
+        'manager_delete_feedback',
+        'manager_view_security_log',
+    ];
+    foreach ($columns as $column) {
+        $exists = static function () use ($db, $isSqlite, $column): bool {
+            if ($isSqlite) {
+                return in_array($column, array_column($db->query('PRAGMA table_info(users)')->fetchAll(PDO::FETCH_ASSOC), 'name'), true);
+            }
+            $stmt = $db->prepare("SELECT COUNT(*) FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = ?");
+            $stmt->execute([$column]);
+            return (int)$stmt->fetchColumn() > 0;
+        };
+        if ($exists()) {
+            continue;
+        }
+        try {
+            $db->exec("ALTER TABLE users ADD COLUMN $column "
+                . ($isSqlite ? 'INTEGER' : 'TINYINT(1)') . ' NOT NULL DEFAULT 0');
+        } catch (PDOException $error) {
+            if (!$exists()) {
+                throw $error;
+            }
         }
     }
 }
@@ -323,7 +431,7 @@ function ensure_app_tables(PDO $db): void
             username TEXT NOT NULL UNIQUE,
             email TEXT NOT NULL UNIQUE,
             password_hash TEXT NOT NULL,
-            role TEXT NOT NULL DEFAULT 'designer' CHECK (role IN ('admin','designer')),
+            role TEXT NOT NULL DEFAULT 'designer' CHECK (role IN ('admin','manager','designer')),
             status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','disabled')),
             email_verified_at TEXT NULL,
             email_verification_token_hash TEXT NULL,
@@ -332,6 +440,9 @@ function ensure_app_tables(PDO $db): void
             password_reset_token_hash TEXT NULL,
             password_reset_expires_at INTEGER NULL,
             password_reset_sent_at INTEGER NULL,
+            manager_manage_accounts INTEGER NOT NULL DEFAULT 0,
+            manager_delete_feedback INTEGER NOT NULL DEFAULT 0,
+            manager_view_security_log INTEGER NOT NULL DEFAULT 0,
             created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
             last_login_at TEXT NULL
         )");
@@ -388,7 +499,7 @@ function ensure_app_tables(PDO $db): void
         username VARCHAR(80) NOT NULL UNIQUE,
         email VARCHAR(190) NOT NULL UNIQUE,
         password_hash VARCHAR(255) NOT NULL,
-        role ENUM('admin','designer') NOT NULL DEFAULT 'designer',
+        role ENUM('admin','manager','designer') NOT NULL DEFAULT 'designer',
         status ENUM('active','disabled') NOT NULL DEFAULT 'active',
         email_verified_at DATETIME NULL,
         email_verification_token_hash CHAR(64) NULL,
@@ -397,6 +508,9 @@ function ensure_app_tables(PDO $db): void
         password_reset_token_hash CHAR(64) NULL,
         password_reset_expires_at BIGINT UNSIGNED NULL,
         password_reset_sent_at BIGINT UNSIGNED NULL,
+        manager_manage_accounts TINYINT(1) NOT NULL DEFAULT 0,
+        manager_delete_feedback TINYINT(1) NOT NULL DEFAULT 0,
+        manager_view_security_log TINYINT(1) NOT NULL DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         last_login_at DATETIME NULL,
         UNIQUE INDEX idx_users_email_verification_token (email_verification_token_hash),
@@ -701,7 +815,9 @@ function current_user(): ?array
         unset($_SESSION['user']);
         return null;
     }
-    $stmt = app_db()->prepare("SELECT id, username, email, role, status FROM users WHERE id = ? LIMIT 1");
+    $stmt = app_db()->prepare("SELECT id, username, email, role, status,
+        manager_manage_accounts, manager_delete_feedback, manager_view_security_log
+        FROM users WHERE id = ? LIMIT 1");
     $stmt->execute([$userId]);
     $user = $stmt->fetch();
     if (!$user || $user['status'] !== 'active') {
@@ -714,6 +830,9 @@ function current_user(): ?array
         'username' => (string)$user['username'],
         'email' => (string)$user['email'],
         'role' => (string)$user['role'],
+        'manager_manage_accounts' => (int)$user['manager_manage_accounts'],
+        'manager_delete_feedback' => (int)$user['manager_delete_feedback'],
+        'manager_view_security_log' => (int)$user['manager_view_security_log'],
     ];
 }
 
@@ -737,6 +856,33 @@ function require_login_page(): array
         exit;
     }
     return $user;
+}
+
+function user_is_full_admin(?array $user): bool
+{
+    return (string)($user['role'] ?? '') === 'admin';
+}
+
+function user_can_access_admin(?array $user): bool
+{
+    return in_array((string)($user['role'] ?? ''), ['admin', 'manager'], true);
+}
+
+function user_has_admin_permission(?array $user, string $permission): bool
+{
+    if (user_is_full_admin($user)) {
+        return true;
+    }
+    if ((string)($user['role'] ?? '') !== 'manager') {
+        return false;
+    }
+    $columns = [
+        'manage_accounts' => 'manager_manage_accounts',
+        'delete_feedback' => 'manager_delete_feedback',
+        'view_security_log' => 'manager_view_security_log',
+    ];
+    $column = $columns[$permission] ?? null;
+    return $column !== null && (int)($user[$column] ?? 0) === 1;
 }
 
 function require_cli_token_json(): array
@@ -788,7 +934,18 @@ function require_cli_token_json(): array
 function require_admin_page(): array
 {
     $user = require_login_page();
-    if (($user['role'] ?? '') !== 'admin') {
+    if (!user_is_full_admin($user)) {
+        http_response_code(403);
+        echo 'Acces refuse.';
+        exit;
+    }
+    return $user;
+}
+
+function require_admin_dashboard_page(): array
+{
+    $user = require_login_page();
+    if (!user_can_access_admin($user)) {
         http_response_code(403);
         echo 'Acces refuse.';
         exit;
@@ -1137,7 +1294,7 @@ function render_theme_boot_script(): void
 function render_site_nav(string $active = '', bool $accountAvailable = true): void
 {
     $user = $accountAvailable ? current_user() : null;
-    $isAdmin = (string)($user['role'] ?? '') === 'admin';
+    $canAccessAdmin = user_can_access_admin($user);
     $username = trim((string)($user['username'] ?? $user['email'] ?? ''));
     $savesClass = $active === 'saves' ? ' nav-account-btn-active' : '';
     $profileClass = $active === 'profile' ? ' nav-account-btn-active' : '';
@@ -1173,15 +1330,30 @@ function render_site_nav(string $active = '', bool $accountAvailable = true): vo
                     </button>
                     <div id="account-menu" class="account-menu account-preferences-menu hidden" aria-hidden="true">
                         <?php if ($user): ?>
-                            <a class="account-menu-link<?= $profileClass ?>" href="profile.php" data-site-i18n-en="Profile" data-site-i18n-fr="Profil">Profil</a>
-                            <?php if ($isAdmin): ?>
-                                <a class="account-menu-link<?= $adminClass ?>" href="admin.php" data-site-i18n-en="Administration" data-site-i18n-fr="Administration">Administration</a>
+                            <a class="account-menu-link<?= $profileClass ?>" href="profile.php">
+                                <i class="account-menu-icon fa-regular fa-user" aria-hidden="true"></i>
+                                <span data-site-i18n-en="Profile" data-site-i18n-fr="Profil">Profil</span>
+                            </a>
+                            <?php if ($canAccessAdmin): ?>
+                                <a class="account-menu-link<?= $adminClass ?>" href="admin.php">
+                                    <svg class="account-menu-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.09a2 2 0 0 1 1 1.74v.5a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2Z"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                    <span data-site-i18n-en="Administration" data-site-i18n-fr="Administration">Administration</span>
+                                </a>
                             <?php endif; ?>
                         <?php else: ?>
-                            <a class="account-menu-link" href="login.php" data-site-i18n-en="Sign in" data-site-i18n-fr="Se connecter">Se connecter</a>
+                            <a class="account-menu-link" href="login.php">
+                                <i class="account-menu-icon fa-solid fa-right-to-bracket" aria-hidden="true"></i>
+                                <span data-site-i18n-en="Sign in" data-site-i18n-fr="Se connecter">Se connecter</span>
+                            </a>
                         <?php endif; ?>
                         <section class="account-preferences" aria-labelledby="account-preferences-title">
-                            <h2 id="account-preferences-title" data-site-i18n-en="Preferences" data-site-i18n-fr="Préférences">Préférences</h2>
+                            <h2 id="account-preferences-title">
+                                <i class="account-menu-icon fa-solid fa-sliders" aria-hidden="true"></i>
+                                <span data-site-i18n-en="Preferences" data-site-i18n-fr="Préférences">Préférences</span>
+                            </h2>
                             <div class="account-preference-row">
                                 <label id="account-language-label" for="lang-select" data-site-i18n-en="Language" data-site-i18n-fr="Langue">Langue</label>
                                 <select id="lang-select" hidden aria-hidden="true" tabindex="-1">
@@ -1208,7 +1380,10 @@ function render_site_nav(string $active = '', bool $accountAvailable = true): vo
                             </div>
                         </section>
                         <?php if ($user): ?>
-                            <a class="account-menu-link" href="logout.php" data-site-i18n-en="Sign out" data-site-i18n-fr="Déconnexion">Déconnexion</a>
+                            <a class="account-menu-link" href="logout.php">
+                                <i class="account-menu-icon fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
+                                <span data-site-i18n-en="Sign out" data-site-i18n-fr="Déconnexion">Déconnexion</span>
+                            </a>
                         <?php endif; ?>
                     </div>
                 </div>

@@ -4,24 +4,43 @@ require_once __DIR__ . '/lib/bootstrap.php';
 require_once __DIR__ . '/lib/admin-security.php';
 require_once __DIR__ . '/lib/admin-i18n.php';
 
-$admin = require_admin_page();
+$admin = require_admin_dashboard_page();
+$isFullAdmin = user_is_full_admin($admin);
+$canManageAccounts = user_has_admin_permission($admin, 'manage_accounts');
+$canDeleteFeedback = user_has_admin_permission($admin, 'delete_feedback');
+$canViewSecurityLog = user_has_admin_permission($admin, 'view_security_log');
 $db = app_db();
-ensure_admin_security_table($db);
-$_SESSION['admin_security_csrf'] ??= bin2hex(random_bytes(32));
+if ($canManageAccounts || $canViewSecurityLog) {
+    ensure_admin_security_table($db);
+}
+if ($isFullAdmin || $canManageAccounts || $canDeleteFeedback) {
+    $_SESSION['admin_security_csrf'] ??= bin2hex(random_bytes(32));
+}
 $db->prepare('DELETE FROM app_feedback WHERE created_at_epoch < ?')->execute([time() - 63072000]);
 $db->prepare("UPDATE app_feedback SET visitor_hash = '' WHERE visitor_hash <> '' AND created_at_epoch < ?")
     ->execute([time() - 86400]);
 $message = '';
 $error = '';
-$activeAdminTab = (string)($_GET['tab'] ?? $_POST['admin_tab'] ?? 'accounts');
-if (!in_array($activeAdminTab, ['accounts', 'feedback', 'statistics', 'security'], true)) {
-    $activeAdminTab = 'accounts';
+$allowedAdminTabs = ['statistics', 'feedback'];
+if ($canManageAccounts) {
+    array_unshift($allowedAdminTabs, 'accounts');
+}
+if ($canManageAccounts || $canViewSecurityLog) {
+    $allowedAdminTabs[] = 'security';
+}
+$activeAdminTab = (string)($_GET['tab'] ?? $_POST['admin_tab'] ?? $allowedAdminTabs[0]);
+if (!in_array($activeAdminTab, $allowedAdminTabs, true)) {
+    $activeAdminTab = $allowedAdminTabs[0];
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_same_origin_post();
     $adminAction = (string)($_POST['admin_action'] ?? 'create_account');
     if ($adminAction === 'moderate_user') {
+        if (!$canManageAccounts) {
+            http_response_code(403);
+            exit('Vous n’avez pas l’autorisation de gérer les comptes.');
+        }
         $activeAdminTab = 'security';
         if (!hash_equals($_SESSION['admin_security_csrf'], (string)($_POST['csrf_token'] ?? ''))) {
             $error = 'Formulaire expiré. Rechargez la page puis réessayez.';
@@ -38,7 +57,61 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = 'L’intervention a échoué. Aucune modification n’a été conservée.';
             }
         }
+    } elseif ($adminAction === 'change_role') {
+        if (!$isFullAdmin) {
+            http_response_code(403);
+            exit('Seul un administrateur peut modifier les rôles.');
+        }
+        $activeAdminTab = 'accounts';
+        if (!hash_equals($_SESSION['admin_security_csrf'], (string)($_POST['csrf_token'] ?? ''))) {
+            $error = 'Formulaire expiré. Rechargez la page puis réessayez.';
+        } else {
+            try {
+                admin_change_user_role(
+                    $db,
+                    (int)$admin['id'],
+                    (int)($_POST['target_user_id'] ?? 0),
+                    (string)($_POST['new_role'] ?? '')
+                );
+                $message = 'Rôle mis à jour.';
+            } catch (InvalidArgumentException $e) {
+                $error = $e->getMessage();
+            } catch (Throwable $e) {
+                error_log('Admin role change failed: ' . $e->getMessage());
+                $error = 'Le changement de rôle a échoué. Aucune modification n’a été conservée.';
+            }
+        }
+    } elseif ($adminAction === 'update_manager_permissions') {
+        if (!$isFullAdmin) {
+            http_response_code(403);
+            exit('Seul un administrateur peut modifier les autorisations.');
+        }
+        $activeAdminTab = 'accounts';
+        if (!hash_equals($_SESSION['admin_security_csrf'], (string)($_POST['csrf_token'] ?? ''))) {
+            $error = 'Formulaire expiré. Rechargez la page puis réessayez.';
+        } else {
+            try {
+                admin_update_manager_permissions(
+                    $db,
+                    (int)$admin['id'],
+                    (int)($_POST['target_user_id'] ?? 0),
+                    isset($_POST['manage_accounts']),
+                    isset($_POST['delete_feedback']),
+                    isset($_POST['view_security_log'])
+                );
+                $message = 'Autorisations du gestionnaire mises à jour.';
+            } catch (InvalidArgumentException $e) {
+                $error = $e->getMessage();
+            } catch (Throwable $e) {
+                error_log('Admin manager permissions failed: ' . $e->getMessage());
+                $error = 'La mise à jour des autorisations a échoué.';
+            }
+        }
     } elseif ($adminAction === 'delete_feedback') {
+        if (!$canDeleteFeedback) {
+            http_response_code(403);
+            exit('Vous n’avez pas l’autorisation de supprimer les retours.');
+        }
         $activeAdminTab = 'feedback';
         $feedbackId = filter_var($_POST['feedback_id'] ?? null, FILTER_VALIDATE_INT, [
             'options' => ['min_range' => 1],
@@ -53,12 +126,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 : 'Ce retour avait déjà été supprimé.';
         }
     } elseif ($adminAction === 'create_account') {
+        if (!$canManageAccounts) {
+            http_response_code(403);
+            exit('Vous n’avez pas l’autorisation de gérer les comptes.');
+        }
         $activeAdminTab = 'accounts';
         $username = sanitize_username((string)($_POST['username'] ?? ''));
         $email = trim((string)($_POST['email'] ?? ''));
         $password = (string)($_POST['password'] ?? '');
         $role = (string)($_POST['role'] ?? 'designer');
-        if (!in_array($role, ['admin', 'designer'], true)) {
+        $creatableRoles = $isFullAdmin ? ['admin', 'manager', 'designer'] : ['manager', 'designer'];
+        if (!in_array($role, $creatableRoles, true)) {
             $role = 'designer';
         }
 
@@ -89,8 +167,18 @@ unset($_SESSION['admin_flash']);
 if (is_array($flash) && ($flash['tab'] ?? '') === $activeAdminTab) {
     $message = (string)($flash['message'] ?? '');
 }
-$securityLog = $db->query('SELECT * FROM admin_security_log ORDER BY id DESC LIMIT 100')->fetchAll();
-$securityLabels = ['suspend' => 'Suspension', 'reactivate' => 'Réactivation', 'delete' => 'Suppression'];
+$securityLog = $canViewSecurityLog
+    ? $db->query('SELECT * FROM admin_security_log ORDER BY id DESC LIMIT 100')->fetchAll()
+    : [];
+$securityLabels = [
+    'suspend' => 'Suspension',
+    'reactivate' => 'Réactivation',
+    'delete' => 'Suppression',
+    'role_admin' => 'Rôle : Admin',
+    'role_manager' => 'Rôle : Gestionnaire',
+    'role_designer' => 'Rôle : Designer',
+    'permissions' => 'Autorisations du gestionnaire',
+];
 
 $usersStmt = $db->query("SELECT
     u.id,
@@ -101,10 +189,14 @@ $usersStmt = $db->query("SELECT
     u.email_verified_at,
     u.created_at,
     u.last_login_at,
+    u.manager_manage_accounts,
+    u.manager_delete_feedback,
+    u.manager_view_security_log,
     COUNT(d.id) AS design_count
 FROM users u
 LEFT JOIN learning_designs d ON d.owner_user_id = u.id
-GROUP BY u.id, u.username, u.email, u.role, u.status, u.email_verified_at, u.created_at, u.last_login_at
+GROUP BY u.id, u.username, u.email, u.role, u.status, u.email_verified_at, u.created_at, u.last_login_at,
+    u.manager_manage_accounts, u.manager_delete_feedback, u.manager_view_security_log
 ORDER BY u.created_at DESC");
 $users = $usersStmt->fetchAll();
 
@@ -190,7 +282,7 @@ function admin_stat_percentage(int $value, int $total): int
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="css/interface.css?v=20260905-subtle-focus">
     <link rel="stylesheet" href="css/account-ui.css?v=20260906-highlight">
-    <link rel="stylesheet" href="css/account-pages.css?v=20260910-admin-tab-font">
+    <link rel="stylesheet" href="css/account-pages.css?v=20260926-permission-dialog">
 </head>
 <body class="admin-page">
 <?php render_site_nav('admin'); ?>
@@ -200,14 +292,19 @@ function admin_stat_percentage(int $value, int $total): int
             <div>
                 <p class="account-kicker">Administration</p>
                 <h1 <?= admin_i18n_attributes('Vue d’ensemble') ?>>Vue d’ensemble</h1>
+                <?php if (!$isFullAdmin): ?>
+                    <p class="account-copy" <?= admin_i18n_attributes('Accès gestionnaire : fonctionnalités définies par l’administrateur.', 'Manager access: features assigned by the administrator.') ?>>Accès gestionnaire : fonctionnalités définies par l’administrateur.</p>
+                <?php endif; ?>
             </div>
         </div>
 
         <div class="admin-tabs" role="tablist" aria-label="Sections de l’administration" <?= admin_i18n_attributes('Sections de l’administration') ?> data-site-i18n-attr="aria-label">
+            <?php if ($canManageAccounts): ?>
             <button id="admin-tab-accounts" class="admin-tab<?= $activeAdminTab === 'accounts' ? ' is-active' : '' ?>" type="button" role="tab" aria-selected="<?= $activeAdminTab === 'accounts' ? 'true' : 'false' ?>" aria-controls="admin-panel-accounts" data-admin-tab="accounts">
                 <i class="fa-solid fa-users" aria-hidden="true"></i>
                 <?= admin_i18n('Comptes') ?>
             </button>
+            <?php endif; ?>
             <button id="admin-tab-feedback" class="admin-tab<?= $activeAdminTab === 'feedback' ? ' is-active' : '' ?>" type="button" role="tab" aria-selected="<?= $activeAdminTab === 'feedback' ? 'true' : 'false' ?>" aria-controls="admin-panel-feedback" data-admin-tab="feedback">
                 <i class="fa-regular fa-message" aria-hidden="true"></i>
                 Feedback
@@ -217,11 +314,14 @@ function admin_stat_percentage(int $value, int $total): int
                 <i class="fa-solid fa-chart-column" aria-hidden="true"></i>
                 <?= admin_i18n('Statistiques') ?>
             </button>
+            <?php if ($canManageAccounts || $canViewSecurityLog): ?>
             <button id="admin-tab-security" class="admin-tab<?= $activeAdminTab === 'security' ? ' is-active' : '' ?>" type="button" role="tab" aria-selected="<?= $activeAdminTab === 'security' ? 'true' : 'false' ?>" aria-controls="admin-panel-security" data-admin-tab="security">
                 <i class="fa-solid fa-shield-halved" aria-hidden="true"></i> <?= admin_i18n('Sécurité') ?>
             </button>
+            <?php endif; ?>
         </div>
 
+        <?php if ($canManageAccounts || $canViewSecurityLog): ?>
         <div id="admin-panel-security" class="admin-tab-panel" role="tabpanel" aria-labelledby="admin-tab-security"<?= $activeAdminTab === 'security' ? '' : ' hidden' ?>>
             <?php if ($activeAdminTab === 'security' && $message !== ''): ?>
                 <p class="account-message success" role="status" data-admin-notice="security" data-admin-success><?= admin_i18n($message) ?></p>
@@ -229,6 +329,7 @@ function admin_stat_percentage(int $value, int $total): int
             <?php if ($activeAdminTab === 'security' && $error !== ''): ?>
                 <p class="account-message error" role="alert" data-admin-notice="security"><?= admin_i18n($error) ?></p>
             <?php endif; ?>
+            <?php if ($canManageAccounts): ?>
             <form method="post" action="admin.php?tab=security" class="account-form panel">
                 <h2 <?= admin_i18n_attributes('Modérer un compte') ?>>Modérer un compte</h2>
                 <p class="account-copy" <?= admin_i18n_attributes('La suspension bloque l’accès au compte, révoque ses jetons CLI et retire ses scénarios du catalogue et du partage. La réactivation ne republie pas les scénarios et ne restaure pas les jetons.') ?>>La suspension bloque l’accès au compte, révoque ses jetons CLI et retire ses scénarios du catalogue et du partage. La réactivation ne republie pas les scénarios et ne restaure pas les jetons.</p>
@@ -241,6 +342,7 @@ function admin_stat_percentage(int $value, int $total): int
                         <option value="" <?= admin_i18n_attributes('Choisir un utilisateur') ?>>Choisir un utilisateur</option>
                         <?php foreach ($users as $u): ?>
                             <?php if ((int)$u['id'] === (int)$admin['id']) continue; ?>
+                            <?php if (!$isFullAdmin && (string)$u['role'] === 'admin') continue; ?>
                             <option <?= admin_i18n_attributes($u['username'] . ' — ' . $u['email'] . ' · ' . ($u['status'] === 'active' ? 'Actif' : 'Suspendu') . ' · ' . $u['role'] . ' · ' . $u['design_count'] . ' scénario(s)', $u['username'] . ' — ' . $u['email'] . ' · ' . ($u['status'] === 'active' ? 'Active' : 'Suspended') . ' · ' . $u['role'] . ' · ' . $u['design_count'] . ' scenario(s)') ?> value="<?= (int)$u['id'] ?>"<?= (int)($_POST['target_user_id'] ?? 0) === (int)$u['id'] ? ' selected' : '' ?>><?= h($u['username'] . ' — ' . $u['email'] . ' · ' . ($u['status'] === 'active' ? 'Actif' : 'Suspendu') . ' · ' . $u['role'] . ' · ' . $u['design_count'] . ' scénario(s)') ?></option>
                         <?php endforeach; ?>
                     </select>
@@ -249,6 +351,8 @@ function admin_stat_percentage(int $value, int $total): int
                     <label for="security-action" <?= admin_i18n_attributes('Intervention') ?>>Intervention</label>
                     <select id="security-action" name="security_action" required>
                         <?php foreach ($securityLabels as $value => $label): ?>
+                            <?php if (!$isFullAdmin && $value === 'delete') continue; ?>
+                            <?php if (str_starts_with($value, 'role_') || $value === 'permissions') continue; ?>
                             <option <?= admin_i18n_attributes($label) ?> value="<?= h($value) ?>"<?= ($_POST['security_action'] ?? '') === $value ? ' selected' : '' ?>><?= h($label) ?></option>
                         <?php endforeach; ?>
                     </select>
@@ -265,6 +369,8 @@ function admin_stat_percentage(int $value, int $total): int
                 <p class="account-copy" <?= admin_i18n_attributes('Votre propre compte et le dernier administrateur actif sont protégés.') ?>>Votre propre compte et le dernier administrateur actif sont protégés.</p>
                 <button type="submit" <?= admin_i18n_attributes('Appliquer l’intervention') ?>>Appliquer l’intervention</button>
             </form>
+            <?php endif; ?>
+            <?php if ($canViewSecurityLog): ?>
             <section class="panel">
                 <h2 <?= admin_i18n_attributes('Historique des interventions') ?>>Historique des interventions</h2>
                 <p class="account-copy" <?= admin_i18n_attributes('Les 100 interventions les plus récentes. Dates en UTC.') ?>>Les 100 interventions les plus récentes. Dates en UTC.</p>
@@ -279,7 +385,9 @@ function admin_stat_percentage(int $value, int $total): int
                     </table></div>
                 <?php endif; ?>
             </section>
+            <?php endif; ?>
         </div>
+        <?php endif; ?>
 
         <div id="admin-panel-statistics" class="admin-tab-panel" role="tabpanel" aria-labelledby="admin-tab-statistics"<?= $activeAdminTab === 'statistics' ? '' : ' hidden' ?>>
         <section class="admin-statistics-panel">
@@ -391,7 +499,7 @@ function admin_stat_percentage(int $value, int $total): int
                         <?php foreach ($topCreators as $index => $creator): ?>
                             <li>
                                 <span class="admin-statistics-rank"><?= $index + 1 ?></span>
-                                <span class="admin-statistics-creator"><strong><?= h((string)$creator['username']) ?></strong><small><?= h((string)$creator['email']) ?></small></span>
+                                <span class="admin-statistics-creator"><strong><?= h((string)$creator['username']) ?></strong><?php if ($isFullAdmin): ?><small><?= h((string)$creator['email']) ?></small><?php endif; ?></span>
                                 <strong class="admin-statistics-design-count"><?= (int)$creator['design_count'] ?> <small>scénario<?= (int)$creator['design_count'] !== 1 ? 's' : '' ?></small></strong>
                             </li>
                         <?php endforeach; ?>
@@ -413,6 +521,9 @@ function admin_stat_percentage(int $value, int $total): int
                 <div>
                     <h2 <?= admin_i18n_attributes('Retours utilisateurs') ?>>Retours utilisateurs</h2>
                     <p <?= admin_i18n_attributes('Les 200 réponses les plus récentes.') ?>>Les 200 réponses les plus récentes.</p>
+                    <?php if (!$canDeleteFeedback): ?>
+                        <p <?= admin_i18n_attributes('Consultation seule : seul un administrateur peut supprimer un retour.', 'Read-only access: only an administrator can delete feedback.') ?>>Consultation seule : seul un administrateur peut supprimer un retour.</p>
+                    <?php endif; ?>
                 </div>
                 <span class="admin-feedback-total"><?= admin_i18n($feedbackTotal . ($feedbackTotal > 1 ? ' réponses' : ' réponse'), $feedbackTotal . ($feedbackTotal === 1 ? ' response' : ' responses')) ?></span>
             </div>
@@ -440,7 +551,9 @@ function admin_stat_percentage(int $value, int $total): int
                             <th>Page</th>
                             <th <?= admin_i18n_attributes('Langue') ?>>Langue</th>
                             <th <?= admin_i18n_attributes('Reçu le') ?>>Reçu le</th>
+                            <?php if ($canDeleteFeedback): ?>
                             <th><span class="sr-only">Actions</span></th>
+                            <?php endif; ?>
                         </tr>
                         </thead>
                         <tbody>
@@ -460,6 +573,7 @@ function admin_stat_percentage(int $value, int $total): int
                                 <td><code><?= h(feedback_display_page_path((string)$feedback['page_path'])) ?></code></td>
                                 <td><?= h(strtoupper((string)$feedback['locale'])) ?></td>
                                 <td><?= h((string)$feedback['created_at']) ?></td>
+                                <?php if ($canDeleteFeedback): ?>
                                 <td class="admin-feedback-actions">
                                     <form method="post" class="admin-feedback-delete-form" data-feedback-delete-form>
                                         <input type="hidden" name="admin_tab" value="feedback">
@@ -470,6 +584,7 @@ function admin_stat_percentage(int $value, int $total): int
                                         </button>
                                     </form>
                                 </td>
+                                <?php endif; ?>
                             </tr>
                         <?php endforeach; ?>
                         </tbody>
@@ -479,6 +594,7 @@ function admin_stat_percentage(int $value, int $total): int
         </section>
         </div>
 
+        <?php if ($canManageAccounts): ?>
         <div id="admin-panel-accounts" class="admin-tab-panel" role="tabpanel" aria-labelledby="admin-tab-accounts"<?= $activeAdminTab === 'accounts' ? '' : ' hidden' ?>>
             <?php if ($activeAdminTab === 'accounts' && $message !== ''): ?>
                 <p class="account-message success" role="status" data-admin-notice="accounts" data-admin-success><?= admin_i18n($message) ?></p>
@@ -506,7 +622,10 @@ function admin_stat_percentage(int $value, int $total): int
                     <label for="role" <?= admin_i18n_attributes('Rôle') ?>>Rôle</label>
                     <select id="role" name="role">
                         <option value="designer">Designer</option>
+                        <option value="manager" <?= admin_i18n_attributes('Gestionnaire') ?>>Gestionnaire</option>
+                        <?php if ($isFullAdmin): ?>
                         <option value="admin">Admin</option>
+                        <?php endif; ?>
                     </select>
                 </div>
             </div>
@@ -528,6 +647,7 @@ function admin_stat_percentage(int $value, int $total): int
                     <select id="admin-account-role">
                         <option value="" <?= admin_i18n_attributes('Tous') ?>>Tous</option>
                         <option value="admin">Admin</option>
+                        <option value="manager" <?= admin_i18n_attributes('Gestionnaire') ?>>Gestionnaire</option>
                         <option value="designer">Designer</option>
                     </select>
                 </label>
@@ -569,6 +689,9 @@ function admin_stat_percentage(int $value, int $total): int
                         <th <?= admin_i18n_attributes('Statut') ?>>Statut</th>
                         <th <?= admin_i18n_attributes('Créé le') ?>>Créé le</th>
                         <th <?= admin_i18n_attributes('Dernière connexion') ?>>Dernière connexion</th>
+                        <?php if ($isFullAdmin): ?>
+                        <th <?= admin_i18n_attributes('Droits') ?>>Droits</th>
+                        <?php endif; ?>
                     </tr>
                     </thead>
                     <tbody>
@@ -576,11 +699,49 @@ function admin_stat_percentage(int $value, int $total): int
                         <tr data-account-row data-search="<?= h(strtolower((string)$u['username'] . ' ' . (string)$u['email'])) ?>" data-role="<?= h((string)$u['role']) ?>" data-status="<?= h((string)$u['status']) ?>" data-verification="<?= empty($u['email_verified_at']) ? 'pending' : 'verified' ?>">
                             <td><?= htmlspecialchars((string)$u['username'], ENT_QUOTES, 'UTF-8') ?></td>
                             <td><?= htmlspecialchars((string)$u['email'], ENT_QUOTES, 'UTF-8') ?></td>
-                            <td><?= htmlspecialchars((string)$u['role'], ENT_QUOTES, 'UTF-8') ?></td>
+                            <td>
+                                <?php if (!$isFullAdmin || (int)$u['id'] === (int)$admin['id']): ?>
+                                    <?= (string)$u['role'] === 'manager' ? admin_i18n('Gestionnaire') : htmlspecialchars((string)$u['role'], ENT_QUOTES, 'UTF-8') ?>
+                                <?php else: ?>
+                                    <form method="post" class="admin-role-form">
+                                        <input type="hidden" name="admin_tab" value="accounts">
+                                        <input type="hidden" name="admin_action" value="change_role">
+                                        <input type="hidden" name="csrf_token" value="<?= h($_SESSION['admin_security_csrf']) ?>">
+                                        <input type="hidden" name="target_user_id" value="<?= (int)$u['id'] ?>">
+                                        <select name="new_role" aria-label="<?= h('Rôle de ' . (string)$u['username']) ?>" required>
+                                            <option value="designer"<?= (string)$u['role'] === 'designer' ? ' selected' : '' ?>>Designer</option>
+                                            <option value="manager"<?= (string)$u['role'] === 'manager' ? ' selected' : '' ?> <?= admin_i18n_attributes('Gestionnaire') ?>>Gestionnaire</option>
+                                            <option value="admin"<?= (string)$u['role'] === 'admin' ? ' selected' : '' ?>>Admin</option>
+                                        </select>
+                                        <button class="admin-role-save" type="submit" title="Enregistrer le rôle" aria-label="Enregistrer le rôle" <?= admin_i18n_attributes('Enregistrer le rôle') ?> data-site-i18n-attr="title,aria-label">
+                                            <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
+                                        </button>
+                                    </form>
+                                <?php endif; ?>
+                            </td>
                             <td><?= (int)$u['design_count'] ?></td>
                             <td><?= admin_i18n($u['status'] === 'active' ? 'Actif' : 'Désactivé') ?><?= empty($u['email_verified_at']) ? admin_i18n(' · email en attente') : '' ?></td>
                             <td><?= htmlspecialchars((string)$u['created_at'], ENT_QUOTES, 'UTF-8') ?></td>
                             <td><?= !empty($u['last_login_at']) ? h((string)$u['last_login_at']) : admin_i18n('Jamais') ?></td>
+                            <?php if ($isFullAdmin): ?>
+                            <td class="admin-permission-cell">
+                                <?php if ((string)$u['role'] === 'manager'): ?>
+                                    <button type="button" class="admin-permission-open"
+                                        data-manager-id="<?= (int)$u['id'] ?>"
+                                        data-manager-name="<?= h((string)$u['username']) ?>"
+                                        data-manager-email="<?= h((string)$u['email']) ?>"
+                                        data-manage-accounts="<?= (int)$u['manager_manage_accounts'] ?>"
+                                        data-delete-feedback="<?= (int)$u['manager_delete_feedback'] ?>"
+                                        data-view-security-log="<?= (int)$u['manager_view_security_log'] ?>"
+                                        aria-label="<?= h('Configurer les droits de ' . (string)$u['username']) ?>">
+                                        <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
+                                        <span <?= admin_i18n_attributes('Droits') ?>>Droits</span>
+                                    </button>
+                                <?php else: ?>
+                                    <span aria-hidden="true">—</span>
+                                <?php endif; ?>
+                            </td>
+                            <?php endif; ?>
                         </tr>
                     <?php endforeach; ?>
                     </tbody>
@@ -588,6 +749,7 @@ function admin_stat_percentage(int $value, int $total): int
             </div>
             <nav id="admin-account-pagination" class="admin-account-pagination" aria-label="Pages des comptes" <?= admin_i18n_attributes('Pages des comptes', 'Account pages') ?> data-site-i18n-attr="aria-label"></nav>
         </section>
+            <?php if ($isFullAdmin): ?>
             <section class="panel admin-backup-panel" aria-labelledby="admin-backup-title">
                 <h2 id="admin-backup-title" <?= admin_i18n_attributes('Sauvegarde des scénarios') ?>>Sauvegarde des scénarios</h2>
                 <p class="account-copy" <?= admin_i18n_attributes('Téléchargez tous les scénarios dans une archive ZIP, avec un dossier par utilisateur et un fichier JSON par scénario, réimportable dans l’éditeur après extraction.') ?>>Téléchargez tous les scénarios dans une archive ZIP, avec un dossier par utilisateur et un fichier JSON par scénario, réimportable dans l’éditeur après extraction.</p>
@@ -595,9 +757,42 @@ function admin_stat_percentage(int $value, int $total): int
                     <i class="fa-solid fa-file-export" aria-hidden="true"></i><?= admin_i18n('Sauvegarder tous les scénarios') ?>
                 </a>
             </section>
+            <?php endif; ?>
         </div>
+        <?php endif; ?>
     </section>
 </main>
+<?php if ($isFullAdmin): ?>
+<dialog id="admin-manager-permissions-dialog" class="modal account-confirm-dialog admin-manager-permissions-dialog" aria-labelledby="admin-manager-permissions-title">
+    <form method="post" class="admin-manager-permission-dialog-form">
+        <input type="hidden" name="admin_tab" value="accounts">
+        <input type="hidden" name="admin_action" value="update_manager_permissions">
+        <input type="hidden" name="csrf_token" value="<?= h($_SESSION['admin_security_csrf']) ?>">
+        <input type="hidden" name="target_user_id" value="">
+        <div class="admin-manager-permission-dialog-head">
+            <div>
+                <p class="account-kicker" <?= admin_i18n_attributes('Gestionnaire') ?>>Gestionnaire</p>
+                <h2 id="admin-manager-permissions-title" class="modal-title" <?= admin_i18n_attributes('Autorisations') ?>>Autorisations</h2>
+            </div>
+            <button type="button" class="admin-manager-permission-close" aria-label="Fermer" <?= admin_i18n_attributes('Fermer') ?> data-site-i18n-attr="aria-label">
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+            </button>
+        </div>
+        <p class="admin-manager-permission-person"><strong data-manager-dialog-name></strong><small data-manager-dialog-email></small></p>
+        <fieldset class="admin-manager-permission-options">
+            <legend <?= admin_i18n_attributes('Fonctionnalités autorisées') ?>>Fonctionnalités autorisées</legend>
+            <label><input type="checkbox" name="manage_accounts" value="1"> <span <?= admin_i18n_attributes('Gérer et modérer les comptes') ?>>Gérer et modérer les comptes</span></label>
+            <label><input type="checkbox" name="delete_feedback" value="1"> <span <?= admin_i18n_attributes('Supprimer les retours utilisateurs') ?>>Supprimer les retours utilisateurs</span></label>
+            <label><input type="checkbox" name="view_security_log" value="1"> <span <?= admin_i18n_attributes('Consulter le journal de sécurité') ?>>Consulter le journal de sécurité</span></label>
+        </fieldset>
+        <p class="account-copy" <?= admin_i18n_attributes('Les autorisations prennent effet dès la prochaine requête du gestionnaire.', 'Permissions take effect on the manager’s next request.') ?>>Les autorisations prennent effet dès la prochaine requête du gestionnaire.</p>
+        <div class="modal-actions">
+            <button type="button" class="btn btn-light" data-manager-permission-cancel <?= admin_i18n_attributes('Annuler') ?>>Annuler</button>
+            <button type="submit" class="admin-manager-permission-submit" <?= admin_i18n_attributes('Enregistrer les autorisations') ?>>Enregistrer les autorisations</button>
+        </div>
+    </form>
+</dialog>
+<?php endif; ?>
 <?php render_site_footer(); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -622,7 +817,7 @@ document.addEventListener('DOMContentLoaded', function () {
             tab.setAttribute('tabindex', active ? '0' : '-1');
         });
         Object.keys(panels).forEach(function (key) {
-            panels[key].hidden = key !== name;
+            if (panels[key]) panels[key].hidden = key !== name;
         });
         var activeTab = tabs.find(function (tab) {
             return tab.dataset.adminTab === name;
@@ -655,6 +850,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    <?php if ($canManageAccounts): ?>
     var securityAction = document.getElementById('security-action');
     function updateSecurityConfirmation() {
         var deleting = securityAction.value === 'delete';
@@ -735,17 +931,45 @@ document.addEventListener('DOMContentLoaded', function () {
             filterAccounts();
         });
     });
+    filterAccounts();
+    document.getElementById('lang-select').addEventListener('change', filterAccounts);
+    <?php endif; ?>
     document.querySelectorAll('[data-feedback-delete-form]').forEach(function (form) {
         form.addEventListener('submit', function (event) {
             if (!window.confirm(document.documentElement.lang === 'en' ? 'Permanently delete this feedback?' : 'Supprimer définitivement ce retour ?')) event.preventDefault();
         });
     });
+    <?php if ($isFullAdmin): ?>
+    var managerPermissionsDialog = document.getElementById('admin-manager-permissions-dialog');
+    var managerPermissionsForm = managerPermissionsDialog.querySelector('form');
+    var managerPermissionTrigger = null;
+    document.querySelectorAll('.admin-permission-open').forEach(function (button) {
+        button.addEventListener('click', function () {
+            managerPermissionTrigger = button;
+            managerPermissionsForm.elements.target_user_id.value = button.dataset.managerId;
+            managerPermissionsForm.elements.manage_accounts.checked = button.dataset.manageAccounts === '1';
+            managerPermissionsForm.elements.delete_feedback.checked = button.dataset.deleteFeedback === '1';
+            managerPermissionsForm.elements.view_security_log.checked = button.dataset.viewSecurityLog === '1';
+            managerPermissionsDialog.querySelector('[data-manager-dialog-name]').textContent = button.dataset.managerName;
+            managerPermissionsDialog.querySelector('[data-manager-dialog-email]').textContent = button.dataset.managerEmail;
+            managerPermissionsDialog.showModal();
+            managerPermissionsForm.elements.manage_accounts.focus();
+        });
+    });
+    function closeManagerPermissionsDialog() {
+        managerPermissionsDialog.close();
+    }
+    managerPermissionsDialog.querySelector('.admin-manager-permission-close').addEventListener('click', closeManagerPermissionsDialog);
+    managerPermissionsDialog.querySelector('[data-manager-permission-cancel]').addEventListener('click', closeManagerPermissionsDialog);
+    managerPermissionsDialog.addEventListener('close', function () {
+        if (managerPermissionTrigger && managerPermissionTrigger.isConnected) managerPermissionTrigger.focus();
+        managerPermissionTrigger = null;
+    });
+    <?php endif; ?>
     document.querySelectorAll('[data-admin-success]').forEach(function (notice) {
         window.setTimeout(function () { notice.remove(); }, 8000);
     });
     activateTab('<?= h($activeAdminTab) ?>', false);
-    filterAccounts();
-    document.getElementById('lang-select').addEventListener('change', filterAccounts);
 });
 </script>
 </body>

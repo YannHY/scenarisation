@@ -139,12 +139,20 @@
 }
 
 .account-menu-link {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   width: 100%;
   padding: 10px 12px;
   border-radius: 10px;
   color: var(--text-strong);
   text-decoration: none;
+}
+
+.account-menu-icon {
+  width: 16px;
+  flex: 0 0 16px;
+  text-align: center;
 }
 
 .account-menu-link:hover,

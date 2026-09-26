@@ -34,7 +34,7 @@ $choices = [
     </div>
     <div class="new-design-choices">
         <?php foreach ($choices as [$href, $icon, $titleFr, $titleEn, $descriptionFr, $descriptionEn, $actionFr, $actionEn]): ?>
-            <a class="new-design-choice" href="<?= h($href) ?>"<?= $href !== 'designer.php?new=1' ? ' data-import-dialog aria-haspopup="dialog"' : '' ?>>
+            <a class="new-design-choice<?= $href === 'designer.php?new=1' ? ' new-design-choice-primary' : '' ?>" href="<?= h($href) ?>"<?= $href !== 'designer.php?new=1' ? ' data-import-dialog aria-haspopup="dialog"' : '' ?>>
                 <span class="new-design-choice-icon" aria-hidden="true"><i class="fa-solid <?= h($icon) ?>"></i></span>
                 <h2 data-site-i18n-en="<?= h($titleEn) ?>" data-site-i18n-fr="<?= h($titleFr) ?>"><?= h($titleFr) ?></h2>
                 <p data-site-i18n-en="<?= h($descriptionEn) ?>" data-site-i18n-fr="<?= h($descriptionFr) ?>"><?= h($descriptionFr) ?></p>

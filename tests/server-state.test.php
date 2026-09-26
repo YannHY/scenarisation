@@ -33,6 +33,38 @@ function cleanup_fixture(string $path): void {
 try {
     require $fixture . '/web/lib/bootstrap.php';
     app_start_session();
+    check(user_can_access_admin(['role' => 'admin']), 'administrator can access administration');
+    check(user_can_access_admin(['role' => 'manager']), 'manager can access limited administration');
+    check(!user_can_access_admin(['role' => 'designer']), 'designer cannot access administration');
+    check(user_is_full_admin(['role' => 'admin']), 'administrator retains full privileges');
+    check(!user_is_full_admin(['role' => 'manager']), 'manager does not receive full privileges');
+    check(user_has_admin_permission(['role' => 'admin'], 'manage_accounts'), 'administrator implicitly has every administration permission');
+    check(user_has_admin_permission(['role' => 'manager', 'manager_manage_accounts' => 1], 'manage_accounts'), 'manager receives an explicitly enabled permission');
+    check(!user_has_admin_permission(['role' => 'manager', 'manager_manage_accounts' => 0], 'manage_accounts'), 'manager permission is disabled by default');
+
+    $roleMigration = new PDO('sqlite::memory:', null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+    $roleMigration->exec('PRAGMA foreign_keys = ON');
+    $roleMigration->exec("CREATE TABLE users (
+        id INTEGER PRIMARY KEY,
+        username TEXT NOT NULL UNIQUE,
+        role TEXT NOT NULL DEFAULT 'designer' CHECK (role IN ('admin','designer'))
+    )");
+    $roleMigration->exec('CREATE INDEX idx_users_role_test ON users(role)');
+    $roleMigration->exec('CREATE TABLE user_items (id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE)');
+    $roleMigration->exec("INSERT INTO users VALUES (1, 'Legacy admin', 'admin')");
+    $roleMigration->exec('INSERT INTO user_items VALUES (1, 1)');
+    ensure_manager_role($roleMigration);
+    ensure_manager_permission_columns($roleMigration);
+    $roleMigration->exec("INSERT INTO users (id, username, role) VALUES (2, 'Limited manager', 'manager')");
+    check($roleMigration->query("SELECT role FROM users WHERE id = 2")->fetchColumn() === 'manager', 'existing SQLite schema accepts manager role after migration');
+    check((int)$roleMigration->query("SELECT manager_manage_accounts FROM users WHERE id = 2")->fetchColumn() === 0, 'manager permissions are disabled by default');
+    check((int)$roleMigration->query("SELECT COUNT(*) FROM sqlite_master WHERE type = 'index' AND name = 'idx_users_role_test'")->fetchColumn() === 1, 'role migration preserves user indexes');
+    $roleMigration->exec('DELETE FROM users WHERE id = 1');
+    check((int)$roleMigration->query('SELECT COUNT(*) FROM user_items')->fetchColumn() === 0, 'role migration preserves foreign-key cascades');
+    ensure_manager_role($roleMigration);
+    check((int)$roleMigration->query("SELECT COUNT(*) FROM users WHERE role = 'manager'")->fetchColumn() === 1, 'role migration is idempotent');
+    $roleMigration = null;
+
     check(app_base_url() === 'https://local.example.test/learning', 'local base URL overrides distributed defaults');
     check(app_env('APP_MAIL_FROM') === 'local@example.test', 'local sender overrides distributed defaults');
     putenv('APP_BASE_URL=https://env.example.test/app');

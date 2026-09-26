@@ -111,6 +111,8 @@ php -S localhost:8000
 
 Ouvrez ensuite [http://localhost:8000](http://localhost:8000). La base SQLite locale et ses tables sont créées automatiquement. Pour activer les comptes, ouvrez `setup_admin.php` et créez le premier administrateur.
 
+Trois rôles sont disponibles : **Designer** pour concevoir des scénarios, **Gestionnaire** pour accéder à une administration limitée, et **Admin** pour administrer entièrement la plateforme. Pour chaque gestionnaire, un administrateur peut autoriser indépendamment la gestion et la modération des comptes, la suppression des retours utilisateurs et la consultation du journal de sécurité. Ces autorisations sont désactivées par défaut et se règlent dans l’onglet **Comptes**.
+
 ### Configuration d'un déploiement
 
 La configuration peut être fournie par variables d'environnement ou à partir du gabarit [app-config.php](./app-config.php). Les principales variables reconnues sont :

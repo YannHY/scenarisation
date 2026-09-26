@@ -588,6 +588,184 @@ body.admin-page .admin-feedback-panel {
   background: color-mix(in srgb, var(--primary) 8%, transparent);
 }
 
+.admin-role-form {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 172px;
+  margin: 0;
+}
+
+.admin-role-form select {
+  flex: 1 1 auto;
+  min-width: 112px;
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text-strong);
+  padding: 5px 30px 5px 9px;
+  font: 600 12px/1.2 var(--font-family);
+}
+
+.admin-role-save {
+  display: inline-flex;
+  flex: 0 0 34px;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #d7d7d2;
+  border-radius: 8px;
+  background: #f4f4f2;
+  color: #161616;
+  cursor: pointer;
+}
+
+.admin-role-save:hover {
+  background: #e7e7e3;
+  border-color: #bdbdb7;
+}
+
+.admin-role-save:focus-visible,
+.admin-role-form select:focus-visible {
+  outline: 3px solid var(--action-focus);
+  outline-offset: 2px;
+}
+
+.admin-permission-cell {
+  width: 118px;
+  text-align: center;
+}
+
+.admin-permission-open {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 34px;
+  border: 1px solid #d7d7d2;
+  border-radius: 8px;
+  background: #f4f4f2;
+  color: #161616;
+  padding: 6px 10px;
+  font: 700 12px/1.2 var(--font-family);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.admin-permission-open:hover,
+.admin-manager-permission-close:hover {
+  border-color: #bdbdb7;
+  background: #e7e7e3;
+}
+
+.admin-permission-open:focus-visible {
+  outline: 3px solid var(--action-focus);
+  outline-offset: 2px;
+}
+
+.admin-manager-permissions-dialog {
+  width: min(540px, calc(100vw - 32px));
+}
+
+.admin-manager-permission-dialog-form {
+  display: grid;
+  gap: 18px;
+  margin: 0;
+}
+
+.admin-manager-permission-dialog-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.admin-manager-permission-dialog-head .account-kicker,
+.admin-manager-permission-dialog-head .modal-title {
+  margin: 0;
+}
+
+.admin-manager-permission-close {
+  display: inline-flex;
+  flex: 0 0 36px;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #d7d7d2;
+  border-radius: 9px;
+  background: #f4f4f2;
+  color: #161616;
+  cursor: pointer;
+}
+
+.admin-manager-permission-person {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+}
+
+.admin-manager-permission-person small {
+  color: var(--muted);
+}
+
+.admin-manager-permission-options {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.admin-manager-permission-options legend {
+  color: var(--text-strong);
+  padding: 0 6px;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.admin-manager-permission-options label {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: var(--text-strong);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.admin-manager-permission-options input {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  margin: 1px 0 0;
+  accent-color: #1d1d1b;
+}
+
+.admin-manager-permission-submit {
+  min-height: 38px;
+  border: 1px solid #1d1d1b;
+  border-radius: 9px;
+  background: #1d1d1b;
+  color: #fff;
+  padding: 8px 13px;
+  font: 700 12px/1.2 var(--font-family);
+  cursor: pointer;
+}
+
+.admin-manager-permission-submit:hover {
+  background: #000;
+}
+
+.admin-manager-permission-close:focus-visible,
+.admin-manager-permission-submit:focus-visible,
+.admin-manager-permission-options input:focus-visible {
+  outline: 3px solid var(--action-focus);
+  outline-offset: 2px;
+}
+
 .admin-feedback-table {
   min-width: 840px;
 }
@@ -675,7 +853,7 @@ body.admin-page .inline-grid > div {
   width: min(var(--content-shell-width), calc(100vw - var(--content-shell-gutter)));
   margin: 40px auto 0;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   line-height: 1.4;
 }
@@ -686,7 +864,7 @@ body.setup-page .site-breadcrumb {
 }
 body.login-page .site-breadcrumb {
   width: min(1040px, calc(100vw - var(--content-shell-gutter)));
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 650;
 }
 body.forgot-password-page .site-breadcrumb,
@@ -719,8 +897,9 @@ body.legal-page .site-breadcrumb {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
+  font-size: 17px;
 }
 .site-breadcrumb a:hover,
 .site-breadcrumb a:focus-visible {
@@ -1598,6 +1777,44 @@ th {
   border-color: var(--danger);
 }
 
+[data-theme="dark"] .admin-role-save {
+  border-color: #3d3d3d;
+  background: #111;
+  color: #fff;
+}
+
+[data-theme="dark"] .admin-role-save:hover {
+  border-color: #5a5a5a;
+  background: #000;
+}
+
+[data-theme="dark"] .admin-manager-permission-options input {
+  accent-color: #f4f4f2;
+}
+
+[data-theme="dark"] .admin-permission-open,
+[data-theme="dark"] .admin-manager-permission-close {
+  border-color: #3d3d3d;
+  background: #111;
+  color: #fff;
+}
+
+[data-theme="dark"] .admin-permission-open:hover,
+[data-theme="dark"] .admin-manager-permission-close:hover {
+  border-color: #5a5a5a;
+  background: #000;
+}
+
+[data-theme="dark"] .admin-manager-permission-submit {
+  border-color: #f4f4f2;
+  background: #f4f4f2;
+  color: #111;
+}
+
+[data-theme="dark"] .admin-manager-permission-submit:hover {
+  background: #fff;
+}
+
 @media (max-width: 760px) {
   .profile-section-head,
   .profile-publication {
@@ -2446,4 +2663,23 @@ body.model-library-preview-open {
 .admin-account-pagination button:disabled {
   opacity: 0.45;
   cursor: default;
+}
+
+/* Keep every administration select chevron comfortably inside its control. */
+body.admin-page select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='m1 1 5 5 5-5' fill='none' stroke='%23161616' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.8'/%3E%3C/svg%3E");
+  background-position: right 12px center;
+  background-repeat: no-repeat;
+  background-size: 12px 8px;
+  padding-right: 36px;
+}
+
+body.admin-page .admin-role-form select {
+  background-position: right 10px center;
+  padding-right: 30px;
+}
+
+[data-theme="dark"] body.admin-page select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='m1 1 5 5 5-5' fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.8'/%3E%3C/svg%3E");
 }

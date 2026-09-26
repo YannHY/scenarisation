@@ -438,7 +438,7 @@
       button.innerHTML = `<i class="fa-regular fa-user" aria-hidden="true"></i>`;
       button.title = tr("Connexion", "Sign in");
       button.setAttribute("aria-label", tr("Connexion", "Sign in"));
-      menu.innerHTML = "";
+      if (!menu.classList.contains("account-preferences-menu")) menu.innerHTML = "";
       syncSaveUi();
       return;
     }
@@ -447,11 +447,13 @@
     button.innerHTML = `<i class="fa-solid fa-user-check" aria-hidden="true"></i>`;
     button.title = tr("Compte", "Account");
     button.setAttribute("aria-label", tr("Compte", "Account"));
-    menu.innerHTML = `
-      <a class="account-menu-link" role="menuitem" href="profile.php">${tr("Profil", "Profile")}</a>
-      ${String(authState.user.role) === "admin" ? `<a class="account-menu-link" role="menuitem" href="admin.php">${tr("Administration", "Admin")}</a>` : ""}
-      <a class="account-menu-link" role="menuitem" href="logout.php">${tr("Deconnexion", "Sign out")}</a>
-    `;
+    if (!menu.classList.contains("account-preferences-menu")) {
+      menu.innerHTML = `
+        <a class="account-menu-link" role="menuitem" href="profile.php"><i class="account-menu-icon fa-regular fa-user" aria-hidden="true"></i><span>${tr("Profil", "Profile")}</span></a>
+        ${String(authState.user.role) === "admin" ? `<a class="account-menu-link" role="menuitem" href="admin.php"><svg class="account-menu-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.09a2 2 0 0 1 1 1.74v.5a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2Z"/><circle cx="12" cy="12" r="3"/></svg><span>${tr("Administration", "Admin")}</span></a>` : ""}
+        <a class="account-menu-link" role="menuitem" href="logout.php"><i class="account-menu-icon fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i><span>${tr("Deconnexion", "Sign out")}</span></a>
+      `;
+    }
     syncSaveUi();
   }
 

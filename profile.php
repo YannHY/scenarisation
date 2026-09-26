@@ -210,7 +210,13 @@ function e(string $value): string
                 <h1 id="profile-title" class="title-with-icon"><i class="fa-solid fa-user" aria-hidden="true"></i>Profil</h1>
             </div>
         </div>
-        <p class="account-copy"><span id="profile-role-label">Rôle</span>&nbsp;: <?= e((string)$me['role']) ?></p>
+        <p class="account-copy"><span id="profile-role-label">Rôle</span>&nbsp;:
+            <?php if ((string)$me['role'] === 'manager'): ?>
+                <span data-site-i18n-fr="Gestionnaire" data-site-i18n-en="Manager">Gestionnaire</span>
+            <?php else: ?>
+                <?= e((string)$me['role']) ?>
+            <?php endif; ?>
+        </p>
 
         <?php if ($message !== ''): ?>
             <p class="account-message success" data-profile-flash><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?></p>
