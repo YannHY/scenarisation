@@ -255,7 +255,9 @@ At the end, report:
 
 ## Publication Guidance
 
-Do not publish from a sandbox unless the user explicitly provides a CLI token and asks you to publish.
+Do not request or require a CLI token while installing the skill, creating the design, editing it, or validating it. A token is needed only for the login step immediately before publication.
+
+Do not publish from a sandbox unless the design has been validated and the user then explicitly asks you to publish and provides a CLI token for that step.
 
 For normal use, tell the user to publish from their own Mac/terminal:
 
@@ -271,4 +273,4 @@ $SCENARISATION login
 $SCENARISATION publish design.json
 ```
 
-Never invent, request publicly, or print a token unless the user deliberately shares it for that session.
+Ask for the token only when you are ready to run `$SCENARISATION login`, and explain that the CLI will display the `CLI token:` prompt. Never invent, request publicly, echo, or print a token unless the user deliberately shares it for that publication session.

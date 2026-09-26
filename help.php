@@ -177,7 +177,8 @@ Utilise les identifiants de compétences numériques acceptés par le CLI, par e
 - le contenu ou le fichier `design.json`.
 
 Publication :
-Ne publie pas directement depuis ton sandbox sauf si je te donne explicitement un jeton CLI.
+Ne demande aucun jeton pendant la création ou la validation du scénario. Ne publie pas directement depuis ton sandbox sauf si, une fois le fichier validé, je te demande explicitement de le publier et te donne un jeton CLI pour cette étape.
+Dans ce cas seulement, lance `scenarisation login` et indique-moi que le jeton doit être fourni à l’invite `CLI token:`. Ne l’affiche jamais dans ta réponse.
 Pour publier depuis mon Mac, indique-moi simplement, si le fichier est sur le Bureau :
 
 scenarisation publish ~/Desktop/design.json
@@ -399,7 +400,8 @@ At the end, give me:
 - the content or file `design.json`.
 
 Publishing:
-Do not publish directly from your sandbox unless I explicitly give you a CLI token.
+Do not request a token while creating or validating the scenario. Do not publish directly from your sandbox unless, once the file has been validated, I explicitly ask you to publish it and give you a CLI token for that step.
+Only then, run `scenarisation login` and tell me that the token must be provided at the `CLI token:` prompt. Never display it in your response.
 To publish from my Mac, tell me to use `scenarisation publish ~/Desktop/design.json` if the file is on the Desktop, or `scenarisation publish design.json` if it remains in the current folder.
 
 Important rules:
@@ -825,11 +827,11 @@ Objectifs généraux de la formation.
                     <div class="help-card">
                         <strong>1. L’IA crée et publie</strong>
                         <span>Copiez le prompt ci-dessous, répondez aux questions et validez les propositions de l’IA.</span>
-                        <span>Pour publier, donnez-lui explicitement l’autorisation et un jeton CLI créé dans votre profil. Vous n’avez rien à installer vous-même.</span>
+                        <span>Ne donnez aucun jeton pendant la création. Une fois le scénario validé, demandez explicitement sa publication : l’IA lance alors <code>scenarisation login</code> et vous demande le jeton créé dans votre profil. Donnez-le uniquement à ce moment-là.</span>
                     </div>
                     <div class="help-card">
                         <strong>2. Vous publiez vous-même</strong>
-                        <span>L’IA vous remet le fichier <code>design.json</code>. Installez ensuite le CLI sur votre ordinateur, connectez-le avec <code>scenarisation login</code>, puis publiez avec <code>scenarisation publish</code>.</span>
+                        <span>L’IA vous remet le fichier <code>design.json</code>. Installez ensuite le CLI sur votre ordinateur. Au moment de publier, lancez <code>scenarisation login</code>, puis collez le jeton lorsque le terminal affiche <code>CLI token:</code>. Publiez ensuite avec <code>scenarisation publish</code>.</span>
                         <span>Le jeton reste alors sur votre ordinateur.</span>
                     </div>
                 </div>
@@ -851,6 +853,10 @@ Objectifs généraux de la formation.
                     <pre class="help-code">curl -fsSL https://raw.githubusercontent.com/YannHY/scenarisation/main/install-skill.sh | sh</pre>
                 </div>
                 <p>Relancez l’outil si nécessaire. Dans Claude Code, utilisez <code>/scenarisation</code>. Dans Codex, utilisez <code>$scenarisation</code>.</p>
+                <div class="help-callout warning">
+                    <i class="fa-solid fa-key" aria-hidden="true"></i>
+                    <p><strong>Quand donner le jeton avec la skill ?</strong> Aucun jeton n’est nécessaire pour installer la skill, créer le scénario ou le valider. Attendez que le fichier soit validé. Si vous voulez que l’agent publie à votre place, demandez-lui alors explicitement de publier et donnez le jeton uniquement lorsqu’il lance <code>scenarisation login</code> et le réclame. Si vous publiez vous-même, ne donnez jamais le jeton à l’agent.</p>
+                </div>
 
                 <h3 id="cli-detaille">Utiliser le CLI</h3>
                 <p>Le CLI permet de créer, valider et publier un scénario directement depuis votre terminal.</p>
@@ -936,7 +942,8 @@ scenarisation prompt design.json</pre>
                 </div>
 
                 <h4>Publier</h4>
-                <p>Pour publier depuis votre ordinateur, créez d’abord un jeton dans votre profil, section <strong>Publication depuis le CLI</strong>. Ensuite, connectez le CLI et publiez le fichier.</p>
+                <p>Vous n’avez pas besoin de jeton pour créer, modifier ou valider un scénario. Le jeton est demandé uniquement lors de la connexion du CLI, avant la première publication.</p>
+                <p>Une fois le scénario validé, créez un jeton dans votre profil, section <strong>Publication depuis le CLI</strong>. Lancez ensuite <code>scenarisation login</code> : lorsque le terminal affiche <code>CLI token:</code>, collez le jeton et appuyez sur Entrée. Lancez enfin la publication.</p>
                 <div class="help-code-wrap">
                     <button class="help-copy-btn" type="button" aria-label="Copier la commande" title="Copier"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
                     <pre class="help-code">scenarisation login
@@ -949,7 +956,7 @@ scenarisation publish design.json</pre>
                 </div>
                 <div class="help-callout warning">
                     <i class="fa-solid fa-key" aria-hidden="true"></i>
-                    <p>Le jeton CLI est personnel. Il permet de publier sur votre compte : ne le transmettez à l’IA que si vous voulez explicitement qu’elle publie à votre place.</p>
+                    <p>Le jeton CLI est personnel. Après <code>scenarisation login</code>, il est enregistré sur votre ordinateur et n’est normalement pas redemandé pour les publications suivantes. Ne le transmettez à l’IA que si vous voulez explicitement qu’elle publie à votre place.</p>
                 </div>
 
                 <h4>Commandes utiles</h4>
@@ -1039,7 +1046,7 @@ window.helpPromptTranslations = <?= json_encode([
     ],
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 </script>
-<script src="js/help-i18n.js?v=20260926-cli-start"></script>
+<script src="js/help-i18n.js?v=20260926-cli-token-timing"></script>
 <script>
 var initialHelpLanguage = 'fr';
 try {
