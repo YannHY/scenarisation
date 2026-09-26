@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 const APP_SCHEMA_VERSION = 8;
-const TERMS_VERSION = '2026-09-10';
+const TERMS_VERSION = '2026-09-26';
 const EMAIL_VERIFICATION_TTL_SECONDS = 86400;
 const EMAIL_VERIFICATION_RESEND_DELAY_SECONDS = 60;
 const PASSWORD_RESET_TTL_SECONDS = 3600;
@@ -965,20 +965,6 @@ function sanitize_username(string $value): string
     $value = preg_replace('/\s+/u', '_', $value) ?? '';
     $value = preg_replace('/[^\p{L}\p{N}_.-]/u', '', $value) ?? '';
     return mb_substr($value, 0, 80, 'UTF-8');
-}
-
-function is_florimont_email(string $email): bool
-{
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        return false;
-    }
-
-    $atPosition = strrpos($email, '@');
-    if ($atPosition === false) {
-        return false;
-    }
-
-    return strtolower(substr($email, $atPosition + 1)) === 'florimont.ch';
 }
 
 /**

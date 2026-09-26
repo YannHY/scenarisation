@@ -66,8 +66,8 @@ if ($db !== null && $requestMethod === 'POST' && $submittedToken !== '') {
 
     if (($protectionError = account_protection_error($db, 'resend_verification', $pendingEmail)) !== '') {
         $error = $protectionError;
-    } elseif (!filter_var($pendingEmail, FILTER_VALIDATE_EMAIL) || !is_florimont_email($pendingEmail)) {
-        $error = 'Saisissez une adresse email @florimont.ch valide.';
+    } elseif (!filter_var($pendingEmail, FILTER_VALIDATE_EMAIL)) {
+        $error = 'Saisissez une adresse email valide.';
     } else {
         $stmt = $db->prepare("SELECT id, username, email, email_verified_at, email_verification_sent_at
             FROM users WHERE email = ? LIMIT 1");
@@ -169,7 +169,7 @@ if ($db !== null && $requestMethod === 'POST' && $submittedToken !== '') {
             <p class="account-copy">Consultez votre boîte de réception et, si nécessaire, vos courriers indésirables.</p>
             <form method="post" class="account-form">
                 <label for="email">Renvoyer le lien à</label>
-                <input id="email" name="email" type="email" required autocomplete="email" placeholder="@florimont.ch" value="<?= h($pendingEmail) ?>">
+                <input id="email" name="email" type="email" required autocomplete="email" placeholder="nom@exemple.com" value="<?= h($pendingEmail) ?>">
                 <?php render_account_protection('resend_verification'); ?>
                 <button type="submit"<?= !account_turnstile_ready() ? ' disabled' : '' ?>>Renvoyer l’email</button>
             </form>

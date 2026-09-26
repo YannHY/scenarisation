@@ -23,10 +23,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Nom d’utilisateur et email requis.';
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $error = 'Adresse email invalide.';
-        } elseif ($emailChanged && !is_florimont_email($email)) {
-            // Sans ce contrôle, un compte pouvait basculer vers n'importe quel
-            // domaine après coup et contourner la restriction de signup.php.
-            $error = 'Les comptes sont réservés aux adresses email @florimont.ch.';
         } else {
             try {
                 if (!$emailChanged) {

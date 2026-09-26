@@ -40,7 +40,7 @@ app_start_session();
         <p>Ces traitements reposent sur l’intérêt légitime de l’éditeur à assurer le fonctionnement, la sécurité et le diagnostic technique du service.</p>
 
         <h3>Création et gestion d’un compte</h3>
-        <p>La création d’un compte entraîne l’enregistrement du nom d’utilisateur choisi, de l’adresse électronique <code>@florimont.ch</code>, du mot de passe sous forme hachée, du rôle et de l’état du compte, ainsi que des dates de création, de vérification de l’adresse et de dernière connexion. Pour les inscriptions soumises à acceptation des conditions générales d’utilisation, la date d’acceptation et la version acceptée sont également conservées avec le compte afin de documenter cet accord.</p>
+        <p>La création d’un compte entraîne l’enregistrement du nom d’utilisateur choisi, de l’adresse électronique, du mot de passe sous forme hachée, du rôle et de l’état du compte, ainsi que des dates de création, de vérification de l’adresse et de dernière connexion. La date d’acceptation et la version acceptée sont également conservées avec le compte afin de documenter cet accord.</p>
         <p>Des jetons temporaires, enregistrés sous forme hachée, sont utilisés pour vérifier l’adresse électronique et réinitialiser le mot de passe. Ces données servent à créer et sécuriser le compte, permettre la connexion, envoyer les messages indispensables au service et administrer les accès. Leur traitement est nécessaire à l’exécution du service demandé par l’utilisateur.</p>
         <p>Le nom d’utilisateur, l’adresse électronique et le mot de passe sont obligatoires pour créer un compte. L’application reste consultable sans compte, mais la sauvegarde sur le serveur, la publication et certaines fonctions de gestion ne sont alors pas disponibles.</p>
 
@@ -53,7 +53,7 @@ app_start_session();
         <p>Le contenu d’un scénario est librement saisi par son auteur. Il ne doit pas contenir de données personnelles ou sensibles concernant des élèves, collègues ou tiers, sauf si l’auteur dispose d’une base légale et des autorisations nécessaires. Scénarisation n’est pas conçu comme un dossier scolaire ni comme un outil de suivi individuel des élèves.</p>
 
         <h3>Partage et publication</h3>
-        <p>Lorsque vous publiez un scénario, le serveur enregistre un identifiant de partage, son état de publication et, le cas échéant, la licence Creative Commons choisie et la date d’inscription au catalogue.</p>
+        <p>Lorsque vous publiez un scénario, le serveur enregistre un identifiant de partage, son état de publication, la licence Creative Commons choisie et la date d’inscription au catalogue.</p>
         <ul>
             <li>Un scénario publié <strong>par lien</strong> devient accessible à toute personne qui possède ce lien.</li>
             <li>Un scénario ajouté au <strong>catalogue public</strong> rend également visibles son contenu, son titre, sa description, le nom d’utilisateur de son auteur, sa date de mise à jour et la licence choisie.</li>

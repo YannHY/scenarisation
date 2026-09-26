@@ -25,7 +25,7 @@ app_start_session();
 <main class="legal-shell">
     <article class="legal-card">
         <h1>Licence et réutilisation</h1>
-        <p class="legal-updated"><strong>Dernière mise à jour&nbsp;: <time datetime="2026-09-13">13 septembre 2026</time></strong></p>
+        <p class="legal-updated"><strong>Dernière mise à jour&nbsp;: <time datetime="2026-09-26">26 septembre 2026</time></strong></p>
 
         <p class="legal-lead">Cette page distingue les contenus propres à Scénarisation, son code source, les créations publiées par les utilisateurs et les éléments appartenant à des tiers.</p>
 
@@ -59,7 +59,7 @@ app_start_session();
         <p>Scénarisation est inspiré de l’<a href="https://www.ucl.ac.uk/learning-designer/" rel="noopener noreferrer">UCL Learning Designer</a> et s’appuie sur le <a href="https://github.com/jourde/learning-designer-revised" rel="noopener noreferrer">travail de François Jourde</a>. Ces références n’emportent aucun transfert des marques ou droits détenus par leurs titulaires respectifs.</p>
 
         <h2>Commentaires transmis avec un avis</h2>
-        <p>Les commentaires facultatifs envoyés au moyen du formulaire d’avis ne sont pas publiés et ne sont pas placés sous la licence Creative Commons du site. Leur auteur autorise uniquement leur lecture, leur analyse et leur utilisation interne par les administrateurs de Scénarisation afin de corriger, évaluer et améliorer le service.</p>
+        <p>Les commentaires facultatifs et anonymes envoyés au moyen du formulaire d’avis ne sont pas publiés et ne sont pas placés sous la licence Creative Commons du site. Leur auteur autorise uniquement leur lecture, leur analyse et leur utilisation interne par les administrateurs de Scénarisation afin de corriger, évaluer et améliorer le service.</p>
         <p>L’auteur du commentaire doit disposer des droits nécessaires sur son contenu et s’abstenir d’y inclure des informations personnelles ou confidentielles. Les règles détaillées figurent dans les <a href="mentions-legales.php">mentions légales</a> et la <a href="politique-confidentialite.php">politique de confidentialité</a>.</p>
 
         <h2>Questions et demandes</h2>

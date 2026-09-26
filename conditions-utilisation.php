@@ -25,12 +25,13 @@ app_start_session();
 <main class="legal-shell">
     <article class="legal-card">
         <h1>Conditions générales d’utilisation</h1>
-        <p class="legal-updated"><strong>Version du <time datetime="<?= h(TERMS_VERSION) ?>">10 septembre 2026</time></strong></p>
+        <p class="legal-updated"><strong>Version du <time datetime="<?= h(TERMS_VERSION) ?>">26 septembre 2026</time></strong></p>
         <p class="legal-lead">Ces conditions encadrent l’utilisation de Scénarisation, un service non commercial de création, de sauvegarde et de partage de scénarios pédagogiques.</p>
 
         <h2>Service et accès</h2>
-        <p>Scénarisation est édité par Yann Houry, avec la contribution de François Jourde. Les coordonnées de l’éditeur et de l’hébergeur figurent dans les <a href="mentions-legales.php">mentions légales</a>.</p>
-        <p>L’application peut être consultée sans compte. Un compte permet notamment de sauvegarder des scénarios sur le serveur et de les publier. L’inscription en libre-service est réservée aux adresses <code>@florimont.ch</code> et nécessite la vérification de l’adresse électronique.</p>
+        <p>Scénarisation est édité par Yann Houry et François Jourde. Les coordonnées de l’éditeur et de l’hébergeur figurent dans les <a href="https://scenarisation.eu/mentions-legales.php">mentions légales</a>.</p>
+        <p>L’application peut être consultée sans compte. Un compte permet notamment de sauvegarder des scénarios sur le serveur et de les publier.</p>
+        <p>Scénarisation est conçu pour être utilisé par des adultes. Vous devez avoir au moins treize ans pour l'utiliser. Si nous apprenons que nous avons recueilli des données personnelles concernant un enfant de moins de treize ans, nous les supprimerons dans les plus brefs délais. Si vous pensez que nous détenons des informations concernant un enfant de moins de treize ans, veuillez nous contacter à l’adresse <a href="mailto:yannhoury@ralentirtravaux.com">yannhoury@ralentirtravaux.com</a>.</p>
 
         <h2>Création et sécurité du compte</h2>
         <p>Lors de son inscription, l’utilisateur accepte ces conditions au moyen de la case prévue dans le formulaire. La date et la version acceptée sont enregistrées avec le compte.</p>
@@ -58,7 +59,7 @@ app_start_session();
         <p>Ces limitations n’excluent ni les obligations légales propres à l’éditeur, notamment concernant le traitement des signalements de contenus illicites, ni les responsabilités qui ne peuvent être exclues ou limitées par la loi. Elles ne privent pas l’utilisateur des droits impératifs dont il bénéficie, notamment en cas de manquement du service à ses obligations.</p>
 
         <h2>Gestion et suppression du compte</h2>
-        <p>L’utilisateur peut supprimer son compte depuis son espace personnel. Cette suppression entraîne celle des scénarios et des jetons CLI associés, selon les modalités décrites dans la politique de confidentialité.</p>
+        <p>L’utilisateur peut supprimer son compte depuis son espace personnel. Cette suppression entraîne celle des scénarios et des jetons CLI associés, selon les modalités décrites dans la politique de confidentialité. Toutefois, cette suppression n’entraîne pas celle des scénarios qui ont été dérivés à partir des scénarios de l’utilisateur.</p>
         <p>Les administrateurs peuvent bloquer les soumissions abusives, retirer un contenu illicite ou désactiver un compte qui compromet la sécurité du service ou méconnaît ces règles. Pour signaler un contenu ou demander un réexamen, utilisez la <a href="https://www.ralentirtravaux.com/contact/contact.php" rel="noopener noreferrer">page de contact de l’éditeur</a> en précisant le compte ou le contenu concerné.</p>
 
         <h2>Évolution des conditions</h2>

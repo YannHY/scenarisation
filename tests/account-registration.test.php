@@ -60,7 +60,7 @@ try {
     check(request('setup_admin.php',$post,'setup_admin',$ok)==='', 'initial administrator creation redirects');
     $db=new PDO('sqlite:'.$fixture.'/test.sqlite',null,null,[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]);
     check((int)$db->query('SELECT COUNT(*) FROM users')->fetchColumn()===1,'initial administrator recorded');
-    $post['username']='Teacher';$post['email']='teacher@florimont.ch';$ok['action']='signup';
+    $post['username']='Teacher';$post['email']='teacher@example.test';$ok['action']='signup';
     foreach (['missing_csrf','missing_token','failed_token','wrong_host','wrong_action','missing_terms'] as $case) {
         $db->exec('DELETE FROM account_rate_limits');$input=$post;$response=$ok;
         if($case==='missing_csrf')unset($input['csrf_token']);
@@ -79,7 +79,7 @@ try {
     $db->exec('DELETE FROM account_rate_limits');
     $db->exec("UPDATE users SET email_verification_sent_at=0 WHERE username='Teacher'");
     $oldToken=$user['email_verification_token_hash'];
-    $resend=['email'=>'teacher@florimont.ch','csrf_token'=>'VALID','cf-turnstile-response'=>'test-token'];
+    $resend=['email'=>'teacher@example.test','csrf_token'=>'VALID','cf-turnstile-response'=>'test-token'];
     request('verify-email.php',$resend,'resend_verification',['success'=>false]);
     check($db->query("SELECT email_verification_token_hash FROM users WHERE username='Teacher'")->fetchColumn()===$oldToken,'failed captcha does not issue new email token');
     $ok['action']='resend_verification';

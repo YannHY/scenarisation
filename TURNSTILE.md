@@ -48,7 +48,7 @@ Les fichiers de tests et ce guide ne sont pas nécessaires sur le serveur. La ta
 
 1. Ouvrir `https://scenarisation.eu/signup.php` dans une nouvelle session de navigation.
 2. Vérifier que le widget Turnstile apparaît et permet de terminer la vérification.
-3. Créer un compte avec une adresse de test `@florimont.ch` que vous contrôlez, accepter les CGU, puis confirmer l’adresse depuis l’email reçu.
+3. Créer un compte avec une adresse email de test que vous contrôlez, accepter les CGU, puis confirmer l’adresse depuis l’email reçu.
 4. Pour un compte encore non vérifié, vérifier le renvoi d’un lien depuis `verify-email.php`. Il doit demander Turnstile ; un renvoi immédiat supplémentaire doit rester soumis au délai d’une minute.
 5. Si la vérification reste indisponible, vérifier les deux clés, les domaines autorisés dans Cloudflare et dans la configuration privée, et l’accès HTTPS sortant du serveur.
 

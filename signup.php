@@ -37,8 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Nom d’utilisateur, email et mot de passe requis.';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = 'Adresse email invalide.';
-    } elseif (!is_florimont_email($email)) {
-        $error = 'L’inscription est réservée aux adresses email @florimont.ch.';
     } elseif (strlen($password) < 8) {
         $error = 'Le mot de passe doit contenir au moins 8 caractères.';
     } else {
@@ -102,17 +100,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <section class="account-card">
         <p class="account-kicker">Scénarisation</p>
         <h1>Créer un compte</h1>
-        <p class="account-copy">Inscrivez-vous avec votre adresse @florimont.ch. Un lien de vérification vous sera envoyé avant votre première connexion.</p>
+        <p class="account-copy">Inscrivez-vous avec une adresse email valide. Un lien de vérification vous sera envoyé avant votre première connexion.</p>
         <form method="post" class="account-form">
             <label for="username">Nom d’utilisateur</label>
             <input id="username" name="username" type="text" required autocomplete="nickname">
             <label for="email">Email</label>
-            <input id="email" name="email" type="email" required autocomplete="username" placeholder="@florimont.ch">
+            <input id="email" name="email" type="email" required autocomplete="username" placeholder="nom@exemple.com">
             <label for="password">Mot de passe</label>
             <input id="password" name="password" type="password" minlength="8" required autocomplete="new-password">
             <label class="account-terms" for="accept_terms">
                 <input id="accept_terms" name="accept_terms" type="checkbox" value="1" required<?= ($_POST['accept_terms'] ?? null) === '1' ? ' checked' : '' ?>>
-                <span>J’accepte les <a href="conditions-utilisation.php" target="_blank" rel="noopener">conditions générales d’utilisation</a> (nouvel onglet).</span>
+                <span>J’accepte les <a href="conditions-utilisation.php" target="_blank" rel="noopener">conditions générales d’utilisation</a>.</span>
             </label>
             <?php render_account_protection('signup'); ?>
             <button type="submit"<?= !account_turnstile_ready() ? ' disabled' : '' ?>>Créer mon compte</button>
