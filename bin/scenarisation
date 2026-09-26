@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any
 
 
-VERSION = "0.8.3"
+VERSION = "0.8.4"
 DEFAULT_DAY_HOURS = 7
 AIAS_VERSION = "2.1"
 DEFAULT_SITE = "https://www.ralentirtravaux.com/flo/learning-designer"
@@ -54,13 +54,79 @@ BANNER_ACCENTS = {
     "É": ("0000100", "0001000"),
 }
 BANNER_DETAILS = (
-    ("CLI", lambda: f"Scénarisation {VERSION}"),
-    ("Développement", lambda: "Yann Houry"),
-    ("Travail d’origine", lambda: "François Jourde"),
-    ("Inspiration", lambda: "UCL Learning Designer"),
-    ("Licence", lambda: "CC BY-SA 4.0"),
-    ("Web", lambda: "scenarisation.eu · github.com/YannHY/scenarisation"),
+    (("CLI", "CLI"), lambda: f"Scénarisation {VERSION}"),
+    (("Développement", "Development"), lambda: "Yann Houry"),
+    (("Travail d’origine", "Original work"), lambda: "François Jourde"),
+    (("Inspiration", "Inspiration"), lambda: "UCL Learning Designer"),
+    (("Licence", "License"), lambda: "CC BY-SA 4.0"),
+    (("Web", "Web"), lambda: "scenarisation.eu · github.com/YannHY/scenarisation"),
 )
+
+COMMAND_HELP_LABELS_FR = {
+    "init (nouveau)": "nouveau / init",
+    "add-moment (ajouter-moment)": "ajouter-moment / add-moment",
+    "add-activity (ajouter-activite, ajouter-activité)": "ajouter-activité / add-activity",
+    "outcome (acquis)": "acquis / outcome",
+    "prompt (codex-prompt)": "codex-prompt / prompt",
+    "handoff (confier-codex, codex)": "codex / handoff",
+    "validate (verifier, vérifier)": "vérifier / validate",
+    "list (lister)": "lister / list",
+    "login (connexion)": "connexion / login",
+    "publish (publier)": "publier / publish",
+    "status (etat, état)": "état / status",
+    "upgrade (update, mise-a-jour)": "mise-a-jour / upgrade",
+}
+
+COMMAND_HELP_LABELS_EN = {
+    "init (nouveau)": "init / nouveau",
+    "add-moment (ajouter-moment)": "add-moment / ajouter-moment",
+    "add-activity (ajouter-activite, ajouter-activité)": "add-activity / ajouter-activité",
+    "outcome (acquis)": "outcome / acquis",
+    "prompt (codex-prompt)": "prompt / codex-prompt",
+    "handoff (confier-codex, codex)": "handoff / codex",
+    "validate (verifier, vérifier)": "validate / vérifier",
+    "list (lister)": "list / lister",
+    "login (connexion)": "login / connexion",
+    "publish (publier)": "publish / publier",
+    "status (etat, état)": "status / état",
+    "upgrade (update, mise-a-jour)": "upgrade / mise-a-jour",
+}
+
+
+class CliHelpFormatter(argparse.RawDescriptionHelpFormatter):
+    """Keep the CLI help compact and readable in wide terminals."""
+
+    command_labels = COMMAND_HELP_LABELS_FR
+
+    def __init__(self, prog: str) -> None:
+        super().__init__(prog, max_help_position=38, width=100)
+
+    def _format_action_invocation(self, action: argparse.Action) -> str:
+        if not action.option_strings and action.metavar in self.command_labels:
+            return self.command_labels[action.metavar]
+        return super()._format_action_invocation(action)
+
+
+class EnglishCliHelpFormatter(CliHelpFormatter):
+    command_labels = COMMAND_HELP_LABELS_EN
+
+
+class CliArgumentParser(argparse.ArgumentParser):
+    """Apply the compact formatter to the main parser and every subcommand."""
+
+    def __init__(self, *args: Any, help_language: str = "fr", **kwargs: Any) -> None:
+        self.help_language = help_language
+        formatter = EnglishCliHelpFormatter if help_language == "en" else CliHelpFormatter
+        kwargs.setdefault("formatter_class", formatter)
+        super().__init__(*args, **kwargs)
+
+    def format_help(self) -> str:
+        text = super().format_help()
+        return text.replace("usage: ", "utilisation : ", 1) if self.help_language == "fr" else text
+
+    def format_usage(self) -> str:
+        text = super().format_usage()
+        return text.replace("usage: ", "utilisation : ", 1) if self.help_language == "fr" else text
 
 LEARNING_TYPES = {
     "undefined": ("Non défini", "Undefined"),
@@ -363,22 +429,23 @@ def banner_lines(use_color: bool) -> list[str]:
     return lines
 
 
-def banner_detail_lines(use_color: bool) -> list[str]:
+def banner_detail_lines(use_color: bool, language: str = "fr") -> list[str]:
     """Return project credits and release information below the banner."""
     lines = []
     for index in range(0, len(BANNER_DETAILS), 2):
         columns = []
-        for detail_index, (label, value) in enumerate(BANNER_DETAILS[index:index + 2], start=index):
+        for detail_index, (labels, value) in enumerate(BANNER_DETAILS[index:index + 2], start=index):
             _, (red, green, blue) = LEARNING_TYPE_COLORS[detail_index % len(LEARNING_TYPE_COLORS)]
             square = "■"
             if use_color:
                 square = f"\033[1;38;2;{red};{green};{blue}m■\033[0m"
+            label = labels[1] if language == "en" else labels[0]
             columns.append(f"{square} {label} : {value()}")
         lines.append("    ".join(columns))
     return lines
 
 
-def print_banner() -> None:
+def print_banner(language: str = "fr") -> None:
     """Show the banner for people at a terminal without polluting scripted output."""
     if (
         not sys.stderr.isatty()
@@ -389,7 +456,7 @@ def print_banner() -> None:
     use_color = "NO_COLOR" not in os.environ and os.environ.get("TERM", "") != "dumb"
     print("\n".join(banner_lines(use_color)), file=sys.stderr)
     print(file=sys.stderr)
-    print("\n".join(banner_detail_lines(use_color)), file=sys.stderr)
+    print("\n".join(banner_detail_lines(use_color, language)), file=sys.stderr)
     print(file=sys.stderr)
 
 
@@ -1039,45 +1106,131 @@ def command_upgrade(args: argparse.Namespace) -> None:
         die(f"upgrade installer failed with exit code {exc.returncode}", exc.returncode)
 
 
-def add_common_design_args(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--title", "--titre", default="", help="Design title / titre du design")
-    parser.add_argument("--lang", choices=["fr", "en"], default="fr", help="UI language")
-    parser.add_argument("--duration", "--duree", "--durée", type=int, default=0, help="Total learning duration in minutes")
+def localized(language: str, french: str, english: str) -> str:
+    return english if language == "en" else french
+
+
+def requested_help_language(arguments: list[str]) -> str:
+    """Read the requested help language before argparse handles --help."""
+    language = os.environ.get("SCENARISATION_LANG", "fr").lower()
+    for index, argument in enumerate(arguments):
+        if argument.startswith("--lang="):
+            language = argument.split("=", 1)[1]
+        elif argument == "--lang" and index + 1 < len(arguments):
+            language = arguments[index + 1]
+    return "en" if language.lower().startswith("en") else "fr"
+
+
+def localize_parser_sections(parser: argparse.ArgumentParser, language: str) -> None:
+    """Translate argparse's built-in section and help labels."""
+    if language != "fr":
+        return
+    parser._positionals.title = "arguments"
+    parser._optionals.title = "options"
+    for action in parser._actions:
+        if isinstance(action, argparse._HelpAction):
+            action.help = "Afficher cette aide et quitter"
+
+
+def add_common_design_args(parser: argparse.ArgumentParser, language: str) -> None:
+    parser.add_argument("--title", "--titre", default="", help=localized(language, "Titre du scénario", "Design title"))
+    parser.add_argument("--lang", choices=["fr", "en"], default="fr", help=localized(language, "Langue du scénario", "Design language"))
+    parser.add_argument(
+        "--duration", "--duree", "--durée", type=int, default=0,
+        help=localized(language, "Durée totale en minutes", "Total learning duration in minutes"),
+    )
     parser.add_argument("--day-hours", "--heures-jour", type=int, default=DEFAULT_DAY_HOURS)
-    parser.add_argument("--mode", default="", help="onsite/online/hybrid or presentiel/distanciel/hybride")
+    parser.add_argument(
+        "--mode",
+        default="",
+        help=localized(language, "presentiel/distanciel/hybride", "onsite/online/hybrid"),
+    )
     parser.add_argument(
         "--school-system", "--systeme-scolaire", "--système-scolaire",
         default="",
-        help="School system/classification id or label; see `scenarisation list school-systems`",
+        help=localized(
+            language,
+            "Identifiant ou libellé du système scolaire ; voir `scenarisation lister school-systems`",
+            "School system/classification id or label; see `scenarisation list school-systems`",
+        ),
     )
     parser.add_argument(
         "--school-level", "--niveau-scolaire", "--niveau",
         default="",
-        help="Level id or label for --school-system; see `scenarisation list school-levels --system ID`",
+        help=localized(
+            language,
+            "Niveau du système scolaire ; voir `scenarisation lister school-levels --system ID`",
+            "Level id or label for --school-system; see `scenarisation list school-levels --system ID`",
+        ),
     )
     parser.add_argument("--group-size", "--taille-groupe", default="")
     parser.add_argument("--designers", "--concepteurs", default="")
     parser.add_argument("--trainers", "--formateurs", default="")
     parser.add_argument("--description", default="")
-    parser.add_argument("--brief", "--commande", default="", help="Institutional brief / commande")
-    parser.add_argument("--objectives", "--objectifs", default="", help="Overall learning objectives")
+    parser.add_argument("--brief", "--commande", default="", help=localized(language, "Commande institutionnelle", "Institutional brief"))
+    parser.add_argument("--objectives", "--objectifs", default="", help=localized(language, "Objectifs généraux", "Overall learning objectives"))
 
 
-def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
+def build_parser(language: str = "fr") -> argparse.ArgumentParser:
+    parser_factory = lambda **kwargs: CliArgumentParser(help_language=language, **kwargs)
+    parser = CliArgumentParser(
         prog="scenarisation",
-        description="Create Scenarisation files and Codex prompts from the terminal.",
+        help_language=language,
+        add_help=False,
+        usage=localized(
+            language,
+            "%(prog)s [--help] [--version] COMMANDE [OPTIONS]",
+            "%(prog)s [--help] [--version] COMMAND [OPTIONS]",
+        ),
+        description=localized(
+            language,
+            "Créer, valider et publier des scénarios pédagogiques depuis le terminal.",
+            "Create, validate, and publish learning designs from the terminal.",
+        ),
+        epilog=localized(
+            language,
+            "Utilisez « scenarisation COMMANDE --help » pour afficher les options d’une commande.",
+            "Run `scenarisation COMMAND --help` to display a command's options.",
+        ),
     )
-    parser.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
-    sub = parser.add_subparsers(dest="command", required=True)
+    parser.add_argument(
+        "-h", "--help", action="help",
+        help=localized(language, "Afficher cette aide et quitter", "Show this help message and exit"),
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {VERSION}",
+        help=localized(language, "Afficher la version et quitter", "Show the version and exit"),
+    )
+    parser.add_argument(
+        "--lang",
+        choices=["fr", "en"],
+        dest="help_language",
+        default=language,
+        help=localized(language, "Langue de l’aide", "Help language"),
+    )
+    sub = parser.add_subparsers(
+        title=localized(language, "commandes", "commands"),
+        metavar=localized(language, "COMMANDE", "COMMAND"),
+        dest="command",
+        required=True,
+        parser_class=parser_factory,
+    )
 
-    init = sub.add_parser("init", aliases=["nouveau"], help="Create a new design JSON file")
-    init.add_argument("file", help="Output JSON file")
+    init = sub.add_parser(
+        "init", aliases=["nouveau"],
+        help=localized(language, "Créer un nouveau fichier de scénario", "Create a new design file"),
+    )
+    init.add_argument("file", help=localized(language, "Fichier JSON à créer", "Output JSON file"))
     init.add_argument("--force", action="store_true")
-    add_common_design_args(init)
+    add_common_design_args(init, language)
     init.set_defaults(func=command_init)
 
-    moment = sub.add_parser("add-moment", aliases=["ajouter-moment"], help="Add a learning moment")
+    moment = sub.add_parser(
+        "add-moment", aliases=["ajouter-moment"],
+        help=localized(language, "Ajouter un moment d’apprentissage", "Add a learning moment"),
+    )
     moment.add_argument("file")
     moment.add_argument("--title", "--titre", required=True)
     moment.add_argument("--objectives", "--objectifs", default="")
@@ -1085,37 +1238,55 @@ def build_parser() -> argparse.ArgumentParser:
     moment.add_argument("--notes", default="")
     moment.set_defaults(func=command_add_moment)
 
-    activity = sub.add_parser("add-activity", aliases=["ajouter-activite", "ajouter-activité"], help="Add an activity to a moment")
-    activity.add_argument("file")
-    activity.add_argument("--moment", help="Moment index, id, or title. Defaults to the last moment.")
-    activity.add_argument("--type", required=True, help="read/investigate/practice/produce/discuss/collaborate")
+    activity = sub.add_parser(
+        "add-activity",
+        aliases=["ajouter-activite", "ajouter-activité"],
+        help=localized(language, "Ajouter une activité à un moment", "Add an activity to a moment"),
+    )
+    activity.add_argument("file", help=localized(language, "Fichier JSON à modifier", "Design JSON file"))
+    activity.add_argument(
+        "--moment",
+        help=localized(
+            language,
+            "Index, identifiant ou titre du moment ; le dernier moment par défaut",
+            "Moment index, id, or title; defaults to the last moment",
+        ),
+    )
+    activity.add_argument(
+        "--type", required=True,
+        help=localized(
+            language,
+            "lire/investiguer/pratiquer/produire/discuter/collaborer",
+            "read/investigate/practice/produce/discuss/collaborate",
+        ),
+    )
     activity.add_argument("--duration", "--duree", "--durée", type=int, required=True)
     activity.add_argument(
         "--group", "--groupe", required=True,
-        help="whole/subgroups/individual; choose explicitly for this activity",
+        help=localized(language, "classe/sous-groupes/individuel ; choix obligatoire", "whole/subgroups/individual; required"),
     )
     activity.add_argument(
         "--teaching", "--enseignement", "--teacher", "--enseignant",
         dest="teaching",
         required=True,
-        help="directed/guided/supported/independent (or French equivalents)",
+        help=localized(language, "dirigé/guidé/accompagné/autonome", "directed/guided/supported/independent"),
     )
     activity.add_argument(
         "--pacing", "--rythme", required=True,
-        help="sync/async (or French equivalents); choose explicitly for this activity",
+        help=localized(language, "synchrone/asynchrone ; choix obligatoire", "sync/async; required"),
     )
     activity.add_argument(
         "--mode",
         required=True,
-        help="classroom-based/location-based/online/blended/other (or French equivalents)",
+        help=localized(language, "classe/terrain/en-ligne/hybride/autre", "classroom-based/location-based/online/blended/other"),
     )
     activity.add_argument(
         "--evaluation", "--évaluation", "--assessment", required=True,
-        help="none/diagnostic/formative/summative/certificative",
+        help=localized(language, "aucune/diagnostique/formative/sommative/certificative", "none/diagnostic/formative/summative/certificative"),
     )
     activity.add_argument(
         "--aias", "--aias-level", required=True,
-        help="1-5, not-applicable, or undecided; choose explicitly for this activity",
+        help=localized(language, "1-5, non-applicable ou indécis ; choix obligatoire", "1-5, not-applicable, or undecided; required"),
     )
     activity.add_argument("--description", default="")
     activity.add_argument("--instructions", "--consignes", default="")
@@ -1126,44 +1297,73 @@ def build_parser() -> argparse.ArgumentParser:
         "--compétences",
         action="append",
         default=[],
-        help="Comma-separated digital competencies: A1,P6,C14 or competency ids",
+        help=localized(language, "Compétences numériques séparées par des virgules : A1,P6,C14", "Comma-separated digital competencies: A1,P6,C14"),
     )
     activity.add_argument(
         "--link", "--lien", action="append", default=[],
-        help="title=url or url; appended to the description as Markdown",
+        help=localized(language, "titre=url ou url ; ajouté à la description en Markdown", "title=url or url; appended to the description as Markdown"),
     )
     activity.set_defaults(func=command_add_activity)
 
-    outcome = sub.add_parser("outcome", aliases=["acquis"], help="Add a Bloom scenarisation outcome")
-    outcome.add_argument("file")
-    outcome.add_argument("--bloom", required=True, help="remember/understand/apply/analyze/evaluate/create")
+    outcome = sub.add_parser(
+        "outcome", aliases=["acquis"],
+        help=localized(language, "Ajouter un acquis selon Bloom", "Add a Bloom learning outcome"),
+    )
+    outcome.add_argument("file", help=localized(language, "Fichier JSON à modifier", "Design JSON file"))
+    outcome.add_argument(
+        "--bloom", required=True,
+        help=localized(
+            language,
+            "mémoriser/comprendre/appliquer/analyser/évaluer/créer",
+            "remember/understand/apply/analyze/evaluate/create",
+        ),
+    )
     outcome.add_argument("--verb", "--verbe", required=True)
     outcome.add_argument("--text", "--texte", required=True)
     outcome.set_defaults(func=command_outcome)
 
-    prompt = sub.add_parser("prompt", aliases=["codex-prompt"], help="Print a Codex handoff prompt")
+    prompt = sub.add_parser(
+        "prompt", aliases=["codex-prompt"],
+        help=localized(language, "Afficher un prompt destiné à Codex", "Print a prompt for Codex"),
+    )
     prompt.add_argument("file")
     prompt.add_argument("--lang", choices=["fr", "en"])
     prompt.add_argument("--output", "-o")
     prompt.set_defaults(func=command_prompt)
 
-    handoff = sub.add_parser("handoff", aliases=["confier-codex", "codex"], help="Send the design prompt to Codex")
+    handoff = sub.add_parser(
+        "handoff", aliases=["confier-codex", "codex"],
+        help=localized(language, "Confier le scénario à Codex", "Send the design prompt to Codex"),
+    )
     handoff.add_argument("file")
     handoff.add_argument("--lang", choices=["fr", "en"])
     handoff.add_argument("--output", "-o")
     handoff.add_argument("--dry-run", action="store_true")
-    handoff.add_argument("--codex-command", help="Codex executable name/path")
+    handoff.add_argument(
+        "--codex-command",
+        help=localized(language, "Nom ou chemin de l’exécutable Codex", "Codex executable name or path"),
+    )
     handoff.set_defaults(func=command_handoff)
 
-    validate = sub.add_parser("validate", aliases=["verifier", "vérifier"], help="Validate a design file")
+    validate = sub.add_parser(
+        "validate", aliases=["verifier", "vérifier"],
+        help=localized(language, "Vérifier un fichier de scénario", "Validate a design file"),
+    )
     validate.add_argument("file")
     validate.add_argument(
         "--strict-pedagogy", action="store_true",
-        help="also reject undecided teaching and AIAS choices",
+        help=localized(
+            language,
+            "Refuser aussi les choix pédagogiques et AIAS indécis",
+            "Also reject undecided teaching and AIAS choices",
+        ),
     )
     validate.set_defaults(func=command_validate)
 
-    list_cmd = sub.add_parser("list", aliases=["lister"], help="List accepted values")
+    list_cmd = sub.add_parser(
+        "list", aliases=["lister"],
+        help=localized(language, "Lister les valeurs acceptées", "List accepted values"),
+    )
     list_cmd.add_argument(
         "kind",
         choices=["types", "bloom", "competencies", "activity-options", "school-systems", "school-levels"],
@@ -1171,32 +1371,59 @@ def build_parser() -> argparse.ArgumentParser:
     list_cmd.add_argument("--system", "--school-system", "--système", default="")
     list_cmd.set_defaults(func=command_list)
 
-    login = sub.add_parser("login", aliases=["connexion"], help="Save a CLI publishing token")
-    login.add_argument("--site", default=DEFAULT_SITE, help=f"Scenarisation site URL. Defaults to {DEFAULT_SITE}")
-    login.add_argument("--token", help="CLI token generated from the profile page")
+    login = sub.add_parser(
+        "login", aliases=["connexion"],
+        help=localized(language, "Enregistrer un jeton de publication", "Save a publishing token"),
+    )
+    login.add_argument(
+        "--site", default=DEFAULT_SITE,
+        help=localized(language, f"Adresse du site ; {DEFAULT_SITE} par défaut", f"Site URL; defaults to {DEFAULT_SITE}"),
+    )
+    login.add_argument(
+        "--token",
+        help=localized(language, "Jeton généré depuis la page de profil", "Token generated from the profile page"),
+    )
     login.set_defaults(func=command_login)
 
-    publish = sub.add_parser("publish", aliases=["publier"], help="Publish a design JSON file online")
-    publish.add_argument("file")
-    publish.add_argument("--site", help="Scenarisation site URL. Defaults to the last login site.")
-    publish.add_argument("--title", "--titre", help="Published design title")
-    publish.add_argument("--design-id", type=int, help="Update an existing online design id")
+    publish = sub.add_parser(
+        "publish", aliases=["publier"],
+        help=localized(language, "Publier un scénario en ligne", "Publish a design online"),
+    )
+    publish.add_argument("file", help=localized(language, "Fichier JSON à publier", "Design JSON file to publish"))
+    publish.add_argument(
+        "--site",
+        help=localized(language, "Adresse du site ; dernière connexion par défaut", "Site URL; defaults to the last login site"),
+    )
+    publish.add_argument("--title", "--titre", help=localized(language, "Titre publié", "Published design title"))
+    publish.add_argument(
+        "--design-id", type=int,
+        help=localized(language, "Identifiant d’un scénario en ligne à mettre à jour", "Online design id to update"),
+    )
     publish.add_argument("--timeout", type=int, default=30)
     publish.set_defaults(func=command_publish)
 
-    status = sub.add_parser("status", aliases=["etat", "état"], help="Show CLI version and publishing setup")
+    status = sub.add_parser(
+        "status", aliases=["etat", "état"],
+        help=localized(language, "Afficher la version et l’état de la publication", "Show version and publishing status"),
+    )
     status.set_defaults(func=command_status)
 
-    upgrade = sub.add_parser("upgrade", aliases=["update", "mise-a-jour"], help="Install the latest CLI version")
+    upgrade = sub.add_parser(
+        "upgrade", aliases=["update", "mise-a-jour"],
+        help=localized(language, "Installer la dernière version du CLI", "Install the latest CLI version"),
+    )
     upgrade.add_argument("--timeout", type=int, default=30)
     upgrade.set_defaults(func=command_upgrade)
+    for subparser in {id(candidate): candidate for candidate in sub.choices.values()}.values():
+        localize_parser_sections(subparser, language)
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
-    print_banner()
-    parser = build_parser()
     arguments = sys.argv[1:] if argv is None else argv
+    language = requested_help_language(arguments)
+    print_banner(language)
+    parser = build_parser(language)
     if not arguments:
         parser.print_help()
         return 0
