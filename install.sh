@@ -209,4 +209,7 @@ fi
 
 say ""
 say "Installed scenarisation to $TARGET"
+if [ "${SCENARISATION_INSTALL_QUIET:-0}" != "1" ]; then
+  "$TARGET" --version
+fi
 say "Run: scenarisation --help"

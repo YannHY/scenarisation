@@ -855,12 +855,37 @@ Objectifs généraux de la formation.
                 <h3 id="cli-detaille">Utiliser le CLI</h3>
                 <p>Le CLI permet de créer, valider et publier un scénario directement depuis votre terminal.</p>
 
-                <h4>Installer ou actualiser</h4>
-                <p>Utilisez cet installateur si vous souhaitez travailler vous-même avec la commande <code>learning</code>. Il installe la dernière version ou remplace la version existante.</p>
+                <h4>Par où commencer</h4>
+                <p>Le CLI nécessite Python 3. Vérifiez d’abord que Python est disponible dans votre terminal.</p>
                 <div class="help-code-wrap">
                     <button class="help-copy-btn" type="button" aria-label="Copier la commande" title="Copier"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
-                    <pre class="help-code">curl -fsSL https://raw.githubusercontent.com/YannHY/scenarisation/main/install.sh | sh
-scenarisation status</pre>
+                    <pre class="help-code">python3 --version</pre>
+                </div>
+
+                <h4>Installer ou actualiser</h4>
+                <p>Utilisez cet installateur si vous souhaitez travailler vous-même avec la commande <code>scenarisation</code>. Il installe la dernière version ou remplace la version existante.</p>
+                <div class="help-code-wrap">
+                    <button class="help-copy-btn" type="button" aria-label="Copier la commande" title="Copier"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
+                    <pre class="help-code">curl -fsSL https://raw.githubusercontent.com/YannHY/scenarisation/main/install.sh | sh</pre>
+                </div>
+                <p>Vérifiez ensuite l’installation et affichez la liste des systèmes scolaires disponibles.</p>
+                <div class="help-code-wrap">
+                    <button class="help-copy-btn" type="button" aria-label="Copier la commande" title="Copier"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
+                    <pre class="help-code">scenarisation --help
+scenarisation status
+scenarisation list school-systems</pre>
+                </div>
+                <p>Si le terminal ne reconnaît pas la commande après l’installation, fermez-le puis ouvrez-en un nouveau, ou rechargez la liste des commandes.</p>
+                <div class="help-code-wrap">
+                    <button class="help-copy-btn" type="button" aria-label="Copier la commande" title="Copier"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
+                    <pre class="help-code">rehash
+scenarisation list school-systems</pre>
+                </div>
+                <p>Depuis un dépôt Scénarisation cloné, placez-vous d’abord dans son dossier en adaptant le chemin ci-dessous, puis utilisez directement le CLI inclus, sans installation globale.</p>
+                <div class="help-code-wrap">
+                    <button class="help-copy-btn" type="button" aria-label="Copier la commande" title="Copier"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
+                    <pre class="help-code">cd ~/chemin/vers/scenarisation
+./bin/scenarisation list school-systems</pre>
                 </div>
 
                 <h4>Créer un scénario</h4>
@@ -1014,7 +1039,7 @@ window.helpPromptTranslations = <?= json_encode([
     ],
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 </script>
-<script src="js/help-i18n.js?v=20260910-scenario-wording"></script>
+<script src="js/help-i18n.js?v=20260926-cli-start"></script>
 <script>
 var initialHelpLanguage = 'fr';
 try {

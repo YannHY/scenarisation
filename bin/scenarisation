@@ -21,12 +21,35 @@ from pathlib import Path
 from typing import Any
 
 
-VERSION = "0.7.0"
+VERSION = "0.8.0"
 DEFAULT_DAY_HOURS = 7
 AIAS_VERSION = "2.1"
 DEFAULT_SITE = "https://www.ralentirtravaux.com/flo/learning-designer"
 INSTALL_URL = "https://raw.githubusercontent.com/YannHY/scenarisation/main/install.sh"
 CONFIG_PATH = Path(os.environ.get("SCENARISATION_CONFIG") or os.environ.get("LEARNING_CONFIG", "~/.learning-designer/config.json")).expanduser()
+
+# Keep these six colours in sync with --read…--collaborate in css/interface.css.
+LEARNING_TYPE_COLORS = (
+    ("read", (91, 221, 211)),
+    ("investigate", (241, 148, 146)),
+    ("practice", (196, 152, 236)),
+    ("produce", (162, 214, 129)),
+    ("discuss", (133, 182, 240)),
+    ("collaborate", (231, 185, 89)),
+)
+
+BANNER_WORD = "SCÉNARISATION"
+BANNER_GLYPHS = {
+    "A": (" ███ ", "█   █", "█████", "█   █", "█   █"),
+    "C": ("█████", "█    ", "█    ", "█    ", "█████"),
+    "É": ("█████", "█    ", "████ ", "█    ", "█████"),
+    "I": ("█████", "  █  ", "  █  ", "  █  ", "█████"),
+    "N": ("█   █", "██  █", "█ █ █", "█  ██", "█   █"),
+    "O": (" ███ ", "█   █", "█   █", "█   █", " ███ "),
+    "R": ("████ ", "█   █", "████ ", "█  █ ", "█   █"),
+    "S": ("█████", "█    ", "█████", "    █", "█████"),
+    "T": ("█████", "  █  ", "  █  ", "  █  ", "  █  "),
+}
 
 LEARNING_TYPES = {
     "undefined": ("Non défini", "Undefined"),
@@ -305,6 +328,38 @@ for level_id, label_fr, label_en in (
 def die(message: str, code: int = 1) -> None:
     print(f"scenarisation: {message}", file=sys.stderr)
     raise SystemExit(code)
+
+
+def banner_lines(use_color: bool) -> list[str]:
+    """Return the pixel banner, optionally using the six learning-type colours."""
+    lines = []
+    for row in range(-1, 5):
+        parts = []
+        for index, letter in enumerate(BANNER_WORD):
+            if row == -1:
+                pixels = "   █ " if letter == "É" else "     "
+            else:
+                pixels = BANNER_GLYPHS[letter][row]
+            if use_color:
+                _, (red, green, blue) = LEARNING_TYPE_COLORS[index % len(LEARNING_TYPE_COLORS)]
+                parts.append(f"\033[1;38;2;{red};{green};{blue}m{pixels}\033[0m")
+            else:
+                parts.append(pixels)
+        lines.append(" ".join(parts).rstrip())
+    return lines
+
+
+def print_banner() -> None:
+    """Show the banner for people at a terminal without polluting scripted output."""
+    if (
+        not sys.stderr.isatty()
+        or os.environ.get("SCENARISATION_NO_BANNER")
+        or os.environ.get("SCENARISATION_INSTALL_QUIET") == "1"
+    ):
+        return
+    use_color = "NO_COLOR" not in os.environ and os.environ.get("TERM", "") != "dumb"
+    print("\n".join(banner_lines(use_color)), file=sys.stderr)
+    print(file=sys.stderr)
 
 
 def slug(value: str) -> str:
@@ -1108,8 +1163,13 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    print_banner()
     parser = build_parser()
-    args = parser.parse_args(argv)
+    arguments = sys.argv[1:] if argv is None else argv
+    if not arguments:
+        parser.print_help()
+        return 0
+    args = parser.parse_args(arguments)
     args.func(args)
     return 0
 
