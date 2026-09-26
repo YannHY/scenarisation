@@ -70,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="css/interface.css?v=20260905-subtle-focus">
     <link rel="stylesheet" href="css/account-ui.css?v=20260906-highlight">
-    <link rel="stylesheet" href="css/account-pages.css?v=20260910-login-neutral-icons">
+    <link rel="stylesheet" href="css/account-pages.css?v=20260926-login-colour-rhythm">
 </head>
 <body class="login-page">
 <?php render_site_nav('login'); ?>
@@ -87,16 +87,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="login-learning-rhythm" aria-hidden="true">
                 <span></span><span></span><span></span><span></span><span></span><span></span>
             </div>
+            <p class="login-beta-note">
+                <i class="fa-solid fa-bug" aria-hidden="true"></i>
+                <span data-site-i18n-en="This site is currently in beta." data-site-i18n-fr="Le site est actuellement en version bêta.">Le site est actuellement en version bêta.</span>
+            </p>
         </section>
 
         <section class="account-card">
         <h1 data-site-i18n-en="Sign in" data-site-i18n-fr="Connexion">Connexion</h1>
         <p class="account-copy" data-site-i18n-en="Sign in to save and access your work." data-site-i18n-fr="Connectez-vous pour sauvegarder et retrouver vos productions.">Connectez-vous pour sauvegarder et retrouver vos productions.</p>
+        <p class="login-beta-note login-beta-note-mobile">
+            <i class="fa-solid fa-bug" aria-hidden="true"></i>
+            <span data-site-i18n-en="This site is currently in beta." data-site-i18n-fr="Le site est actuellement en version bêta.">Le site est actuellement en version bêta.</span>
+        </p>
         <form method="post" class="account-form">
-            <label for="email">Email</label>
-            <input id="email" name="email" type="email" required autocomplete="username">
-            <label for="password" data-site-i18n-en="Password" data-site-i18n-fr="Mot de passe">Mot de passe</label>
-            <input id="password" name="password" type="password" required autocomplete="current-password">
+            <div class="field">
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" required autocomplete="username">
+            </div>
+            <div class="field">
+                <label for="password" data-site-i18n-en="Password" data-site-i18n-fr="Mot de passe">Mot de passe</label>
+                <input id="password" name="password" type="password" required autocomplete="current-password">
+            </div>
             <a class="account-form-link" href="forgot-password.php">
                 <i class="fa-solid fa-key" aria-hidden="true"></i>
                 <span data-site-i18n-en="Forgot password?" data-site-i18n-fr="Mot de passe oublié&nbsp;?">Mot de passe oublié&nbsp;?</span>

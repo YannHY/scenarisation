@@ -45,7 +45,7 @@ app_start_session();
         <p>Le nom d’utilisateur, l’adresse électronique et le mot de passe sont obligatoires pour créer un compte. L’application reste consultable sans compte, mais la sauvegarde sur le serveur, la publication et certaines fonctions de gestion ne sont alors pas disponibles.</p>
 
         <h3>Vérification anti-robot</h3>
-        <p>Les formulaires d’inscription, de création du premier compte administrateur et de renvoi d’un email de vérification utilisent Cloudflare Turnstile pour limiter les abus automatisés. Cloudflare reçoit les informations techniques nécessaires à cette vérification, notamment l’adresse IP et des informations relatives au navigateur et à l’appareil. Le serveur vérifie ensuite un jeton temporaire auprès de Cloudflare avant d’autoriser la demande. L’application ne transmet ni le mot de passe, ni l’adresse email, ni le contenu des scénarios à cette API de vérification et ne conserve pas les jetons Turnstile dans sa base de données.</p>
+        <p>Les formulaires d’inscription et de renvoi d’un email de vérification utilisent Cloudflare Turnstile pour limiter les abus automatisés. Cloudflare reçoit les informations techniques nécessaires à cette vérification, notamment l’adresse IP et des informations relatives au navigateur et à l’appareil. Le serveur vérifie ensuite un jeton temporaire auprès de Cloudflare avant d’autoriser la demande. L’application ne transmet ni le mot de passe, ni l’adresse email, ni le contenu des scénarios à cette API de vérification et ne conserve pas les jetons Turnstile dans sa base de données.</p>
         <p>Ce traitement répond à l’intérêt légitime de l’éditeur de sécuriser les comptes et de prévenir les envois abusifs. Pour les modalités du traitement effectué par Cloudflare, consultez sa <a href="https://www.cloudflare.com/fr-fr/privacypolicy/" rel="noopener noreferrer">politique de confidentialité</a>.</p>
 
         <h3>Scénarios pédagogiques enregistrés</h3>
@@ -61,7 +61,7 @@ app_start_session();
         <p>La publication est facultative et résulte de l’action de l’utilisateur. Un scénario peut être retiré du catalogue ou dépublié depuis le compte. Des copies déjà téléchargées ou réutilisées par des tiers peuvent toutefois subsister.</p>
 
         <h3>Jetons de ligne de commande</h3>
-        <p>Si vous créez un jeton pour le CLI <code>learning</code>, le serveur conserve son nom, son empreinte cryptographique, un préfixe permettant de l’identifier, sa date de création, sa dernière date d’utilisation et, le cas échéant, sa date de révocation. Le jeton complet n’est affiché qu’au moment de sa création.</p>
+        <p>Si vous créez un jeton pour le CLI <code>scenarisation</code>, le serveur conserve son nom, son empreinte cryptographique, un préfixe permettant de l’identifier, sa date de création, sa dernière date d’utilisation et, le cas échéant, sa date de révocation. Le jeton complet n’est affiché qu’au moment de sa création.</p>
 
         <h3>Retours sur l’application</h3>
         <p>Le bouton d’avis permet d’enregistrer une appréciation, un commentaire facultatif, la page consultée, la langue de l’interface et la date de l’envoi. Le retour n’est pas rattaché au compte de l’utilisateur. Il sert exclusivement à comprendre la satisfaction générale et à améliorer Scénarisation.</p>
@@ -73,7 +73,7 @@ app_start_session();
         <h2>Cookies et traceurs</h2>
         <p>Un cookie de session est utilisé pour maintenir la connexion, protéger l’accès au compte, sécuriser les requêtes et délivrer le jeton temporaire du formulaire d’avis. Il est configuré pour ne pas être accessible au JavaScript, n’est envoyé que sur une connexion sécurisée lorsque HTTPS est actif, et expire à la fermeture du navigateur. Il est strictement nécessaire au service.</p>
         <p>Les éléments enregistrés dans le stockage local servent aux préférences d’interface, à la sauvegarde locale demandée par l’utilisateur et au fonctionnement de l’éditeur. Ils ne sont pas utilisés pour établir un profil publicitaire.</p>
-        <p><strong>Scénarisation n’intègre, à la date de cette politique, aucun outil de mesure d’audience, réseau publicitaire ou traceur de profilage.</strong></p>
+        <p><strong>Scénarisation n’intègre aucun outil de mesure d’audience, réseau publicitaire ou traceur de profilage.</strong></p>
 
         <h2>Services externes et transferts</h2>
         <p>Le site charge certaines ressources techniques depuis des services externes&nbsp;:</p>

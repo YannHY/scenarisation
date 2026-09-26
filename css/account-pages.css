@@ -1042,8 +1042,8 @@ html body.login-page .login-intro h2 {
   grid-template-columns: 1.1fr 0.8fr 1.35fr 0.7fr 1fr 0.9fr;
   gap: 7px;
   width: min(100%, 430px);
-  height: 6px;
-  margin-top: 32px;
+  height: 5px;
+  margin-top: 28px;
 }
 .login-learning-rhythm span {
   border-radius: 999px;
@@ -1054,6 +1054,28 @@ html body.login-page .login-intro h2 {
 .login-learning-rhythm span:nth-child(4) { background: var(--produce); }
 .login-learning-rhythm span:nth-child(5) { background: var(--discuss); }
 .login-learning-rhythm span:nth-child(6) { background: var(--collaborate); }
+.login-beta-note {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 20px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.45;
+}
+.login-beta-note i {
+  display: inline-grid;
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  color: #111;
+  font-size: 13px;
+}
+.login-beta-note-mobile {
+  display: none;
+}
 body.login-page .site-footer-copy-stack {
   align-items: center;
   text-align: center;
@@ -1154,6 +1176,9 @@ h1, h2 {
   flex-direction: column;
   gap: 18px;
 }
+.login-layout .account-form {
+  gap: 16px;
+}
 .field {
   display: flex;
   flex-direction: column;
@@ -1223,6 +1248,9 @@ h1, h2 {
   cursor: pointer;
   box-shadow: var(--shadow-btn-primary);
 }
+.login-layout .account-form button {
+  margin-top: 2px;
+}
 .account-form button:hover,
 .account-form button:focus-visible {
   background: var(--action-primary-hover);
@@ -1290,7 +1318,7 @@ h1, h2 {
 .account-signup-action p {
   margin: 0 0 12px;
   color: var(--text);
-  font-size: 18px;
+  font-size: 16px;
   line-height: 1.4;
   font-weight: 700;
 }
@@ -1665,6 +1693,14 @@ th {
 
 [data-theme="dark"] .login-benefits i {
   background: #111;
+  color: #fff;
+}
+
+[data-theme="dark"] .login-beta-note {
+  color: #c7d2e5;
+}
+
+[data-theme="dark"] .login-beta-note i {
   color: #fff;
 }
 
@@ -2081,6 +2117,10 @@ body.profile-page .danger-panel .danger-button:focus-visible {
   }
   .login-intro {
     display: none;
+  }
+  .login-beta-note-mobile {
+    display: flex;
+    margin: -6px 0 22px;
   }
 }
 

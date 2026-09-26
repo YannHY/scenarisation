@@ -29,7 +29,7 @@ $publicUrl = app_base_url();
         <p class="legal-updated"><strong>Dernière mise à jour&nbsp;: <time datetime="2026-09-26">26 septembre 2026</time></strong></p>
 
         <h2>Édition et publication</h2>
-        <p>Le site <strong>Scénarisation</strong>, accessible à l’adresse <a href="<?= h($publicUrl) ?>"><?= h($publicUrl) ?></a>, est un service non commercial créé et édité par <strong>Yann Houry</strong>, avec la contribution de <strong>François Jourde</strong>.</p>
+        <p>Le site <strong>Scénarisation</strong>, accessible à l’adresse <a href="<?= h($publicUrl) ?>"><?= h($publicUrl) ?></a>, est un service non commercial créé et édité par <strong>Yann Houry</strong> et <strong>François Jourde</strong>.</p>
         <p>Le directeur de la publication est Yann Houry.</p>
         <p>Pour contacter l’éditeur, signaler un contenu ou exercer un droit de réponse, utilisez la <a href="https://www.ralentirtravaux.com/contact/contact.php" rel="noopener noreferrer">page de contact de Ralentir Travaux</a>.</p>
 
