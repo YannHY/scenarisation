@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any
 
 
-VERSION = "0.8.1"
+VERSION = "0.8.2"
 DEFAULT_DAY_HOURS = 7
 AIAS_VERSION = "2.1"
 DEFAULT_SITE = "https://www.ralentirtravaux.com/flo/learning-designer"
@@ -40,19 +40,47 @@ LEARNING_TYPE_COLORS = (
 
 BANNER_WORD = "SCÉNARISATION"
 BANNER_GLYPHS = {
-    "A": ("01110", "10001", "10001", "11111", "10001", "10001", "10001"),
-    "C": ("01111", "10000", "10000", "10000", "10000", "10000", "01111"),
-    "É": ("11111", "10000", "10000", "11110", "10000", "10000", "11111"),
-    "I": ("11111", "00100", "00100", "00100", "00100", "00100", "11111"),
-    "N": ("10001", "11001", "11001", "10101", "10011", "10011", "10001"),
-    "O": ("01110", "10001", "10001", "10001", "10001", "10001", "01110"),
-    "R": ("11110", "10001", "10001", "11110", "10100", "10010", "10001"),
-    "S": ("01111", "10000", "10000", "01110", "00001", "00001", "11110"),
-    "T": ("11111", "00100", "00100", "00100", "00100", "00100", "00100"),
+    "A": (
+        "000111000", "001000100", "010000010", "100000001", "100000001", "111111111",
+        "100000001", "100000001", "100000001", "100000001", "100000001",
+    ),
+    "C": (
+        "001111110", "010000001", "100000000", "100000000", "100000000", "100000000",
+        "100000000", "100000000", "100000000", "010000001", "001111110",
+    ),
+    "É": (
+        "111111111", "100000000", "100000000", "100000000", "111111100", "100000000",
+        "100000000", "100000000", "100000000", "100000000", "111111111",
+    ),
+    "I": (
+        "111111111", "000010000", "000010000", "000010000", "000010000", "000010000",
+        "000010000", "000010000", "000010000", "000010000", "111111111",
+    ),
+    "N": (
+        "100000001", "110000001", "101000001", "100100001", "100100001", "100010001",
+        "100001001", "100001001", "100000101", "100000011", "100000001",
+    ),
+    "O": (
+        "001111100", "010000010", "100000001", "100000001", "100000001", "100000001",
+        "100000001", "100000001", "100000001", "010000010", "001111100",
+    ),
+    "R": (
+        "111111100", "100000010", "100000001", "100000001", "100000010", "111111100",
+        "100100000", "100010000", "100001000", "100000100", "100000010",
+    ),
+    "S": (
+        "001111110", "010000001", "100000000", "100000000", "010000000", "001111100",
+        "000000010", "000000001", "000000001", "100000010", "011111100",
+    ),
+    "T": (
+        "111111111", "000010000", "000010000", "000010000", "000010000", "000010000",
+        "000010000", "000010000", "000010000", "000010000", "000010000",
+    ),
 }
 BANNER_ACCENTS = {
-    "É": ("00010", "00100"),
+    "É": ("000001000", "000010000"),
 }
+BANNER_QUADRANTS = (" ", "▘", "▝", "▀", "▖", "▌", "▞", "▛", "▗", "▚", "▐", "▜", "▄", "▙", "▟", "█")
 BANNER_DETAILS = (
     ("CLI", lambda: f"Scénarisation {VERSION}"),
     ("Développement", lambda: "Yann Houry"),
@@ -341,30 +369,31 @@ def die(message: str, code: int = 1) -> None:
     raise SystemExit(code)
 
 
-def banner_lines(use_color: bool, compact: bool = False) -> list[str]:
-    """Return a detailed square-pixel banner in the six learning-type colours."""
+def banner_lines(use_color: bool) -> list[str]:
+    """Render 9×13 pixel letters in compact 2×2 terminal quadrants."""
     lines = []
-    lit_pixel = "▪" if compact else "■"
-    cell_gap = "" if compact else " "
-    letter_gap = " "
-    for row in range(-2, 7):
+    blank_accent = ("000000000", "000000000")
+    pixel_height = len(next(iter(BANNER_GLYPHS.values()))) + len(blank_accent)
+    for row in range(0, pixel_height, 2):
         parts = []
         for index, letter in enumerate(BANNER_WORD):
-            if row < 0:
-                pixels = BANNER_ACCENTS.get(letter, ("00000", "00000"))[row + 2]
-            else:
-                pixels = BANNER_GLYPHS[letter][row]
+            pixels = BANNER_ACCENTS.get(letter, blank_accent) + BANNER_GLYPHS[letter]
+            top = pixels[row].ljust(10, "0")
+            bottom = (pixels[row + 1] if row + 1 < len(pixels) else "000000000").ljust(10, "0")
             _, (red, green, blue) = LEARNING_TYPE_COLORS[index % len(LEARNING_TYPE_COLORS)]
             colour = f"\033[1;38;2;{red};{green};{blue}m"
             cells = []
-            for pixel in pixels:
-                square = lit_pixel if pixel == "1" else " "
-                if use_color and pixel == "1":
-                    cells.append(f"{colour}{square}\033[0m{cell_gap}")
-                else:
-                    cells.append(f"{square}{cell_gap}")
+            for column in range(0, len(top), 2):
+                mask = (
+                    (top[column] == "1")
+                    | ((top[column + 1] == "1") << 1)
+                    | ((bottom[column] == "1") << 2)
+                    | ((bottom[column + 1] == "1") << 3)
+                )
+                block = BANNER_QUADRANTS[mask]
+                cells.append(f"{colour}{block}\033[0m" if use_color and mask else block)
             parts.append("".join(cells))
-        lines.append(letter_gap.join(parts).rstrip())
+        lines.append(" ".join(parts).rstrip())
     return lines
 
 
@@ -392,8 +421,7 @@ def print_banner() -> None:
     ):
         return
     use_color = "NO_COLOR" not in os.environ and os.environ.get("TERM", "") != "dumb"
-    compact = shutil.get_terminal_size(fallback=(80, 24)).columns < 142
-    print("\n".join(banner_lines(use_color, compact)), file=sys.stderr)
+    print("\n".join(banner_lines(use_color)), file=sys.stderr)
     print(file=sys.stderr)
     print("\n".join(banner_detail_lines(use_color)), file=sys.stderr)
     print(file=sys.stderr)
