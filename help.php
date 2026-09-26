@@ -820,24 +820,19 @@ Objectifs généraux de la formation.
                 <h2>Créer avec l’IA</h2>
                 <p>Choisissez entre un prompt prêt à copier, une skill réutilisable ou le CLI selon votre besoin.</p>
 
-                <h3 id="ia-guide">Guide</h3>
-                <div class="help-grid single">
-                    <div class="help-card">
-                        <strong>L’IA crée et publie</strong>
-                        <span>Copiez le prompt ci-dessous, répondez aux questions et validez les propositions de l’IA.</span>
-                        <span>Ne donnez aucun jeton pendant la création. Une fois le scénario validé, demandez explicitement sa publication : l’IA lance alors <code>scenarisation login</code> et vous demande le jeton créé dans votre profil. Donnez-le uniquement à ce moment-là.</span>
-                    </div>
-                </div>
+                <h3 id="ia-guide">Utiliser un prompt</h3>
+                <h4>L’IA crée et publie</h4>
+                <p>Pour un usage ponctuel, copiez le prompt ci-dessous, répondez aux questions et validez les propositions de l’IA. Celle-ci sélectionne un CLI compatible et utilise une copie locale si son environnement est isolé.</p>
+                <p>Ne donnez aucun jeton pendant la création. Une fois le scénario validé, demandez explicitement sa publication : l’IA lance alors <code>scenarisation login</code> et vous demande le jeton créé dans votre profil. Donnez-le uniquement à ce moment-là.</p>
 
                 <h4>Prompt à donner à Claude Code ou Codex</h4>
-                <p>Ce prompt suffit pour un usage ponctuel. L’IA sélectionne un CLI compatible et utilise une copie locale si son environnement est isolé.</p>
                 <div class="help-prompt-wrap">
                     <button class="help-copy-btn" type="button" aria-label="Copier le prompt" title="Copier"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
                     <textarea class="help-prompt" data-help-prompt="ai" readonly><?= h($aiPrompt) ?></textarea>
                 </div>
 
                 <h3 id="skill-claude">Utiliser la skill</h3>
-                <p>La skill est adaptée à un usage régulier dans Claude Code ou Codex. Elle pose les questions pédagogiques, crée le fichier <code>design.json</code> avec le CLI et le valide.</p>
+                <p>Pour un usage régulier dans Claude Code ou Codex, la skill charge automatiquement le parcours de conception et les catalogues du CLI, sans que vous ayez à recopier le prompt.</p>
 
                 <h4>Installer ou actualiser</h4>
                 <p>Depuis la racine de votre projet, cette commande installe ou actualise la skill pour Claude Code et Codex ainsi que le CLI, puis vérifie leur compatibilité.</p>
@@ -846,10 +841,6 @@ Objectifs généraux de la formation.
                     <pre class="help-code">curl -fsSL https://raw.githubusercontent.com/YannHY/scenarisation/main/install-skill.sh | sh</pre>
                 </div>
                 <p>Relancez l’outil si nécessaire. Dans Claude Code, utilisez <code>/scenarisation</code>. Dans Codex, utilisez <code>$scenarisation</code>.</p>
-                <div class="help-callout warning">
-                    <i class="fa-solid fa-key" aria-hidden="true"></i>
-                    <p><strong>Quand donner le jeton avec la skill ?</strong> Aucun jeton n’est nécessaire pour installer la skill, créer le scénario ou le valider. Attendez que le fichier soit validé, demandez alors explicitement à l’agent de le publier et donnez le jeton uniquement lorsqu’il lance <code>scenarisation login</code> et le réclame.</p>
-                </div>
 
                 <h3 id="cli-detaille">Utiliser le CLI</h3>
                 <p>Le CLI permet de créer, valider et publier un scénario directement depuis votre terminal.</p>
