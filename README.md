@@ -75,7 +75,9 @@ Quelques commandes utiles :
 scenarisation list school-systems
 scenarisation list school-levels --system france
 scenarisation list activity-options
-scenarisation init mon-scenario.json --school-system france --school-level quatrieme
+scenarisation list competency-frameworks
+scenarisation list competencies --framework crcn --search sources --details
+scenarisation init mon-scenario.json --school-system france --school-level quatrieme --competency-framework crcn
 scenarisation add-moment mon-scenario.json --title "Découvrir"
 scenarisation validate mon-scenario.json --strict-pedagogy
 scenarisation handoff mon-scenario.json
@@ -83,7 +85,7 @@ scenarisation login
 scenarisation publish mon-scenario.json
 ```
 
-Le CLI enregistre des identifiants stables dans `schoolSystem` et `schoolLevel`, accepte aussi les principaux libellés et alias français ou anglais, et refuse une association incohérente entre un système et un niveau. Pour chaque activité créée, il exige un choix explicite de groupe, d’enseignement, de rythme, de mode de formation, d’évaluation et de niveau AIAS.
+Le CLI enregistre des identifiants stables dans `schoolSystem` et `schoolLevel`, accepte aussi les principaux libellés et alias français ou anglais, et refuse une association incohérente entre un système et un niveau. Il permet également de déclarer un ou plusieurs référentiels de compétences, d’en rechercher les libellés et de valider les compétences affectées aux activités. Les anciens codes `A`, `P` et `C` restent disponibles comme alias du référentiel Florimont. Pour chaque activité créée, le CLI exige un choix explicite de groupe, d’enseignement, de rythme, de mode de formation, d’évaluation et de niveau AIAS.
 
 Les instructions d'installation et d'utilisation de la Skill sont détaillées dans la section [Créer avec l'IA](./help.php#cli) de l'aide.
 
@@ -134,6 +136,7 @@ Conservez les secrets dans un fichier local non versionné, par exemple `learnin
 - [skills/scenarisation](./skills/scenarisation) : Skill et configuration de l'agent ;
 - [skills/scenarisation-site](./skills/scenarisation-site) : Skill de développement et de maintenance du site ;
 - [bin/scenarisation](./bin/scenarisation) : CLI de création, de validation et de publication ;
+- [data/cli-competencies.json](./data/cli-competencies.json) : catalogue compact installé avec le CLI, généré depuis les référentiels de l’éditeur ;
 - [lib/bootstrap.php](./lib/bootstrap.php) : configuration, base de données et fonctions PHP communes.
 
 ### Organisation du JavaScript du concepteur
@@ -160,9 +163,12 @@ Développé par Yann Houry sur la base du travail de François Jourde et inspir�
 Les tests utilisent des données isolées ; ils ne modifient pas la base du site :
 
 ```bash
+node scripts/build-cli-competency-catalog.cjs
 node --test tests/*.test.cjs
 php tests/server-state.test.php
 ```
+
+Régénérez `data/cli-competencies.json` avec la première commande après toute modification des référentiels de l’éditeur. Un test vérifie que les identifiants et les libellés restent synchronisés.
 
 Le dossier `tests/` reste versionné mais n’est pas nécessaire sur le serveur web.
 

@@ -45,8 +45,10 @@ fi
 
 if [ -n "$SOURCE_DIR" ]; then
   mkdir -p "$TMP_DIR/bin"
+  mkdir -p "$TMP_DIR/data"
   cp "$SOURCE_DIR/install.sh" "$TMP_DIR/install.sh"
   cp "$SOURCE_DIR/bin/scenarisation" "$TMP_DIR/bin/scenarisation"
+  cp "$SOURCE_DIR/data/cli-competencies.json" "$TMP_DIR/data/cli-competencies.json"
 else
   download "https://raw.githubusercontent.com/$REPO/$REF/install.sh" "$TMP_DIR/install.sh"
 fi
@@ -73,8 +75,11 @@ fi
 
 if ! "$SCENARISATION_BIN" list school-systems >/dev/null 2>&1 \
   || ! "$SCENARISATION_BIN" list activity-options >/dev/null 2>&1 \
+  || ! "$SCENARISATION_BIN" list competency-frameworks >/dev/null 2>&1 \
+  || ! "$SCENARISATION_BIN" list competencies --framework crcn --search sources >/dev/null 2>&1 \
   || ! "$SCENARISATION_BIN" init --help 2>&1 | grep -q -- "--school-system" \
   || ! "$SCENARISATION_BIN" init --help 2>&1 | grep -q -- "--school-level" \
+  || ! "$SCENARISATION_BIN" init --help 2>&1 | grep -q -- "--competency-framework" \
   || ! "$SCENARISATION_BIN" add-activity --help 2>&1 | grep -q -- "--group" \
   || ! "$SCENARISATION_BIN" add-activity --help 2>&1 | grep -q -- "--teaching" \
   || ! "$SCENARISATION_BIN" add-activity --help 2>&1 | grep -q -- "--pacing" \

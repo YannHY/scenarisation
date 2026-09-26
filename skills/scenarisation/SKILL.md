@@ -11,7 +11,7 @@ Help an educator create a complete, structured, importable Scenarisation `design
 
 ## CLI Setup
 
-Select the CLI by capability, not merely by whether a `scenarisation` command exists. The selected CLI must support the school-system catalog, the two `init` options, and explicit pedagogical choices for every activity.
+Select the CLI by capability, not merely by whether a `scenarisation` command exists. The selected CLI must support school systems, competency frameworks and labels, and explicit pedagogical choices for every activity.
 
 First, when working inside a Scenarisation repository that contains `./bin/scenarisation`, probe that repository CLI:
 
@@ -19,11 +19,13 @@ First, when working inside a Scenarisation repository that contains `./bin/scena
 ./bin/scenarisation --version
 ./bin/scenarisation list school-systems
 ./bin/scenarisation list activity-options
+./bin/scenarisation list competency-frameworks
+./bin/scenarisation list competencies --framework crcn --search sources
 ./bin/scenarisation init --help
 ./bin/scenarisation add-activity --help
 ```
 
-Use it as `SCENARISATION=./bin/scenarisation` when both catalog commands succeed, the `init` help includes `--school-system` and `--school-level`, and the activity help includes `--group`, `--teaching`, `--pacing`, `--mode`, `--evaluation`, and `--aias`. Prefer this repository CLI over a global installation because it matches the current project.
+Use it as `SCENARISATION=./bin/scenarisation` when all catalog commands succeed, the `init` help includes `--school-system`, `--school-level`, and `--competency-framework`, and the activity help includes `--group`, `--teaching`, `--pacing`, `--mode`, `--evaluation`, and `--aias`. Prefer this repository CLI over a global installation because it matches the current project.
 
 When no compatible repository CLI is available, probe the global command in the same way:
 
@@ -31,6 +33,8 @@ When no compatible repository CLI is available, probe the global command in the 
 scenarisation --version
 scenarisation list school-systems
 scenarisation list activity-options
+scenarisation list competency-frameworks
+scenarisation list competencies --framework crcn --search sources
 scenarisation init --help
 scenarisation add-activity --help
 ```
@@ -46,10 +50,13 @@ If `.tools/bin/scenarisation` already exists, apply the same capability check to
 ```bash
 mkdir -p .tools/bin
 curl -fsSL https://raw.githubusercontent.com/YannHY/scenarisation/main/bin/scenarisation -o .tools/bin/scenarisation
+curl -fsSL https://raw.githubusercontent.com/YannHY/scenarisation/main/data/cli-competencies.json -o .tools/bin/scenarisation-competencies.json
 chmod +x .tools/bin/scenarisation
 ./.tools/bin/scenarisation --version
 ./.tools/bin/scenarisation list school-systems
 ./.tools/bin/scenarisation list activity-options
+./.tools/bin/scenarisation list competency-frameworks
+./.tools/bin/scenarisation list competencies --framework crcn --search sources
 ./.tools/bin/scenarisation init --help
 ./.tools/bin/scenarisation add-activity --help
 ```
@@ -58,9 +65,10 @@ If `raw.githubusercontent.com` is blocked, use the environment’s web fetch/bro
 
 ```text
 https://github.com/YannHY/scenarisation/blob/main/bin/scenarisation
+https://github.com/YannHY/scenarisation/blob/main/data/cli-competencies.json
 ```
 
-Write the retrieved file to `.tools/bin/scenarisation`, make it executable, and use `./.tools/bin/scenarisation` for all later commands.
+Write the retrieved CLI and catalog files to `.tools/bin/scenarisation` and `.tools/bin/scenarisation-competencies.json`, make the CLI executable, and use `./.tools/bin/scenarisation` for all later commands.
 
 Once a compatible `.tools/bin/scenarisation` has been created, do not depend on the network again. If none of the candidates passes the capability check and a current local copy cannot be obtained, stop with an actionable explanation rather than generating an incomplete design.
 
@@ -79,16 +87,26 @@ Essential questions:
 - expected learning outcomes: what learners should be able to do
 - constraints: time, tools, assessment, institution, classroom setup
 - desired level of detail
+- whether competencies should be linked and, if so, which framework or frameworks to use
 
 Complementary questions to ask only when useful:
 
 - Bloom level for each outcome if known
-- digital competencies to mobilize, if relevant
+- competencies to mobilize, if the user already knows them
 - imposed supports, works, resources, or tools
 
 Distinguish teaching objectives from learning outcomes. If the user gives only teaching objectives, transform them into observable learning outcomes with action verbs and Bloom levels.
 
 If information is missing, make reasonable assumptions instead of blocking, unless the assumption would be risky.
+
+Competency-framework handling:
+
+- Ask about competency frameworks only when competencies are relevant to the design.
+- Never silently assume Florimont merely because the legacy A/P/C aliases exist.
+- Let the user choose more than one framework when the design genuinely needs them.
+- If the user does not know which framework to use, propose a short contextual choice: CRCN or Pix for France, Pix IA for AI literacy, DigComp for a European digital-competence frame, GreenComp for sustainability, PER romand for French-speaking Switzerland, Socle commun for the French common core, or Florimont for that institution's internal progression.
+- Inspect the selected framework with `list competencies --framework ID`; use `--search TERM` to narrow a large catalog and `--details` when descriptions are needed.
+- Present the relevant labels before assigning codes. Do not guess a competency from an opaque code.
 
 School-system handling:
 
@@ -112,7 +130,7 @@ Before running the complete creation commands, briefly restate:
 - planned number of moments
 - teaching objectives
 - proposed Bloom outcomes
-- main digital competencies, if any
+- selected competency framework or frameworks and proposed competencies, if any
 
 ## Create the Design
 
@@ -126,7 +144,8 @@ $SCENARISATION add-activity --help
 $SCENARISATION outcome --help
 $SCENARISATION list types
 $SCENARISATION list bloom
-$SCENARISATION list competencies
+$SCENARISATION list competency-frameworks
+$SCENARISATION list competencies --framework crcn --search "sources" --details
 $SCENARISATION list activity-options
 $SCENARISATION list school-systems
 $SCENARISATION list school-levels --system france
@@ -135,7 +154,7 @@ $SCENARISATION list school-levels --system france
 Create the file:
 
 ```bash
-$SCENARISATION init design.json --title "TITLE" --lang fr --duration 90 --mode onsite --school-system france --school-level quatrieme --group-size 24 --description "DESCRIPTION" --objectives "TEACHING OBJECTIVES"
+$SCENARISATION init design.json --title "TITLE" --lang fr --duration 90 --mode onsite --school-system france --school-level quatrieme --competency-framework crcn --group-size 24 --description "DESCRIPTION" --objectives "TEACHING OBJECTIVES"
 ```
 
 Add each moment:
@@ -147,7 +166,7 @@ $SCENARISATION add-moment design.json --title "MOMENT TITLE" --objectives "MOMEN
 Add each activity:
 
 ```bash
-$SCENARISATION add-activity design.json --moment 1 --type investigate --duration 15 --group subgroups --teaching guided --pacing sync --mode onsite --evaluation formative --aias 3 --competencies A1,P6 --description "ACTIVITY DESCRIPTION" --instructions "INSTRUCTIONS FOR STUDENTS"
+$SCENARISATION add-activity design.json --moment 1 --type investigate --duration 15 --group subgroups --teaching guided --pacing sync --mode onsite --evaluation formative --aias 3 --competencies 1.1.N2.2 --description "ACTIVITY DESCRIPTION" --instructions "INSTRUCTIONS FOR STUDENTS"
 ```
 
 ## Make Pedagogical Choices for Every Activity
@@ -169,6 +188,7 @@ Use only CLI-controlled values for controlled fields. Safe values:
 
 - `school-system`: use an id returned by `list school-systems`
 - `school-level`: use an id returned by `list school-levels --system SYSTEM_ID`
+- `competency-framework`: use an id returned by `list competency-frameworks`; the option is repeatable
 - `type`: `read`, `investigate`, `practice`, `produce`, `discuss`, `collaborate`
 - `group`: `whole`, `subgroups`, `individual`
 - `teaching`: `directed`, `guided`, `supported`, `independent`
@@ -176,7 +196,7 @@ Use only CLI-controlled values for controlled fields. Safe values:
 - `mode`: `onsite`, `location-based`, `online`, `blended`, `other`
 - `evaluation`: `none`, `diagnostic`, `formative`, `summative`, `certificative`
 - `aias`: `1`, `2`, `3`, `4`, `5`, or `not-applicable`; never use `undecided` in a generated design
-- `competencies`: short codes such as `A1`, `P6`, `C14`, comma-separated
+- `competencies`: codes from the declared framework, framework-qualified codes such as `crcn:1.1.N2.2`, or full ids such as `competency:crcn:1.1.N2.2`; legacy `A1`, `P6`, and `C14` aliases are Florimont-only
 
 Never put long natural-language text in controlled fields such as `--school-system`, `--school-level`, `--group`, `--teaching`, `--evaluation`, `--type`, or `--pacing`.
 
@@ -217,7 +237,7 @@ The design should include:
 - an explicit, coherent teaching mode, pacing, delivery mode, evaluation mode, and AIAS choice for every activity
 - diagnostic, formative, or summative assessment modes where relevant
 - Bloom outcomes connected to the activities
-- digital competencies where relevant
+- competencies from the user-selected framework where relevant
 - descriptions detailed enough for a teacher to use
 
 If the user asks to integrate digital work, propose pedagogically useful uses such as guided research, source checking, collaborative mapping, digital writing, file organization, revision, correction, controlled production, or controlled sharing.
@@ -247,7 +267,7 @@ At the end, report:
 - number of activities
 - teaching objectives used
 - Bloom outcomes created
-- digital competencies used
+- competency frameworks and competencies used, with labels
 - duration distribution
 - distribution of group, teaching, pacing, delivery, evaluation, and AIAS choices
 - assumptions made

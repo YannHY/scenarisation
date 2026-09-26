@@ -21,12 +21,15 @@ from pathlib import Path
 from typing import Any
 
 
-VERSION = "0.8.5"
+VERSION = "0.9.0"
 DEFAULT_DAY_HOURS = 7
 AIAS_VERSION = "2.1"
 DEFAULT_SITE = "https://www.ralentirtravaux.com/flo/learning-designer"
 INSTALL_URL = "https://raw.githubusercontent.com/YannHY/scenarisation/main/install.sh"
 CONFIG_PATH = Path(os.environ.get("SCENARISATION_CONFIG") or os.environ.get("LEARNING_CONFIG", "~/.learning-designer/config.json")).expanduser()
+COMPETENCY_CATALOG_FILENAME = "scenarisation-competencies.json"
+COMPETENCY_CATALOG_ENV = "SCENARISATION_COMPETENCY_CATALOG"
+_COMPETENCY_CATALOG_CACHE: dict[str, Any] | None = None
 
 # Keep these six colours in sync with --read…--collaborate in css/interface.css.
 LEARNING_TYPE_COLORS = (
@@ -522,6 +525,145 @@ def school_level_display(level: str, system: str, lang: str = "fr") -> str:
     return f"{level} ({label_en if lang == 'en' else label_fr})"
 
 
+def competency_catalog_path() -> Path:
+    configured = os.environ.get(COMPETENCY_CATALOG_ENV, "").strip()
+    candidates = []
+    if configured:
+        candidates.append(Path(configured).expanduser())
+    executable = Path(__file__).resolve()
+    candidates.extend(
+        [
+            executable.with_name(COMPETENCY_CATALOG_FILENAME),
+            executable.parent.parent / "data" / "cli-competencies.json",
+        ]
+    )
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate
+    searched = ", ".join(str(candidate) for candidate in candidates)
+    die(
+        "digital competency catalog not found. Reinstall or upgrade Scenarisation, "
+        f"or set {COMPETENCY_CATALOG_ENV}. Searched: {searched}"
+    )
+    return candidates[0]
+
+
+def load_competency_catalog() -> dict[str, Any]:
+    global _COMPETENCY_CATALOG_CACHE
+    if _COMPETENCY_CATALOG_CACHE is not None:
+        return _COMPETENCY_CATALOG_CACHE
+    path = competency_catalog_path()
+    try:
+        catalog = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        die(f"invalid digital competency catalog at {path}: {exc}")
+    if (
+        not isinstance(catalog, dict)
+        or not isinstance(catalog.get("frameworks"), list)
+        or not isinstance(catalog.get("competencies"), list)
+    ):
+        die(f"invalid digital competency catalog structure at {path}")
+    _COMPETENCY_CATALOG_CACHE = catalog
+    return catalog
+
+
+def lookup_competency_framework(value: str | None, catalog: dict[str, Any] | None = None) -> str:
+    token = slug(value or "")
+    if not token:
+        return ""
+    catalog = catalog or load_competency_catalog()
+    aliases = {"per": "per-romand", "digcomp3": "digcomp", "digcomp-3": "digcomp"}
+    token = aliases.get(token, token)
+    for framework in catalog["frameworks"]:
+        candidates = (framework.get("id", ""), framework.get("labelFr", ""), framework.get("labelEn", ""))
+        if token in {slug(str(candidate)) for candidate in candidates}:
+            return str(framework["id"])
+    return ""
+
+
+def resolve_competency_frameworks(values: list[str]) -> list[str]:
+    catalog = load_competency_catalog()
+    resolved = []
+    for raw in values:
+        for value in raw.split(","):
+            if not value.strip():
+                continue
+            framework_id = lookup_competency_framework(value, catalog)
+            if not framework_id:
+                die(
+                    f"invalid competency framework: {value}. "
+                    "Run `scenarisation list competency-frameworks`."
+                )
+            if framework_id not in resolved:
+                resolved.append(framework_id)
+    return resolved
+
+
+def competency_by_id(catalog: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    return {str(item.get("id", "")): item for item in catalog["competencies"] if item.get("id")}
+
+
+def competency_matches(reference: str, frameworks: list[str], catalog: dict[str, Any]) -> list[dict[str, Any]]:
+    token = reference.strip()
+    if not token:
+        return []
+    by_id = competency_by_id(catalog)
+    if token in by_id:
+        return [by_id[token]]
+    folded_id = token.casefold()
+    for item_id, item in by_id.items():
+        if item_id.casefold() == folded_id:
+            return [item]
+
+    qualified_framework = ""
+    local_reference = token
+    if ":" in token:
+        prefix, remainder = token.split(":", 1)
+        qualified_framework = lookup_competency_framework(prefix, catalog)
+        if qualified_framework:
+            local_reference = remainder.strip()
+
+    legacy = re.fullmatch(r"([AaPpCc])\s*-?\s*(\d{1,2})", local_reference)
+    if legacy and not qualified_framework:
+        level = {"a": "acquerir", "p": "approfondir", "c": "creer"}[legacy.group(1).lower()]
+        item = by_id.get(f"competency:{level}:{int(legacy.group(2))}")
+        return [item] if item else []
+
+    allowed_frameworks = [qualified_framework] if qualified_framework else frameworks
+    if not allowed_frameworks:
+        return []
+    folded = local_reference.casefold()
+    normalized = slug(local_reference)
+    matches = []
+    for item in catalog["competencies"]:
+        if item.get("frameworkId") not in allowed_frameworks:
+            continue
+        references = [item.get("code", ""), *(item.get("aliases") or [])]
+        if any(str(value).casefold() == folded or slug(str(value)) == normalized for value in references if value):
+            matches.append(item)
+    return matches
+
+
+def resolve_competency(reference: str, frameworks: list[str]) -> str:
+    catalog = load_competency_catalog()
+    matches = competency_matches(reference, frameworks, catalog)
+    if len(matches) == 1:
+        return str(matches[0]["id"])
+    if len(matches) > 1:
+        choices = ", ".join(str(item["id"]) for item in matches[:5])
+        die(f"ambiguous digital competency: {reference}. Use a framework-qualified code: {choices}")
+    if not frameworks and not reference.startswith("competency:") and ":" not in reference:
+        die(
+            f"digital competency requires a framework: {reference}. "
+            "Declare one with `init --competency-framework ID` or use a full competency id."
+        )
+    die(
+        f"unknown digital competency: {reference}. "
+        "Run `scenarisation list competencies --framework ID`."
+    )
+    return ""
+
+
 def now_id(prefix: str) -> str:
     return f"{prefix}-{int(time.time() * 1000)}"
 
@@ -642,17 +784,8 @@ def parse_links_as_markdown(raw_links: list[str]) -> str:
     return "\n".join(links)
 
 
-def competency_id(reference: str) -> str:
-    token = reference.strip()
-    if not token:
-        return ""
-    if token.startswith("competency:"):
-        return token
-    match = re.fullmatch(r"([AaPpCc])\s*-?\s*(\d{1,2})", token)
-    if match:
-        level = {"a": "acquerir", "p": "approfondir", "c": "creer"}[match.group(1).lower()]
-        return f"competency:{level}:{int(match.group(2))}"
-    return token
+def competency_id(reference: str, frameworks: list[str] | None = None) -> str:
+    return resolve_competency(reference, frameworks or [])
 
 
 def new_document(args: argparse.Namespace) -> dict[str, Any]:
@@ -661,6 +794,7 @@ def new_document(args: argparse.Namespace) -> dict[str, Any]:
     if args.school_level and not school_system:
         die("--school-level requires --school-system")
     school_level = resolve_school_level(args.school_level, school_system) if args.school_level else ""
+    competency_frameworks = resolve_competency_frameworks(args.competency_framework) if args.competency_framework else []
     return {
         "allNotesExpanded": False,
         "intentionsCollapsed": False,
@@ -675,6 +809,7 @@ def new_document(args: argparse.Namespace) -> dict[str, Any]:
             "modeDelivery": normalize(args.mode, LOCATION_ALIASES, "mode") if args.mode else "",
             "schoolSystem": school_system,
             "schoolLevel": school_level,
+            "competencyFrameworks": competency_frameworks,
             "sizeClass": args.group_size or "",
             "designers": args.designers or "",
             "trainers": args.trainers or "",
@@ -746,7 +881,17 @@ def command_add_activity(args: argparse.Namespace) -> None:
     document = load_document(path)
     session = find_session(document, args.moment)
     activity_type = normalize(args.type, ALIASES, "type")
-    tools = [competency_id(item) for raw in args.competencies for item in raw.split(",")]
+    declared_frameworks = document.get("meta", {}).get("competencyFrameworks") or []
+    if not isinstance(declared_frameworks, list):
+        die("invalid competencyFrameworks metadata: expected a list")
+    command_frameworks = resolve_competency_frameworks(args.competency_framework) if args.competency_framework else []
+    frameworks = command_frameworks or [str(value) for value in declared_frameworks]
+    if command_frameworks:
+        meta_frameworks = document.setdefault("meta", {}).setdefault("competencyFrameworks", [])
+        for framework_id in command_frameworks:
+            if framework_id not in meta_frameworks:
+                meta_frameworks.append(framework_id)
+    tools = [competency_id(item, frameworks) for raw in args.competencies for item in raw.split(",") if item.strip()]
     tools = [item for item in tools if item]
     description = (args.description or "").strip()
     markdown_links = parse_links_as_markdown(args.link)
@@ -819,6 +964,7 @@ def summarize_document(document: dict[str, Any]) -> str:
         f"- Delivery mode: {meta.get('modeDelivery') or '-'}",
         f"- School system / classification: {school_system_display(school_system_for_display, language)}",
         f"- School level: {school_level_display(school_level, school_system, language)}",
+        f"- Competency frameworks: {', '.join(meta.get('competencyFrameworks') or []) or '-'}",
         f"- Group size: {meta.get('sizeClass') or '-'}",
         f"- Designers: {meta.get('designers') or '-'}",
         f"- Trainers: {meta.get('trainers') or '-'}",
@@ -866,7 +1012,16 @@ def summarize_document(document: dict[str, Any]) -> str:
             if activity.get("instructions"):
                 lines.append(f"      Instructions for students: {activity['instructions']}")
             if activity.get("tools"):
-                lines.append(f"      Digital competencies: {', '.join(activity['tools'])}")
+                try:
+                    by_id = competency_by_id(load_competency_catalog())
+                    competency_labels = [
+                        f"{tool_id} ({by_id[tool_id].get('labelEn' if language == 'en' else 'labelFr', '')})"
+                        if tool_id in by_id else tool_id
+                        for tool_id in activity["tools"]
+                    ]
+                except SystemExit:
+                    competency_labels = activity["tools"]
+                lines.append(f"      Digital competencies: {', '.join(competency_labels)}")
     return "\n".join(lines)
 
 
@@ -879,7 +1034,7 @@ def build_codex_prompt(document: dict[str, Any], args: argparse.Namespace) -> st
             "",
             "Use the Scenarisation structure: moments, learning activity type, duration, group mode,",
             "teaching mode, pacing, delivery mode, assessment mode, AIAS, Bloom learning outcomes,",
-            "and digital competencies. Keep the design importable as Scenarisation JSON.",
+            "and competencies from the frameworks declared in the design. Keep the design importable as Scenarisation JSON.",
             "For every activity, make a deliberate and coherent pedagogical choice for group, teaching,",
             "pacing, delivery, assessment, and AIAS. Do not leave AIAS undecided. Base these choices on",
             "the objective, learner autonomy, required interactions, constraints, and evidence of learning.",
@@ -931,6 +1086,21 @@ def command_validate(args: argparse.Namespace) -> None:
         warnings.append("missing design title")
     raw_school_system = str(meta.get("schoolSystem") or "")
     raw_school_level = str(meta.get("schoolLevel") or "")
+    declared_frameworks = meta.get("competencyFrameworks") or []
+    catalog = None
+    catalog_by_id: dict[str, dict[str, Any]] = {}
+    known_frameworks: set[str] = set()
+    if declared_frameworks or any(activity.get("tools") for session in document.get("sessions", []) for activity in session.get("activities", [])):
+        catalog = load_competency_catalog()
+        catalog_by_id = competency_by_id(catalog)
+        known_frameworks = {str(framework.get("id", "")) for framework in catalog["frameworks"]}
+    if not isinstance(declared_frameworks, list):
+        warnings.append("competencyFrameworks must be a list")
+        declared_frameworks = []
+    else:
+        for framework_id in declared_frameworks:
+            if framework_id not in known_frameworks:
+                warnings.append(f"invalid competency framework: {framework_id}")
     school_system = lookup_school_system(raw_school_system)
     if raw_school_system and not school_system:
         warnings.append(f"invalid school system or classification: {raw_school_system}")
@@ -967,6 +1137,14 @@ def command_validate(args: argparse.Namespace) -> None:
                 warnings.append(f"{prefix}: invalid AIAS level")
             elif aias_status != "specified" and aias_level is not None:
                 warnings.append(f"{prefix}: AIAS level must be empty for status {aias_status}")
+            for tool_id in activity.get("tools") or []:
+                item = catalog_by_id.get(str(tool_id))
+                if not item:
+                    warnings.append(f"{prefix}: invalid digital competency: {tool_id}")
+                elif declared_frameworks and item.get("frameworkId") not in declared_frameworks:
+                    warnings.append(
+                        f"{prefix}: competency {tool_id} uses undeclared framework {item.get('frameworkId')}"
+                    )
             if args.strict_pedagogy and activity.get("teachingMode") == "undefined":
                 warnings.append(f"{prefix}: teaching mode is still undecided")
             if args.strict_pedagogy and aias_status == "undecided":
@@ -988,8 +1166,45 @@ def command_list(args: argparse.Namespace) -> None:
             if level_id not in seen:
                 print(f"{level_id:12} {fr} / {en}")
                 seen.add(level_id)
+    elif args.kind == "competency-frameworks":
+        catalog = load_competency_catalog()
+        if args.format == "json":
+            print(json.dumps(catalog["frameworks"], ensure_ascii=False, indent=2))
+            return
+        label_key = "labelEn" if args.help_language == "en" else "labelFr"
+        for framework in catalog["frameworks"]:
+            print(f"{framework['id']:12} {framework.get(label_key) or framework.get('labelFr')}")
     elif args.kind == "competencies":
-        print("Use A1-A30, P1-P35, C1-C30, or full ids such as competency:acquerir:14.")
+        catalog = load_competency_catalog()
+        frameworks = resolve_competency_frameworks(args.framework) if args.framework else []
+        if not frameworks:
+            print("Choose a framework with --framework. Available frameworks:")
+            label_key = "labelEn" if args.help_language == "en" else "labelFr"
+            for framework in catalog["frameworks"]:
+                print(f"  {framework['id']:12} {framework.get(label_key) or framework.get('labelFr')}")
+            return
+        query = slug(args.search or "")
+        items = []
+        for item in catalog["competencies"]:
+            if item.get("frameworkId") not in frameworks:
+                continue
+            searchable = " ".join(
+                str(item.get(field, ""))
+                for field in ("code", "labelFr", "labelEn", "descriptionFr", "descriptionEn", "groupId")
+            )
+            if query and query not in slug(searchable):
+                continue
+            items.append(item)
+        if args.format == "json":
+            print(json.dumps(items, ensure_ascii=False, indent=2))
+            return
+        label_key = "labelEn" if args.help_language == "en" else "labelFr"
+        description_key = "descriptionEn" if args.help_language == "en" else "descriptionFr"
+        for item in items:
+            line = f"{item['frameworkId']}:{item['code']}\t{item.get(label_key) or item.get('labelFr')}\t{item['id']}"
+            if args.details and item.get(description_key):
+                line += f"\t{item[description_key]}"
+            print(line)
     elif args.kind == "activity-options":
         print("group: whole, subgroups, individual")
         print("teaching: directed, guided, supported, independent")
@@ -1201,6 +1416,16 @@ def add_common_design_args(parser: argparse.ArgumentParser, language: str) -> No
             "Level id or label for --school-system; see `scenarisation list school-levels --system ID`",
         ),
     )
+    parser.add_argument(
+        "--competency-framework", "--referentiel-competences", "--référentiel-compétences",
+        action="append",
+        default=[],
+        help=localized(
+            language,
+            "Référentiel de compétences, répétable ou séparé par des virgules ; voir `scenarisation lister competency-frameworks`",
+            "Competency framework, repeatable or comma-separated; see `scenarisation list competency-frameworks`",
+        ),
+    )
     parser.add_argument("--group-size", "--taille-groupe", default="")
     parser.add_argument("--designers", "--concepteurs", default="")
     parser.add_argument("--trainers", "--formateurs", default="")
@@ -1335,7 +1560,21 @@ def build_parser(language: str = "fr") -> argparse.ArgumentParser:
         "--compétences",
         action="append",
         default=[],
-        help=localized(language, "Compétences numériques séparées par des virgules : A1,P6,C14", "Comma-separated digital competencies: A1,P6,C14"),
+        help=localized(
+            language,
+            "Codes séparés par des virgules dans le référentiel déclaré, ou identifiants complets",
+            "Comma-separated codes in the declared framework, or full competency ids",
+        ),
+    )
+    activity.add_argument(
+        "--competency-framework", "--referentiel-competences", "--référentiel-compétences",
+        action="append",
+        default=[],
+        help=localized(
+            language,
+            "Référentiel utilisé pour résoudre les codes et ajouté au scénario",
+            "Framework used to resolve codes and added to the design",
+        ),
     )
     activity.add_argument(
         "--link", "--lien", action="append", default=[],
@@ -1404,9 +1643,18 @@ def build_parser(language: str = "fr") -> argparse.ArgumentParser:
     )
     list_cmd.add_argument(
         "kind",
-        choices=["types", "bloom", "competencies", "activity-options", "school-systems", "school-levels"],
+        choices=["types", "bloom", "competency-frameworks", "competencies", "activity-options", "school-systems", "school-levels"],
     )
     list_cmd.add_argument("--system", "--school-system", "--système", default="")
+    list_cmd.add_argument(
+        "--framework", "--competency-framework", "--référentiel",
+        action="append",
+        default=[],
+        help=localized(language, "Référentiel à afficher", "Framework to display"),
+    )
+    list_cmd.add_argument("--search", "--recherche", default="")
+    list_cmd.add_argument("--details", "--détails", action="store_true")
+    list_cmd.add_argument("--format", choices=["text", "json"], default="text")
     list_cmd.set_defaults(func=command_list)
 
     login = sub.add_parser(

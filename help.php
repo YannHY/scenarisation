@@ -52,11 +52,12 @@ Questions indispensables :
 - objectifs d’enseignement : ce que je veux faire travailler, transmettre ou entraîner ;
 - acquis d’apprentissage attendus : ce que les élèves devront être capables de faire à la fin ;
 - contraintes matérielles, pédagogiques ou institutionnelles ;
-- niveau de détail souhaité.
+- niveau de détail souhaité ;
+- référentiel ou référentiels de compétences à utiliser lorsque des compétences sont mobilisées.
 
 Questions complémentaires à poser seulement si c’est utile :
 - niveau Bloom souhaité pour chaque acquis, si je le connais ;
-- compétences numériques à mobiliser, si pertinent ;
+- compétences à mobiliser, si je les connais déjà ;
 - supports, œuvres, ressources ou outils déjà imposés.
 
 Distingue bien :
@@ -66,6 +67,8 @@ Distingue bien :
 Si je donne seulement des objectifs d’enseignement, transforme-les en acquis d’apprentissage observables, formulés avec des verbes d’action et reliés à la taxonomie de Bloom.
 
 Si certaines informations manquent, fais des hypothèses raisonnables au lieu de bloquer, sauf si l’hypothèse serait risquée.
+
+Si des compétences sont pertinentes, demande le ou les référentiels à utiliser. Ne suppose jamais Florimont à cause des anciens codes A/P/C. Si je ne sais pas lequel choisir, propose un choix court adapté au contexte : CRCN ou Pix en France, Pix IA pour la culture de l’IA, DigComp pour le cadre européen, GreenComp pour la durabilité, PER romand en Suisse romande, Socle commun en France, ou Florimont pour sa progression interne. Consulte ensuite les libellés du référentiel avec `list competencies --framework IDENTIFIANT` et présente les compétences pertinentes avant de retenir leurs codes.
 
 Pour la Belgique, distingue les communautés française, flamande et germanophone. Pour le Royaume-Uni, distingue l’Angleterre, le pays de Galles, l’Écosse et l’Irlande du Nord. Considère les Écoles européennes comme un système transnational et ISCED 2011 comme une classification internationale. Si le choix est ambigu, demande la précision nécessaire. N’invente jamais un identifiant : consulte les catalogues du CLI.
 
@@ -81,7 +84,7 @@ Avant d’exécuter les commandes de création complète, reformule brièvement 
 - le nombre de moments prévu ;
 - les objectifs d’enseignement ;
 - les acquis Bloom proposés ;
-- les principales compétences numériques, si elles sont mobilisées.
+- les référentiels choisis et les principales compétences, si elles sont mobilisées.
 
 Ensuite utilise le CLI, pas une écriture manuelle du JSON.
 
@@ -93,7 +96,8 @@ Avant de créer toutes les activités, vérifie les commandes utiles :
 - $SCENARISATION outcome --help
 - $SCENARISATION list types
 - $SCENARISATION list bloom
-- $SCENARISATION list competencies
+- $SCENARISATION list competency-frameworks
+- $SCENARISATION list competencies --framework IDENTIFIANT --search TERME --details
 - $SCENARISATION list activity-options
 - $SCENARISATION list school-systems
 - $SCENARISATION list school-levels --system IDENTIFIANT
@@ -103,6 +107,7 @@ Pour `init` et `add-activity`, utilise uniquement les valeurs contrôlées accep
 Valeurs sûres :
 - `--school-system` : un identifiant renvoyé par `list school-systems`
 - `--school-level` : un identifiant renvoyé par `list school-levels --system IDENTIFIANT`
+- `--competency-framework` : un identifiant renvoyé par `list competency-frameworks` ; l’option peut être répétée
 - `--type` : `read`, `investigate`, `practice`, `produce`, `discuss`, `collaborate`
 - `--group` : `individual`, `subgroups`, `whole`
 - `--teaching` : `directed`, `guided`, `supported`, `independent`
@@ -113,7 +118,7 @@ Valeurs sûres :
 
 Pour chaque activité, détermine et transmets explicitement `--group`, `--teaching`, `--pacing`, `--mode`, `--evaluation` et `--aias`. Ne t’appuie pas sur des valeurs par défaut. Choisis-les comme un ensemble cohérent à partir de l’objectif, de l’autonomie des élèves, des interactions nécessaires, des contraintes de formation et des traces d’apprentissage attendues. AIAS 1 signifie sans IA ; AIAS 2 réserve l’IA à l’exploration, la recherche ou la planification ; AIAS 3 en fait une collaboratrice dont l’élève évalue et transforme les productions ; AIAS 4 l’intègre pleinement sous la direction critique de l’élève ; AIAS 5 correspond à l’exploration et à la co-conception de nouveaux usages. Utilise `not-applicable` seulement si le cadre AIAS ne s’applique réellement pas, et ne laisse jamais AIAS indécis dans un scénario généré.
 
-Pour `init`, transmets le système et le niveau lorsqu’ils sont connus, par exemple : `$SCENARISATION init design.json --school-system france --school-level quatrieme`.
+Pour `init`, transmets le système, le niveau et les référentiels lorsqu’ils sont connus, par exemple : `$SCENARISATION init design.json --school-system france --school-level quatrieme --competency-framework crcn`.
 
 Utilise les valeurs canoniques ci-dessus pour `--pacing` et `--mode` ; le CLI accepte également leurs principaux équivalents français ou anglais.
 
@@ -158,10 +163,7 @@ Si je demande d’intégrer le numérique, propose des usages pédagogiquement u
 - relecture, correction et amélioration d’un texte ;
 - production ou partage contrôlé.
 
-Utilise les identifiants de compétences numériques acceptés par le CLI, par exemple :
-- A1, A2
-- P1, P6
-- C14, C15
+Utilise les codes du référentiel déclaré, des codes qualifiés comme `crcn:1.1.N2.2`, ou des identifiants complets comme `competency:crcn:1.1.N2.2`. Les anciens codes A/P/C sont réservés à Florimont.
 
 À la fin, restitue-moi :
 - le chemin du fichier `design.json` ;
@@ -171,7 +173,7 @@ Utilise les identifiants de compétences numériques acceptés par le CLI, par e
 - le nombre d’activités ;
 - les objectifs d’enseignement pris en compte ;
 - les acquis Bloom créés ;
-- les compétences numériques mobilisées ;
+- les référentiels et les compétences mobilisées, avec leurs libellés ;
 - la répartition des durées ;
 - les hypothèses retenues ;
 - le contenu ou le fichier `design.json`.
@@ -179,13 +181,7 @@ Utilise les identifiants de compétences numériques acceptés par le CLI, par e
 Publication :
 Ne demande aucun jeton pendant la création ou la validation du scénario. Ne publie pas directement depuis ton sandbox sauf si, une fois le fichier validé, je te demande explicitement de le publier et te donne un jeton CLI pour cette étape.
 Dans ce cas seulement, lance `scenarisation login` et indique-moi que le jeton doit être fourni à l’invite `CLI token:`. Ne l’affiche jamais dans ta réponse.
-Pour publier depuis mon Mac, indique-moi simplement, si le fichier est sur le Bureau :
-
-scenarisation publish ~/Desktop/design.json
-
-Ou, si le fichier reste dans le dossier courant :
-
-scenarisation publish design.json
+Une fois la connexion établie, publie le scénario toi-même avec `scenarisation publish design.json`.
 
 Règles importantes :
 - Travaille progressivement.
@@ -283,11 +279,12 @@ Essential questions:
 - teaching objectives: what I want learners to work on, understand, or practise;
 - expected learning outcomes: what learners should be able to do at the end;
 - material, pedagogical, or institutional constraints;
-- desired level of detail.
+- desired level of detail;
+- the competency framework or frameworks to use when competencies are relevant.
 
 Ask these additional questions only when useful:
 - the desired Bloom level for each outcome, if I know it;
-- digital competencies to be developed, when relevant;
+- competencies to be developed, if I already know them;
 - any required resources, works, materials, or tools.
 
 Clearly distinguish between:
@@ -297,6 +294,8 @@ Clearly distinguish between:
 If I provide only teaching objectives, turn them into observable learning outcomes using action verbs linked to Bloom’s taxonomy.
 
 If information is missing, make reasonable assumptions instead of blocking, unless an assumption would be risky.
+
+When competencies are relevant, ask which framework or frameworks to use. Never assume Florimont merely because the legacy A/P/C codes exist. If I do not know which one to choose, offer a short contextual choice: CRCN or Pix in France, Pix IA for AI literacy, DigComp for the European framework, GreenComp for sustainability, PER romand in French-speaking Switzerland, Socle commun in France, or Florimont for its internal progression. Then inspect labels with `list competencies --framework ID` and show the relevant competencies before selecting their codes.
 
 For Belgium, distinguish the French, Flemish, and German-speaking Communities. For the United Kingdom, distinguish England, Wales, Scotland, and Northern Ireland. Treat the European Schools as a transnational system and ISCED 2011 as an international classification. If the choice is ambiguous, ask for the necessary clarification. Never invent an identifier: consult the CLI catalogs.
 
@@ -312,7 +311,7 @@ Before running all creation commands, briefly restate:
 - the planned number of moments;
 - the teaching objectives;
 - the proposed Bloom outcomes;
-- the main digital competencies, when relevant.
+- the selected frameworks and main competencies, when relevant.
 
 Then use the CLI rather than writing the JSON manually.
 
@@ -324,7 +323,8 @@ Before creating all activities, inspect the useful commands:
 - $SCENARISATION outcome --help
 - $SCENARISATION list types
 - $SCENARISATION list bloom
-- $SCENARISATION list competencies
+- $SCENARISATION list competency-frameworks
+- $SCENARISATION list competencies --framework ID --search TERM --details
 - $SCENARISATION list activity-options
 - $SCENARISATION list school-systems
 - $SCENARISATION list school-levels --system SYSTEM_ID
@@ -334,6 +334,7 @@ For `init` and `add-activity`, use only controlled values accepted by the CLI.
 Safe values:
 - `--school-system`: an id returned by `list school-systems`
 - `--school-level`: an id returned by `list school-levels --system SYSTEM_ID`
+- `--competency-framework`: an id returned by `list competency-frameworks`; the option is repeatable
 - `--type`: `read`, `investigate`, `practice`, `produce`, `discuss`, `collaborate`
 - `--group`: `individual`, `subgroups`, `whole`
 - `--teaching`: `directed`, `guided`, `supported`, `independent`
@@ -344,7 +345,7 @@ Safe values:
 
 For every activity, explicitly determine and pass `--group`, `--teaching`, `--pacing`, `--mode`, `--evaluation`, and `--aias`. Do not rely on defaults. Choose them as a coherent set based on the objective, learner autonomy, required interactions, delivery constraints, and expected evidence of learning. AIAS 1 means no AI; AIAS 2 limits AI to exploration, research, or planning; AIAS 3 makes AI a collaborator whose output the learner evaluates and transforms; AIAS 4 fully integrates AI under the learner's critical direction; AIAS 5 covers exploring and co-designing new AI uses. Use `not-applicable` only when the AIAS framework genuinely does not apply, and never leave AIAS undecided in a generated scenario.
 
-For `init`, pass the system and level whenever they are known, for example: `$SCENARISATION init design.json --school-system france --school-level quatrieme`.
+For `init`, pass the system, level, and competency frameworks whenever they are known, for example: `$SCENARISATION init design.json --school-system france --school-level quatrieme --competency-framework crcn`.
 
 Use the canonical values above for `--pacing` and `--mode`; the CLI also accepts their main French and English equivalents.
 
@@ -382,10 +383,7 @@ The scenario must include:
 
 If I ask you to integrate digital technology, suggest pedagogically useful applications such as guided research, source checking, collaborative mapping, digital writing, file organisation, revision, and controlled sharing.
 
-Use digital competency identifiers accepted by the CLI, for example:
-- A1, A2
-- P1, P6
-- C14, C15
+Use codes from the declared framework, qualified codes such as `crcn:1.1.N2.2`, or full ids such as `competency:crcn:1.1.N2.2`. Legacy A/P/C codes are Florimont-only.
 
 At the end, give me:
 - the path to `design.json`;
@@ -394,7 +392,7 @@ At the end, give me:
 - the number of moments and activities;
 - the teaching objectives used;
 - the Bloom outcomes created;
-- the digital competencies developed;
+- the frameworks and competencies developed, with their labels;
 - the duration breakdown;
 - the assumptions made;
 - the content or file `design.json`.
@@ -402,7 +400,7 @@ At the end, give me:
 Publishing:
 Do not request a token while creating or validating the scenario. Do not publish directly from your sandbox unless, once the file has been validated, I explicitly ask you to publish it and give you a CLI token for that step.
 Only then, run `scenarisation login` and tell me that the token must be provided at the `CLI token:` prompt. Never display it in your response.
-To publish from my Mac, tell me to use `scenarisation publish ~/Desktop/design.json` if the file is on the Desktop, or `scenarisation publish design.json` if it remains in the current folder.
+Once logged in, publish the scenario yourself with `scenarisation publish design.json`.
 
 Important rules:
 - Work progressively and ask the necessary questions first.
@@ -823,16 +821,11 @@ Objectifs généraux de la formation.
                 <p>Choisissez entre un prompt prêt à copier, une skill réutilisable ou le CLI selon votre besoin.</p>
 
                 <h3 id="ia-guide">Guide</h3>
-                <div class="help-grid">
+                <div class="help-grid single">
                     <div class="help-card">
-                        <strong>1. L’IA crée et publie</strong>
+                        <strong>L’IA crée et publie</strong>
                         <span>Copiez le prompt ci-dessous, répondez aux questions et validez les propositions de l’IA.</span>
                         <span>Ne donnez aucun jeton pendant la création. Une fois le scénario validé, demandez explicitement sa publication : l’IA lance alors <code>scenarisation login</code> et vous demande le jeton créé dans votre profil. Donnez-le uniquement à ce moment-là.</span>
-                    </div>
-                    <div class="help-card">
-                        <strong>2. Vous publiez vous-même</strong>
-                        <span>L’IA vous remet le fichier <code>design.json</code>. Installez ensuite le CLI sur votre ordinateur. Au moment de publier, lancez <code>scenarisation login</code>, puis collez le jeton lorsque le terminal affiche <code>CLI token:</code>. Publiez ensuite avec <code>scenarisation publish</code>.</span>
-                        <span>Le jeton reste alors sur votre ordinateur.</span>
                     </div>
                 </div>
 
@@ -855,7 +848,7 @@ Objectifs généraux de la formation.
                 <p>Relancez l’outil si nécessaire. Dans Claude Code, utilisez <code>/scenarisation</code>. Dans Codex, utilisez <code>$scenarisation</code>.</p>
                 <div class="help-callout warning">
                     <i class="fa-solid fa-key" aria-hidden="true"></i>
-                    <p><strong>Quand donner le jeton avec la skill ?</strong> Aucun jeton n’est nécessaire pour installer la skill, créer le scénario ou le valider. Attendez que le fichier soit validé. Si vous voulez que l’agent publie à votre place, demandez-lui alors explicitement de publier et donnez le jeton uniquement lorsqu’il lance <code>scenarisation login</code> et le réclame. Si vous publiez vous-même, ne donnez jamais le jeton à l’agent.</p>
+                    <p><strong>Quand donner le jeton avec la skill ?</strong> Aucun jeton n’est nécessaire pour installer la skill, créer le scénario ou le valider. Attendez que le fichier soit validé, demandez alors explicitement à l’agent de le publier et donnez le jeton uniquement lorsqu’il lance <code>scenarisation login</code> et le réclame.</p>
                 </div>
 
                 <h3 id="cli-detaille">Utiliser le CLI</h3>
@@ -898,12 +891,14 @@ scenarisation list school-systems</pre>
                 <div class="help-details-grid">
                     <div>
                         <strong>1. Initialiser le fichier</strong>
-                        <p><code>init</code> crée le fichier JSON de départ avec le titre, la langue, la durée, la modalité, le système ou la classification et le niveau. Consultez d’abord les catalogues du CLI : ils fournissent les identifiants exacts et empêchent d’associer un niveau au mauvais système.</p>
+                        <p><code>init</code> crée le fichier JSON de départ avec le titre, la langue, la durée, la modalité, le système ou la classification, le niveau et les référentiels de compétences. Consultez d’abord les catalogues du CLI : ils fournissent les identifiants et les libellés exacts.</p>
                         <div class="help-code-wrap">
                             <button class="help-copy-btn" type="button" aria-label="Copier la commande" title="Copier"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
                             <pre class="help-code">scenarisation list school-systems
 scenarisation list school-levels --system france
-scenarisation init design.json --title "Atelier IA" --lang fr --duration 120 --mode hybride --school-system france --school-level quatrieme --group-size 24</pre>
+scenarisation list competency-frameworks
+scenarisation list competencies --framework pix-ia --search générative --details
+scenarisation init design.json --title "Atelier IA" --lang fr --duration 120 --mode hybride --school-system france --school-level quatrieme --competency-framework pix-ia --group-size 24</pre>
                         </div>
                     </div>
                     <div>
@@ -919,7 +914,7 @@ scenarisation init design.json --title "Atelier IA" --lang fr --duration 120 --m
                         <p>Une activité précise le type d’apprentissage, ses paramètres, sa description pédagogique et les consignes directement adressées aux élèves.</p>
                         <div class="help-code-wrap">
                             <button class="help-copy-btn" type="button" aria-label="Copier la commande" title="Copier"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
-                            <pre class="help-code">scenarisation add-activity design.json --type investigate --duration 30 --group subgroups --teaching guided --pacing sync --mode onsite --evaluation formative --aias 3 --competencies A6,P34 --description "Comparer trois exemples d'usages de l'IA." --instructions "Relevez deux points communs et une différence."</pre>
+                            <pre class="help-code">scenarisation add-activity design.json --type investigate --duration 30 --group subgroups --teaching guided --pacing sync --mode onsite --evaluation formative --aias 3 --competencies 2.2,2.3 --description "Comparer trois exemples d'usages de l'IA." --instructions "Relevez deux points communs et une différence."</pre>
                         </div>
                     </div>
                     <div>
@@ -965,7 +960,8 @@ scenarisation publish design.json</pre>
                     <pre class="help-code">scenarisation --help
 scenarisation list types
 scenarisation list bloom
-scenarisation list competencies
+scenarisation list competency-frameworks
+scenarisation list competencies --framework crcn --search sources --details
 scenarisation list school-systems
 scenarisation list school-levels --system france
 scenarisation status

@@ -160,9 +160,11 @@ choose_install_dir() {
 
 INSTALL_DIR="$(choose_install_dir)"
 TARGET="$INSTALL_DIR/scenarisation"
+CATALOG_TARGET="$INSTALL_DIR/scenarisation-competencies.json"
 TMP_FILE="$(mktemp "${TMPDIR:-/tmp}/scenarisation.XXXXXX")"
+TMP_CATALOG="$(mktemp "${TMPDIR:-/tmp}/scenarisation-competencies.XXXXXX")"
 cleanup() {
-  rm -f "$TMP_FILE"
+  rm -f "$TMP_FILE" "$TMP_CATALOG"
 }
 trap cleanup EXIT
 
@@ -174,13 +176,17 @@ fi
 
 if [ -f "./bin/scenarisation" ]; then
   cp "./bin/scenarisation" "$TMP_FILE"
+  cp "./data/cli-competencies.json" "$TMP_CATALOG"
 else
   CACHE_BUSTER="$(date +%s 2>/dev/null || printf '%s' "$$")"
   URL="https://raw.githubusercontent.com/$REPO/$REF/bin/scenarisation?v=$CACHE_BUSTER"
+  CATALOG_URL="https://raw.githubusercontent.com/$REPO/$REF/data/cli-competencies.json?v=$CACHE_BUSTER"
   if command -v curl >/dev/null 2>&1; then
     curl -fsSL "$URL" -o "$TMP_FILE"
+    curl -fsSL "$CATALOG_URL" -o "$TMP_CATALOG"
   elif command -v wget >/dev/null 2>&1; then
     wget -qO "$TMP_FILE" "$URL"
+    wget -qO "$TMP_CATALOG" "$CATALOG_URL"
   else
     echo "install.sh: curl or wget is required" >&2
     exit 1
@@ -198,9 +204,11 @@ if [ ! -d "$INSTALL_DIR" ]; then
 fi
 
 if [ -w "$INSTALL_DIR" ]; then
+  cp "$TMP_CATALOG" "$CATALOG_TARGET"
   cp "$TMP_FILE" "$TARGET"
   chmod +x "$TARGET"
 elif command -v sudo >/dev/null 2>&1; then
+  sudo cp "$TMP_CATALOG" "$CATALOG_TARGET"
   sudo cp "$TMP_FILE" "$TARGET"
   sudo chmod +x "$TARGET"
 else

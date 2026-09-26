@@ -46,6 +46,28 @@ test('competency labels follow language changes without rebuilding the catalogs'
   assert.ok(catalog.COMPETENCY_REFERENCE_MAP[context.window.LearningDesignerModules.config.normalizeToken(entry.id)]);
 });
 
+test('CLI competency catalog stays aligned with the editor catalog', () => {
+  const context = loadModules();
+  vm.runInContext(`globalThis.sharedCatalog = window.LearningDesignerModules.createCompetencies({
+    COMPETENCY_CATALOG_SOURCE, COMPETENCY_CATALOG_EN_SOURCE,
+    COMPETENCY_FRAMEWORK_CATALOG_SOURCE, COMPETENCY_GREENCOMP_DETAIL_SOURCE,
+    COMPETENCY_DIGCOMP_DETAIL_SOURCE,
+    normalizeToken: window.LearningDesignerModules.config.normalizeToken,
+    currentLang: () => 'fr'
+  });`, context);
+  const cliCatalog = JSON.parse(fs.readFileSync(path.join(__dirname, '../data/cli-competencies.json'), 'utf8'));
+  const editorFrameworks = Array.from(context.sharedCatalog.COMPETENCY_FRAMEWORKS, item => item.id);
+  const editorItems = Array.from(context.sharedCatalog.SELECTABLE_TOOLS_DATA).filter(item => !item.pickerHidden);
+  assert.deepEqual(
+    cliCatalog.frameworks.map(item => item.id),
+    editorFrameworks
+  );
+  assert.deepEqual(
+    cliCatalog.competencies.map(item => [item.id, item.labelFr, item.labelEn]),
+    editorItems.map(item => [item.id, item.labelFr, item.labelEn])
+  );
+});
+
 function documentWith(name, id, instructions) {
   return { meta: { name }, sessions: [{ id, title: name, activities: [{ instructions }] }] };
 }
