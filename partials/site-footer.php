@@ -14,16 +14,14 @@
                 <a class="site-footer-link" id="footer-cli-btn" href="help.php#cli" data-site-i18n-en="Skill and CLI" data-site-i18n-fr="Skill et CLI">Skill et CLI</a>
             </span>
             <span class="site-footer-link-row">
-                <a class="site-footer-link" href="conditions-utilisation.php" data-site-i18n-en="Terms of use" data-site-i18n-fr="Conditions d’utilisation">Conditions d’utilisation</a>
-                <span class="site-footer-separator" aria-hidden="true">|</span>
-                <a class="site-footer-link" href="licence-reutilisation.php" data-site-i18n-en="License and reuse" data-site-i18n-fr="Licence et réutilisation">Licence et réutilisation</a>
+                <a class="site-footer-link" href="conditions-utilisation.php" data-site-i18n-en="Terms and licenses" data-site-i18n-fr="Conditions et licences">Conditions et licences</a>
                 <span class="site-footer-separator" aria-hidden="true">|</span>
                 <a class="site-footer-link" href="politique-confidentialite.php" data-site-i18n-en="Privacy" data-site-i18n-fr="Confidentialité">Confidentialité</a>
                 <span class="site-footer-separator" aria-hidden="true">|</span>
                 <a class="site-footer-link" href="mentions-legales.php" data-site-i18n-en="Legal notice" data-site-i18n-fr="Mentions légales">Mentions légales</a>
             </span>
         </nav>
-        <span class="site-footer-copy site-footer-license">2026 — <a href="licence-reutilisation.php"><abbr title="Creative Commons Attribution - Partage dans les mêmes conditions" data-site-i18n-attr="title" data-site-i18n-en="Creative Commons Attribution-ShareAlike" data-site-i18n-fr="Creative Commons Attribution - Partage dans les mêmes conditions">CC BY-SA</abbr></a></span>
+        <span class="site-footer-copy site-footer-license">2026 — <a href="conditions-utilisation.php#licences-reutilisation"><abbr title="Creative Commons Attribution - Partage dans les mêmes conditions" data-site-i18n-attr="title" data-site-i18n-en="Creative Commons Attribution-ShareAlike" data-site-i18n-fr="Creative Commons Attribution - Partage dans les mêmes conditions">CC BY-SA</abbr></a></span>
     </div>
 </footer>
 <script src="js/feedback.js?v=20260906-scenarisation"></script>

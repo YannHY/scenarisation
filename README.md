@@ -153,7 +153,7 @@ L'ordre de chargement est explicite dans `designer.php` : sources des compétenc
 
 ## Crédits et licence
 
-Développé par Yann Houry sur la base du travail de François Jourde et inspiré de l'UCL Learning Designer. Le code source et les contenus originaux du projet sont distribués sous licence [Creative Commons Attribution – Partage dans les mêmes conditions 4.0 International (CC BY-SA 4.0)](./LICENSE), sauf mention contraire. Les composants tiers conservent leurs propres licences. Les scénarios publiés par les utilisateurs restent soumis à la licence choisie par leur auteur. Voir les [conditions de réutilisation](https://www.scenarisation.eu/licence-reutilisation.php).
+Développé par Yann Houry sur la base du travail de François Jourde et inspiré de l'UCL Learning Designer. Le code source et les contenus originaux du projet sont distribués sous licence [Creative Commons Attribution – Partage dans les mêmes conditions 4.0 International (CC BY-SA 4.0)](./LICENSE), sauf mention contraire. Les composants tiers conservent leurs propres licences. Les scénarios publiés par les utilisateurs restent soumis à la licence choisie par leur auteur. Voir les [conditions de réutilisation](https://www.scenarisation.eu/conditions-utilisation.php#licences-reutilisation).
 
 ## Vérifications de développement
 

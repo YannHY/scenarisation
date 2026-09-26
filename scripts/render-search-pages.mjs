@@ -24,7 +24,7 @@ const pages = {
     "competencies.php",
     "help.php",
     "learning-design.php",
-    "licence-reutilisation.php",
+    "conditions-utilisation.php",
     "mentions-legales.php",
     "models.php",
     "politique-confidentialite.php",

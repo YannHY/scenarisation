@@ -16,7 +16,7 @@
     help: ["help.php"], models: ["models.php"], scenarios: ["view.php", "share.php"],
     competencies: ["competencies.php"], prompts: ["prompts.php"],
     references: ["bloom.php", "cadre-conversationnel.php", "learning-design.php", "competencies.php"],
-    other: ["index.php", "about.php", "licence-reutilisation.php", "mentions-legales.php", "politique-confidentialite.php"]
+    other: ["index.php", "about.php", "conditions-utilisation.php", "mentions-legales.php", "politique-confidentialite.php"]
   };
 
   var translations = {
@@ -47,7 +47,7 @@
         "competencies.php": "Compétences",
         "help.php": "Aide",
         "learning-design.php": "Learning design",
-        "licence-reutilisation.php": "Licence",
+        "conditions-utilisation.php": "Conditions et licences",
         "mentions-legales.php": "Informations légales",
         "models.php": "Modèles",
         "politique-confidentialite.php": "Confidentialité",
@@ -81,7 +81,7 @@
         "competencies.php": "Competencies",
         "help.php": "Help",
         "learning-design.php": "Learning design",
-        "licence-reutilisation.php": "License",
+        "conditions-utilisation.php": "Terms and licenses",
         "mentions-legales.php": "Legal information",
         "models.php": "Templates",
         "politique-confidentialite.php": "Privacy",

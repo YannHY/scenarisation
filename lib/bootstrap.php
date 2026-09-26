@@ -1576,9 +1576,6 @@ function site_breadcrumb_items(string $active = ''): array
         'login' => [
             ['fr' => 'Connexion', 'en' => 'Sign in'],
         ],
-        'license' => [
-            ['fr' => 'Licence et réutilisation', 'en' => 'License and reuse'],
-        ],
         'legal' => [
             ['fr' => 'Mentions légales', 'en' => 'Legal notice'],
         ],
@@ -1613,6 +1610,9 @@ function site_breadcrumb_items(string $active = ''): array
         ],
         'signup' => [
             ['fr' => 'Créer un compte', 'en' => 'Create account'],
+        ],
+        'terms' => [
+            ['fr' => 'Conditions et licences', 'en' => 'Terms and licenses'],
         ],
         'reset_password' => [
             ['fr' => 'Connexion', 'en' => 'Sign in', 'href' => 'login.php'],
