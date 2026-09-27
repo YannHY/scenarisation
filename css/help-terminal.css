@@ -1,0 +1,229 @@
+.help-terminal {
+    width: 100%;
+    max-width: 920px;
+    margin: 26px 0 34px;
+    overflow: hidden;
+    border: 1px solid #454548;
+    border-radius: 16px;
+    background: #1d1d1e;
+    box-shadow: 0 24px 54px rgba(0, 0, 0, .24);
+}
+
+.help-terminal-bar {
+    display: flex;
+    align-items: center;
+    min-height: 48px;
+    padding: 0 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, .025);
+    background: #2c2d30;
+}
+
+.help-terminal-controls {
+    display: flex;
+    flex: 0 0 auto;
+    gap: 10px;
+}
+
+.help-terminal-control {
+    width: 13px;
+    height: 13px;
+    border: 1px solid rgba(0, 0, 0, .18);
+    border-radius: 50%;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, .42);
+}
+
+.help-terminal-control-close {
+    background: #ff5f57;
+}
+
+.help-terminal-control-minimize {
+    background: #febc2e;
+}
+
+.help-terminal-control-expand {
+    background: #28c840;
+}
+
+.help-terminal-title {
+    min-width: 0;
+    overflow: hidden;
+    margin-left: 16px;
+    color: #aaa9ad;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 13px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.help-terminal-title i {
+    margin-right: 7px;
+    color: #6ed2f3;
+    filter: drop-shadow(0 1px 0 rgba(255, 255, 255, .25));
+}
+
+.help-terminal-screen {
+    min-width: 0;
+    overflow-x: auto;
+    padding: 14px 18px 18px;
+    background: #1d1d1e;
+    color: #f2f0f0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: clamp(9px, 1.15vw, 12px);
+    font-weight: 650;
+    line-height: 1.3;
+    scrollbar-color: #59595d #252527;
+}
+
+.help-terminal-command {
+    min-width: 620px;
+    margin-bottom: 14px;
+    white-space: pre;
+}
+
+.help-terminal-prompt {
+    color: #aeadb0;
+}
+
+.help-terminal-pixel-logo {
+    display: flex;
+    align-items: flex-start;
+    gap: .34em;
+    width: max-content;
+    min-width: 620px;
+    margin: 0 0 16px;
+}
+
+.help-terminal-pixel-logo pre {
+    margin: 0;
+    font: inherit;
+    font-size: clamp(8px, 1.25vw, 13px);
+    font-weight: 900;
+    line-height: 1.06;
+    letter-spacing: .04em;
+}
+
+.terminal-cyan {
+    color: #58d4d1;
+}
+
+.terminal-pink {
+    color: #f1959a;
+}
+
+.terminal-purple {
+    color: #b985df;
+}
+
+.terminal-green {
+    color: #9dcc7e;
+}
+
+.terminal-blue {
+    color: #76a9e5;
+}
+
+.terminal-yellow {
+    color: #e8b953;
+}
+
+.help-terminal-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 20px;
+    width: 100%;
+    min-width: 620px;
+    max-width: 780px;
+    margin-bottom: 18px;
+}
+
+.help-terminal-meta span {
+    white-space: nowrap;
+}
+
+.help-terminal-meta i {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-right: 8px;
+    border-radius: 2px;
+    background: currentColor;
+}
+
+.help-terminal-output {
+    width: max-content;
+    min-width: 620px;
+    margin: 0;
+    color: #f2f0f0;
+    font: inherit;
+    white-space: pre;
+}
+
+.help-terminal-shell {
+    color: #f4f1ef;
+}
+
+.help-terminal-cursor {
+    display: inline-block;
+    width: .62em;
+    height: 1.08em;
+    background: #aaa9ad;
+    vertical-align: -.16em;
+    animation: help-terminal-blink 1.15s steps(1, end) infinite;
+}
+
+.help-terminal figcaption {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+@keyframes help-terminal-blink {
+    0%, 52% {
+        opacity: 1;
+    }
+
+    53%, 100% {
+        opacity: 0;
+    }
+}
+
+@media (max-width: 720px) {
+    .help-terminal {
+        margin: 22px 0 28px;
+        border-radius: 12px;
+    }
+
+    .help-terminal-bar {
+        min-height: 42px;
+        padding: 0 13px;
+    }
+
+    .help-terminal-control {
+        width: 11px;
+        height: 11px;
+    }
+
+    .help-terminal-controls {
+        gap: 7px;
+    }
+
+    .help-terminal-title {
+        margin-left: 12px;
+        font-size: 11px;
+    }
+
+    .help-terminal-screen {
+        padding: 12px 14px 16px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .help-terminal-cursor {
+        animation: none;
+    }
+}

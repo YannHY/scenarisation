@@ -371,7 +371,8 @@
         "3. Relire et adapter": "3. Review and adapt",
         "Vérifiez les informations, les sources, le niveau de difficulté et l’accessibilité, puis ajustez la proposition à votre classe.": "Check information, sources, difficulty, and accessibility, then adapt the proposal to your class.",
         "Avant d’utiliser un contenu en classe :": "Before using any content in class:",
-        "relisez-le, contrôlez les faits et les sources, vérifiez les droits d’usage et ne transmettez aucune donnée personnelle ou sensible concernant vos élèves.": "review it, check facts and sources, verify usage rights, and never share personal or sensitive information about your learners."
+        "relisez-le, contrôlez les faits et les sources, vérifiez les droits d’usage et ne transmettez aucune donnée personnelle ou sensible concernant vos élèves.": "review it, check facts and sources, verify usage rights, and never share personal or sensitive information about your learners.",
+        "Aperçu de l’aide du CLI Scénarisation dans une fenêtre de terminal.": "Preview of the Scénarisation CLI help in a terminal window."
     };
 
     var attributes = {

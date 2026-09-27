@@ -465,6 +465,7 @@ PROMPT;
     <link rel="stylesheet" href="css/interface.css?v=20260910-help-toc">
     <link rel="stylesheet" href="css/account-ui.css?v=20260906-highlight">
     <link rel="stylesheet" href="css/account-pages.css?v=20260904-content-rhythm">
+    <link rel="stylesheet" href="css/help-terminal.css?v=20260927-terminal-illustration">
 </head>
 <body class="help-page">
 <?php render_site_nav('help'); ?>
@@ -845,6 +846,122 @@ Objectifs généraux de la formation.
                 <h3 id="cli-detaille">Utiliser le CLI</h3>
                 <p>Le CLI permet de créer, valider et publier un scénario directement depuis votre terminal.</p>
 
+                <figure class="help-terminal" aria-labelledby="help-terminal-caption">
+                    <div class="help-terminal-bar" aria-hidden="true">
+                        <span class="help-terminal-controls">
+                            <span class="help-terminal-control help-terminal-control-close"></span>
+                            <span class="help-terminal-control help-terminal-control-minimize"></span>
+                            <span class="help-terminal-control help-terminal-control-expand"></span>
+                        </span>
+                        <span class="help-terminal-title"><i class="fa-solid fa-folder" aria-hidden="true"></i> scenarisation — zsh — 141×43</span>
+                    </div>
+                    <div class="help-terminal-screen" lang="fr">
+                        <div class="help-terminal-command"><span class="help-terminal-prompt">%</span> ./bin/scenarisation --help</div>
+                        <div class="help-terminal-pixel-logo" aria-label="Scénarisation">
+                            <pre class="terminal-cyan" aria-hidden="true">████
+█
+████
+   █
+████</pre>
+                            <pre class="terminal-pink" aria-hidden="true">████
+█
+█
+█
+████</pre>
+                            <pre class="terminal-purple" aria-hidden="true">████
+█
+███
+█
+████</pre>
+                            <pre class="terminal-green" aria-hidden="true">█  █
+██ █
+█ ██
+█  █
+█  █</pre>
+                            <pre class="terminal-blue" aria-hidden="true"> ██
+█  █
+████
+█  █
+█  █</pre>
+                            <pre class="terminal-yellow" aria-hidden="true">███
+█  █
+███
+█ █
+█  █</pre>
+                            <pre class="terminal-cyan" aria-hidden="true">████
+ ██
+ ██
+ ██
+████</pre>
+                            <pre class="terminal-pink" aria-hidden="true">████
+█
+████
+   █
+████</pre>
+                            <pre class="terminal-purple" aria-hidden="true"> ██
+█  █
+████
+█  █
+█  █</pre>
+                            <pre class="terminal-green" aria-hidden="true">████
+ ██
+ ██
+ ██
+ ██</pre>
+                            <pre class="terminal-blue" aria-hidden="true">████
+ ██
+ ██
+ ██
+████</pre>
+                            <pre class="terminal-yellow" aria-hidden="true"> ██
+█  █
+█  █
+█  █
+ ██ </pre>
+                            <pre class="terminal-cyan" aria-hidden="true">█  █
+██ █
+█ ██
+█  █
+█  █</pre>
+                        </div>
+                        <div class="help-terminal-meta">
+                            <span><i class="terminal-cyan" aria-hidden="true"></i>CLI : Scénarisation 0.9.0</span>
+                            <span><i class="terminal-pink" aria-hidden="true"></i>Développement : Yann Houry</span>
+                            <span><i class="terminal-purple" aria-hidden="true"></i>Travail d’origine : François Jourde</span>
+                            <span><i class="terminal-green" aria-hidden="true"></i>Inspiration : UCL Learning Designer</span>
+                            <span><i class="terminal-blue" aria-hidden="true"></i>Licence : CC BY-SA 4.0</span>
+                            <span><i class="terminal-yellow" aria-hidden="true"></i>Web : scenarisation.eu</span>
+                        </div>
+                        <pre class="help-terminal-output"><span class="terminal-purple">utilisation :</span> <span class="terminal-pink">scenarisation [--help] [--version] COMMANDE [OPTIONS]</span>
+
+Créer, valider et publier des scénarios pédagogiques depuis le terminal.
+
+<span class="terminal-purple">options:</span>
+  <span class="terminal-cyan">-h, --help</span>                         Afficher cette aide et quitter
+  <span class="terminal-cyan">--version</span>                          Afficher la version et quitter
+  <span class="terminal-cyan">--lang <span class="terminal-yellow">{fr,en}</span></span>                     Langue de l’aide
+
+<span class="terminal-purple">commandes:</span>
+  <span class="terminal-green">COMMANDE</span>
+    nouveau / init                   Créer un nouveau fichier de scénario
+    ajouter-moment / add-moment      Ajouter un moment d’apprentissage
+    ajouter-activité / add-activity  Ajouter une activité à un moment
+    acquis / outcome                 Ajouter un acquis selon Bloom
+    codex-prompt / prompt            Afficher un prompt destiné à Codex
+    codex / handoff                  Confier le scénario à Codex
+    vérifier / validate              Vérifier un fichier de scénario
+    lister / list                    Lister les valeurs acceptées
+    connexion / login                Enregistrer un jeton de publication
+    publier / publish                Publier un scénario en ligne
+    état / status                    Afficher la version et l’état de la publication
+    mise-a-jour / upgrade            Installer la dernière version du CLI
+
+Utilisez « scenarisation COMMANDE --help » pour afficher les options d’une commande.
+<span class="help-terminal-shell">scenarisation ~ %</span> <span class="help-terminal-cursor" aria-hidden="true"></span></pre>
+                    </div>
+                    <figcaption id="help-terminal-caption">Aperçu de l’aide du CLI Scénarisation dans une fenêtre de terminal.</figcaption>
+                </figure>
+
                 <h4>Par où commencer</h4>
                 <p>Le CLI nécessite Python 3. Vérifiez d’abord que Python est disponible dans votre terminal.</p>
                 <div class="help-code-wrap">
@@ -1033,7 +1150,7 @@ window.helpPromptTranslations = <?= json_encode([
     ],
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 </script>
-<script src="js/help-i18n.js?v=20260926-cli-token-timing"></script>
+<script src="js/help-i18n.js?v=20260927-terminal-illustration"></script>
 <script>
 var initialHelpLanguage = 'fr';
 try {
