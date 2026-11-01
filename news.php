@@ -90,6 +90,15 @@ app_start_session();
                            data-site-i18n-fr="Les cycles, les niveaux et les référentiels de compétences restent maintenant cohérents entre les différents pays et systèmes éducatifs, ce qui facilite la recherche de scénarios partagés.">Les cycles, les niveaux et les référentiels de compétences restent maintenant cohérents entre les différents pays et systèmes éducatifs, ce qui facilite la recherche de scénarios partagés.</p>
                     </div>
                 </article>
+
+                <article class="updates-item">
+                    <span class="updates-icon" aria-hidden="true"><i class="fa-solid fa-square-root-variable"></i></span>
+                    <div>
+                        <h3 data-site-i18n-en="LaTeX formula editor" data-site-i18n-fr="Éditeur de formules LaTeX">Éditeur de formules LaTeX</h3>
+                        <p data-site-i18n-en="A guided assistant now makes it easy to insert inline or centred mathematical formulas into Markdown fields. Formulas are rendered in the editor, shared pages, HTML exports and Word equations; their LaTeX source remains editable in Markdown, JSON and Excel and can also be supplied through the CLI."
+                           data-site-i18n-fr="Un assistant guidé permet désormais d’insérer facilement des formules mathématiques dans le texte ou centrées dans les champs Markdown. Les formules sont rendues dans l’éditeur, les pages partagées, les exports HTML et les équations Word ; leur source LaTeX reste modifiable dans les formats Markdown, JSON et Excel et peut aussi être fournie par le CLI.">Un assistant guidé permet désormais d’insérer facilement des formules mathématiques dans le texte ou centrées dans les champs Markdown. Les formules sont rendues dans l’éditeur, les pages partagées, les exports HTML et les équations Word ; leur source LaTeX reste modifiable dans les formats Markdown, JSON et Excel et peut aussi être fournie par le CLI.</p>
+                    </div>
+                </article>
             </div>
         </div>
     </section>
@@ -233,6 +242,267 @@ app_start_session();
                         <h3 data-site-i18n-en="Imports without leaving the page" data-site-i18n-fr="Imports sans quitter la page">Imports sans quitter la page</h3>
                         <p data-site-i18n-en="Dedicated dialogs let users search and preview templates, browse shared scenarios or drop a local LDJ, JSON, CSV, Excel or Markdown file before opening the editor."
                            data-site-i18n-fr="Des fenêtres dédiées permettent de rechercher et prévisualiser les modèles, de parcourir les scénarios partagés ou de déposer un fichier local LDJ, JSON, CSV, Excel ou Markdown avant d’ouvrir l’éditeur.">Des fenêtres dédiées permettent de rechercher et prévisualiser les modèles, de parcourir les scénarios partagés ou de déposer un fichier local LDJ, JSON, CSV, Excel ou Markdown avant d’ouvrir l’éditeur.</p>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="updates-entry" aria-labelledby="updates-2026-09-06">
+        <div class="updates-date">
+            <time datetime="2026-09-06" data-site-i18n-en="6 September 2026" data-site-i18n-fr="6 septembre 2026">6 septembre 2026</time>
+        </div>
+        <div class="updates-content">
+            <h2 id="updates-2026-09-06"
+                data-site-i18n-en="Search, saved scenarios and more school systems"
+                data-site-i18n-fr="Recherche, scénarios sauvegardés et systèmes scolaires élargis">Recherche, scénarios sauvegardés et systèmes scolaires élargis</h2>
+            <p class="updates-summary"
+               data-site-i18n-en="Scénarisation becomes easier to explore and adapts to a wider range of educational contexts, while giving users more control over their saved work."
+               data-site-i18n-fr="Scénarisation devient plus facile à explorer et s’adapte à davantage de contextes éducatifs, tout en donnant plus de contrôle sur les travaux sauvegardés.">Scénarisation devient plus facile à explorer et s’adapte à davantage de contextes éducatifs, tout en donnant plus de contrôle sur les travaux sauvegardés.</p>
+
+            <div class="updates-list">
+                <article class="updates-item">
+                    <span class="updates-icon" aria-hidden="true"><i class="fa-solid fa-magnifying-glass"></i></span>
+                    <div>
+                        <h3 data-site-i18n-en="Bilingual site search" data-site-i18n-fr="Recherche bilingue dans le site">Recherche bilingue dans le site</h3>
+                        <p data-site-i18n-en="A French and English search engine now helps users find features, documentation and reference pages, with search terms highlighted on arrival."
+                           data-site-i18n-fr="Un moteur de recherche en français et en anglais permet désormais de retrouver les fonctionnalités, la documentation et les pages de référence, avec mise en évidence des termes recherchés à l’arrivée.">Un moteur de recherche en français et en anglais permet désormais de retrouver les fonctionnalités, la documentation et les pages de référence, avec mise en évidence des termes recherchés à l’arrivée.</p>
+                    </div>
+                </article>
+
+                <article class="updates-item">
+                    <span class="updates-icon" aria-hidden="true"><i class="fa-solid fa-school"></i></span>
+                    <div>
+                        <h3 data-site-i18n-en="International programmes and portable backups" data-site-i18n-fr="Programmes internationaux et sauvegardes transportables">Programmes internationaux et sauvegardes transportables</h3>
+                        <p data-site-i18n-en="International Baccalaureate programmes join the supported school systems. Users can also export their saved scenarios from their profile for safekeeping or reuse."
+                           data-site-i18n-fr="Les programmes du Baccalauréat International rejoignent les systèmes scolaires pris en charge. Les utilisateurs peuvent aussi exporter leurs scénarios sauvegardés depuis leur profil afin de les conserver ou de les réutiliser.">Les programmes du Baccalauréat International rejoignent les systèmes scolaires pris en charge. Les utilisateurs peuvent aussi exporter leurs scénarios sauvegardés depuis leur profil afin de les conserver ou de les réutiliser.</p>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="updates-entry" aria-labelledby="updates-2026-09-05">
+        <div class="updates-date">
+            <time datetime="2026-09-05" data-site-i18n-en="5 September 2026" data-site-i18n-fr="5 septembre 2026">5 septembre 2026</time>
+        </div>
+        <div class="updates-content">
+            <h2 id="updates-2026-09-05"
+                data-site-i18n-en="A more reliable and supportive editor"
+                data-site-i18n-fr="Un éditeur plus fiable et plus accompagnant">Un éditeur plus fiable et plus accompagnant</h2>
+            <p class="updates-summary"
+               data-site-i18n-en="The scenario editor better explains its pedagogical choices and protects work more effectively when several changes or saves happen close together."
+               data-site-i18n-fr="L’éditeur de scénarios explicite mieux les choix pédagogiques et protège davantage le travail lorsque plusieurs modifications ou sauvegardes se succèdent.">L’éditeur de scénarios explicite mieux les choix pédagogiques et protège davantage le travail lorsque plusieurs modifications ou sauvegardes se succèdent.</p>
+
+            <div class="updates-list">
+                <article class="updates-item">
+                    <span class="updates-icon" aria-hidden="true"><i class="fa-solid fa-circle-question"></i></span>
+                    <div>
+                        <h3 data-site-i18n-en="Help where it is needed" data-site-i18n-fr="De l’aide au bon endroit">De l’aide au bon endroit</h3>
+                        <p data-site-i18n-en="Contextual explanations now accompany the main fields, while activity forms guide users through the essential learning, teaching and assessment choices."
+                           data-site-i18n-fr="Des explications contextuelles accompagnent désormais les principaux champs, tandis que les formulaires d’activité guident les choix essentiels liés à l’apprentissage, à l’enseignement et à l’évaluation.">Des explications contextuelles accompagnent désormais les principaux champs, tandis que les formulaires d’activité guident les choix essentiels liés à l’apprentissage, à l’enseignement et à l’évaluation.</p>
+                    </div>
+                </article>
+
+                <article class="updates-item">
+                    <span class="updates-icon" aria-hidden="true"><i class="fa-solid fa-shield-halved"></i></span>
+                    <div>
+                        <h3 data-site-i18n-en="Safer automatic saving" data-site-i18n-fr="Sauvegarde automatique sécurisée">Sauvegarde automatique sécurisée</h3>
+                        <p data-site-i18n-en="The editor detects conflicting versions and preserves unsaved drafts, reducing the risk of losing recent changes when a scenario is opened or edited in several places."
+                           data-site-i18n-fr="L’éditeur détecte les versions en conflit et préserve les brouillons non synchronisés, ce qui réduit le risque de perdre des changements récents lorsqu’un scénario est ouvert ou modifié à plusieurs endroits.">L’éditeur détecte les versions en conflit et préserve les brouillons non synchronisés, ce qui réduit le risque de perdre des changements récents lorsqu’un scénario est ouvert ou modifié à plusieurs endroits.</p>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="updates-entry" aria-labelledby="updates-2026-08-30">
+        <div class="updates-date">
+            <time datetime="2026-08-30" data-site-i18n-en="30 August 2026" data-site-i18n-fr="30 août 2026">30 août 2026</time>
+        </div>
+        <div class="updates-content">
+            <h2 id="updates-2026-08-30"
+                data-site-i18n-en="Richer and more precise competency frameworks"
+                data-site-i18n-fr="Des référentiels enrichis et plus précis">Des référentiels enrichis et plus précis</h2>
+            <p class="updates-summary"
+               data-site-i18n-en="More detailed educational references make it easier to identify and assign the right competencies to each activity."
+               data-site-i18n-fr="Des références pédagogiques plus détaillées facilitent l’identification et l’attribution des compétences adaptées à chaque activité.">Des références pédagogiques plus détaillées facilitent l’identification et l’attribution des compétences adaptées à chaque activité.</p>
+
+            <div class="updates-list">
+                <article class="updates-item">
+                    <span class="updates-icon" aria-hidden="true"><i class="fa-solid fa-sitemap"></i></span>
+                    <div>
+                        <h3 data-site-i18n-en="More precise competency selection" data-site-i18n-fr="Sélection plus précise des compétences">Sélection plus précise des compétences</h3>
+                        <p data-site-i18n-en="Competencies can now be selected at a finer level. The DigComp and GreenComp catalogues provide expanded descriptions that make the frameworks easier to understand and apply."
+                           data-site-i18n-fr="Les compétences peuvent désormais être sélectionnées à un niveau plus fin. Les catalogues DigComp et GreenComp proposent des descriptions enrichies qui facilitent la compréhension et l’utilisation des référentiels.">Les compétences peuvent désormais être sélectionnées à un niveau plus fin. Les catalogues DigComp et GreenComp proposent des descriptions enrichies qui facilitent la compréhension et l’utilisation des référentiels.</p>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="updates-entry" aria-labelledby="updates-2026-08-23">
+        <div class="updates-date">
+            <time datetime="2026-08-23" data-site-i18n-en="23 August 2026" data-site-i18n-fr="23 août 2026">23 août 2026</time>
+        </div>
+        <div class="updates-content">
+            <h2 id="updates-2026-08-23"
+                data-site-i18n-en="Models and more complete teaching plans"
+                data-site-i18n-fr="Des modèles et une planification plus complète">Des modèles et une planification plus complète</h2>
+            <p class="updates-summary"
+               data-site-i18n-en="New starting points and richer planning options help turn an idea into a complete, reusable teaching scenario."
+               data-site-i18n-fr="De nouveaux points de départ et des options de planification enrichies aident à transformer une idée en scénario complet et réutilisable.">De nouveaux points de départ et des options de planification enrichies aident à transformer une idée en scénario complet et réutilisable.</p>
+
+            <div class="updates-list">
+                <article class="updates-item">
+                    <span class="updates-icon" aria-hidden="true"><i class="fa-solid fa-layer-group"></i></span>
+                    <div>
+                        <h3 data-site-i18n-en="Reusable models and fuller planning" data-site-i18n-fr="Modèles réutilisables et planification plus complète">Modèles réutilisables et planification plus complète</h3>
+                        <p data-site-i18n-en="A model library offers ready-made structures to adapt. Activities also gain richer planning options, teaching modes, export choices and student-facing materials."
+                           data-site-i18n-fr="Une bibliothèque propose des structures prêtes à adapter. Les activités gagnent également des options de planification, des modes d’enseignement, des exports et des supports destinés aux élèves.">Une bibliothèque propose des structures prêtes à adapter. Les activités gagnent également des options de planification, des modes d’enseignement, des exports et des supports destinés aux élèves.</p>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="updates-entry" aria-labelledby="updates-2026-07-28">
+        <div class="updates-date">
+            <time datetime="2026-07-28" data-site-i18n-en="28 July 2026" data-site-i18n-fr="28 juillet 2026">28 juillet 2026</time>
+        </div>
+        <div class="updates-content">
+            <h2 id="updates-2026-07-28"
+                data-site-i18n-en="Bilingual resources for teaching design"
+                data-site-i18n-fr="Des ressources bilingues pour la conception pédagogique">Des ressources bilingues pour la conception pédagogique</h2>
+            <p class="updates-summary"
+               data-site-i18n-en="New French and English resources support teachers throughout the scenario design process."
+               data-site-i18n-fr="De nouvelles ressources en français et en anglais accompagnent les enseignants tout au long de la conception d’un scénario.">De nouvelles ressources en français et en anglais accompagnent les enseignants tout au long de la conception d’un scénario.</p>
+
+            <div class="updates-list">
+                <article class="updates-item">
+                    <span class="updates-icon" aria-hidden="true"><i class="fa-solid fa-comments"></i></span>
+                    <div>
+                        <h3 data-site-i18n-en="Bilingual prompts and complete help" data-site-i18n-fr="Prompts bilingues et aide complète">Prompts bilingues et aide complète</h3>
+                        <p data-site-i18n-en="A French and English prompt library provides practical starting points for working with an AI assistant, alongside a redesigned help page covering the whole application."
+                           data-site-i18n-fr="Une bibliothèque de prompts en français et en anglais offre des points de départ concrets pour travailler avec un assistant IA, aux côtés d’une page d’aide repensée couvrant toute l’application.">Une bibliothèque de prompts en français et en anglais offre des points de départ concrets pour travailler avec un assistant IA, aux côtés d’une page d’aide repensée couvrant toute l’application.</p>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="updates-entry" aria-labelledby="updates-2026-07-21">
+        <div class="updates-date">
+            <time datetime="2026-07-21" data-site-i18n-en="21 July 2026" data-site-i18n-fr="21 juillet 2026">21 juillet 2026</time>
+        </div>
+        <div class="updates-content">
+            <h2 id="updates-2026-07-21"
+                data-site-i18n-en="More flexible imports and exports"
+                data-site-i18n-fr="Des imports et exports plus souples">Des imports et exports plus souples</h2>
+            <p class="updates-summary"
+               data-site-i18n-en="Scenarios become easier to move between tools and to export in the format needed for each use."
+               data-site-i18n-fr="Les scénarios circulent plus facilement entre les outils et s’exportent dans le format adapté à chaque usage.">Les scénarios circulent plus facilement entre les outils et s’exportent dans le format adapté à chaque usage.</p>
+
+            <div class="updates-list">
+                <article class="updates-item">
+                    <span class="updates-icon" aria-hidden="true"><i class="fa-solid fa-file-import"></i></span>
+                    <div>
+                        <h3 data-site-i18n-en="Markdown import and improved exports" data-site-i18n-fr="Import Markdown et exports améliorés">Import Markdown et exports améliorés</h3>
+                        <p data-site-i18n-en="Scénarisation can import a structured Markdown scenario. Document exports are clearer, offer custom filenames and guide users through the available formats."
+                           data-site-i18n-fr="Scénarisation peut importer un scénario structuré en Markdown. Les exports de documents sont plus clairs, proposent un nom de fichier personnalisé et guident le choix du format.">Scénarisation peut importer un scénario structuré en Markdown. Les exports de documents sont plus clairs, proposent un nom de fichier personnalisé et guident le choix du format.</p>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="updates-entry" aria-labelledby="updates-2026-06-13">
+        <div class="updates-date">
+            <time datetime="2026-06-13" data-site-i18n-en="13 June 2026" data-site-i18n-fr="13 juin 2026">13 juin 2026</time>
+        </div>
+        <div class="updates-content">
+            <h2 id="updates-2026-06-13"
+                data-site-i18n-en="Smoother sharing and adaptation"
+                data-site-i18n-fr="Un partage et une adaptation plus fluides">Un partage et une adaptation plus fluides</h2>
+            <p class="updates-summary"
+               data-site-i18n-en="Publishing, importing and adapting shared scenarios become more consistent across the site and the command-line workflow."
+               data-site-i18n-fr="La publication, l’import et l’adaptation des scénarios partagés deviennent plus cohérents dans le site comme dans le parcours en ligne de commande.">La publication, l’import et l’adaptation des scénarios partagés deviennent plus cohérents dans le site comme dans le parcours en ligne de commande.</p>
+
+            <div class="updates-list">
+                <article class="updates-item">
+                    <span class="updates-icon" aria-hidden="true"><i class="fa-solid fa-share-nodes"></i></span>
+                    <div>
+                        <h3 data-site-i18n-en="Shared scenarios easier to reuse" data-site-i18n-fr="Des scénarios partagés plus faciles à réutiliser">Des scénarios partagés plus faciles à réutiliser</h3>
+                        <p data-site-i18n-en="Shared scenarios are easier to publish, browse and import, providing a clearer path from discovering an existing design to adapting it for a new context."
+                           data-site-i18n-fr="Les scénarios partagés sont plus simples à publier, parcourir et importer, avec un chemin plus clair entre la découverte d’une conception existante et son adaptation à un nouveau contexte.">Les scénarios partagés sont plus simples à publier, parcourir et importer, avec un chemin plus clair entre la découverte d’une conception existante et son adaptation à un nouveau contexte.</p>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="updates-entry" aria-labelledby="updates-2026-05-20">
+        <div class="updates-date">
+            <time datetime="2026-05-20" data-site-i18n-en="20 May 2026" data-site-i18n-fr="20 mai 2026">20 mai 2026</time>
+        </div>
+        <div class="updates-content">
+            <h2 id="updates-2026-05-20"
+                data-site-i18n-en="The CLI and AI assistance take shape"
+                data-site-i18n-fr="Le CLI et l’assistance IA prennent forme">Le CLI et l’assistance IA prennent forme</h2>
+            <p class="updates-summary"
+               data-site-i18n-en="Scénarisation expands beyond the graphical editor with a command-line workflow and reusable instructions for AI assistants."
+               data-site-i18n-fr="Scénarisation dépasse l’éditeur graphique avec un parcours en ligne de commande et des instructions réutilisables pour les assistants IA.">Scénarisation dépasse l’éditeur graphique avec un parcours en ligne de commande et des instructions réutilisables pour les assistants IA.</p>
+
+            <div class="updates-list">
+                <article class="updates-item">
+                    <span class="updates-icon" aria-hidden="true"><i class="fa-solid fa-terminal"></i></span>
+                    <div>
+                        <h3 data-site-i18n-en="Create and publish from the terminal" data-site-i18n-fr="Créer et publier depuis le terminal">Créer et publier depuis le terminal</h3>
+                        <p data-site-i18n-en="An installable command-line tool can create, validate and publish teaching scenarios. Dedicated documentation explains the workflow and its publication token."
+                           data-site-i18n-fr="Un outil installable en ligne de commande permet de créer, valider et publier des scénarios pédagogiques. Une documentation dédiée explique le parcours et son jeton de publication.">Un outil installable en ligne de commande permet de créer, valider et publier des scénarios pédagogiques. Une documentation dédiée explique le parcours et son jeton de publication.</p>
+                    </div>
+                </article>
+
+                <article class="updates-item">
+                    <span class="updates-icon" aria-hidden="true"><i class="fa-solid fa-robot"></i></span>
+                    <div>
+                        <h3 data-site-i18n-en="Reusable AI guidance" data-site-i18n-fr="Accompagnement IA réutilisable">Accompagnement IA réutilisable</h3>
+                        <p data-site-i18n-en="A reusable skill guides AI assistants through learning-design tasks and helps produce scenarios that can be continued in the application."
+                           data-site-i18n-fr="Une skill réutilisable guide les assistants IA dans les tâches de scénarisation pédagogique et aide à produire des scénarios qui peuvent être poursuivis dans l’application.">Une skill réutilisable guide les assistants IA dans les tâches de scénarisation pédagogique et aide à produire des scénarios qui peuvent être poursuivis dans l’application.</p>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section class="updates-entry" aria-labelledby="updates-2026-05-02">
+        <div class="updates-date">
+            <time datetime="2026-05-02" data-site-i18n-en="2 May 2026" data-site-i18n-fr="2 mai 2026">2 mai 2026</time>
+        </div>
+        <div class="updates-content">
+            <h2 id="updates-2026-05-02"
+                data-site-i18n-en="The foundations of Scénarisation"
+                data-site-i18n-fr="Les fondations de Scénarisation">Les fondations de Scénarisation</h2>
+            <p class="updates-summary"
+               data-site-i18n-en="The project takes shape around a visual teaching-scenario editor and the first personal workspaces."
+               data-site-i18n-fr="Le projet prend forme autour d’un éditeur visuel de scénarios pédagogiques et des premiers espaces de travail personnels.">Le projet prend forme autour d’un éditeur visuel de scénarios pédagogiques et des premiers espaces de travail personnels.</p>
+
+            <div class="updates-list">
+                <article class="updates-item">
+                    <span class="updates-icon" aria-hidden="true"><i class="fa-solid fa-pen-ruler"></i></span>
+                    <div>
+                        <h3 data-site-i18n-en="The first scenario editor" data-site-i18n-fr="Le premier éditeur de scénarios">Le premier éditeur de scénarios</h3>
+                        <p data-site-i18n-en="An initial graphical interface provides the essential structure for designing learning activities and organising a teaching scenario."
+                           data-site-i18n-fr="Une première interface graphique fournit la structure essentielle pour concevoir des activités d’apprentissage et organiser un scénario pédagogique.">Une première interface graphique fournit la structure essentielle pour concevoir des activités d’apprentissage et organiser un scénario pédagogique.</p>
+                    </div>
+                </article>
+
+                <article class="updates-item">
+                    <span class="updates-icon" aria-hidden="true"><i class="fa-solid fa-user-lock"></i></span>
+                    <div>
+                        <h3 data-site-i18n-en="Accounts and saved work" data-site-i18n-fr="Comptes et travaux sauvegardés">Comptes et travaux sauvegardés</h3>
+                        <p data-site-i18n-en="Users can create an account, sign in and keep their scenarios in a personal space, with the ability to reopen or delete saved work."
+                           data-site-i18n-fr="Les utilisateurs peuvent créer un compte, se connecter et conserver leurs scénarios dans un espace personnel, avec la possibilité de rouvrir ou de supprimer les travaux sauvegardés.">Les utilisateurs peuvent créer un compte, se connecter et conserver leurs scénarios dans un espace personnel, avec la possibilité de rouvrir ou de supprimer les travaux sauvegardés.</p>
                     </div>
                 </article>
             </div>
