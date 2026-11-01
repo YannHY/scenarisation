@@ -39,11 +39,11 @@ app_start_session();
         </div>
         <div class="updates-content">
             <h2 id="updates-2026-11-01"
-                data-site-i18n-en="Source tracking, richer analyses and smoother imports"
-                data-site-i18n-fr="Suivi de l’origine, analyses enrichies et imports plus fluides">Suivi de l’origine, analyses enrichies et imports plus fluides</h2>
+                data-site-i18n-en="Richer, traceable scenarios that are easier to use"
+                data-site-i18n-fr="Des scénarios plus riches, traçables et faciles à exploiter">Des scénarios plus riches, traçables et faciles à exploiter</h2>
             <p class="updates-summary"
-               data-site-i18n-en="Scénarisation 1.0 is the first stable public release. It makes the origin and authorship of adapted scenarios traceable, while making analyses easier to share and improving the information and filters available during design and import."
-               data-site-i18n-fr="Scénarisation 1.0 est la première version publique stable. Elle rend traçables l’origine et la paternité des scénarios adaptés, tout en facilitant le partage des analyses et en améliorant les informations et les filtres disponibles lors de la conception ou de l’import.">Scénarisation 1.0 est la première version publique stable. Elle rend traçables l’origine et la paternité des scénarios adaptés, tout en facilitant le partage des analyses et en améliorant les informations et les filtres disponibles lors de la conception ou de l’import.</p>
+               data-site-i18n-en="This update enriches scenario design with source tracking, analysis exports, LaTeX formulas and teacher materials. It also makes scenarios easier to find and reuse with new import filters."
+               data-site-i18n-fr="Cette mise à jour enrichit la conception des scénarios avec le suivi de leur origine, l’export des analyses, les formules LaTeX et le matériel enseignant. Elle facilite aussi leur recherche et leur réutilisation grâce à de nouveaux filtres d’import.">Cette mise à jour enrichit la conception des scénarios avec le suivi de leur origine, l’export des analyses, les formules LaTeX et le matériel enseignant. Elle facilite aussi leur recherche et leur réutilisation grâce à de nouveaux filtres d’import.</p>
 
             <div class="updates-list">
                 <article class="updates-item">
@@ -51,7 +51,7 @@ app_start_session();
                     <div>
                         <h3 data-site-i18n-en="Source and author tracking" data-site-i18n-fr="Suivi de l’origine et de l’auteur">Suivi de l’origine et de l’auteur</h3>
                         <p data-site-i18n-en="Scénarisation now preserves the source, author, licence and date of every adaptation. This information remains visible in the application and its exports. All scenarios can be adapted privately; a NoDerivatives adaptation cannot be published, while a ShareAlike adaptation retains the source licence."
-                           data-site-i18n-fr="Scénarisation conserve désormais la source, l’auteur, la licence et la date de chaque adaptation. Ces informations restent visibles dans l’application et les exports. Tous les scénarios peuvent être adaptés en privé ; une adaptation NoDerivatives ne peut pas être publiée, tandis qu’une adaptation ShareAlike conserve la licence d’origine.">Scénarisation conserve désormais la source, l’auteur, la licence et la date de chaque adaptation. Ces informations restent visibles dans l’application et les exports. Tous les scénarios peuvent être adaptés en privé ; une adaptation NoDerivatives ne peut pas être publiée, tandis qu’une adaptation ShareAlike conserve la licence d’origine.</p>
+                           data-site-i18n-fr="Scénarisation conserve désormais la source, l’auteur, la licence et la date de chaque adaptation. Ces informations restent visibles dans l’application et les exports. Tous les scénarios peuvent être adaptés en privé&nbsp;; une adaptation NoDerivatives ne peut pas être publiée, tandis qu’une adaptation ShareAlike conserve la licence d’origine.">Scénarisation conserve désormais la source, l’auteur, la licence et la date de chaque adaptation. Ces informations restent visibles dans l’application et les exports. Tous les scénarios peuvent être adaptés en privé&nbsp;; une adaptation NoDerivatives ne peut pas être publiée, tandis qu’une adaptation ShareAlike conserve la licence d’origine.</p>
                     </div>
                 </article>
 
@@ -76,18 +76,9 @@ app_start_session();
                 <article class="updates-item">
                     <span class="updates-icon" aria-hidden="true"><i class="fa-solid fa-filter"></i></span>
                     <div>
-                        <h3 data-site-i18n-en="More precise import filters" data-site-i18n-fr="Filtres d’import plus précis">Filtres d’import plus précis</h3>
-                        <p data-site-i18n-en="The template and shared-library import windows now offer clearer filters for duration, number of stages, delivery mode, learning type, school system, level and competency framework."
-                           data-site-i18n-fr="Les fenêtres d’import des modèles et de la bibliothèque partagée proposent désormais des filtres plus clairs par durée, nombre de moments, modalité, type d’apprentissage, système scolaire, niveau et référentiel de compétences.">Les fenêtres d’import des modèles et de la bibliothèque partagée proposent désormais des filtres plus clairs par durée, nombre de moments, modalité, type d’apprentissage, système scolaire, niveau et référentiel de compétences.</p>
-                    </div>
-                </article>
-
-                <article class="updates-item">
-                    <span class="updates-icon" aria-hidden="true"><i class="fa-solid fa-graduation-cap"></i></span>
-                    <div>
-                        <h3 data-site-i18n-en="Reliable school frameworks" data-site-i18n-fr="Référentiels scolaires fiabilisés">Référentiels scolaires fiabilisés</h3>
-                        <p data-site-i18n-en="School cycles, levels and competency frameworks now remain consistent across countries and education systems, making shared scenarios easier to find."
-                           data-site-i18n-fr="Les cycles, les niveaux et les référentiels de compétences restent maintenant cohérents entre les différents pays et systèmes éducatifs, ce qui facilite la recherche de scénarios partagés.">Les cycles, les niveaux et les référentiels de compétences restent maintenant cohérents entre les différents pays et systèmes éducatifs, ce qui facilite la recherche de scénarios partagés.</p>
+                        <h3 data-site-i18n-en="New import filters" data-site-i18n-fr="Nouveaux filtres d’import">Nouveaux filtres d’import</h3>
+                        <p data-site-i18n-en="The template and shared-library import windows can now be filtered by duration, number of stages, delivery mode, learning type, school system, level and competency framework."
+                           data-site-i18n-fr="Les fenêtres d’import des modèles et de la bibliothèque partagée peuvent désormais être filtrées par durée, nombre de moments, modalité, type d’apprentissage, système scolaire, niveau et référentiel de compétences.">Les fenêtres d’import des modèles et de la bibliothèque partagée peuvent désormais être filtrées par durée, nombre de moments, modalité, type d’apprentissage, système scolaire, niveau et référentiel de compétences.</p>
                     </div>
                 </article>
 
@@ -96,7 +87,7 @@ app_start_session();
                     <div>
                         <h3 data-site-i18n-en="LaTeX formula editor" data-site-i18n-fr="Éditeur de formules LaTeX">Éditeur de formules LaTeX</h3>
                         <p data-site-i18n-en="A guided assistant now makes it easy to insert inline or centred mathematical formulas into Markdown fields. Formulas are rendered in the editor, shared pages, HTML exports and Word equations; their LaTeX source remains editable in Markdown, JSON and Excel and can also be supplied through the CLI."
-                           data-site-i18n-fr="Un assistant guidé permet désormais d’insérer facilement des formules mathématiques dans le texte ou centrées dans les champs Markdown. Les formules sont rendues dans l’éditeur, les pages partagées, les exports HTML et les équations Word ; leur source LaTeX reste modifiable dans les formats Markdown, JSON et Excel et peut aussi être fournie par le CLI.">Un assistant guidé permet désormais d’insérer facilement des formules mathématiques dans le texte ou centrées dans les champs Markdown. Les formules sont rendues dans l’éditeur, les pages partagées, les exports HTML et les équations Word ; leur source LaTeX reste modifiable dans les formats Markdown, JSON et Excel et peut aussi être fournie par le CLI.</p>
+                           data-site-i18n-fr="Un assistant guidé permet désormais d’insérer facilement des formules mathématiques dans le texte ou centrées dans les champs Markdown. Les formules sont rendues dans l’éditeur, les pages partagées, les exports HTML et les équations Word&nbsp;; leur source LaTeX reste modifiable dans les formats Markdown, JSON et Excel et peut aussi être fournie par le CLI.">Un assistant guidé permet désormais d’insérer facilement des formules mathématiques dans le texte ou centrées dans les champs Markdown. Les formules sont rendues dans l’éditeur, les pages partagées, les exports HTML et les équations Word&nbsp;; leur source LaTeX reste modifiable dans les formats Markdown, JSON et Excel et peut aussi être fournie par le CLI.</p>
                     </div>
                 </article>
             </div>
@@ -224,7 +215,7 @@ app_start_session();
                 data-site-i18n-fr="Un point de départ plus clair pour chaque nouveau scénario">Un point de départ plus clair pour chaque nouveau scénario</h2>
             <p class="updates-summary"
                data-site-i18n-en="A new entry page brings together the different ways to begin: start from scratch, adapt a template or import a shared scenario."
-               data-site-i18n-fr="Une nouvelle page de démarrage rassemble les différentes façons de commencer : partir d’une page blanche, adapter un modèle ou importer un scénario partagé.">Une nouvelle page de démarrage rassemble les différentes façons de commencer : partir d’une page blanche, adapter un modèle ou importer un scénario partagé.</p>
+               data-site-i18n-fr="Une nouvelle page de démarrage rassemble les différentes façons de commencer&nbsp;: partir d’une page blanche, adapter un modèle ou importer un scénario partagé.">Une nouvelle page de démarrage rassemble les différentes façons de commencer&nbsp;: partir d’une page blanche, adapter un modèle ou importer un scénario partagé.</p>
 
             <div class="updates-list">
                 <article class="updates-item">

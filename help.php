@@ -20,7 +20,17 @@ Teste dans cet ordre :
 2. la commande globale `scenarisation` ;
 3. `./.tools/bin/scenarisation` si cette copie locale existe déjà.
 
-Le CLI retenu doit prendre en charge `list school-systems`, `list activity-options`, les options `--school-system` et `--school-level` de `init`, les choix pédagogiques explicites de `add-activity` et `validate --strict-pedagogy`.
+Pour chaque candidat, exécute les contrôles suivants en remplaçant `CANDIDAT` par la commande testée :
+
+CANDIDAT --version
+CANDIDAT list school-systems
+CANDIDAT list activity-options
+CANDIDAT list competency-frameworks
+CANDIDAT list competencies --framework crcn --search sources
+CANDIDAT init --help
+CANDIDAT add-activity --help
+
+Le CLI retenu doit réussir toutes les commandes de catalogue, y compris celles des référentiels et des libellés de compétences. L’aide de `init` doit inclure `--school-system`, `--school-level` et `--competency-framework`. L’aide de `add-activity` doit inclure `--group`, `--teaching`, `--pacing`, `--mode`, `--evaluation` et `--aias`. Le CLI doit également prendre en charge `validate --strict-pedagogy`. Un simple succès de `--help` ne suffit pas.
 
 Si la commande globale existe mais n’est pas compatible, indique-moi simplement qu’elle doit être mise à jour et demande-moi l’autorisation de lancer `scenarisation upgrade`. Après mon accord explicite, effectue la mise à jour et recommence les vérifications.
 
@@ -30,7 +40,13 @@ mkdir -p .tools/bin
 curl -fsSL https://raw.githubusercontent.com/YannHY/scenarisation/main/bin/scenarisation -o .tools/bin/scenarisation
 curl -fsSL https://raw.githubusercontent.com/YannHY/scenarisation/main/data/cli-competencies.json -o .tools/bin/scenarisation-competencies.json
 chmod +x .tools/bin/scenarisation
-./.tools/bin/scenarisation --help
+./.tools/bin/scenarisation --version
+./.tools/bin/scenarisation list school-systems
+./.tools/bin/scenarisation list activity-options
+./.tools/bin/scenarisation list competency-frameworks
+./.tools/bin/scenarisation list competencies --framework crcn --search sources
+./.tools/bin/scenarisation init --help
+./.tools/bin/scenarisation add-activity --help
 
 Si raw.githubusercontent.com est bloqué, utilise web_fetch ou une autre méthode disponible pour récupérer :
 https://github.com/YannHY/scenarisation/blob/main/bin/scenarisation
@@ -253,7 +269,17 @@ Test these candidates in order:
 2. the global `scenarisation` command;
 3. `./.tools/bin/scenarisation` when that local copy already exists.
 
-The selected CLI must support `list school-systems`, `list activity-options`, the `init` options `--school-system` and `--school-level`, explicit pedagogical choices in `add-activity`, and `validate --strict-pedagogy`.
+For each candidate, run the following checks, replacing `CANDIDATE` with the command being tested:
+
+CANDIDATE --version
+CANDIDATE list school-systems
+CANDIDATE list activity-options
+CANDIDATE list competency-frameworks
+CANDIDATE list competencies --framework crcn --search sources
+CANDIDATE init --help
+CANDIDATE add-activity --help
+
+The selected CLI must successfully run every catalog command, including the competency-framework and competency-label commands. The `init` help must include `--school-system`, `--school-level`, and `--competency-framework`. The `add-activity` help must include `--group`, `--teaching`, `--pacing`, `--mode`, `--evaluation`, and `--aias`. The CLI must also support `validate --strict-pedagogy`. A successful `--help` alone is not sufficient.
 
 If the global command exists but is incompatible, simply tell me that it must be updated and ask for permission to run `scenarisation upgrade`. After my explicit approval, perform the update and repeat the checks.
 
@@ -263,7 +289,13 @@ mkdir -p .tools/bin
 curl -fsSL https://raw.githubusercontent.com/YannHY/scenarisation/main/bin/scenarisation -o .tools/bin/scenarisation
 curl -fsSL https://raw.githubusercontent.com/YannHY/scenarisation/main/data/cli-competencies.json -o .tools/bin/scenarisation-competencies.json
 chmod +x .tools/bin/scenarisation
-./.tools/bin/scenarisation --help
+./.tools/bin/scenarisation --version
+./.tools/bin/scenarisation list school-systems
+./.tools/bin/scenarisation list activity-options
+./.tools/bin/scenarisation list competency-frameworks
+./.tools/bin/scenarisation list competencies --framework crcn --search sources
+./.tools/bin/scenarisation init --help
+./.tools/bin/scenarisation add-activity --help
 
 If raw.githubusercontent.com is blocked, use web_fetch or another available method to retrieve:
 https://github.com/YannHY/scenarisation/blob/main/bin/scenarisation

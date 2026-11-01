@@ -3,6 +3,10 @@
 - Dans la réponse finale après toute modification de fichiers, lister systématiquement les fichiers modifiés au cours de la tâche, avec un lien cliquable vers chacun.
 - Ne pas inclure dans cette liste les modifications préexistantes qui n'ont pas été effectuées au cours de la tâche.
 
+# Préférences rédactionnelles
+
+- Dans les contenus français destinés à l’affichage, toujours insérer une espace insécable avant les points-virgules et les deux-points afin que ces signes ne se retrouvent jamais seuls en début de ligne. Dans le HTML, utiliser `&nbsp;` avant `;` et `:`.
+
 # Préférences visuelles
 
 - Tous les styles doivent être placés dans des fichiers du dossier `css/`. Ne pas ajouter de blocs `<style>` ni d’attributs `style` dans les fichiers PHP ou HTML. Lors d’une modification de styles intégrés existants, les déplacer dans un fichier CSS et charger celui-ci depuis la page.
