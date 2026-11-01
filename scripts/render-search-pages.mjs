@@ -27,6 +27,7 @@ const pages = {
     "conditions-utilisation.php",
     "mentions-legales.php",
     "models.php",
+    "news.php",
     "politique-confidentialite.php",
     "prompts.php"
   ],
@@ -39,6 +40,7 @@ const pages = {
     "help.php",
     "learning-design.php",
     "models.php",
+    "news.php",
     "prompts.php"
   ]
 };

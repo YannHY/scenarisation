@@ -50,7 +50,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     }
 }
 
-$stmt = $db->prepare('SELECT id, title, share_token, is_published, is_listed, updated_at, created_at FROM learning_designs WHERE owner_user_id = ? ORDER BY updated_at DESC');
+$stmt = $db->prepare('SELECT id, title, share_token, is_published, is_listed, updated_at, created_at,
+    source_design_id, root_design_id, source_title, source_author_name, source_license_code, derived_at
+    FROM learning_designs WHERE owner_user_id = ? ORDER BY updated_at DESC');
 $stmt->execute([(int)$user['id']]);
 $items = $stmt->fetchAll();
 
@@ -74,6 +76,7 @@ function e(string $value): string
     <link rel="stylesheet" href="css/account-ui.css?v=20260906-highlight" />
     <link rel="stylesheet" href="css/account-pages.css?v=20260910-saved-table" />
     <link rel="stylesheet" href="css/my-designs.css?v=20260910-no-heading-divider" />
+    <link rel="stylesheet" href="css/provenance.css?v=<?= hash_file('sha256', __DIR__ . '/css/provenance.css') ?>" />
   </head>
   <body class="designs-page">
     <?php render_site_nav('saves'); ?>
@@ -110,6 +113,10 @@ function e(string $value): string
             <tr>
               <td>
                 <h2 class="saved-card-title"><?= e((string)$item['title']) ?></h2>
+                <?php $itemProvenance = app_design_provenance_payload($item); ?>
+                <?php if ($itemProvenance): ?>
+                  <p class="saved-card-provenance"><i class="fa-solid fa-code-branch" aria-hidden="true"></i><span data-site-i18n-en="Derived from" data-site-i18n-fr="Dérivé de">Dérivé de</span> « <?= e((string)$itemProvenance['sourceTitle']) ?> » <span data-site-i18n-en="by" data-site-i18n-fr="par">par</span> <?= e((string)$itemProvenance['sourceAuthor']) ?><?php if ($itemProvenance['sourceLicenseLabel']): ?> · <?= e((string)$itemProvenance['sourceLicenseLabel']) ?><?php endif; ?></p>
+                <?php endif; ?>
               </td>
               <td class="saved-card-meta"><?= e((string)$item['updated_at']) ?></td>
               <td class="saved-card-meta"><?= e((string)$item['created_at']) ?></td>

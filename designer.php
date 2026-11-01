@@ -17,6 +17,7 @@ app_start_session();
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="css/interface.css?v=<?= hash_file('sha256', __DIR__ . '/css/interface.css') ?>" />
+    <link rel="stylesheet" href="css/provenance.css?v=<?= hash_file('sha256', __DIR__ . '/css/provenance.css') ?>" />
   </head>
   <body class="designer-page">
     <a id="skip-link" class="skip-link" href="#board">Aller au contenu principal</a>
@@ -41,6 +42,14 @@ app_start_session();
       </div>
       <div id="top-panel-body" class="top-panel-body" aria-hidden="true" inert>
         <div id="timeline-view" class="panel-grid" role="tabpanel" aria-labelledby="top-tab-settings">
+          <section id="design-provenance" class="design-provenance" aria-labelledby="design-provenance-title" hidden>
+            <div class="design-provenance-icon" aria-hidden="true"><i class="fa-solid fa-code-branch"></i></div>
+            <div>
+              <h2 id="design-provenance-title" class="design-provenance-title">Suivi de l’origine</h2>
+              <p id="design-provenance-copy" class="design-provenance-copy"></p>
+              <p id="design-provenance-meta" class="design-provenance-meta"></p>
+            </div>
+          </section>
           <div class="panel-column panel-column-left">
             <div class="form-row">
               <label id="label-meta-name" for="meta-name" data-tooltip-i18n="metaNameTooltip">Titre</label>

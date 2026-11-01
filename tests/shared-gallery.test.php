@@ -49,9 +49,21 @@ try {
     $insert = $db->prepare('INSERT INTO learning_designs (owner_user_id, title, document_json, is_published, is_listed, share_token) VALUES (1, ?, ?, ?, ?, ?)');
     $insert->execute(['Public example', '{"meta":{"name":"Public example","schoolSystem":"france","schoolLevel":"quatrieme"},"sessions":[{"activities":[{"tools":["competency:acquerir:1"]}]}]}', 1, 1, 'public-example']);
     $insert->execute(['Private example', '{"sessions":[]}', 0, 0, null]);
+    $db->exec("INSERT INTO learning_designs (
+        owner_user_id, title, document_json, is_published, is_listed, share_token, license_code,
+        source_design_id, root_design_id, source_title, source_author_name, source_license_code, derived_at
+    ) VALUES (1, 'Adaptation', '{\"meta\":{\"name\":\"Adaptation\"},\"sessions\":[]}', 1, 1, 'adaptation', 'cc-by',
+        1, 1, 'Public example', 'Original author', 'cc-by', CURRENT_TIMESTAMP)");
+    $db->exec("INSERT INTO learning_designs (
+        owner_user_id, title, document_json, is_published, is_listed, share_token, license_code
+    ) VALUES (1, 'Lecture seule', '{\"meta\":{\"name\":\"Lecture seule\"},\"sessions\":[]}', 1, 1, 'readonly', 'cc-by-nd')");
     $result = gallery_render($dsn);
     gallery_check($result['status'] === 200 && str_contains($result['html'], 'Public example'), 'Published catalogue still loads');
     gallery_check(!str_contains($result['html'], 'Private example'), 'Private scenarios stay excluded');
+    gallery_check(str_contains($result['html'], 'Dérivé de') && str_contains($result['html'], 'Original author'), 'Source tracking appears in catalogue cards');
+    gallery_check(str_contains($result['html'], 'Adaptation privée uniquement'), 'NoDerivatives scenarios explain the publication limit');
+    $signedInResult = gallery_render($dsn, true);
+    gallery_check(substr_count($signedInResult['html'], 'action="import_shared_design.php"') === 3, 'Every shared scenario can be reused, including NoDerivatives sources');
     $embedded = gallery_render($dsn, false, true);
     gallery_check(str_contains($embedded['html'], 'data-school-stage="college"'), 'French lower-secondary stage is exposed for filtering');
     gallery_check(str_contains($embedded['html'], 'data-school-level="quatrieme"'), 'Exact school level is exposed for filtering');

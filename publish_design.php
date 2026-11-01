@@ -18,7 +18,8 @@ if ($designId <= 0) {
     app_json_response(['success' => false, 'error' => 'Identifiant invalide.'], 422);
 }
 
-$stmt = $db->prepare("SELECT id, share_token, license_code, is_published, is_listed FROM learning_designs WHERE id = ? AND owner_user_id = ? LIMIT 1");
+$stmt = $db->prepare("SELECT id, share_token, license_code, is_published, is_listed, source_license_code
+    FROM learning_designs WHERE id = ? AND owner_user_id = ? LIMIT 1");
 $stmt->execute([$designId, (int)$user['id']]);
 $row = $stmt->fetch();
 if (!$row) {
@@ -50,12 +51,19 @@ if ($action === 'unpublish') {
 // action === 'publish'
 $isListed = !empty($input['is_listed']);
 $licenseCode = null;
+$sourceLicenseCode = strtolower(trim((string)($row['source_license_code'] ?? '')));
+if ($sourceLicenseCode !== '' && !creative_commons_allows_derivatives($sourceLicenseCode)) {
+    app_json_response(['success' => false, 'error' => 'La licence de la source interdit la publication d’une adaptation.'], 422);
+}
 if ($isListed) {
     $requestedLicense = strtolower(trim((string)($input['license_code'] ?? '')));
     if (!creative_commons_license($requestedLicense)) {
         app_json_response(['success' => false, 'error' => 'Veuillez choisir une licence Creative Commons valide pour publier dans le catalogue.'], 422);
     }
     $licenseCode = $requestedLicense;
+    if (in_array($sourceLicenseCode, ['cc-by-sa', 'cc-by-nc-sa'], true) && $licenseCode !== $sourceLicenseCode) {
+        app_json_response(['success' => false, 'error' => 'Cette adaptation doit conserver la licence ShareAlike de sa source.'], 422);
+    }
 }
 
 $token = (string)($row['share_token'] ?? '');

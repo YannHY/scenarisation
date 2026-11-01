@@ -14,7 +14,15 @@ if ($token === '') {
 }
 
 $db = app_db();
-$stmt = $db->prepare("SELECT id, title, document_json, license_code, updated_at FROM learning_designs WHERE share_token = ? AND is_published = 1 LIMIT 1");
+$stmt = $db->prepare("SELECT d.id, d.title, d.document_json, d.license_code, d.updated_at,
+    d.source_design_id, d.root_design_id, d.source_title, d.source_author_name,
+    d.source_license_code, d.derived_at, u.username,
+    source.share_token AS source_share_token, source.is_published AS source_is_published
+    FROM learning_designs d
+    JOIN users u ON u.id = d.owner_user_id
+    LEFT JOIN learning_designs source ON source.id = d.source_design_id
+    WHERE d.share_token = ? AND d.is_published = 1
+    LIMIT 1");
 $stmt->execute([$token]);
 $row = $stmt->fetch();
 if (!$row) {
@@ -45,6 +53,10 @@ try {
 } catch (Exception) {}
 
 $license = creative_commons_license((string)($row['license_code'] ?? ''));
+$provenance = app_design_provenance_payload($row);
+$sourceUrl = $provenance && !empty($row['source_is_published']) && trim((string)($row['source_share_token'] ?? '')) !== ''
+    ? 'view.php?token=' . urlencode((string)$row['source_share_token'])
+    : null;
 
 // ── Label maps ───────────────────────────────────────────────
 $LEARNING_TYPES = [
@@ -863,6 +875,7 @@ $displayDesignedMinutes = $designedMinutes > 0 ? $designedMinutes : $totalMinute
   <link rel="stylesheet" href="css/view-footer.css?v=20260910">
   <link rel="stylesheet" href="css/view-toolbar.css?v=20260910">
   <link rel="stylesheet" href="css/view-links.css?v=20260910">
+  <link rel="stylesheet" href="css/provenance.css?v=<?= hash_file('sha256', __DIR__ . '/css/provenance.css') ?>">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
   <style>
     :root {
@@ -1183,6 +1196,21 @@ $displayDesignedMinutes = $designedMinutes > 0 ? $designedMinutes : $totalMinute
       <?php endif; ?>
     </div>
   </header>
+
+  <?php if ($provenance): ?>
+  <section class="public-provenance" aria-labelledby="public-provenance-title">
+    <div class="public-provenance-icon" aria-hidden="true"><i class="fa-solid fa-code-branch"></i></div>
+    <div>
+      <h2 id="public-provenance-title" class="public-provenance-title">Adaptation</h2>
+      <p class="public-provenance-copy">Adapté par <strong><?= esc((string)$row['username']) ?></strong> à partir de
+        <?php if ($sourceUrl): ?><a href="<?= esc($sourceUrl) ?>">« <?= esc((string)$provenance['sourceTitle']) ?> »</a><?php else: ?>« <?= esc((string)$provenance['sourceTitle']) ?> »<?php endif; ?>,
+        créé par <strong><?= esc((string)$provenance['sourceAuthor']) ?></strong>.</p>
+      <?php if ($provenance['sourceLicenseLabel']): ?>
+        <p class="public-provenance-meta">Source sous <a href="<?= esc((string)$provenance['sourceLicenseUrl']) ?>" target="_blank" rel="license noopener noreferrer"><?= esc((string)$provenance['sourceLicenseLabel']) ?></a></p>
+      <?php endif; ?>
+    </div>
+  </section>
+  <?php endif; ?>
 
   <?php
   $metaCards = [];

@@ -9,7 +9,9 @@ if ($designId <= 0) {
     app_json_response(['success' => false, 'error' => 'Identifiant invalide.'], 422);
 }
 
-$stmt = $db->prepare("SELECT id, title, document_json, updated_at, revision FROM learning_designs WHERE id = ? AND owner_user_id = ? LIMIT 1");
+$stmt = $db->prepare("SELECT id, title, document_json, updated_at, revision,
+    source_design_id, root_design_id, source_title, source_author_name, source_license_code, derived_at
+    FROM learning_designs WHERE id = ? AND owner_user_id = ? LIMIT 1");
 $stmt->execute([$designId, (int)$user['id']]);
 $row = $stmt->fetch();
 if (!$row) {
@@ -20,6 +22,7 @@ $document = json_decode((string)$row['document_json'], true);
 if (!is_array($document)) {
     $document = ['sessions' => [], 'meta' => []];
 }
+$provenance = app_design_provenance_payload($row);
 
 app_json_response([
     'success' => true,
@@ -28,6 +31,7 @@ app_json_response([
         'title' => (string)$row['title'],
         'updatedAt' => (string)$row['updated_at'],
         'revision' => (int)$row['revision'],
+        'provenance' => $provenance,
         'document' => $document,
     ],
 ]);

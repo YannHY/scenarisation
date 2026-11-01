@@ -62,6 +62,50 @@
     window.history.replaceState({}, "", url.toString());
   }
 
+  function renderDesignProvenance(provenance) {
+    const section = $("design-provenance");
+    const title = $("design-provenance-title");
+    const copy = $("design-provenance-copy");
+    const meta = $("design-provenance-meta");
+    if (!section || !title || !copy || !meta) return;
+    const visible = Boolean(provenance?.verified && (provenance.sourceTitle || provenance.sourceAuthor));
+    section.hidden = !visible;
+    if (!visible) {
+      copy.textContent = "";
+      meta.textContent = "";
+      return;
+    }
+    title.textContent = tr("Suivi de l’origine", "Source tracking");
+    const sourceTitle = String(provenance.sourceTitle || tr("Scénario sans titre", "Untitled scenario"));
+    const sourceAuthor = String(provenance.sourceAuthor || tr("auteur inconnu", "unknown author"));
+    copy.textContent = tr(
+      `Dérivé de « ${sourceTitle} » par ${sourceAuthor}.`,
+      `Derived from “${sourceTitle}” by ${sourceAuthor}.`
+    );
+    const details = [];
+    if (provenance.sourceLicenseLabel) details.push(String(provenance.sourceLicenseLabel));
+    if (["cc-by-nd", "cc-by-nc-nd"].includes(String(provenance.sourceLicenseCode || ""))) {
+      details.push(tr("Adaptation privée uniquement", "Private adaptation only"));
+    }
+    if (provenance.derivedAt) {
+      const datePart = String(provenance.derivedAt).slice(0, 10);
+      const parsedDate = /^\d{4}-\d{2}-\d{2}$/.test(datePart) ? new Date(`${datePart}T00:00:00Z`) : null;
+      const formattedDate = parsedDate && !Number.isNaN(parsedDate.getTime())
+        ? new Intl.DateTimeFormat(app()?.getCurrentLang?.() === "en" ? "en-GB" : "fr-FR", {
+            dateStyle: "long",
+            timeZone: "Europe/Paris"
+          }).format(parsedDate)
+        : String(provenance.derivedAt);
+      details.push(tr(`Adapté le ${formattedDate}`, `Adapted on ${formattedDate}`));
+    }
+    meta.textContent = details.join(" · ");
+  }
+
+  function syncDesignProvenanceFromState() {
+    const state = app()?.getState?.() ?? {};
+    renderDesignProvenance(state?.meta?.provenance || null);
+  }
+
   async function fetchJson(url, options = {}) {
     const response = await fetch(url, {
       credentials: "same-origin",
@@ -98,6 +142,7 @@
     } finally {
       authState.loading = false;
       app()?.initializeStorageScope?.(authState.user?.id ?? null);
+      syncDesignProvenanceFromState();
       renderAccountArea();
       syncSaveUi();
       syncPublishUi();
@@ -556,12 +601,14 @@
             return false;
           }
         }
+        renderDesignProvenance(data.design.provenance);
         app()?.loadDocument?.(data.design.document, {
           remoteDesignId: data.design.id,
           remoteUpdatedAt: data.design.updatedAt,
           remoteRevision: data.design.revision,
           remoteSaveConflict: null,
-          remoteDirty: false
+          remoteDirty: false,
+          provenance: data.design.provenance || null
         });
         lastSaved = {
           generation: app()?.getDocumentGeneration?.(),
@@ -860,6 +907,9 @@
     syncSaveUi();
     syncPublishUi();
     refreshAuth();
-    window.addEventListener("ld:statechange", scheduleAutoSave);
+    window.addEventListener("ld:statechange", () => {
+      syncDesignProvenanceFromState();
+      scheduleAutoSave();
+    });
   });
 })();

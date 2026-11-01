@@ -17,7 +17,11 @@ if ($token === '') {
 }
 
 $db = app_db();
-$stmt = $db->prepare("SELECT title, document_json FROM learning_designs WHERE share_token = ? AND is_published = 1 LIMIT 1");
+$stmt = $db->prepare("SELECT d.id, d.title, d.document_json, d.license_code, d.root_design_id, u.username
+    FROM learning_designs d
+    JOIN users u ON u.id = d.owner_user_id
+    WHERE d.share_token = ? AND d.is_published = 1
+    LIMIT 1");
 $stmt->execute([$token]);
 $source = $stmt->fetch();
 if (!$source) {
@@ -25,6 +29,8 @@ if (!$source) {
     echo 'Cette production n’est pas disponible ou son lien de partage a été révoqué.';
     exit;
 }
+
+$sourceLicenseCode = strtolower(trim((string)($source['license_code'] ?? '')));
 
 $document = json_decode((string)$source['document_json'], true);
 if (!is_array($document) || !isset($document['sessions']) || !is_array($document['sessions'])) {
@@ -46,8 +52,20 @@ if (!is_string($payload)) {
     exit;
 }
 
-$insert = $db->prepare("INSERT INTO learning_designs (owner_user_id, title, document_json) VALUES (?, ?, ?)");
-$insert->execute([(int)$user['id'], $copyTitle, $payload]);
+$insert = $db->prepare("INSERT INTO learning_designs (
+    owner_user_id, title, document_json, source_design_id, root_design_id,
+    source_title, source_author_name, source_license_code, derived_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)");
+$insert->execute([
+    (int)$user['id'],
+    $copyTitle,
+    $payload,
+    (int)$source['id'],
+    (int)($source['root_design_id'] ?? 0) ?: (int)$source['id'],
+    $title,
+    (string)$source['username'],
+    $sourceLicenseCode !== '' ? $sourceLicenseCode : null,
+]);
 $designId = (int)$db->lastInsertId();
 
 header('Location: designer.php?remote_design_id=' . urlencode((string)$designId));

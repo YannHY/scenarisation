@@ -87,19 +87,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="login-learning-rhythm" aria-hidden="true">
                 <span></span><span></span><span></span><span></span><span></span><span></span>
             </div>
-            <p class="login-beta-note">
-                <i class="fa-solid fa-bug" aria-hidden="true"></i>
-                <span data-site-i18n-en="This site is currently in beta." data-site-i18n-fr="Le site est actuellement en version bêta.">Le site est actuellement en version bêta.</span>
-            </p>
         </section>
 
         <section class="account-card">
         <h1 data-site-i18n-en="Sign in" data-site-i18n-fr="Connexion">Connexion</h1>
         <p class="account-copy" data-site-i18n-en="Sign in to save and access your work." data-site-i18n-fr="Connectez-vous pour sauvegarder et retrouver vos productions.">Connectez-vous pour sauvegarder et retrouver vos productions.</p>
-        <p class="login-beta-note login-beta-note-mobile">
-            <i class="fa-solid fa-bug" aria-hidden="true"></i>
-            <span data-site-i18n-en="This site is currently in beta." data-site-i18n-fr="Le site est actuellement en version bêta.">Le site est actuellement en version bêta.</span>
-        </p>
         <form method="post" class="account-form">
             <div class="field">
                 <label for="email">Email</label>

@@ -111,12 +111,16 @@ try {
     $db = app_db();
     check((int)$db->query('SELECT schema_version FROM app_schema_meta')->fetchColumn() === APP_SCHEMA_VERSION, 'v4 schema upgrades to current version');
     check((int)$db->query('SELECT revision FROM learning_designs WHERE id=1')->fetchColumn() === 1, 'existing design starts at revision one');
+    $designColumns = array_column($db->query('PRAGMA table_info(learning_designs)')->fetchAll(PDO::FETCH_ASSOC), 'name');
+    check(in_array('source_design_id', $designColumns, true) && in_array('source_author_name', $designColumns, true), 'existing schema receives provenance columns');
     check($db->query('SELECT email_verified_at FROM users WHERE id=10')->fetchColumn() === null, 'upgrade does not replay old email-verification backfills');
     check($db->query('SELECT title FROM learning_designs WHERE id=1')->fetchColumn() === 'Legacy design', 'migration preserves existing content');
     check($db->query('SELECT terms_accepted_at FROM users WHERE id=10')->fetchColumn() === null, 'legacy account receives no fabricated acceptance date');
     check($db->query('SELECT terms_version FROM users WHERE id=10')->fetchColumn() === null, 'legacy account receives no fabricated terms version');
     ensure_app_schema($db);
     check((int)$db->query('SELECT revision FROM learning_designs WHERE id=1')->fetchColumn() === 1, 'migration is idempotent');
+    check(creative_commons_allows_derivatives('cc-by-sa'), 'ShareAlike licenses allow adaptations');
+    check(!creative_commons_allows_derivatives('cc-by-nd') && !creative_commons_allows_derivatives('cc-by-nc-nd'), 'NoDerivatives licenses remain identifiable for publication rules');
 
     $db->exec("INSERT INTO users (id,username,email,password_hash,role,status) VALUES (1,'Admin','admin@example.test','test','admin','active')");
     $_SESSION['user'] = ['id'=>1,'username'=>'Old name','email'=>'old@example.test','role'=>'admin'];

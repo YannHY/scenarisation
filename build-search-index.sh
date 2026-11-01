@@ -30,12 +30,12 @@ node "$PROJECT_DIR/scripts/render-search-pages.mjs" "$PROJECT_DIR" "$STAGING_DIR
 PAGEFIND_SITE="$STAGING_DIR/fr" \
 PAGEFIND_OUTPUT_PATH="$TEMP_OUTPUT_DIR/fr" \
 PAGEFIND_FORCE_LANGUAGE="fr" \
-npx -y pagefind
+npx -y pagefind@1.5.2
 
 PAGEFIND_SITE="$STAGING_DIR/en" \
 PAGEFIND_OUTPUT_PATH="$TEMP_OUTPUT_DIR/en" \
 PAGEFIND_FORCE_LANGUAGE="en" \
-npx -y pagefind
+npx -y pagefind@1.5.2
 
 rm -rf "$OUTPUT_DIR"
 mv "$TEMP_OUTPUT_DIR" "$OUTPUT_DIR"

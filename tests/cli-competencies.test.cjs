@@ -8,6 +8,7 @@ const { spawnSync } = require('node:child_process');
 const root = path.join(__dirname, '..');
 const cli = path.join(root, 'bin', 'scenarisation');
 const catalogPath = path.join(root, 'data', 'cli-competencies.json');
+const helpPath = path.join(root, 'help.php');
 
 function run(args, options = {}) {
   return spawnSync('python3', [cli, ...args], {
@@ -22,6 +23,21 @@ function expectSuccess(result) {
   assert.equal(result.status, 0, result.stderr || result.stdout);
   return result.stdout;
 }
+
+test('AI prompts document terminal requirements and install the competency catalog in both languages', () => {
+  const help = fs.readFileSync(helpPath, 'utf8');
+  const catalogDownload = 'curl -fsSL https://raw.githubusercontent.com/YannHY/scenarisation/main/data/cli-competencies.json -o .tools/bin/scenarisation-competencies.json';
+  const catalogFallback = 'https://github.com/YannHY/scenarisation/blob/main/data/cli-competencies.json';
+
+  assert.match(help, /Ce prompt peut être utilisé dans Codex, ChatGPT Work, Claude Code/);
+  assert.match(help, /ne simule jamais l’utilisation du CLI/);
+  assert.match(help, /This prompt can be used in Codex, ChatGPT Work, Claude Code/);
+  assert.match(help, /never simulate using the CLI/);
+  assert.match(help, /demandez explicitement sa publication\u00a0: l’IA lance alors/);
+  assert.doesNotMatch(help, /demandez explicitement sa publication : l’IA lance alors/);
+  assert.equal(help.split(catalogDownload).length - 1, 2);
+  assert.equal(help.split(catalogFallback).length - 1, 2);
+});
 
 test('CLI catalog exposes every editor competency framework with labels', () => {
   const catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));

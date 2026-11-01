@@ -1,7 +1,8 @@
 <?php
 declare(strict_types=1);
 
-const APP_SCHEMA_VERSION = 8;
+const APP_VERSION = '1.0.0';
+const APP_SCHEMA_VERSION = 9;
 const TERMS_VERSION = '2026-09-26';
 const EMAIL_VERIFICATION_TTL_SECONDS = 86400;
 const EMAIL_VERIFICATION_RESEND_DELAY_SECONDS = 60;
@@ -229,12 +230,13 @@ function ensure_app_schema(PDO $db): void
         return;
     }
 
-    // A v4 upgrade only adds revisions; do not replay historical data backfills.
+    // Incremental upgrades add targeted columns below; do not replay historical data backfills.
     if ($currentVersion === false || $currentVersion === null || (int)$currentVersion < 4) {
         ensure_app_tables($db);
         ensure_app_migrations($db);
     }
     ensure_design_revision_column($db);
+    ensure_design_provenance_columns($db);
     ensure_terms_acceptance_columns($db);
     ensure_manager_role($db);
     ensure_manager_permission_columns($db);
@@ -407,6 +409,51 @@ function ensure_design_revision_column(PDO $db): void
     }
 }
 
+/** Add immutable source snapshots used to attribute reused scenarios. */
+function ensure_design_provenance_columns(PDO $db): void
+{
+    $isSqlite = $db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite';
+    $columns = [
+        'source_design_id' => $isSqlite ? 'INTEGER NULL' : 'BIGINT UNSIGNED NULL',
+        'root_design_id' => $isSqlite ? 'INTEGER NULL' : 'BIGINT UNSIGNED NULL',
+        'source_title' => $isSqlite ? 'TEXT NULL' : 'VARCHAR(255) NULL',
+        'source_author_name' => $isSqlite ? 'TEXT NULL' : 'VARCHAR(80) NULL',
+        'source_license_code' => $isSqlite ? 'TEXT NULL' : 'VARCHAR(24) NULL',
+        'derived_at' => $isSqlite ? 'TEXT NULL' : 'DATETIME NULL',
+    ];
+    foreach ($columns as $column => $definition) {
+        $exists = static function () use ($db, $isSqlite, $column): bool {
+            if ($isSqlite) {
+                return in_array($column, array_column($db->query('PRAGMA table_info(learning_designs)')->fetchAll(PDO::FETCH_ASSOC), 'name'), true);
+            }
+            $stmt = $db->prepare("SELECT COUNT(*) FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'learning_designs' AND COLUMN_NAME = ?");
+            $stmt->execute([$column]);
+            return (int)$stmt->fetchColumn() > 0;
+        };
+        if ($exists()) continue;
+        try {
+            $db->exec("ALTER TABLE learning_designs ADD COLUMN $column $definition");
+        } catch (PDOException $error) {
+            if (!$exists()) throw $error;
+        }
+    }
+    if ($isSqlite) {
+        $db->exec('CREATE INDEX IF NOT EXISTS idx_learning_designs_source ON learning_designs(source_design_id)');
+        $db->exec('CREATE INDEX IF NOT EXISTS idx_learning_designs_root ON learning_designs(root_design_id)');
+        return;
+    }
+    foreach ([
+        'idx_learning_designs_source' => 'CREATE INDEX idx_learning_designs_source ON learning_designs(source_design_id)',
+        'idx_learning_designs_root' => 'CREATE INDEX idx_learning_designs_root ON learning_designs(root_design_id)',
+    ] as $indexName => $sql) {
+        $stmt = $db->prepare("SELECT COUNT(*) FROM information_schema.STATISTICS
+            WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'learning_designs' AND INDEX_NAME = ?");
+        $stmt->execute([$indexName]);
+        if ((int)$stmt->fetchColumn() === 0) $db->exec($sql);
+    }
+}
+
 function ensure_app_schema_meta_table(PDO $db): void
 {
     if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite') {
@@ -458,6 +505,12 @@ function ensure_app_tables(PDO $db): void
             is_published INTEGER NOT NULL DEFAULT 0,
             is_listed INTEGER NOT NULL DEFAULT 0,
             listed_at TEXT NULL,
+            source_design_id INTEGER NULL,
+            root_design_id INTEGER NULL,
+            source_title TEXT NULL,
+            source_author_name TEXT NULL,
+            source_license_code TEXT NULL,
+            derived_at TEXT NULL,
             created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (owner_user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -528,6 +581,12 @@ function ensure_app_tables(PDO $db): void
         is_published TINYINT(1) NOT NULL DEFAULT 0,
         is_listed TINYINT(1) NOT NULL DEFAULT 0,
         listed_at DATETIME NULL,
+        source_design_id BIGINT UNSIGNED NULL,
+        root_design_id BIGINT UNSIGNED NULL,
+        source_title VARCHAR(255) NULL,
+        source_author_name VARCHAR(80) NULL,
+        source_license_code VARCHAR(24) NULL,
+        derived_at DATETIME NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         INDEX idx_learning_designs_owner (owner_user_id),
@@ -802,6 +861,34 @@ function creative_commons_licenses(): array
 function creative_commons_license(string $code): ?array
 {
     return creative_commons_licenses()[strtolower(trim($code))] ?? null;
+}
+
+function creative_commons_allows_derivatives(string $code): bool
+{
+    return !in_array(strtolower(trim($code)), ['cc-by-nd', 'cc-by-nc-nd'], true);
+}
+
+/** @return array<string, mixed>|null */
+function app_design_provenance_payload(array $row): ?array
+{
+    $sourceDesignId = (int)($row['source_design_id'] ?? 0);
+    $sourceTitle = trim((string)($row['source_title'] ?? ''));
+    $sourceAuthor = trim((string)($row['source_author_name'] ?? ''));
+    if ($sourceDesignId <= 0 && $sourceTitle === '' && $sourceAuthor === '') return null;
+
+    $licenseCode = strtolower(trim((string)($row['source_license_code'] ?? '')));
+    $license = creative_commons_license($licenseCode);
+    return [
+        'verified' => true,
+        'sourceDesignId' => $sourceDesignId > 0 ? $sourceDesignId : null,
+        'rootDesignId' => (int)($row['root_design_id'] ?? 0) ?: null,
+        'sourceTitle' => $sourceTitle,
+        'sourceAuthor' => $sourceAuthor,
+        'sourceLicenseCode' => $license ? $licenseCode : null,
+        'sourceLicenseLabel' => $license['label'] ?? null,
+        'sourceLicenseUrl' => $license['url'] ?? null,
+        'derivedAt' => trim((string)($row['derived_at'] ?? '')) ?: null,
+    ];
 }
 
 function current_user(): ?array
@@ -1532,7 +1619,7 @@ function render_site_nav(string $active = '', bool $accountAvailable = true): vo
     <script defer src="js/site-tooltip.js?v=<?= hash_file('sha256', __DIR__ . '/../js/site-tooltip.js') ?>"></script>
     <link rel="stylesheet" href="css/account-preferences.css?v=<?= hash_file('sha256', __DIR__ . '/../css/account-preferences.css') ?>" />
     <link rel="stylesheet" href="css/site-search.css?v=20260910-single-row" />
-    <script src="js/site-search.js?v=20260910-scenario-wording"></script>
+    <script src="js/site-search.js?v=20261101-updates-page"></script>
     <?php
 }
 
@@ -1548,6 +1635,9 @@ function site_breadcrumb_items(string $active = ''): array
         ],
         'about' => [
             ['fr' => 'À propos', 'en' => 'About'],
+        ],
+        'updates' => [
+            ['fr' => 'Nouveautés', 'en' => 'What’s new'],
         ],
         'admin' => [
             ['fr' => 'Compte', 'en' => 'Account'],

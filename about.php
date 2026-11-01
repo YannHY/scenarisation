@@ -25,7 +25,7 @@ app_start_session();
 <main class="about-shell with-nav">
     <div class="about-card">
         <h1 id="about-title" class="about-title">À propos</h1>
-        <p class="about-version">Version 0.9</p>
+        <p class="about-version">Version <?= h(APP_VERSION) ?></p>
         <p id="about-intro" class="about-intro">Scénarisation est un outil de scénarisation pédagogique. <a href="help.php">Consultez la page d’aide</a> pour découvrir ses fonctionnalités et apprendre à l’utiliser.</p>
 
         <hr class="about-divider">

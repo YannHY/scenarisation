@@ -1054,28 +1054,6 @@ html body.login-page .login-intro h2 {
 .login-learning-rhythm span:nth-child(4) { background: var(--produce); }
 .login-learning-rhythm span:nth-child(5) { background: var(--discuss); }
 .login-learning-rhythm span:nth-child(6) { background: var(--collaborate); }
-.login-beta-note {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 20px 0 0;
-  color: var(--muted);
-  font-size: 14px;
-  font-weight: 650;
-  line-height: 1.45;
-}
-.login-beta-note i {
-  display: inline-grid;
-  flex: 0 0 28px;
-  width: 28px;
-  height: 28px;
-  place-items: center;
-  color: #111;
-  font-size: 13px;
-}
-.login-beta-note-mobile {
-  display: none;
-}
 body.login-page .site-footer-copy-stack {
   align-items: center;
   text-align: center;
@@ -1696,14 +1674,6 @@ th {
   color: #fff;
 }
 
-[data-theme="dark"] .login-beta-note {
-  color: #c7d2e5;
-}
-
-[data-theme="dark"] .login-beta-note i {
-  color: #fff;
-}
-
 [data-theme="dark"] .profile-primary-link {
   background: var(--action-primary);
   border-color: var(--action-primary-border);
@@ -2117,10 +2087,6 @@ body.profile-page .danger-panel .danger-button:focus-visible {
   }
   .login-intro {
     display: none;
-  }
-  .login-beta-note-mobile {
-    display: flex;
-    margin: -6px 0 22px;
   }
 }
 

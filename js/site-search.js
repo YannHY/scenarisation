@@ -16,7 +16,7 @@
     help: ["help.php"], models: ["models.php"], scenarios: ["view.php", "share.php"],
     competencies: ["competencies.php"], prompts: ["prompts.php"],
     references: ["bloom.php", "cadre-conversationnel.php", "learning-design.php", "competencies.php"],
-    other: ["index.php", "about.php", "conditions-utilisation.php", "mentions-legales.php", "politique-confidentialite.php"]
+    other: ["index.php", "about.php", "news.php", "conditions-utilisation.php", "mentions-legales.php", "politique-confidentialite.php"]
   };
 
   var translations = {
@@ -42,6 +42,7 @@
         "share.php": "Scénarios partagés",
         "index.php": "Accueil",
         "about.php": "À propos",
+        "news.php": "Nouveautés",
         "bloom.php": "Taxonomie de Bloom",
         "cadre-conversationnel.php": "Cadre conversationnel",
         "competencies.php": "Compétences",
@@ -76,6 +77,7 @@
         "share.php": "Shared scenarios",
         "index.php": "Home",
         "about.php": "About",
+        "news.php": "What’s new",
         "bloom.php": "Bloom’s Taxonomy",
         "cadre-conversationnel.php": "Conversational Framework",
         "competencies.php": "Competencies",

@@ -1,0 +1,149 @@
+.design-provenance {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  margin: 0 0 4px;
+  padding: 0 0 12px;
+  border-bottom: 1px solid var(--line, #d9d9d9);
+}
+
+.design-provenance[hidden] {
+  display: none;
+}
+
+.design-provenance-icon,
+.public-provenance-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #f2f2f2;
+  color: #111;
+}
+
+.design-provenance-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.design-provenance-title,
+.public-provenance-title {
+  margin: 0;
+  color: var(--text-strong, var(--text-1, #171717));
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+html body.designer-page .design-provenance-title {
+  color: var(--text-strong, var(--text-1, #171717));
+  font-family: var(--font-family, sans-serif);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.35;
+}
+
+.design-provenance-copy,
+.design-provenance-meta,
+.public-provenance-copy,
+.public-provenance-meta,
+.saved-card-provenance,
+.shared-card-provenance {
+  margin: 5px 0 0;
+  color: var(--muted, var(--text-2, #666));
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.design-provenance-meta,
+.public-provenance-meta {
+  font-size: 12px;
+}
+
+.design-provenance-copy,
+.design-provenance-meta {
+  margin-top: 3px;
+  line-height: 1.4;
+}
+
+.public-provenance {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+  margin: 0 0 28px;
+  padding: 0 0 22px;
+  border-bottom: 1px solid var(--border, #d9d9d9);
+}
+
+.public-provenance a,
+.shared-card-provenance a {
+  color: inherit;
+  font-weight: 650;
+  text-underline-offset: 3px;
+}
+
+.saved-card-provenance {
+  max-width: 360px;
+}
+
+.saved-card-provenance i {
+  margin-right: 6px;
+  color: var(--text-strong, #111);
+}
+
+.shared-card-provenance {
+  margin-top: 7px;
+}
+
+.shared-license-note {
+  display: block;
+  margin: 0;
+  color: var(--muted, #666);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.shared-license-note i {
+  margin-right: 5px;
+}
+
+[data-theme="dark"] .design-provenance-icon,
+[data-theme="dark"] .public-provenance-icon {
+  background: #050505;
+  color: #fff;
+}
+
+[data-theme="dark"] .saved-card-provenance i {
+  color: #fff;
+}
+
+@media (max-width: 640px) {
+  .design-provenance,
+  .public-provenance {
+    grid-template-columns: 32px minmax(0, 1fr);
+    gap: 11px;
+  }
+
+  .design-provenance-icon,
+  .public-provenance-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .design-provenance {
+    grid-template-columns: 28px minmax(0, 1fr);
+    gap: 9px;
+  }
+
+  .design-provenance-icon {
+    width: 28px;
+    height: 28px;
+  }
+}

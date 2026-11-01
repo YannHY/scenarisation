@@ -3,7 +3,8 @@
 (() => {
 "use strict";
 window.LearningDesignerModules.createFields = ({
-  t, escapeHtml, announce
+  t, escapeHtml, announce, getLearningOutcomes, getBloomTaxonomy,
+  createLearningOutcome, deleteLearningOutcome
 }) => {
 const MARKDOWN_ACTIONS = [
   { id: "bold", text: "B", titleKey: "mdBold", code: "KeyB", shift: false, key: "B" },
@@ -105,8 +106,158 @@ function ensureMarkdownToolbars(root = document) {
       }
       toolbar.appendChild(button);
     });
+    if (textarea.classList.contains("activity-description")) {
+      toolbar.appendChild(createLearningOutcomesControl());
+    }
     wrapper.insertBefore(toolbar, textarea);
   });
+}
+
+function createLearningOutcomesControl() {
+  const control = document.createElement("div");
+  control.className = "learning-outcomes-control";
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "markdown-tool-btn learning-outcomes-trigger";
+  button.setAttribute("aria-haspopup", "dialog");
+  button.setAttribute("aria-expanded", "false");
+  button.innerHTML = '<i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>';
+
+  const menu = document.createElement("div");
+  menu.className = "learning-outcomes-menu hidden";
+  menu.setAttribute("role", "dialog");
+  menu.setAttribute("aria-label", t("learningOutcomesMenuLabel"));
+  control.append(button, menu);
+  localizeLearningOutcomesControl(control);
+  return control;
+}
+
+function localizeLearningOutcomesControl(control) {
+  const button = control.querySelector(".learning-outcomes-trigger");
+  const label = t("insertLearningOutcome");
+  if (button) {
+    button.setAttribute("aria-label", label);
+    button.setAttribute("title", label);
+  }
+}
+
+function renderLearningOutcomesMenu(control) {
+  const menu = control.querySelector(".learning-outcomes-menu");
+  if (!menu) return;
+  menu.replaceChildren();
+
+  const heading = document.createElement("div");
+  heading.className = "learning-outcomes-menu-heading";
+  const title = document.createElement("strong");
+  title.textContent = t("learningOutcomesMenuLabel");
+  const hint = document.createElement("span");
+  hint.textContent = t("learningOutcomesMenuHint");
+  heading.append(title, hint);
+  menu.appendChild(heading);
+
+  const createButton = document.createElement("button");
+  createButton.type = "button";
+  createButton.className = "learning-outcome-create-trigger";
+  createButton.innerHTML = '<i class="fa-solid fa-plus" aria-hidden="true"></i><span></span>';
+  createButton.querySelector("span").textContent = t("newLearningOutcome");
+  menu.appendChild(createButton);
+
+  const form = createLearningOutcomeForm();
+  menu.appendChild(form);
+
+  const outcomes = typeof getLearningOutcomes === "function" ? getLearningOutcomes() : [];
+  if (!Array.isArray(outcomes) || outcomes.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "learning-outcomes-empty";
+    empty.textContent = t("noLearningOutcomes");
+    menu.appendChild(empty);
+  } else {
+    const list = document.createElement("div");
+    list.className = "learning-outcomes-options";
+    outcomes.forEach((outcome) => {
+      const row = document.createElement("div");
+      row.className = "learning-outcome-option-row";
+      const item = document.createElement("button");
+      item.type = "button";
+      item.className = "learning-outcome-option";
+      item.dataset.outcomeId = outcome.id || "";
+      item.dataset.bloom = outcome.category || "";
+
+      const tag = document.createElement("span");
+      tag.className = "learning-outcome-option-tag";
+      tag.textContent = outcome.verb || outcome.categoryLabel || "—";
+      const text = document.createElement("span");
+      text.className = "learning-outcome-option-text";
+      text.textContent = outcome.text || tag.textContent;
+      item.append(tag, text);
+
+      const deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.className = "learning-outcome-option-delete";
+      deleteButton.dataset.outcomeId = outcome.id || "";
+      deleteButton.setAttribute("aria-label", `${t("deleteOutcome")} : ${outcome.text || tag.textContent}`);
+      deleteButton.setAttribute("title", t("deleteOutcome"));
+      deleteButton.innerHTML = '<i class="fa-solid fa-trash" aria-hidden="true"></i>';
+      row.append(item, deleteButton);
+      list.appendChild(row);
+    });
+    menu.appendChild(list);
+  }
+}
+
+function createLearningOutcomeForm() {
+  const form = document.createElement("div");
+  form.className = "learning-outcome-create-form hidden";
+
+  const intro = document.createElement("p");
+  intro.textContent = t("newLearningOutcomeHint");
+
+  const taxonomy = typeof getBloomTaxonomy === "function" ? getBloomTaxonomy() : [];
+  const level = document.createElement("select");
+  level.className = "learning-outcome-level-select";
+  level.setAttribute("aria-label", t("bloomLevel"));
+  level.appendChild(new Option(t("bloomLevelOptional"), ""));
+  (Array.isArray(taxonomy) ? taxonomy : []).forEach((category) => {
+    level.appendChild(new Option(category.label, category.id));
+  });
+
+  const verb = document.createElement("select");
+  verb.className = "learning-outcome-verb-select";
+  verb.setAttribute("aria-label", t("bloomVerb"));
+  verb.disabled = true;
+  verb.appendChild(new Option(t("bloomVerbOptional"), ""));
+
+  const text = document.createElement("input");
+  text.type = "text";
+  text.className = "learning-outcome-new-text";
+  text.setAttribute("aria-label", t("learningOutcomeText"));
+  text.placeholder = t("learningOutcomeTextPlaceholder");
+
+  const actions = document.createElement("div");
+  actions.className = "learning-outcome-create-actions";
+  const cancel = document.createElement("button");
+  cancel.type = "button";
+  cancel.className = "learning-outcome-create-cancel";
+  cancel.textContent = t("cancel");
+  const confirm = document.createElement("button");
+  confirm.type = "button";
+  confirm.className = "learning-outcome-create-confirm";
+  confirm.textContent = t("createAndInsertOutcome");
+  confirm.disabled = true;
+  actions.append(cancel, confirm);
+  form.append(intro, level, verb, text, actions);
+  return form;
+}
+
+function updateLearningOutcomeVerbSelect(form) {
+  const level = form.querySelector(".learning-outcome-level-select");
+  const verb = form.querySelector(".learning-outcome-verb-select");
+  const taxonomy = typeof getBloomTaxonomy === "function" ? getBloomTaxonomy() : [];
+  const category = (Array.isArray(taxonomy) ? taxonomy : []).find((item) => item.id === level?.value);
+  verb.replaceChildren(new Option(t("bloomVerbOptional"), ""));
+  (category?.verbs || []).forEach((label) => verb.appendChild(new Option(label, label)));
+  verb.disabled = !category;
 }
 
 function renderInlineMarkdown(value) {
@@ -246,6 +397,7 @@ function localizeExpandableFieldControls(root = document) {
     button.setAttribute("aria-label", expanded ? t("closeFullscreen") : t("fullscreen"));
     button.setAttribute("title", expanded ? t("closeFullscreen") : t("fullscreen"));
   });
+  root.querySelectorAll(".learning-outcomes-control").forEach(localizeLearningOutcomesControl);
 }
 
 
@@ -363,6 +515,30 @@ function applyMarkdownAction(textarea, actionId) {
   }
 }
 
+function insertLearningOutcome(textarea, outcome) {
+  const wrapper = textarea.closest(".expandable-field") || textarea;
+  const { start, end } = getStoredSelection(wrapper, textarea);
+  const tag = String(outcome?.verb || outcome?.categoryLabel || "").trim();
+  const body = String(outcome?.text || "").trim();
+  const content = tag && body ? `**${tag}** — ${body}` : (body || tag);
+  if (!content) return;
+  const before = textarea.value.slice(0, start);
+  const after = textarea.value.slice(end);
+  const leadingBreak = before && !before.endsWith("\n") ? "\n" : "";
+  const trailingBreak = after && !after.startsWith("\n") ? "\n" : "";
+  const replacement = `${leadingBreak}- ${content}${trailingBreak}`;
+  replaceSelection(textarea, wrapper, replacement, start + replacement.length - trailingBreak.length);
+  announce(t("learningOutcomeInserted"));
+}
+
+function closeLearningOutcomesMenus(except = null) {
+  document.querySelectorAll(".learning-outcomes-control").forEach((control) => {
+    if (control === except) return;
+    control.querySelector(".learning-outcomes-menu")?.classList.add("hidden");
+    control.querySelector(".learning-outcomes-trigger")?.setAttribute("aria-expanded", "false");
+  });
+}
+
 function setupExpandableFields() {
   ensureMarkdownToolbars();
   ensureMarkdownPreviews();
@@ -388,7 +564,7 @@ function setupExpandableFields() {
   });
 
   document.addEventListener("mousedown", (event) => {
-    if (event.target.closest(".markdown-tool-btn")) {
+    if (event.target.closest(".markdown-tool-btn, .learning-outcome-option, .learning-outcome-option-delete")) {
       event.preventDefault();
     }
   });
@@ -400,6 +576,115 @@ function setupExpandableFields() {
     const textarea = wrapper?.querySelector("textarea");
     if (!textarea) return;
     applyMarkdownAction(textarea, button.dataset.mdAction || "");
+  });
+
+  document.addEventListener("click", (event) => {
+    const trigger = event.target.closest(".learning-outcomes-trigger");
+    if (trigger) {
+      const control = trigger.closest(".learning-outcomes-control");
+      const menu = control?.querySelector(".learning-outcomes-menu");
+      if (!control || !menu) return;
+      const shouldOpen = menu.classList.contains("hidden");
+      closeLearningOutcomesMenus(control);
+      if (shouldOpen) renderLearningOutcomesMenu(control);
+      menu.classList.toggle("hidden", !shouldOpen);
+      trigger.setAttribute("aria-expanded", String(shouldOpen));
+      return;
+    }
+
+    const option = event.target.closest(".learning-outcome-option");
+    if (option) {
+      const control = option.closest(".learning-outcomes-control");
+      const textarea = control?.closest(".expandable-field")?.querySelector("textarea");
+      const outcomes = typeof getLearningOutcomes === "function" ? getLearningOutcomes() : [];
+      const outcome = Array.isArray(outcomes)
+        ? outcomes.find((item) => String(item.id || "") === option.dataset.outcomeId)
+        : null;
+      if (textarea && outcome) insertLearningOutcome(textarea, outcome);
+      closeLearningOutcomesMenus();
+      return;
+    }
+
+    const deleteButton = event.target.closest(".learning-outcome-option-delete");
+    if (deleteButton) {
+      const control = deleteButton.closest(".learning-outcomes-control");
+      if (typeof deleteLearningOutcome === "function") {
+        deleteLearningOutcome(deleteButton.dataset.outcomeId || "");
+      }
+      if (control) renderLearningOutcomesMenu(control);
+      announce(t("learningOutcomeDeleted"));
+      return;
+    }
+
+    const createTrigger = event.target.closest(".learning-outcome-create-trigger");
+    if (createTrigger) {
+      const form = createTrigger.closest(".learning-outcomes-menu")?.querySelector(".learning-outcome-create-form");
+      if (!form) return;
+      form.classList.remove("hidden");
+      createTrigger.classList.add("hidden");
+      form.querySelector(".learning-outcome-new-text")?.focus();
+      return;
+    }
+
+    const createCancel = event.target.closest(".learning-outcome-create-cancel");
+    if (createCancel) {
+      const menu = createCancel.closest(".learning-outcomes-menu");
+      menu?.querySelector(".learning-outcome-create-form")?.classList.add("hidden");
+      const createTriggerButton = menu?.querySelector(".learning-outcome-create-trigger");
+      createTriggerButton?.classList.remove("hidden");
+      createTriggerButton?.focus();
+      return;
+    }
+
+    const createConfirm = event.target.closest(".learning-outcome-create-confirm");
+    if (createConfirm) {
+      const form = createConfirm.closest(".learning-outcome-create-form");
+      const control = createConfirm.closest(".learning-outcomes-control");
+      const textarea = control?.closest(".expandable-field")?.querySelector(".activity-description");
+      const level = form?.querySelector(".learning-outcome-level-select");
+      const verb = form?.querySelector(".learning-outcome-verb-select");
+      const text = form?.querySelector(".learning-outcome-new-text")?.value.trim() || "";
+      const taxonomy = typeof getBloomTaxonomy === "function" ? getBloomTaxonomy() : [];
+      const category = (Array.isArray(taxonomy) ? taxonomy : []).find((item) => item.id === level?.value);
+      if (!textarea || !text) return;
+      const draft = {
+        category: category?.id || "",
+        categoryLabel: category?.label || "",
+        verb: verb?.value || "",
+        text
+      };
+      const outcome = typeof createLearningOutcome === "function"
+        ? createLearningOutcome(draft)
+        : draft;
+      insertLearningOutcome(textarea, outcome);
+      closeLearningOutcomesMenus();
+      return;
+    }
+
+    if (!event.target.closest(".learning-outcomes-menu")) closeLearningOutcomesMenus();
+  });
+
+  document.addEventListener("change", (event) => {
+    const level = event.target.closest(".learning-outcome-level-select");
+    if (!level) return;
+    const form = level.closest(".learning-outcome-create-form");
+    if (form) updateLearningOutcomeVerbSelect(form);
+  });
+
+  document.addEventListener("input", (event) => {
+    const input = event.target.closest(".learning-outcome-new-text");
+    if (!input) return;
+    const confirm = input.closest(".learning-outcome-create-form")?.querySelector(".learning-outcome-create-confirm");
+    if (confirm) confirm.disabled = !input.value.trim();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    const openControl = event.target.closest(".learning-outcomes-control") ||
+      document.querySelector(".learning-outcomes-trigger[aria-expanded='true']")?.closest(".learning-outcomes-control");
+    if (!openControl) return;
+    closeLearningOutcomesMenus();
+    openControl.querySelector(".learning-outcomes-trigger")?.focus();
   });
 
   document.addEventListener("keydown", (event) => {

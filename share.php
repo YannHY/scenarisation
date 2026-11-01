@@ -22,9 +22,13 @@ try {
     $currentPage = $embeddedCatalog ? 1 : min($pageCount, max(1, (int)($_GET['page'] ?? 1)));
     $offset = ($currentPage - 1) * $pageSize;
 
-    $sql = "SELECT d.title, d.document_json, d.share_token, d.license_code, d.updated_at, d.listed_at, u.username
+    $sql = "SELECT d.title, d.document_json, d.share_token, d.license_code, d.updated_at, d.listed_at,
+            d.source_design_id, d.root_design_id, d.source_title, d.source_author_name,
+            d.source_license_code, d.derived_at, u.username,
+            source.share_token AS source_share_token, source.is_published AS source_is_published
         FROM learning_designs d
         JOIN users u ON u.id = d.owner_user_id
+        LEFT JOIN learning_designs source ON source.id = d.source_design_id
         WHERE d.is_published = 1 AND d.is_listed = 1 AND d.share_token IS NOT NULL
         ORDER BY d.listed_at DESC, d.id DESC";
     if (!$embeddedCatalog) {
@@ -96,6 +100,10 @@ foreach ($rows as $row) {
     }
     $designedDuration = share_designed_minutes($meta);
     $license = creative_commons_license((string)($row['license_code'] ?? ''));
+    $provenance = app_design_provenance_payload($row);
+    if ($provenance && !empty($row['source_is_published']) && trim((string)($row['source_share_token'] ?? '')) !== '') {
+        $provenance['sourceUrl'] = 'view.php?token=' . urlencode((string)$row['source_share_token']);
+    }
     $items[] = [
         'title' => $title,
         'title_is_default' => $titleIsDefault,
@@ -114,6 +122,8 @@ foreach ($rows as $row) {
         'school_stage' => share_school_stage($schoolSystem, $schoolLevel),
         'competencies' => $competencies,
         'license' => $license,
+        'private_adaptation_only' => !creative_commons_allows_derivatives((string)($row['license_code'] ?? '')),
+        'provenance' => $provenance,
     ];
 }
 
@@ -243,6 +253,7 @@ function share_count_label(int $count, string $singular, ?string $plural = null)
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="css/interface.css?v=20260905-subtle-focus" />
     <link rel="stylesheet" href="css/account-ui.css?v=20260906-highlight" />
+    <link rel="stylesheet" href="css/provenance.css?v=<?= hash_file('sha256', __DIR__ . '/css/provenance.css') ?>" />
     <link rel="stylesheet" href="css/account-pages.css?v=20260904-content-rhythm" />
     <style>
       .shared-header {
@@ -448,6 +459,17 @@ function share_count_label(int $count, string $singular, ?string $plural = null)
                   <h2 class="shared-card-title"><?= h($item['title']) ?></h2>
                 <?php endif; ?>
                 <p class="shared-card-copy"><span data-site-i18n-en="By" data-site-i18n-fr="Par">Par</span> <?= h($item['author']) ?></p>
+                <?php if ($item['provenance']): ?>
+                  <p class="shared-card-provenance">
+                    <span data-site-i18n-en="Derived from" data-site-i18n-fr="Dérivé de">Dérivé de</span>
+                    <?php if (!empty($item['provenance']['sourceUrl'])): ?>
+                      <a href="<?= h($item['provenance']['sourceUrl']) ?>">« <?= h($item['provenance']['sourceTitle']) ?> »</a>
+                    <?php else: ?>
+                      « <?= h($item['provenance']['sourceTitle']) ?> »
+                    <?php endif; ?>
+                    <span data-site-i18n-en="by" data-site-i18n-fr="par">par</span> <?= h($item['provenance']['sourceAuthor']) ?>
+                  </p>
+                <?php endif; ?>
               </div>
               <?php if ($item['description'] !== ''): ?>
                 <p class="shared-card-copy"><?= h($item['description']) ?></p>
@@ -478,6 +500,9 @@ function share_count_label(int $count, string $singular, ?string $plural = null)
                   </a>
                 <?php endif; ?>
               </div>
+              <?php if ($item['private_adaptation_only'] && $item['license']): ?>
+                <p class="shared-license-note"><i class="fa-solid fa-circle-info" aria-hidden="true"></i><span><?= h($item['license']['label']) ?></span> · <span data-site-i18n-en="Private adaptation only" data-site-i18n-fr="Adaptation privée uniquement">Adaptation privée uniquement</span></p>
+              <?php endif; ?>
             </article>
           <?php endforeach; ?>
         </section>

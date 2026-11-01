@@ -104,6 +104,11 @@ function buildMarkdownExport(scope = "full", sessionIds = null) {
   lines.push(`- Taille du groupe: ${getState().meta.sizeClass || "-"}`);
   lines.push(`- Concepteur(s): ${getState().meta.designers || "-"}`);
   lines.push(`- Enseignant(s): ${getState().meta.trainers || "-"}`);
+  const provenance = getState().meta.provenance;
+  if (provenance?.verified) {
+    lines.push(`- Provenance: dérivé de « ${provenance.sourceTitle || "Scénario sans titre"} » par ${provenance.sourceAuthor || "auteur inconnu"}`);
+    if (provenance.sourceLicenseLabel) lines.push(`- Licence de la source: ${provenance.sourceLicenseLabel}`);
+  }
   lines.push(
     `- Durée prévue: ${formatPedagogicalTime(
       getState().meta.learningDays,

@@ -11,6 +11,10 @@ Tu dois créer un scénario pédagogique Scénarisation en utilisant le CLI `sce
 Important :
 Tu es peut-être dans un sandbox isolé. Sélectionne le CLI selon ses capacités, pas seulement selon l’existence d’une commande.
 
+Ce prompt peut être utilisé dans Codex, ChatGPT Work, Claude Code ou tout autre environnement disposant d’un terminal, d’un accès aux fichiers et de la capacité à exécuter le CLI.
+
+Si ton environnement ne permet pas d’exécuter des commandes et d’écrire des fichiers, ne simule jamais l’utilisation du CLI et ne prétends pas avoir créé ou validé `design.json`. Indique clairement cette limite et propose de poursuivre dans un environnement doté d’un terminal, ou de préparer les commandes que l’utilisateur exécutera lui-même.
+
 Teste dans cet ordre :
 1. `./bin/scenarisation` si tu travailles dans le dépôt Scénarisation ;
 2. la commande globale `scenarisation` ;
@@ -24,13 +28,15 @@ Si aucune copie compatible n’est disponible, installe une copie locale dans to
 
 mkdir -p .tools/bin
 curl -fsSL https://raw.githubusercontent.com/YannHY/scenarisation/main/bin/scenarisation -o .tools/bin/scenarisation
+curl -fsSL https://raw.githubusercontent.com/YannHY/scenarisation/main/data/cli-competencies.json -o .tools/bin/scenarisation-competencies.json
 chmod +x .tools/bin/scenarisation
 ./.tools/bin/scenarisation --help
 
 Si raw.githubusercontent.com est bloqué, utilise web_fetch ou une autre méthode disponible pour récupérer :
 https://github.com/YannHY/scenarisation/blob/main/bin/scenarisation
+https://github.com/YannHY/scenarisation/blob/main/data/cli-competencies.json
 
-Puis écris le fichier dans `.tools/bin/scenarisation`, rends-le exécutable et vérifie ses capacités.
+Puis écris les fichiers dans `.tools/bin/scenarisation` et `.tools/bin/scenarisation-competencies.json`, rends le CLI exécutable et vérifie ses capacités.
 
 Mémorise la commande compatible retenue sous la variable `SCENARISATION` : `./bin/scenarisation`, `scenarisation` ou `./.tools/bin/scenarisation`. Utilise ensuite `$SCENARISATION` dans toutes les commandes ci-dessous. Ne suppose pas qu’une variable shell définie dans une commande précédente persistera : si nécessaire, remplace `$SCENARISATION` par la commande retenue.
 
@@ -238,6 +244,10 @@ You must create a Scénarisation teaching scenario using the `scenarisation` CLI
 Important:
 You may be working in an isolated sandbox. Select the CLI by capability, not merely by whether a command exists.
 
+This prompt can be used in Codex, ChatGPT Work, Claude Code, or any other environment with a terminal, file access, and the ability to run the CLI.
+
+If your environment cannot run commands and write files, never simulate using the CLI or claim to have created or validated `design.json`. Clearly state this limitation and offer to continue in an environment with a terminal, or to prepare the commands for the user to run themselves.
+
 Test these candidates in order:
 1. `./bin/scenarisation` when working in the Scénarisation repository;
 2. the global `scenarisation` command;
@@ -251,13 +261,15 @@ If no compatible copy is available, install a local copy in your environment:
 
 mkdir -p .tools/bin
 curl -fsSL https://raw.githubusercontent.com/YannHY/scenarisation/main/bin/scenarisation -o .tools/bin/scenarisation
+curl -fsSL https://raw.githubusercontent.com/YannHY/scenarisation/main/data/cli-competencies.json -o .tools/bin/scenarisation-competencies.json
 chmod +x .tools/bin/scenarisation
 ./.tools/bin/scenarisation --help
 
 If raw.githubusercontent.com is blocked, use web_fetch or another available method to retrieve:
 https://github.com/YannHY/scenarisation/blob/main/bin/scenarisation
+https://github.com/YannHY/scenarisation/blob/main/data/cli-competencies.json
 
-Then write the file to `.tools/bin/scenarisation`, make it executable, and check its capabilities.
+Then write the files to `.tools/bin/scenarisation` and `.tools/bin/scenarisation-competencies.json`, make the CLI executable, and check its capabilities.
 
 Remember the selected compatible command as `SCENARISATION`: `./bin/scenarisation`, `scenarisation`, or `./.tools/bin/scenarisation`. Use `$SCENARISATION` in all commands below. Do not assume that a shell variable set in an earlier command will persist: replace `$SCENARISATION` with the selected command when necessary.
 
@@ -681,6 +693,18 @@ PROMPT;
                     <li>Vous pouvez choisir de rendre le scénario visible dans la galerie publique des scénarios partagés.</li>
                     <li>Une personne connectée peut importer un scénario partagé dans son propre compte afin de l’adapter.</li>
                 </ul>
+                <h3 id="provenance-reutilisation">Réutiliser un scénario et conserver sa provenance</h3>
+                <p>Dans la galerie des scénarios partagés, le bouton <strong>Réutiliser</strong> crée une copie indépendante dans votre compte. Vous pouvez modifier cette adaptation sans changer le scénario source.</p>
+                <ul>
+                    <li>L’application enregistre automatiquement le titre et l’auteur de la source, sa licence, la date de l’adaptation et le lien entre les scénarios.</li>
+                    <li>La mention <strong>Suivi de l’origine</strong> apparaît dans l’éditeur, dans vos scénarios enregistrés, dans la galerie et sur la page publique de l’adaptation.</li>
+                    <li>Cette provenance est distincte du champ libre <strong>Concepteur(s)</strong> et reste lisible si la source est renommée ou retirée de la galerie.</li>
+                    <li>Les duplications réalisées avant l’ajout de cette fonction ne peuvent pas être rattachées automatiquement à leur source.</li>
+                </ul>
+                <div class="help-callout">
+                    <i class="fa-brands fa-creative-commons" aria-hidden="true"></i>
+                    <p><strong>Le bouton Réutiliser reste disponible quelle que soit la licence.</strong> Un scénario sous licence NoDerivatives peut donc être dupliqué et modifié pour un usage privé. La licence et la mention <strong>Adaptation privée uniquement</strong> sont affichées dans la galerie et dans la provenance ; seule la diffusion de la version adaptée est limitée : elle ne peut pas être partagée ou publiée. Une adaptation publiée dans la galerie à partir d’une source ShareAlike doit conserver la même licence.</p>
+                </div>
                 <div class="help-callout">
                     <i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
                     <p><strong>Partager ne signifie pas forcément envoyer du Markdown.</strong> Vous pouvez transmettre un lien de publication, partager un fichier Word ou Excel, fournir une page HTML, ou échanger le fichier JSON natif selon le besoin du destinataire.</p>
@@ -709,6 +733,7 @@ PROMPT;
                         </tbody>
                     </table>
                 </div>
+                <p>Les exports JSON et Markdown d’un scénario dérivé, ainsi que les sauvegardes ZIP, conservent le suivi de son origine afin que l’attribution accompagne le contenu hors de l’application.</p>
                 <p>Pour exporter, cliquez sur <strong>Exporter</strong>, choisissez le format et le nom du fichier, puis prévisualisez le contenu lorsqu’il s’agit d’un format textuel. Vous pouvez le copier ou le télécharger.</p>
                 <h3 id="modeles">Partir d’un modèle</h3>
                 <p class="help-spaced">Le bouton <strong>Importer</strong> ouvre une fenêtre qui propose d’abord une bibliothèque de scénarios génériques et préremplis : introduire un chapitre, étude de documents, débat argumenté, exposé, tâche complexe, séance avec IA encadrée… Les moments, les durées, les types d’apprentissage, les modalités, les acquis Bloom et les niveaux AIAS sont déjà posés ; il reste à remplacer les jalons entre crochets, comme <code>[MATIÈRE]</code> ou <code>[NOTION 1]</code>, par le contenu de votre discipline. La page <a href="models.php">Modèles de scénarios</a> présente l’ensemble de la bibliothèque et permet de télécharger chaque modèle au format JSON.</p>
@@ -824,7 +849,7 @@ Objectifs généraux de la formation.
                 <h3 id="ia-guide">Utiliser un prompt</h3>
                 <h4>L’IA crée et publie</h4>
                 <p>Pour un usage ponctuel, copiez le prompt ci-dessous, répondez aux questions et validez les propositions de l’IA. Celle-ci sélectionne un CLI compatible et utilise une copie locale si son environnement est isolé.</p>
-                <p>Ne donnez aucun jeton pendant la création. Une fois le scénario validé, demandez explicitement sa publication : l’IA lance alors <code>scenarisation login</code> et vous demande le jeton créé dans votre profil. Donnez-le uniquement à ce moment-là.</p>
+                <p>Ne donnez aucun jeton pendant la création. Une fois le scénario validé, demandez explicitement sa publication : l’IA lance alors <code>scenarisation login</code> et vous demande le jeton créé dans votre profil. Donnez-le uniquement à ce moment-là.</p>
 
                 <h4>Prompt à donner à Claude Code ou Codex</h4>
                 <div class="help-prompt-wrap">
@@ -925,14 +950,14 @@ Objectifs généraux de la formation.
 █  █</pre>
                         </div>
                         <div class="help-terminal-meta">
-                            <span><i class="terminal-cyan" aria-hidden="true"></i>CLI : Scénarisation 0.9.0</span>
-                            <span><i class="terminal-pink" aria-hidden="true"></i>Développement : Yann Houry</span>
-                            <span><i class="terminal-purple" aria-hidden="true"></i>Travail d’origine : François Jourde</span>
-                            <span><i class="terminal-green" aria-hidden="true"></i>Inspiration : UCL Learning Designer</span>
-                            <span><i class="terminal-blue" aria-hidden="true"></i>Licence : CC BY-SA 4.0</span>
-                            <span><i class="terminal-yellow" aria-hidden="true"></i>Web : scenarisation.eu</span>
+                            <span><i class="terminal-cyan" aria-hidden="true"></i>CLI : Scénarisation <?= h(APP_VERSION) ?></span>
+                            <span><i class="terminal-pink" aria-hidden="true"></i>Développement : Yann Houry</span>
+                            <span><i class="terminal-purple" aria-hidden="true"></i>Travail d’origine : François Jourde</span>
+                            <span><i class="terminal-green" aria-hidden="true"></i>Inspiration : UCL Learning Designer</span>
+                            <span><i class="terminal-blue" aria-hidden="true"></i>Licence : CC BY-SA 4.0</span>
+                            <span><i class="terminal-yellow" aria-hidden="true"></i>Web : scenarisation.eu</span>
                         </div>
-                        <pre class="help-terminal-output"><span class="terminal-purple">utilisation :</span> <span class="terminal-pink">scenarisation [--help] [--version] COMMANDE [OPTIONS]</span>
+                        <pre class="help-terminal-output"><span class="terminal-purple">utilisation :</span> <span class="terminal-pink">scenarisation [--help] [--version] COMMANDE [OPTIONS]</span>
 
 Créer, valider et publier des scénarios pédagogiques depuis le terminal.
 
@@ -999,7 +1024,7 @@ scenarisation list school-systems</pre>
                 <div class="help-details-grid">
                     <div>
                         <strong>1. Initialiser le fichier</strong>
-                        <p><code>init</code> crée le fichier JSON de départ avec le titre, la langue, la durée, la modalité, le système ou la classification, le niveau et les référentiels de compétences. Consultez d’abord les catalogues du CLI : ils fournissent les identifiants et les libellés exacts.</p>
+                        <p><code>init</code> crée le fichier JSON de départ avec le titre, la langue, la durée, la modalité, le système ou la classification, le niveau et les référentiels de compétences. Consultez d’abord les catalogues du CLI : ils fournissent les identifiants et les libellés exacts.</p>
                         <div class="help-code-wrap">
                             <button class="help-copy-btn" type="button" aria-label="Copier la commande" title="Copier"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
                             <pre class="help-code">scenarisation list school-systems
@@ -1046,7 +1071,7 @@ scenarisation prompt design.json</pre>
 
                 <h4>Publier</h4>
                 <p>Vous n’avez pas besoin de jeton pour créer, modifier ou valider un scénario. Le jeton est demandé uniquement lors de la connexion du CLI, avant la première publication.</p>
-                <p>Une fois le scénario validé, créez un jeton dans votre profil, section <strong>Publication depuis le CLI</strong>. Lancez ensuite <code>scenarisation login</code> : lorsque le terminal affiche <code>CLI token:</code>, collez le jeton et appuyez sur Entrée. Lancez enfin la publication.</p>
+                <p>Une fois le scénario validé, créez un jeton dans votre profil, section <strong>Publication depuis le CLI</strong>. Lancez ensuite <code>scenarisation login</code> : lorsque le terminal affiche <code>CLI token:</code>, collez le jeton et appuyez sur Entrée. Lancez enfin la publication.</p>
                 <div class="help-code-wrap">
                     <button class="help-copy-btn" type="button" aria-label="Copier la commande" title="Copier"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
                     <pre class="help-code">scenarisation login

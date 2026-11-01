@@ -245,7 +245,23 @@ const {
   autoResizeTextarea, initAutoResizeTextareas, localizeExpandableFieldControls,
   setupExpandableFields, restoreAllFullscreenExpandableFields
 } = window.LearningDesignerModules.createFields({
-  t, escapeHtml, announce
+  t, escapeHtml, announce,
+  getLearningOutcomes: () => Array.isArray(state.meta.sliders) ? state.meta.sliders : [],
+  getBloomTaxonomy: () => BLOOM_TAXONOMY[currentLang()] || BLOOM_TAXONOMY.fr,
+  createLearningOutcome: (draft) => {
+    const outcome = { id: nextId(), ...draft };
+    if (!Array.isArray(state.meta.sliders)) state.meta.sliders = [];
+    state.meta.sliders.push(outcome);
+    saveState();
+    renderOutcomes();
+    return outcome;
+  },
+  deleteLearningOutcome: (outcomeId) => {
+    state.meta.sliders = (Array.isArray(state.meta.sliders) ? state.meta.sliders : [])
+      .filter((outcome) => String(outcome.id || "") !== String(outcomeId || ""));
+    saveState();
+    renderOutcomes();
+  }
 });
 
 
