@@ -369,6 +369,7 @@ function markdownHtml(string $text): string {
     $html = [];
     $paragraph = [];
     $listType = '';
+    $mathBlock = null;
 
     $closeParagraph = function () use (&$html, &$paragraph): void {
         if (!$paragraph) return;
@@ -390,6 +391,21 @@ function markdownHtml(string $text): string {
 
     foreach ($lines as $line) {
         $trimmed = trim($line);
+        if (is_array($mathBlock)) {
+            if ($trimmed === '$$') {
+                $html[] = '<div class="math-source-block">$$' . "\n" . esc(implode("\n", $mathBlock)) . "\n" . '$$</div>';
+                $mathBlock = null;
+            } else {
+                $mathBlock[] = $line;
+            }
+            continue;
+        }
+        if ($trimmed === '$$') {
+            $closeParagraph();
+            $closeList();
+            $mathBlock = [];
+            continue;
+        }
         if ($trimmed === '') {
             $closeParagraph();
             $closeList();
@@ -428,6 +444,9 @@ function markdownHtml(string $text): string {
 
     $closeParagraph();
     $closeList();
+    if (is_array($mathBlock)) {
+        $html[] = '<p>$$<br>' . nl2br(esc(implode("\n", $mathBlock)), false) . '</p>';
+    }
     return implode('', $html);
 }
 
@@ -876,6 +895,7 @@ $displayDesignedMinutes = $designedMinutes > 0 ? $designedMinutes : $totalMinute
   <link rel="stylesheet" href="css/view-toolbar.css?v=20260910">
   <link rel="stylesheet" href="css/view-links.css?v=20260910">
   <link rel="stylesheet" href="css/provenance.css?v=<?= hash_file('sha256', __DIR__ . '/css/provenance.css') ?>">
+  <link rel="stylesheet" href="assets/vendor/katex/katex.min.css?v=0.16.27">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
   <style>
     :root {
@@ -1414,6 +1434,9 @@ $displayDesignedMinutes = $designedMinutes > 0 ? $designedMinutes : $totalMinute
   </footer>
 
 </main>
+<script src="assets/vendor/katex/katex.min.js?v=0.16.27"></script>
+<script src="assets/vendor/katex/contrib/auto-render.min.js?v=0.16.27"></script>
+<script src="js/math-render.js?v=<?= hash_file('sha256', __DIR__ . '/js/math-render.js') ?>"></script>
 <script>
 (() => {
   const contextToggle = document.getElementById('activity-context-toggle');

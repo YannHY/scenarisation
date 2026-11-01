@@ -23,6 +23,229 @@ function escapeXml(value) {
     .replaceAll("'", "&apos;");
 }
 
+const MATH_SEGMENT_PATTERN = /\$\$([\s\S]+?)\$\$|\$([^$\n]+?)\$/g;
+
+function mapMathSegments(value, textRenderer, mathRenderer) {
+  const source = String(value ?? "");
+  const output = [];
+  let cursor = 0;
+  let match;
+  MATH_SEGMENT_PATTERN.lastIndex = 0;
+  while ((match = MATH_SEGMENT_PATTERN.exec(source))) {
+    if (match.index > cursor) output.push(textRenderer(source.slice(cursor, match.index)));
+    const displayMode = match[1] !== undefined;
+    output.push(mathRenderer(match[1] ?? match[2] ?? "", displayMode, match[0]));
+    cursor = MATH_SEGMENT_PATTERN.lastIndex;
+  }
+  if (!output.length) return textRenderer(source);
+  if (cursor < source.length) output.push(textRenderer(source.slice(cursor)));
+  return output.join("");
+}
+
+function renderLatexForHtml(latex, displayMode, fallback) {
+  if (typeof window.katex?.renderToString !== "function") return escapeHtml(fallback);
+  try {
+    const mathml = window.katex.renderToString(String(latex).trim(), {
+      displayMode,
+      output: "mathml",
+      throwOnError: false,
+      strict: "ignore",
+      trust: false
+    });
+    return mathml;
+  } catch (_) {
+    return escapeHtml(fallback);
+  }
+}
+
+function htmlContent(value) {
+  return mapMathSegments(
+    value,
+    (text) => escapeHtml(text).replaceAll("\n", "<br />"),
+    renderLatexForHtml
+  );
+}
+
+function wordMathRun(value) {
+  return `<m:r><m:t xml:space="preserve">${escapeXml(value)}</m:t></m:r>`;
+}
+
+const WORD_MATH_SYMBOLS = {
+  alpha: "α", beta: "β", gamma: "γ", delta: "δ", epsilon: "ε", theta: "θ",
+  lambda: "λ", mu: "μ", pi: "π", rho: "ρ", sigma: "σ", tau: "τ", phi: "φ",
+  chi: "χ", psi: "ψ", omega: "ω", Gamma: "Γ", Delta: "Δ", Theta: "Θ",
+  Lambda: "Λ", Pi: "Π", Sigma: "Σ", Phi: "Φ", Psi: "Ψ", Omega: "Ω",
+  sum: "∑", prod: "∏", int: "∫", partial: "∂", infty: "∞", cdot: "·",
+  times: "×", div: "÷", pm: "±", mp: "∓", le: "≤", leq: "≤", ge: "≥",
+  geq: "≥", neq: "≠", approx: "≈", equiv: "≡", to: "→", Rightarrow: "⇒",
+  Leftrightarrow: "⇔", in: "∈", notin: "∉", subset: "⊂", subseteq: "⊆",
+  supset: "⊃", supseteq: "⊇", cup: "∪", cap: "∩", emptyset: "∅",
+  forall: "∀", exists: "∃", nabla: "∇", ell: "ℓ", lim: "lim", sin: "sin",
+  cos: "cos", tan: "tan", log: "log", ln: "ln", exp: "exp", lvert: "|", rvert: "|"
+};
+
+function latexToWordMath(latex) {
+  const source = String(latex ?? "").trim();
+  let index = 0;
+
+  const parseCommandName = () => {
+    if (source[index] !== "\\") return "";
+    index += 1;
+    if (source[index] === "\\") {
+      index += 1;
+      return "linebreak";
+    }
+    const match = source.slice(index).match(/^[A-Za-z]+/);
+    if (match) {
+      index += match[0].length;
+      return match[0];
+    }
+    const single = source[index] || "";
+    index += single ? 1 : 0;
+    return single;
+  };
+
+  const skipSpaces = () => {
+    while (/\s/.test(source[index] || "")) index += 1;
+  };
+
+  const parseGroup = () => {
+    skipSpaces();
+    if (source[index] !== "{") return parseAtom();
+    index += 1;
+    const content = parseExpression("}");
+    if (source[index] === "}") index += 1;
+    return content;
+  };
+
+  const parseRawGroup = () => {
+    skipSpaces();
+    if (source[index] !== "{") {
+      const start = index;
+      parseAtom();
+      return source.slice(start, index);
+    }
+    index += 1;
+    const start = index;
+    let depth = 1;
+    while (index < source.length && depth > 0) {
+      if (source[index] === "{") depth += 1;
+      else if (source[index] === "}") depth -= 1;
+      index += 1;
+    }
+    return source.slice(start, Math.max(start, index - 1));
+  };
+
+  const applyScript = (base, marker, script) => marker === "^"
+    ? `<m:sSup><m:e>${base}</m:e><m:sup>${script}</m:sup></m:sSup>`
+    : `<m:sSub><m:e>${base}</m:e><m:sub>${script}</m:sub></m:sSub>`;
+
+  function parseAtom() {
+    skipSpaces();
+    if (index >= source.length) return "";
+    if (source[index] === "{") return parseGroup();
+    if (source[index] !== "\\") {
+      const char = source[index];
+      index += 1;
+      if (char === "~") return wordMathRun(" ");
+      if (char === "&") return wordMathRun("  ");
+      return wordMathRun(char);
+    }
+
+    const command = parseCommandName();
+    if ([",", ";", ":", "!", "quad", "qquad"].includes(command)) return wordMathRun(" ");
+    if (["left", "right", "limits"].includes(command)) return "";
+    if (["{", "}", "(", ")", "[", "]", "|", "%", "$", "#", "_"].includes(command)) {
+      return wordMathRun(command);
+    }
+    if (command === "linebreak") return wordMathRun("; ");
+    if (command === "frac" || command === "dfrac" || command === "tfrac") {
+      const numerator = parseGroup();
+      const denominator = parseGroup();
+      return `<m:f><m:num>${numerator}</m:num><m:den>${denominator}</m:den></m:f>`;
+    }
+    if (command === "sqrt") {
+      skipSpaces();
+      let degree = "";
+      if (source[index] === "[") {
+        index += 1;
+        const start = index;
+        while (index < source.length && source[index] !== "]") index += 1;
+        degree = wordMathRun(source.slice(start, index));
+        if (source[index] === "]") index += 1;
+      }
+      const radicand = parseGroup();
+      return `<m:rad><m:radPr>${degree ? "" : '<m:degHide m:val="1"/>'}</m:radPr><m:deg>${degree}</m:deg><m:e>${radicand}</m:e></m:rad>`;
+    }
+    if (command === "binom") {
+      const numerator = parseGroup();
+      const denominator = parseGroup();
+      return `${wordMathRun("(")}<m:f><m:fPr><m:type m:val="noBar"/></m:fPr><m:num>${numerator}</m:num><m:den>${denominator}</m:den></m:f>${wordMathRun(")")}`;
+    }
+    if (command === "vec" || command === "hat" || command === "bar" || command === "overline") {
+      const content = parseGroup();
+      if (command === "bar" || command === "overline") {
+        return `<m:bar><m:barPr><m:pos m:val="top"/></m:barPr><m:e>${content}</m:e></m:bar>`;
+      }
+      const accent = command === "vec" ? "→" : "^";
+      return `<m:acc><m:accPr><m:chr m:val="${accent}"/></m:accPr><m:e>${content}</m:e></m:acc>`;
+    }
+    if (command === "mathbb") {
+      const raw = parseRawGroup();
+      const blackboard = { N: "ℕ", Z: "ℤ", Q: "ℚ", R: "ℝ", C: "ℂ" };
+      return wordMathRun(Array.from(raw, (char) => blackboard[char] || char).join(""));
+    }
+    if (["text", "mathrm", "mathbf", "operatorname"].includes(command)) {
+      return wordMathRun(parseRawGroup());
+    }
+    if (command === "begin") {
+      const environment = parseRawGroup();
+      const endToken = `\\end{${environment}}`;
+      const endIndex = source.indexOf(endToken, index);
+      const body = source.slice(index, endIndex >= 0 ? endIndex : source.length);
+      index = endIndex >= 0 ? endIndex + endToken.length : source.length;
+      const rows = body.split(/\\\\/).map((row) => row.split("&"));
+      const matrix = `<m:m>${rows.map((row) => `<m:mr>${row.map((cell) => `<m:e>${latexToWordMath(cell.trim())}</m:e>`).join("")}</m:mr>`).join("")}</m:m>`;
+      if (environment === "cases") {
+        return `<m:d><m:dPr><m:begChr m:val="{"/><m:endChr m:val=""/></m:dPr><m:e>${matrix}</m:e></m:d>`;
+      }
+      if (["pmatrix", "bmatrix", "vmatrix"].includes(environment)) {
+        const delimiters = environment === "bmatrix" ? ["[", "]"] : environment === "vmatrix" ? ["|", "|"] : ["(", ")"];
+        return `<m:d><m:dPr><m:begChr m:val="${delimiters[0]}"/><m:endChr m:val="${delimiters[1]}"/></m:dPr><m:e>${matrix}</m:e></m:d>`;
+      }
+      return matrix;
+    }
+    if (WORD_MATH_SYMBOLS[command]) return wordMathRun(WORD_MATH_SYMBOLS[command]);
+    return wordMathRun(`\\${command}`);
+  }
+
+  function parseExpression(stopCharacter = "") {
+    const atoms = [];
+    while (index < source.length && (!stopCharacter || source[index] !== stopCharacter)) {
+      let atom = parseAtom();
+      skipSpaces();
+      while (source[index] === "^" || source[index] === "_") {
+        const marker = source[index];
+        index += 1;
+        atom = applyScript(atom, marker, parseGroup());
+        skipSpaces();
+      }
+      if (atom) atoms.push(atom);
+    }
+    return atoms.join("");
+  }
+
+  return parseExpression();
+}
+
+function wordMath(latex) {
+  return `<m:oMath>${latexToWordMath(latex)}</m:oMath>`;
+}
+
+function wordMathParagraph(latex) {
+  return `<m:oMathPara><m:oMathParaPr><m:jc m:val="centerGroup"/></m:oMathParaPr>${wordMath(latex)}</m:oMathPara>`;
+}
+
 function formatPedagogicalTime(days, hours, minutes) {
   return `${Math.max(0, Number(days) || 0)} j ${Math.max(0, Number(hours) || 0)} h ${Math.max(
     0,
@@ -200,7 +423,7 @@ function buildStudentHtmlExportDocument(sessionIds = null) {
         .map((activity) => `
           <li>
             <h3>Activité ${escapeHtml(activity.number)}</h3>
-            <div class="instructions">${escapeHtmlWithBreaks(activity.instructions || "-")}</div>
+            <div class="instructions">${htmlContent(activity.instructions || "-")}</div>
           </li>`)
         .join("");
       return `
@@ -251,8 +474,8 @@ function buildHtmlExportDocument(scope = "full", sessionIds = null) {
             <p><strong>Modalité:</strong> ${escapeHtml(labelForLocationMode(activity.locationMode))}</p>
             <p><strong>Évaluation:</strong> ${escapeHtml(labelForEvaluationMode(activity.evaluationMode))}</p>
             <p><strong>AIAS:</strong> ${escapeHtml(aiasSummary(activity.aias))}</p>
-            <p><strong>Description:</strong> ${escapeHtmlWithBreaks(activity.description || "")}</p>
-            <p><strong>Consignes pour les élèves:</strong> ${escapeHtmlWithBreaks(activity.instructions || "")}</p>
+            <p><strong>Description:</strong> ${htmlContent(activity.description || "")}</p>
+            <p><strong>Consignes pour les élèves:</strong> ${htmlContent(activity.instructions || "")}</p>
             ${activity.tools && activity.tools.length ? `<p><strong>Compétences:</strong> ${escapeHtml(activity.tools.map(id => { const t = SELECTABLE_TOOLS_DATA.find(x => x.id === id); return t ? formatCompetencyLabel(t, "fr") : id; }).join(", "))}</p>` : ""}
           </li>
         `
@@ -261,9 +484,9 @@ function buildHtmlExportDocument(scope = "full", sessionIds = null) {
       return `
       <section>
         <h2>${sessionIndex + 1}. ${escapeHtml(session.title)}</h2>
-        ${session.objectives ? `<p><strong>Objectifs:</strong><br />${escapeHtmlWithBreaks(session.objectives)}</p>` : ""}
-        ${session.intentions ? `<p><strong>Choix pédagogiques:</strong><br />${escapeHtmlWithBreaks(session.intentions)}</p>` : ""}
-        ${session.notes ? `<p><strong>Notes:</strong> ${escapeHtml(session.notes)}</p>` : ""}
+        ${session.objectives ? `<p><strong>Objectifs:</strong><br />${htmlContent(session.objectives)}</p>` : ""}
+        ${session.intentions ? `<p><strong>Choix pédagogiques:</strong><br />${htmlContent(session.intentions)}</p>` : ""}
+        ${session.notes ? `<p><strong>Notes:</strong> ${htmlContent(session.notes)}</p>` : ""}
         <ol>${activities}</ol>
       </section>
     `;
@@ -292,26 +515,26 @@ function buildHtmlExportDocument(scope = "full", sessionIds = null) {
     <p><strong>1 jour =</strong> ${escapeHtml(getDayHours())} heures</p>
     ${
       getState().meta.description
-        ? `<p><strong>Description:</strong><br />${escapeHtmlWithBreaks(getState().meta.description)}</p>`
+        ? `<p><strong>Description:</strong><br />${htmlContent(getState().meta.description)}</p>`
         : ""
     }
     ${
       getState().meta.command
-        ? `<p><strong>Commande institutionnelle:</strong><br />${escapeHtmlWithBreaks(
+        ? `<p><strong>Commande institutionnelle:</strong><br />${htmlContent(
             getState().meta.command
           )}</p>`
         : ""
     }
     ${
       getState().meta.teacherMaterials
-        ? `<p><strong>Matériel enseignant:</strong><br />${escapeHtmlWithBreaks(
+        ? `<p><strong>Matériel enseignant:</strong><br />${htmlContent(
             getState().meta.teacherMaterials
           )}</p>`
         : ""
     }
     ${
       getState().meta.personas
-        ? `<p><strong>Objectifs:</strong><br />${escapeHtmlWithBreaks(
+        ? `<p><strong>Objectifs:</strong><br />${htmlContent(
             getState().meta.personas
           )}</p>`
         : ""
@@ -320,7 +543,7 @@ function buildHtmlExportDocument(scope = "full", sessionIds = null) {
       Array.isArray(getState().meta.sliders) && getState().meta.sliders.length
         ? `<p><strong>Acquis d'apprentissage :</strong></p><ul>${getState().meta.sliders.map((o) => {
             const label = o.verb || o.categoryLabel || "";
-            return `<li>${label ? `<strong>${escapeHtml(label)}</strong> : ` : ""}${escapeHtmlWithBreaks(o.text || "")}</li>`;
+            return `<li>${label ? `<strong>${escapeHtml(label)}</strong> : ` : ""}${htmlContent(o.text || "")}</li>`;
           }).join("")}</ul>`
         : ""
     }
@@ -500,19 +723,21 @@ function wordInlineRuns(value, options = {}, depth = 0) {
   const source = String(value ?? "");
   if (!source || depth > 4) return wordPlainTextRuns(source, options);
 
-  const tokenPattern = /\[([^\]\n]+)\]\(((?:https?:\/\/|mailto:)[^\s)<]+)\)|\*\*([^*\n]+)\*\*|\*([^*\n]+)\*/gi;
+  const tokenPattern = /\$\$([\s\S]+?)\$\$|\$([^$\n]+?)\$|\[([^\]\n]+)\]\(((?:https?:\/\/|mailto:)[^\s)<]+)\)|\*\*([^*\n]+)\*\*|\*([^*\n]+)\*/gi;
   const runs = [];
   let cursor = 0;
   let match;
 
   while ((match = tokenPattern.exec(source))) {
     if (match.index > cursor) runs.push(wordPlainTextRuns(source.slice(cursor, match.index), options));
-    if (match[1] !== undefined) {
-      runs.push(wordHyperlink(match[1], match[2], options));
+    if (match[1] !== undefined || match[2] !== undefined) {
+      runs.push(wordMath(match[1] ?? match[2]));
     } else if (match[3] !== undefined) {
-      runs.push(wordInlineRuns(match[3], { ...options, bold: true }, depth + 1));
+      runs.push(wordHyperlink(match[3], match[4], options));
+    } else if (match[5] !== undefined) {
+      runs.push(wordInlineRuns(match[5], { ...options, bold: true }, depth + 1));
     } else {
-      runs.push(wordInlineRuns(match[4], { ...options, italic: true }, depth + 1));
+      runs.push(wordInlineRuns(match[6], { ...options, italic: true }, depth + 1));
     }
     cursor = tokenPattern.lastIndex;
   }
@@ -550,6 +775,7 @@ function wordMarkdownBlocks(value, options = {}) {
   const paragraphs = [];
   let paragraphLines = [];
   let activeList = null;
+  let displayMathLines = null;
 
   const closeList = () => {
     activeList = null;
@@ -562,6 +788,28 @@ function wordMarkdownBlocks(value, options = {}) {
 
   lines.forEach((line) => {
     const trimmed = line.trim();
+    if (displayMathLines) {
+      if (trimmed === "$$") {
+        paragraphs.push(wordMathParagraph(displayMathLines.join("\n")));
+        displayMathLines = null;
+      } else {
+        displayMathLines.push(line);
+      }
+      return;
+    }
+    if (trimmed === "$$") {
+      flushParagraph();
+      closeList();
+      displayMathLines = [];
+      return;
+    }
+    const singleLineMath = trimmed.match(/^\$\$([\s\S]+)\$\$$/);
+    if (singleLineMath) {
+      flushParagraph();
+      closeList();
+      paragraphs.push(wordMathParagraph(singleLineMath[1]));
+      return;
+    }
     if (!trimmed) {
       flushParagraph();
       closeList();
@@ -613,6 +861,9 @@ function wordMarkdownBlocks(value, options = {}) {
   });
 
   flushParagraph();
+  if (displayMathLines) {
+    paragraphs.push(wordParagraph(`$$\n${displayMathLines.join("\n")}`, defaultStyle));
+  }
   return paragraphs.length ? paragraphs.join("") : wordParagraph("", defaultStyle);
 }
 
@@ -795,7 +1046,7 @@ function buildWordExportDocument(scope = "full", sessionIds = null) {
     : buildFullWordBody(sessionIds);
 
   const documentXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math">
   <w:body>
     ${body.join("\n    ")}
     <w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440"/></w:sectPr>

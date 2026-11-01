@@ -16,6 +16,7 @@ app_start_session();
     <link rel="stylesheet" href="css/account-ui.css?v=<?= hash_file('sha256', __DIR__ . '/css/account-ui.css') ?>" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="assets/vendor/katex/katex.min.css?v=0.16.27" />
     <link rel="stylesheet" href="css/interface.css?v=<?= hash_file('sha256', __DIR__ . '/css/interface.css') ?>" />
     <link rel="stylesheet" href="css/provenance.css?v=<?= hash_file('sha256', __DIR__ . '/css/provenance.css') ?>" />
   </head>
@@ -652,6 +653,8 @@ app_start_session();
       </div>
     </div>
     <!-- Les sources précèdent les modules ; interface.js les assemble avant account-ui.js. -->
+    <script src="assets/vendor/katex/katex.min.js?v=0.16.27"></script>
+    <script src="assets/vendor/katex/contrib/auto-render.min.js?v=0.16.27"></script>
     <script src="js/competency-catalog.js?v=<?= hash_file('sha256', __DIR__ . '/js/competency-catalog.js') ?>"></script>
     <script src="js/competency-greencomp-details.js?v=<?= hash_file('sha256', __DIR__ . '/js/competency-greencomp-details.js') ?>"></script>
     <script src="js/competency-digcomp-details.js?v=<?= hash_file('sha256', __DIR__ . '/js/competency-digcomp-details.js') ?>"></script>

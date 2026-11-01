@@ -590,6 +590,18 @@ PROMPT;
                 </div>
                 <p>Le champ AIAS s’appuie sur <a href="https://aiassessmentscale.com/" target="_blank" rel="noopener noreferrer">The AI Assessment Scale 2.1</a>. Dans une activité, l’icône avec des étincelles signale ce réglage lié à l’intelligence artificielle. Après sélection, le bouton affiche directement le niveau choisi, de 1 à 5. Ces cinq niveaux décrivent des conceptions différentes de la tâche et ne constituent pas une progression.</p>
                 <p>Les descriptions, les consignes et les notes acceptent une mise en forme <a href="https://github.com/YannHY/cours/blob/master/Tech/Markdown/Apprendre%20le%20Markdown.md" title="Markdown">Markdown</a> légère. Une barre d’outils et un aperçu permettent de structurer plus facilement le texte. Ajoutez les liens directement avec la syntaxe <code>[titre](URL)</code>.</p>
+                <h3 id="formules-latex">Écrire des formules mathématiques avec LaTeX</h3>
+                <p>Dans un champ compatible Markdown, ouvrez l’éditeur en plein écran puis cliquez sur le bouton <strong>∑</strong>. L’assistant LaTeX permet de saisir une formule, de vérifier immédiatement son aperçu et de partir de modèles classés par catégories : essentiels, opérateurs, relations, ensembles, lettres grecques et structures. Ces modèles restent facultatifs : vous pouvez saisir directement toute formule prise en charge par le moteur de rendu.</p>
+                <div class="help-table-wrap">
+                    <table class="help-table">
+                        <thead><tr><th>Usage</th><th>Syntaxe</th><th>Exemple</th></tr></thead>
+                        <tbody>
+                            <tr><td>Formule dans une phrase</td><td><code>$...$</code></td><td><code>Le cercle vérifie $x^2 + y^2 = 1$.</code></td></tr>
+                            <tr><td>Formule centrée sur sa propre ligne</td><td><code>$$...$$</code></td><td><code>$$\frac{a}{b}$$</code></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>Le bouton <strong>Dans le texte</strong> insère la formule entre deux signes <code>$</code>. Le bouton <strong>Centrée</strong> l’insère entre deux paires de signes <code>$$</code>. Le rendu est disponible dans l’éditeur et l’aperçu, sur les pages publiques de partage, ainsi que dans les exports HTML et Word. Les exports Markdown, JSON et Excel conservent le code LaTeX afin qu’il puisse être modifié ou réimporté.</p>
                 <h3>Raccourcis clavier Markdown</h3>
                 <p>Lorsque le curseur se trouve dans un champ compatible Markdown, utilisez <code>Cmd</code> sur macOS ou <code>Ctrl</code> sur Windows et Linux.</p>
                 <div class="help-table-wrap">
@@ -602,6 +614,7 @@ PROMPT;
                             <tr><td>Titre</td><td><code>Cmd/Ctrl + Shift + H</code></td></tr>
                             <tr><td>Liste à puces</td><td><code>Cmd/Ctrl + Shift + L</code></td></tr>
                             <tr><td>Liste numérotée</td><td><code>Cmd/Ctrl + Shift + 7</code></td></tr>
+                            <tr><td>Formule mathématique</td><td><code>Cmd/Ctrl + Shift + M</code></td></tr>
                             <tr><td>Continuer une liste</td><td><code>Entrée</code></td></tr>
                             <tr><td>Saut de ligne sans nouvelle puce</td><td><code>Shift + Entrée</code></td></tr>
                             <tr><td>Citation</td><td><code>Cmd/Ctrl + Shift + Q</code></td></tr>
@@ -725,11 +738,11 @@ PROMPT;
                     <table class="help-table">
                         <thead><tr><th>Format</th><th>À choisir pour…</th><th>À savoir</th></tr></thead>
                         <tbody>
-                            <tr><td><span class="help-format-badge">Markdown</span></td><td>Éditer un document lisible en texte brut, le versionner ou le transmettre à une IA.</td><td>Peut être réimporté si la structure et les libellés sont conservés.</td></tr>
-                            <tr><td><span class="help-format-badge">HTML</span></td><td>Partager une page autonome lisible dans un navigateur.</td><td>Pratique pour consultation ou archivage web.</td></tr>
-                            <tr><td><span class="help-format-badge">JSON</span></td><td>Conserver toutes les données structurées ou travailler avec le CLI.</td><td>C’est le format le plus fidèle pour l’échange technique et la réimportation.</td></tr>
-                            <tr><td><span class="help-format-badge">Excel</span></td><td>Analyser, filtrer ou retravailler les activités dans un tableur.</td><td>Le fichier téléchargé utilise le format <code>.xlsx</code>.</td></tr>
-                            <tr><td><span class="help-format-badge">Word</span></td><td>Relire, annoter, imprimer ou diffuser un document bureautique.</td><td>Le fichier téléchargé utilise le format <code>.docx</code>.</td></tr>
+                            <tr><td><span class="help-format-badge">Markdown</span></td><td>Éditer un document lisible en texte brut, le versionner ou le transmettre à une IA.</td><td>Peut être réimporté si la structure et les libellés sont conservés. Le code LaTeX reste modifiable.</td></tr>
+                            <tr><td><span class="help-format-badge">HTML</span></td><td>Partager une page autonome lisible dans un navigateur.</td><td>Les formules LaTeX sont rendues pour la consultation ou l’archivage web.</td></tr>
+                            <tr><td><span class="help-format-badge">JSON</span></td><td>Conserver toutes les données structurées ou travailler avec le CLI.</td><td>C’est le format le plus fidèle pour l’échange technique, la réimportation et la conservation du code LaTeX.</td></tr>
+                            <tr><td><span class="help-format-badge">Excel</span></td><td>Analyser, filtrer ou retravailler les activités dans un tableur.</td><td>Le fichier <code>.xlsx</code> conserve le code LaTeX sous forme de texte.</td></tr>
+                            <tr><td><span class="help-format-badge">Word</span></td><td>Relire, annoter, imprimer ou diffuser un document bureautique.</td><td>Le fichier <code>.docx</code> convertit les formules en équations Word.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1067,6 +1080,18 @@ scenarisation init design.json --title "Atelier IA" --lang fr --duration 120 --m
 scenarisation prompt design.json</pre>
                         </div>
                     </div>
+                </div>
+
+                <h4 id="cli-latex">Utiliser LaTeX avec le CLI</h4>
+                <p>Le CLI conserve le code LaTeX placé dans les descriptions, les consignes et les notes. Dans un terminal, entourez ces textes d’apostrophes afin que le shell n’interprète ni les signes <code>$</code> ni les barres obliques inverses. La commande <code>validate</code> vérifie la structure du scénario, mais pas la syntaxe de chaque formule.</p>
+                <div class="help-code-wrap">
+                    <button class="help-copy-btn" type="button" aria-label="Copier la commande" title="Copier"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
+                    <pre class="help-code">scenarisation add-activity design.json \
+  --type practice --duration 20 --group individual \
+  --teaching guided --pacing sync --mode onsite \
+  --evaluation formative --aias 1 \
+  --description 'Résoudre $x^2 + y^2 = 1$.' \
+  --instructions 'Calculer $$\frac{a}{b}$$.'</pre>
                 </div>
 
                 <h4>Publier</h4>

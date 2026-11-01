@@ -16,6 +16,109 @@ const MARKDOWN_ACTIONS = [
   { id: "link", iconClass: "fa-solid fa-link", titleKey: "mdLink", code: "KeyK", shift: false, key: "K" }
 ];
 
+const MATH_RENDER_OPTIONS = {
+  delimiters: [
+    { left: "$$", right: "$$", display: true },
+    { left: "$", right: "$", display: false }
+  ],
+  throwOnError: false,
+  strict: "ignore",
+  trust: false
+};
+
+const MATH_PALETTE_CATEGORIES = [
+  {
+    id: "basics",
+    labelKey: "mathCategoryBasics",
+    items: [
+      ["mathShortcutFraction", "\\frac{a}{b}"],
+      ["mathShortcutRoot", "\\sqrt{x}"],
+      ["mathShortcutPower", "x^{n}"],
+      ["mathShortcutIndex", "x_{n}"],
+      ["mathShortcutParentheses", "\\left(x\\right)"],
+      ["mathShortcutAbsolute", "\\left|x\\right|"]
+    ]
+  },
+  {
+    id: "operators",
+    labelKey: "mathCategoryOperators",
+    items: [
+      ["mathShortcutSum", "\\sum_{i=1}^{n}"],
+      ["mathShortcutProduct", "\\prod_{i=1}^{n}"],
+      ["mathShortcutIntegral", "\\int_{a}^{b} f(x)\\,dx"],
+      ["mathShortcutLimit", "\\lim_{x \\to a} f(x)"],
+      ["mathShortcutDerivative", "\\frac{d}{dx}f(x)"],
+      ["mathShortcutPartial", "\\frac{\\partial f}{\\partial x}"]
+    ]
+  },
+  {
+    id: "relations",
+    labelKey: "mathCategoryRelations",
+    items: [
+      ["mathShortcutLessEqual", "a \\le b"],
+      ["mathShortcutGreaterEqual", "a \\ge b"],
+      ["mathShortcutNotEqual", "a \\ne b"],
+      ["mathShortcutApprox", "a \\approx b"],
+      ["mathShortcutEquivalent", "a \\equiv b"],
+      ["mathShortcutImplies", "a \\Rightarrow b"]
+    ]
+  },
+  {
+    id: "sets",
+    labelKey: "mathCategorySets",
+    items: [
+      ["mathShortcutNaturals", "\\mathbb{N}"],
+      ["mathShortcutIntegers", "\\mathbb{Z}"],
+      ["mathShortcutRationals", "\\mathbb{Q}"],
+      ["mathShortcutReals", "\\mathbb{R}"],
+      ["mathShortcutBelongs", "x \\in A"],
+      ["mathShortcutNotBelongs", "x \\notin A"],
+      ["mathShortcutSubset", "A \\subset B"],
+      ["mathShortcutUnion", "A \\cup B"],
+      ["mathShortcutIntersection", "A \\cap B"],
+      ["mathShortcutEmptySet", "\\varnothing"]
+    ]
+  },
+  {
+    id: "greek",
+    labelKey: "mathCategoryGreek",
+    items: [
+      ["mathShortcutAlpha", "\\alpha"],
+      ["mathShortcutBeta", "\\beta"],
+      ["mathShortcutGamma", "\\gamma"],
+      ["mathShortcutDelta", "\\delta"],
+      ["mathShortcutTheta", "\\theta"],
+      ["mathShortcutLambda", "\\lambda"],
+      ["mathShortcutMu", "\\mu"],
+      ["mathShortcutPi", "\\pi"],
+      ["mathShortcutSigma", "\\sigma"],
+      ["mathShortcutPhi", "\\phi"],
+      ["mathShortcutOmega", "\\omega"]
+    ]
+  },
+  {
+    id: "structures",
+    labelKey: "mathCategoryStructures",
+    items: [
+      ["mathShortcutBinomial", "\\binom{n}{k}"],
+      ["mathShortcutVector", "\\vec{u}"],
+      ["mathShortcutCases", "\\begin{cases} y=x+1 \\\\ y=2x \\end{cases}"],
+      ["mathShortcutMatrix", "\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}"],
+      ["mathShortcutAligned", "\\begin{aligned} a &= b \\\\ c &= d \\end{aligned}"],
+      ["mathShortcutOverline", "\\overline{AB}"]
+    ]
+  }
+];
+
+function renderMath(root) {
+  if (!root || typeof window.renderMathInElement !== "function") return;
+  window.renderMathInElement(root, MATH_RENDER_OPTIONS);
+}
+
+function getExpandableTextarea(wrapper) {
+  return wrapper?.querySelector(":scope > textarea") || null;
+}
+
 function usesMacKeyboardShortcuts() {
   const platform = navigator.userAgentData?.platform || navigator.platform || "";
   return /Mac|iPhone|iPad|iPod/i.test(platform);
@@ -85,7 +188,7 @@ function handleMarkdownListEnter(textarea, event) {
 function ensureMarkdownToolbars(root = document) {
   root.querySelectorAll(".expandable-field").forEach((wrapper) => {
     if (wrapper.querySelector(".markdown-toolbar")) return;
-    const textarea = wrapper.querySelector("textarea");
+    const textarea = getExpandableTextarea(wrapper);
     if (!textarea) return;
     const toolbar = document.createElement("div");
     toolbar.className = "markdown-toolbar";
@@ -106,10 +209,180 @@ function ensureMarkdownToolbars(root = document) {
       }
       toolbar.appendChild(button);
     });
+    toolbar.appendChild(createMathAssistantControl());
     if (textarea.classList.contains("activity-description")) {
       toolbar.appendChild(createLearningOutcomesControl());
     }
     wrapper.insertBefore(toolbar, textarea);
+  });
+}
+
+function createMathAssistantControl() {
+  const control = document.createElement("div");
+  control.className = "math-assistant-control";
+
+  const trigger = document.createElement("button");
+  trigger.type = "button";
+  trigger.className = "markdown-tool-btn math-assistant-trigger";
+  trigger.setAttribute("aria-haspopup", "dialog");
+  trigger.setAttribute("aria-expanded", "false");
+  trigger.textContent = "∑";
+
+  const menu = document.createElement("div");
+  menu.className = "math-assistant-menu hidden";
+  menu.setAttribute("role", "dialog");
+
+  const heading = document.createElement("div");
+  heading.className = "math-assistant-heading";
+  heading.append(document.createElement("strong"), document.createElement("span"));
+
+  const modes = document.createElement("div");
+  modes.className = "math-assistant-modes";
+  modes.setAttribute("role", "group");
+  ["inline", "block"].forEach((mode, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `math-mode-option${index === 0 ? " active" : ""}`;
+    button.dataset.mathMode = mode;
+    button.setAttribute("aria-pressed", String(index === 0));
+    modes.appendChild(button);
+  });
+
+  const inputLabel = document.createElement("label");
+  inputLabel.className = "math-assistant-label";
+  const input = document.createElement("textarea");
+  input.className = "math-assistant-input";
+  input.rows = 2;
+  input.spellcheck = false;
+  inputLabel.append(document.createElement("span"), input);
+
+  const previewLabel = document.createElement("span");
+  previewLabel.className = "math-assistant-label-text";
+  const preview = document.createElement("div");
+  preview.className = "math-assistant-preview";
+  preview.setAttribute("aria-live", "polite");
+
+  const paletteLabel = document.createElement("span");
+  paletteLabel.className = "math-assistant-label-text math-palette-label";
+  const paletteCategories = document.createElement("div");
+  paletteCategories.className = "math-palette-categories";
+  paletteCategories.setAttribute("role", "tablist");
+  const shortcuts = document.createElement("div");
+  shortcuts.className = "math-assistant-shortcuts";
+  shortcuts.setAttribute("role", "tabpanel");
+
+  const actions = document.createElement("div");
+  actions.className = "math-assistant-actions";
+  const cancel = document.createElement("button");
+  cancel.type = "button";
+  cancel.className = "math-assistant-cancel";
+  const insert = document.createElement("button");
+  insert.type = "button";
+  insert.className = "math-assistant-insert";
+  insert.disabled = true;
+  actions.append(cancel, insert);
+
+  menu.append(heading, modes, inputLabel, previewLabel, preview, paletteLabel, paletteCategories, shortcuts, actions);
+  control.append(trigger, menu);
+  localizeMathAssistantControl(control);
+  return control;
+}
+
+function localizeMathAssistantControl(control) {
+  const trigger = control.querySelector(".math-assistant-trigger");
+  const menu = control.querySelector(".math-assistant-menu");
+  const label = t("mdMath");
+  trigger?.setAttribute("aria-label", label);
+  trigger?.setAttribute("title", `${label} (${markdownShortcutLabel({ shift: true, key: "M" })})`);
+  trigger?.setAttribute("aria-keyshortcuts", "Meta+Shift+M Control+Shift+M");
+  menu?.setAttribute("aria-label", t("mathAssistantTitle"));
+  const heading = control.querySelector(".math-assistant-heading");
+  if (heading) {
+    heading.querySelector("strong").textContent = t("mathAssistantTitle");
+    heading.querySelector("span").textContent = t("mathAssistantHint");
+  }
+  const modes = control.querySelectorAll(".math-mode-option");
+  if (modes[0]) modes[0].textContent = t("mathModeInline");
+  if (modes[1]) modes[1].textContent = t("mathModeBlock");
+  const input = control.querySelector(".math-assistant-input");
+  if (input) input.placeholder = t("mathInputPlaceholder");
+  const inputLabel = control.querySelector(".math-assistant-label span");
+  if (inputLabel) inputLabel.textContent = t("mathInputLabel");
+  const previewLabel = control.querySelector(".math-assistant-label-text");
+  if (previewLabel) previewLabel.textContent = t("mathPreviewLabel");
+  const paletteLabel = control.querySelector(".math-palette-label");
+  if (paletteLabel) paletteLabel.textContent = t("mathPaletteLabel");
+  control.querySelector(".math-assistant-cancel").textContent = t("cancel");
+  control.querySelector(".math-assistant-insert").textContent = t("mathInsert");
+  renderMathPalette(control);
+  renderMathAssistantPreview(control);
+}
+
+function renderMathPalette(control) {
+  const categoriesHost = control.querySelector(".math-palette-categories");
+  const shortcutsHost = control.querySelector(".math-assistant-shortcuts");
+  if (!categoriesHost || !shortcutsHost) return;
+  const currentId = MATH_PALETTE_CATEGORIES.some((category) => category.id === control.dataset.mathCategory)
+    ? control.dataset.mathCategory
+    : MATH_PALETTE_CATEGORIES[0].id;
+  control.dataset.mathCategory = currentId;
+  categoriesHost.replaceChildren();
+  MATH_PALETTE_CATEGORIES.forEach((category) => {
+    const button = document.createElement("button");
+    const active = category.id === currentId;
+    button.type = "button";
+    button.className = `math-palette-category${active ? " active" : ""}`;
+    button.dataset.mathCategory = category.id;
+    button.setAttribute("role", "tab");
+    button.setAttribute("aria-selected", String(active));
+    button.textContent = t(category.labelKey);
+    categoriesHost.appendChild(button);
+  });
+
+  shortcutsHost.replaceChildren();
+  const current = MATH_PALETTE_CATEGORIES.find((category) => category.id === currentId);
+  (current?.items || []).forEach(([labelKey, snippet]) => {
+    const button = document.createElement("button");
+    const label = t(labelKey);
+    button.type = "button";
+    button.className = "math-shortcut-btn";
+    button.dataset.mathSnippet = snippet;
+    button.title = label;
+    button.setAttribute("aria-label", label);
+    if (typeof window.katex?.render === "function") {
+      window.katex.render(snippet, button, {
+        throwOnError: false,
+        strict: "ignore",
+        trust: false
+      });
+    } else {
+      button.textContent = snippet;
+    }
+    shortcutsHost.appendChild(button);
+  });
+}
+
+function renderMathAssistantPreview(control) {
+  const input = control?.querySelector(".math-assistant-input");
+  const preview = control?.querySelector(".math-assistant-preview");
+  const insert = control?.querySelector(".math-assistant-insert");
+  const code = input?.value.trim() || "";
+  if (insert) insert.disabled = !code;
+  if (!preview) return;
+  preview.replaceChildren();
+  if (!code) {
+    preview.textContent = t("mathPreviewEmpty");
+    return;
+  }
+  if (typeof window.katex?.render !== "function") {
+    preview.textContent = code;
+    return;
+  }
+  window.katex.render(code, preview, {
+    displayMode: control.querySelector(".math-mode-option.active")?.dataset.mathMode === "block",
+    throwOnError: false,
+    strict: "ignore",
+    trust: false
   });
 }
 
@@ -265,6 +538,7 @@ function renderInlineMarkdown(value) {
   const html = [];
   let listType = "";
   let paragraph = [];
+  let mathBlock = null;
 
   const inline = (text) => escapeHtml(text)
     .replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>")
@@ -293,6 +567,21 @@ function renderInlineMarkdown(value) {
 
   lines.forEach((line) => {
     const trimmed = line.trim();
+    if (mathBlock) {
+      if (trimmed === "$$") {
+        html.push(`<div class="math-source-block">$$\n${escapeHtml(mathBlock.join("\n"))}\n$$</div>`);
+        mathBlock = null;
+      } else {
+        mathBlock.push(line);
+      }
+      return;
+    }
+    if (trimmed === "$$") {
+      closeParagraph();
+      closeList();
+      mathBlock = [];
+      return;
+    }
     if (!trimmed) {
       closeParagraph();
       closeList();
@@ -335,21 +624,25 @@ function renderInlineMarkdown(value) {
 
   closeParagraph();
   closeList();
+  if (mathBlock) {
+    html.push(`<p>$$<br />${escapeHtml(mathBlock.join("\n")).replace(/\n/g, "<br />")}</p>`);
+  }
   return html.join("");
 }
 
 function refreshMarkdownPreview(wrapper) {
-  const textarea = wrapper?.querySelector("textarea");
+  const textarea = getExpandableTextarea(wrapper);
   const preview = wrapper?.querySelector(".markdown-preview");
   if (!textarea || !preview) return;
   const value = textarea.value || "";
   preview.innerHTML = renderInlineMarkdown(value);
+  renderMath(preview);
   wrapper.classList.toggle("preview-active", value.trim() !== "");
 }
 
 function ensureMarkdownPreviews(root = document) {
   root.querySelectorAll(".expandable-field").forEach((wrapper) => {
-    const textarea = wrapper.querySelector("textarea");
+    const textarea = getExpandableTextarea(wrapper);
     if (!textarea) return;
     let preview = wrapper.querySelector(".markdown-preview");
     if (!preview) {
@@ -398,6 +691,7 @@ function localizeExpandableFieldControls(root = document) {
     button.setAttribute("title", expanded ? t("closeFullscreen") : t("fullscreen"));
   });
   root.querySelectorAll(".learning-outcomes-control").forEach(localizeLearningOutcomesControl);
+  root.querySelectorAll(".math-assistant-control").forEach(localizeMathAssistantControl);
 }
 
 
@@ -512,6 +806,7 @@ function applyMarkdownAction(textarea, actionId) {
       urlStart,
       urlStart + placeholders.linkUrl.length
     );
+    return;
   }
 }
 
@@ -539,6 +834,67 @@ function closeLearningOutcomesMenus(except = null) {
   });
 }
 
+function closeMathAssistantMenus(except = null, restoreFocus = false) {
+  document.querySelectorAll(".math-assistant-control").forEach((control) => {
+    if (control === except) return;
+    const menu = control.querySelector(".math-assistant-menu");
+    const trigger = control.querySelector(".math-assistant-trigger");
+    if (!menu || menu.classList.contains("hidden")) return;
+    menu.classList.add("hidden");
+    trigger?.setAttribute("aria-expanded", "false");
+    if (restoreFocus) trigger?.focus();
+  });
+}
+
+function openMathAssistant(control, textarea) {
+  const menu = control.querySelector(".math-assistant-menu");
+  const trigger = control.querySelector(".math-assistant-trigger");
+  const input = control.querySelector(".math-assistant-input");
+  if (!menu || !trigger || !input) return;
+
+  const wrapper = textarea.closest(".expandable-field") || textarea;
+  const { start, end } = getStoredSelection(wrapper, textarea);
+  control.dataset.selectionStart = String(start);
+  control.dataset.selectionEnd = String(end);
+  const selected = textarea.value.slice(start, end).trim();
+  const selectedIsBlock = selected.startsWith("$$") && selected.endsWith("$$");
+  input.value = selected.replace(/^\$\$?\s*/, "").replace(/\s*\$\$?$/, "");
+  control.querySelectorAll(".math-mode-option").forEach((button) => {
+    const active = button.dataset.mathMode === (selectedIsBlock ? "block" : "inline");
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+  closeLearningOutcomesMenus();
+  closeMathAssistantMenus(control);
+  menu.classList.remove("hidden");
+  trigger.setAttribute("aria-expanded", "true");
+  renderMathAssistantPreview(control);
+  input.focus();
+}
+
+function insertMathFromAssistant(control) {
+  const input = control.querySelector(".math-assistant-input");
+  const textarea = control.closest(".expandable-field")?.querySelector("textarea:not(.math-assistant-input)");
+  const code = input?.value.trim() || "";
+  if (!textarea || !code) return;
+  const start = Number.parseInt(control.dataset.selectionStart || "", 10);
+  const end = Number.parseInt(control.dataset.selectionEnd || "", 10);
+  const safeStart = Number.isInteger(start) ? start : textarea.value.length;
+  const safeEnd = Number.isInteger(end) ? end : safeStart;
+  const block = control.querySelector(".math-mode-option.active")?.dataset.mathMode === "block";
+  const before = textarea.value.slice(0, safeStart);
+  const after = textarea.value.slice(safeEnd);
+  const leadingBreak = block && before && !before.endsWith("\n") ? "\n\n" : "";
+  const trailingBreak = block && after && !after.startsWith("\n") ? "\n\n" : "";
+  const replacement = block
+    ? `${leadingBreak}$$\n${code}\n$$${trailingBreak}`
+    : `$${code}$`;
+  const nextValue = `${textarea.value.slice(0, safeStart)}${replacement}${textarea.value.slice(safeEnd)}`;
+  updateTextareaValue(textarea, nextValue, safeStart + replacement.length - trailingBreak.length);
+  closeMathAssistantMenus(null, false);
+  announce(t("mathInserted"));
+}
+
 function setupExpandableFields() {
   ensureMarkdownToolbars();
   ensureMarkdownPreviews();
@@ -547,7 +903,7 @@ function setupExpandableFields() {
     if (!btn) return;
     const wrapper = btn.closest(".expandable-field");
     if (!wrapper) return;
-    const textarea = wrapper.querySelector("textarea");
+    const textarea = getExpandableTextarea(wrapper);
     const isFullscreen = !wrapper.classList.contains("fullscreen");
     toggleExpandableFieldFullscreen(wrapper, isFullscreen);
     if (!isFullscreen) {
@@ -573,9 +929,79 @@ function setupExpandableFields() {
     const button = event.target.closest(".markdown-tool-btn");
     if (!button) return;
     const wrapper = button.closest(".expandable-field");
-    const textarea = wrapper?.querySelector("textarea");
+    const textarea = getExpandableTextarea(wrapper);
     if (!textarea) return;
     applyMarkdownAction(textarea, button.dataset.mdAction || "");
+  });
+
+  document.addEventListener("click", (event) => {
+    const trigger = event.target.closest(".math-assistant-trigger");
+    if (trigger) {
+      const control = trigger.closest(".math-assistant-control");
+      const textarea = control?.closest(".expandable-field")?.querySelector("textarea:not(.math-assistant-input)");
+      const menu = control?.querySelector(".math-assistant-menu");
+      if (!control || !textarea || !menu) return;
+      if (menu.classList.contains("hidden")) {
+        openMathAssistant(control, textarea);
+      } else {
+        closeMathAssistantMenus(null, true);
+      }
+      return;
+    }
+
+    const mode = event.target.closest(".math-mode-option");
+    if (mode) {
+      const control = mode.closest(".math-assistant-control");
+      control?.querySelectorAll(".math-mode-option").forEach((button) => {
+        const active = button === mode;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+      renderMathAssistantPreview(control);
+      return;
+    }
+
+    const shortcut = event.target.closest(".math-shortcut-btn");
+    if (shortcut) {
+      const control = shortcut.closest(".math-assistant-control");
+      const input = control?.querySelector(".math-assistant-input");
+      if (!input) return;
+      const start = input.selectionStart ?? input.value.length;
+      const end = input.selectionEnd ?? start;
+      input.setRangeText(shortcut.dataset.mathSnippet || "", start, end, "end");
+      renderMathAssistantPreview(control);
+      input.focus();
+      return;
+    }
+
+    const paletteCategory = event.target.closest(".math-palette-category");
+    if (paletteCategory) {
+      const control = paletteCategory.closest(".math-assistant-control");
+      if (!control) return;
+      control.dataset.mathCategory = paletteCategory.dataset.mathCategory || "basics";
+      renderMathPalette(control);
+      control.querySelector(".math-palette-category.active")?.focus();
+      return;
+    }
+
+    const cancel = event.target.closest(".math-assistant-cancel");
+    if (cancel) {
+      closeMathAssistantMenus(null, true);
+      return;
+    }
+
+    const insert = event.target.closest(".math-assistant-insert");
+    if (insert) {
+      insertMathFromAssistant(insert.closest(".math-assistant-control"));
+      return;
+    }
+
+    if (!event.target.closest(".math-assistant-menu")) closeMathAssistantMenus();
+  });
+
+  document.addEventListener("input", (event) => {
+    const input = event.target.closest(".math-assistant-input");
+    if (input) renderMathAssistantPreview(input.closest(".math-assistant-control"));
   });
 
   document.addEventListener("click", (event) => {
@@ -595,7 +1021,7 @@ function setupExpandableFields() {
     const option = event.target.closest(".learning-outcome-option");
     if (option) {
       const control = option.closest(".learning-outcomes-control");
-      const textarea = control?.closest(".expandable-field")?.querySelector("textarea");
+      const textarea = getExpandableTextarea(control?.closest(".expandable-field"));
       const outcomes = typeof getLearningOutcomes === "function" ? getLearningOutcomes() : [];
       const outcome = Array.isArray(outcomes)
         ? outcomes.find((item) => String(item.id || "") === option.dataset.outcomeId)
@@ -680,6 +1106,12 @@ function setupExpandableFields() {
 
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
+    const mathControl = event.target.closest(".math-assistant-control") ||
+      document.querySelector(".math-assistant-trigger[aria-expanded='true']")?.closest(".math-assistant-control");
+    if (mathControl) {
+      closeMathAssistantMenus(null, true);
+      return;
+    }
     const openControl = event.target.closest(".learning-outcomes-control") ||
       document.querySelector(".learning-outcomes-trigger[aria-expanded='true']")?.closest(".learning-outcomes-control");
     if (!openControl) return;
@@ -688,9 +1120,15 @@ function setupExpandableFields() {
   });
 
   document.addEventListener("keydown", (event) => {
-    const textarea = event.target.closest(".expandable-field textarea, .grid-desc-input");
+    const textarea = event.target.closest(".expandable-field textarea:not(.math-assistant-input), .grid-desc-input");
     if (!textarea) return;
     if (handleMarkdownListEnter(textarea, event)) return;
+    if (!event.altKey && event.shiftKey && (event.metaKey || event.ctrlKey) && event.code === "KeyM") {
+      event.preventDefault();
+      rememberSelection(textarea);
+      textarea.closest(".expandable-field")?.querySelector(".math-assistant-trigger")?.click();
+      return;
+    }
     const action = markdownActionForKeyboardEvent(event);
     if (!action) return;
     event.preventDefault();
@@ -700,7 +1138,7 @@ function setupExpandableFields() {
 
   ["focusin", "input", "keyup", "mouseup"].forEach((eventName) => {
     document.addEventListener(eventName, (event) => {
-      const textarea = event.target.closest(".expandable-field textarea");
+      const textarea = event.target.closest(".expandable-field textarea:not(.math-assistant-input)");
       if (!textarea) return;
       rememberSelection(textarea);
       if (eventName === "focusin") {
@@ -713,11 +1151,11 @@ function setupExpandableFields() {
   });
 
   document.addEventListener("focusout", (event) => {
-    const textarea = event.target.closest(".expandable-field textarea");
+    const textarea = event.target.closest(".expandable-field textarea:not(.math-assistant-input)");
     if (!textarea) return;
     const wrapper = textarea.closest(".expandable-field");
     window.setTimeout(() => {
-      if (wrapper?.querySelector("textarea") !== document.activeElement) {
+      if (getExpandableTextarea(wrapper) !== document.activeElement) {
         wrapper?.classList.remove("is-editing");
         refreshMarkdownPreview(wrapper);
       }
@@ -727,7 +1165,7 @@ function setupExpandableFields() {
   document.addEventListener("click", (event) => {
     const preview = event.target.closest(".markdown-preview");
     if (!preview) return;
-    const textarea = preview.closest(".expandable-field")?.querySelector("textarea");
+    const textarea = getExpandableTextarea(preview.closest(".expandable-field"));
     if (textarea) textarea.focus();
   });
 }
@@ -776,7 +1214,7 @@ function restoreAllFullscreenExpandableFields() {
   document.querySelectorAll(".expandable-field.fullscreen").forEach((wrapper) => {
     toggleExpandableFieldFullscreen(wrapper, false);
     const btn = wrapper.querySelector(".expand-btn");
-    const textarea = wrapper.querySelector("textarea");
+    const textarea = getExpandableTextarea(wrapper);
     if (btn) {
       btn.textContent = "⤢";
       btn.setAttribute("aria-label", t("fullscreen"));

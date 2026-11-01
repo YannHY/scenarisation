@@ -89,6 +89,47 @@ for (const format of ['Markdown', 'Html', 'Word', 'Excel']) {
   });
 }
 
+test('HTML and Word exports render LaTeX while source-oriented formats preserve it', () => {
+  const context = loadModules();
+  vm.runInContext(`window.katex = {
+    renderToString: (latex, options) => '<math data-display="' + String(Boolean(options.displayMode)) + '"><mi>' + latex + '</mi></math>'
+  };`, context);
+  const state = documentWith(
+    'Mathématiques',
+    'math',
+    'Calculer $x^2$ puis $$\\frac{a}{b}$$.'
+  );
+  const exporter = context.window.LearningDesignerModules.createExports({
+    getState: () => state,
+    escapeHtml: text => String(text)
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+  });
+
+  const html = exporter.buildHtmlExportDocument('students');
+  assert.match(html, /<math data-display="false"><mi>x\^2<\/mi><\/math>/);
+  assert.match(html, /<math data-display="true"><mi>\\frac\{a\}\{b\}<\/mi><\/math>/);
+  assert.doesNotMatch(html, /\$x\^2\$|\$\$\\frac/);
+
+  const word = new TextDecoder().decode(exporter.buildWordExportDocument('students'));
+  assert.match(word, /xmlns:m="http:\/\/schemas\.openxmlformats\.org\/officeDocument\/2006\/math"/);
+  assert.match(word, /<m:sSup>/);
+  assert.match(word, /<m:f>/);
+  assert.doesNotMatch(word, /\$x\^2\$|\$\$\\frac/);
+
+  const markdown = exporter.buildMarkdownExport('students');
+  assert.match(markdown, /\$x\^2\$/);
+  assert.match(markdown, /\$\$\\frac\{a\}\{b\}\$\$/);
+
+  state.sessions[0].activities[0].instructions = '$$\\begin{pmatrix}a&b\\\\c&d\\end{pmatrix}$$';
+  const matrixWord = new TextDecoder().decode(exporter.buildWordExportDocument('students'));
+  assert.match(matrixWord, /<m:d>/);
+  assert.match(matrixWord, /<m:m>/);
+  assert.match(matrixWord, /<m:mr>/);
+  assert.doesNotMatch(matrixWord, /\\begin\{pmatrix\}/);
+});
+
 test('PER preserves official objectives, components and merged-table learning entries', () => {
   const context = loadModules();
   vm.runInContext(`globalThis.perCatalog = window.LearningDesignerModules.createCompetencies({
