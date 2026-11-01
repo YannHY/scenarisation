@@ -936,8 +936,174 @@ body.fullscreen-editor-open {
   text-align: center;
 }
 
-#analysis-title {
-  margin-bottom: 32px;
+.analysis-heading {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 56px;
+}
+
+.analysis-heading .analysis-title {
+  grid-column: 2;
+}
+
+.analysis-export-menu {
+  position: relative;
+  grid-column: 3;
+  justify-self: end;
+  z-index: 5;
+}
+
+.analysis-export-menu summary {
+  list-style: none;
+}
+
+.analysis-export-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.analysis-export-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text-strong);
+  padding: 8px 11px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.analysis-export-button:hover,
+.analysis-export-button:focus-visible {
+  border-color: color-mix(in srgb, var(--text-strong) 28%, var(--line));
+  background: var(--surface-light);
+}
+
+.analysis-export-button:focus-visible {
+  outline: 2px solid var(--text-strong);
+  outline-offset: 2px;
+}
+
+.analysis-export-chevron {
+  font-size: 9px;
+  transition: transform 160ms ease;
+}
+
+.analysis-export-menu[open] .analysis-export-chevron {
+  transform: rotate(180deg);
+}
+
+.analysis-export-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: min(370px, calc(100vw - 32px));
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.16);
+  padding: 16px;
+}
+
+.analysis-export-title {
+  margin: 0;
+  color: var(--text-strong);
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.analysis-export-description {
+  margin: 4px 0 13px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.analysis-export-groups {
+  display: grid;
+  gap: 13px;
+}
+
+.analysis-export-group {
+  display: grid;
+  gap: 7px;
+}
+
+.analysis-export-group + .analysis-export-group {
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+
+html body:not(.home-page) h3.analysis-export-group-title {
+  margin: 0;
+  color: var(--text-strong);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.3;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.analysis-export-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.analysis-export-option {
+  display: grid;
+  gap: 3px;
+  height: 50px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-light);
+  color: var(--text-strong);
+  padding: 9px 6px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.analysis-export-option:hover,
+.analysis-export-option:focus-visible {
+  border-color: color-mix(in srgb, var(--text-strong) 32%, var(--line));
+  background: var(--panel);
+}
+
+.analysis-export-option:focus-visible {
+  outline: 2px solid var(--text-strong);
+  outline-offset: 1px;
+}
+
+.analysis-export-option > span {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.analysis-export-option > small {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.analysis-export-status {
+  min-height: 15px;
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.35;
 }
 
 .analysis-alerts {
@@ -4178,6 +4344,27 @@ main {
 }
 
 @media (max-width: 640px) {
+  .analysis-heading {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 14px;
+    margin-bottom: 42px;
+  }
+
+  .analysis-heading .analysis-title,
+  .analysis-export-menu {
+    grid-column: 1;
+  }
+
+  .analysis-export-menu {
+    justify-self: center;
+  }
+
+  .analysis-export-popover {
+    right: 50%;
+    transform: translateX(50%);
+  }
+
   .analysis-main-grid {
     grid-template-columns: 1fr;
     row-gap: 36px;

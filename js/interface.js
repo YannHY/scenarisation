@@ -213,7 +213,7 @@ let exportSessionIds = null;
 const {
   normalizeExportScope, exportSessionKey, getExportSessionEntries,
   buildStudentInstructionsData, buildMarkdownExport, buildHtmlExportDocument,
-  buildWordExportDocument, SPREADSHEET_COLUMNS, buildExcelExportDocument
+  buildWordExportDocument, SPREADSHEET_COLUMNS, buildExcelExportDocument, createZipArchive
 } = window.LearningDesignerModules.createExports({
   escapeHtml, getState: () => state, totalSessionMinutes, splitMinutesToPedagogicalTime,
   getDayHours, labelForDeliveryMode, labelForSchoolSystem, labelForSchoolLevel,
@@ -236,7 +236,8 @@ const {
   renderAnalysisPanel
 } = window.LearningDesignerModules.createAnalysis({
   getState: () => state, normalizeAiasState, t, currentLang, normalizePedagogicalTime,
-  getDayHours, TEACHING_VALUES, LOCATION_VALUES, LEARNING_TYPES, AIAS_LEVELS
+  getDayHours, TEACHING_VALUES, LOCATION_VALUES, LEARNING_TYPES, AIAS_LEVELS,
+  downloadBlob, announce, createZipArchive
 });
 
 const {
@@ -487,6 +488,22 @@ function applyLocalizedUI() {
   newDesignCancelBtn.textContent = t("cancel");
   newDesignConfirmBtn.textContent = t("newDesignModalConfirm");
   document.getElementById("analysis-title").textContent = t("analysisTitle");
+  document.getElementById("analysis-export-button-label").textContent = t("analysisExportButton");
+  document.getElementById("analysis-export-title").textContent = t("analysisExportTitle");
+  document.getElementById("analysis-export-description").textContent = t("analysisExportDescription");
+  document.getElementById("analysis-export-data-title").textContent = t("analysisExportDataGroup");
+  document.getElementById("analysis-export-documents-title").textContent = t("analysisExportDocumentsGroup");
+  document.getElementById("analysis-export-images-title").textContent = t("analysisExportImagesGroup");
+  document.getElementById("analysis-export-txt-label").textContent = t("analysisExportText");
+  document.getElementById("analysis-export-md-label").textContent = t("analysisExportMarkdown");
+  document.getElementById("analysis-export-html-label").textContent = t("analysisExportHtml");
+  document.getElementById("analysis-export-csv-label").textContent = t("analysisExportCsv");
+  document.getElementById("analysis-export-xlsx-label").textContent = t("analysisExportExcel");
+  document.getElementById("analysis-export-docx-label").textContent = t("analysisExportWord");
+  document.getElementById("analysis-export-pdf-label").textContent = t("analysisExportPdf");
+  document.getElementById("analysis-export-png-label").textContent = t("analysisExportPng");
+  document.getElementById("analysis-export-jpg-label").textContent = t("analysisExportJpg");
+  document.getElementById("analysis-export-svg-label").textContent = t("analysisExportSvg");
   document.getElementById("analysis-learning-title").textContent = t("groupTitleType");
   document.getElementById("analysis-delivery-title").textContent = t("groupTitleMode");
   document.getElementById("analysis-teacher-title").textContent = t("groupTitleTeaching");

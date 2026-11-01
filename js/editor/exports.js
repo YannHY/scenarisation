@@ -1125,7 +1125,7 @@ function excelColumnName(index) {
 return {
   normalizeExportScope, exportSessionKey, getExportSessionEntries,
   buildStudentInstructionsData, buildMarkdownExport, buildHtmlExportDocument,
-  buildWordExportDocument, SPREADSHEET_COLUMNS, buildExcelExportDocument
+  buildWordExportDocument, SPREADSHEET_COLUMNS, buildExcelExportDocument, createZipArchive
 };
 };
 })();

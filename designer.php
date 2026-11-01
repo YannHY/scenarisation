@@ -167,7 +167,48 @@ app_start_session();
           </div>
         </div>
         <div id="analysis-view" class="analysis-view hidden" role="tabpanel" aria-labelledby="top-tab-analysis">
-          <h2 id="analysis-title" class="analysis-title" data-tooltip-i18n="analysisTooltip">Expérience d’apprentissage</h2>
+          <div class="analysis-heading">
+            <h2 id="analysis-title" class="analysis-title" data-tooltip-i18n="analysisTooltip">Expérience d’apprentissage</h2>
+            <details id="analysis-export-menu" class="analysis-export-menu">
+              <summary id="analysis-export-button" class="analysis-export-button">
+                <i class="fa-solid fa-download" aria-hidden="true"></i>
+                <span id="analysis-export-button-label">Exporter</span>
+                <i class="fa-solid fa-chevron-down analysis-export-chevron" aria-hidden="true"></i>
+              </summary>
+              <div class="analysis-export-popover">
+                <p id="analysis-export-title" class="analysis-export-title">Choisir un format</p>
+                <p id="analysis-export-description" class="analysis-export-description">Données structurées ou visuel prêt à partager.</p>
+                <div class="analysis-export-groups">
+                  <section class="analysis-export-group" aria-labelledby="analysis-export-data-title">
+                    <h3 id="analysis-export-data-title" class="analysis-export-group-title">Texte et données</h3>
+                    <div class="analysis-export-options">
+                      <button type="button" class="analysis-export-option" data-analysis-export="txt"><span>TXT</span><small id="analysis-export-txt-label">Texte</small></button>
+                      <button type="button" class="analysis-export-option" data-analysis-export="md"><span>MD</span><small id="analysis-export-md-label">Markdown</small></button>
+                      <button type="button" class="analysis-export-option" data-analysis-export="html"><span>HTML</span><small id="analysis-export-html-label">Page web</small></button>
+                      <button type="button" class="analysis-export-option" data-analysis-export="csv"><span>CSV</span><small id="analysis-export-csv-label">Tableur</small></button>
+                      <button type="button" class="analysis-export-option" data-analysis-export="xlsx"><span>XLSX</span><small id="analysis-export-xlsx-label">Excel</small></button>
+                    </div>
+                  </section>
+                  <section class="analysis-export-group" aria-labelledby="analysis-export-documents-title">
+                    <h3 id="analysis-export-documents-title" class="analysis-export-group-title">Documents</h3>
+                    <div class="analysis-export-options">
+                      <button type="button" class="analysis-export-option" data-analysis-export="docx"><span>DOCX</span><small id="analysis-export-docx-label">Word</small></button>
+                      <button type="button" class="analysis-export-option" data-analysis-export="pdf"><span>PDF</span><small id="analysis-export-pdf-label">Document</small></button>
+                    </div>
+                  </section>
+                  <section class="analysis-export-group" aria-labelledby="analysis-export-images-title">
+                    <h3 id="analysis-export-images-title" class="analysis-export-group-title">Images</h3>
+                    <div class="analysis-export-options">
+                      <button type="button" class="analysis-export-option" data-analysis-export="png"><span>PNG</span><small id="analysis-export-png-label">Image nette</small></button>
+                      <button type="button" class="analysis-export-option" data-analysis-export="jpg"><span>JPEG</span><small id="analysis-export-jpg-label">Image légère</small></button>
+                      <button type="button" class="analysis-export-option" data-analysis-export="svg"><span>SVG</span><small id="analysis-export-svg-label">Vectoriel</small></button>
+                    </div>
+                  </section>
+                </div>
+                <p id="analysis-export-status" class="analysis-export-status" role="status" aria-live="polite"></p>
+              </div>
+            </details>
+          </div>
           <div id="analysis-alerts" class="analysis-alerts hidden" role="status" aria-live="polite" aria-atomic="false"></div>
           <div class="analysis-main-grid">
             <div class="analysis-block analysis-learning-block">
