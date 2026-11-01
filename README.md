@@ -77,7 +77,7 @@ scenarisation list school-levels --system france
 scenarisation list activity-options
 scenarisation list competency-frameworks
 scenarisation list competencies --framework crcn --search sources --details
-scenarisation init mon-scenario.json --school-system france --school-level quatrieme --competency-framework crcn
+scenarisation init mon-scenario.json --school-system france --school-level quatrieme --competency-framework crcn --teacher-materials "Vidéoprojecteur et tablettes"
 scenarisation add-moment mon-scenario.json --title "Découvrir"
 scenarisation validate mon-scenario.json --strict-pedagogy
 scenarisation handoff mon-scenario.json
@@ -85,7 +85,7 @@ scenarisation login
 scenarisation publish mon-scenario.json
 ```
 
-Le CLI enregistre des identifiants stables dans `schoolSystem` et `schoolLevel`, accepte aussi les principaux libellés et alias français ou anglais, et refuse une association incohérente entre un système et un niveau. Il permet également de déclarer un ou plusieurs référentiels de compétences, d’en rechercher les libellés et de valider les compétences affectées aux activités. Les anciens codes `A`, `P` et `C` restent disponibles comme alias du référentiel Florimont. Pour chaque activité créée, le CLI exige un choix explicite de groupe, d’enseignement, de rythme, de mode de formation, d’évaluation et de niveau AIAS.
+Le CLI enregistre des identifiants stables dans `schoolSystem` et `schoolLevel`, accepte aussi les principaux libellés et alias français ou anglais, et refuse une association incohérente entre un système et un niveau. Il permet également de préciser le matériel enseignant avec `--teacher-materials`, de déclarer un ou plusieurs référentiels de compétences, d’en rechercher les libellés et de valider les compétences affectées aux activités. Les anciens codes `A`, `P` et `C` restent disponibles comme alias du référentiel Florimont. Pour chaque activité créée, le CLI exige un choix explicite de groupe, d’enseignement, de rythme, de mode de formation, d’évaluation et de niveau AIAS.
 
 Les instructions d'installation et d'utilisation de la Skill sont détaillées dans la section [Créer avec l'IA](./help.php#cli) de l'aide.
 

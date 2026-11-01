@@ -80,6 +80,7 @@ if ! "$SCENARISATION_BIN" list school-systems >/dev/null 2>&1 \
   || ! "$SCENARISATION_BIN" init --help 2>&1 | grep -q -- "--school-system" \
   || ! "$SCENARISATION_BIN" init --help 2>&1 | grep -q -- "--school-level" \
   || ! "$SCENARISATION_BIN" init --help 2>&1 | grep -q -- "--competency-framework" \
+  || ! "$SCENARISATION_BIN" init --help 2>&1 | grep -q -- "--teacher-materials" \
   || ! "$SCENARISATION_BIN" add-activity --help 2>&1 | grep -q -- "--group" \
   || ! "$SCENARISATION_BIN" add-activity --help 2>&1 | grep -q -- "--teaching" \
   || ! "$SCENARISATION_BIN" add-activity --help 2>&1 | grep -q -- "--pacing" \

@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Any
 
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 DEFAULT_DAY_HOURS = 7
 AIAS_VERSION = "2.1"
 DEFAULT_SITE = "https://www.ralentirtravaux.com/flo/learning-designer"
@@ -815,6 +815,7 @@ def new_document(args: argparse.Namespace) -> dict[str, Any]:
             "trainers": args.trainers or "",
             "description": args.description or "",
             "command": args.brief or "",
+            "teacherMaterials": args.teacher_materials or "",
             "personas": args.objectives or "",
             "sliders": [],
             "activeTab": "settings",
@@ -974,6 +975,8 @@ def summarize_document(document: dict[str, Any]) -> str:
         lines.append(f"- Description: {meta['description']}")
     if meta.get("command"):
         lines.append(f"- Institutional brief: {meta['command']}")
+    if meta.get("teacherMaterials"):
+        lines.append(f"- Teacher materials: {meta['teacherMaterials']}")
     if meta.get("personas"):
         lines.append(f"- Learning objectives/personas: {meta['personas']}")
     outcomes = meta.get("sliders") or []
@@ -1431,6 +1434,16 @@ def add_common_design_args(parser: argparse.ArgumentParser, language: str) -> No
     parser.add_argument("--trainers", "--formateurs", default="")
     parser.add_argument("--description", default="")
     parser.add_argument("--brief", "--commande", default="", help=localized(language, "Commande institutionnelle", "Institutional brief"))
+    parser.add_argument(
+        "--teacher-materials", "--materiel-enseignant", "--matériel-enseignant",
+        dest="teacher_materials",
+        default="",
+        help=localized(
+            language,
+            "Outils physiques et numériques nécessaires à l’enseignant",
+            "Physical and digital tools required by the teacher",
+        ),
+    )
     parser.add_argument("--objectives", "--objectifs", default="", help=localized(language, "Objectifs généraux", "Overall learning objectives"))
 
 

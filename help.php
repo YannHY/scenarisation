@@ -30,7 +30,7 @@ CANDIDAT list competencies --framework crcn --search sources
 CANDIDAT init --help
 CANDIDAT add-activity --help
 
-Le CLI retenu doit réussir toutes les commandes de catalogue, y compris celles des référentiels et des libellés de compétences. L’aide de `init` doit inclure `--school-system`, `--school-level` et `--competency-framework`. L’aide de `add-activity` doit inclure `--group`, `--teaching`, `--pacing`, `--mode`, `--evaluation` et `--aias`. Le CLI doit également prendre en charge `validate --strict-pedagogy`. Un simple succès de `--help` ne suffit pas.
+Le CLI retenu doit réussir toutes les commandes de catalogue, y compris celles des référentiels et des libellés de compétences. L’aide de `init` doit inclure `--school-system`, `--school-level`, `--competency-framework` et `--teacher-materials`. L’aide de `add-activity` doit inclure `--group`, `--teaching`, `--pacing`, `--mode`, `--evaluation` et `--aias`. Le CLI doit également prendre en charge `validate --strict-pedagogy`. Un simple succès de `--help` ne suffit pas.
 
 Si la commande globale existe mais n’est pas compatible, indique-moi simplement qu’elle doit être mise à jour et demande-moi l’autorisation de lancer `scenarisation upgrade`. Après mon accord explicite, effectue la mise à jour et recommence les vérifications.
 
@@ -140,7 +140,7 @@ Valeurs sûres :
 
 Pour chaque activité, détermine et transmets explicitement `--group`, `--teaching`, `--pacing`, `--mode`, `--evaluation` et `--aias`. Ne t’appuie pas sur des valeurs par défaut. Choisis-les comme un ensemble cohérent à partir de l’objectif, de l’autonomie des élèves, des interactions nécessaires, des contraintes de formation et des traces d’apprentissage attendues. AIAS 1 signifie sans IA ; AIAS 2 réserve l’IA à l’exploration, la recherche ou la planification ; AIAS 3 en fait une collaboratrice dont l’élève évalue et transforme les productions ; AIAS 4 l’intègre pleinement sous la direction critique de l’élève ; AIAS 5 correspond à l’exploration et à la co-conception de nouveaux usages. Utilise `not-applicable` seulement si le cadre AIAS ne s’applique réellement pas, et ne laisse jamais AIAS indécis dans un scénario généré.
 
-Pour `init`, transmets le système, le niveau et les référentiels lorsqu’ils sont connus, par exemple : `$SCENARISATION init design.json --school-system france --school-level quatrieme --competency-framework crcn`.
+Pour `init`, transmets le système, le niveau, les référentiels et le matériel enseignant lorsqu’ils sont connus, par exemple : `$SCENARISATION init design.json --school-system france --school-level quatrieme --competency-framework crcn --teacher-materials "Vidéoprojecteur et tablettes"`.
 
 Utilise les valeurs canoniques ci-dessus pour `--pacing` et `--mode` ; le CLI accepte également leurs principaux équivalents français ou anglais.
 
@@ -279,7 +279,7 @@ CANDIDATE list competencies --framework crcn --search sources
 CANDIDATE init --help
 CANDIDATE add-activity --help
 
-The selected CLI must successfully run every catalog command, including the competency-framework and competency-label commands. The `init` help must include `--school-system`, `--school-level`, and `--competency-framework`. The `add-activity` help must include `--group`, `--teaching`, `--pacing`, `--mode`, `--evaluation`, and `--aias`. The CLI must also support `validate --strict-pedagogy`. A successful `--help` alone is not sufficient.
+The selected CLI must successfully run every catalog command, including the competency-framework and competency-label commands. The `init` help must include `--school-system`, `--school-level`, `--competency-framework`, and `--teacher-materials`. The `add-activity` help must include `--group`, `--teaching`, `--pacing`, `--mode`, `--evaluation`, and `--aias`. The CLI must also support `validate --strict-pedagogy`. A successful `--help` alone is not sufficient.
 
 If the global command exists but is incompatible, simply tell me that it must be updated and ask for permission to run `scenarisation upgrade`. After my explicit approval, perform the update and repeat the checks.
 
@@ -389,7 +389,7 @@ Safe values:
 
 For every activity, explicitly determine and pass `--group`, `--teaching`, `--pacing`, `--mode`, `--evaluation`, and `--aias`. Do not rely on defaults. Choose them as a coherent set based on the objective, learner autonomy, required interactions, delivery constraints, and expected evidence of learning. AIAS 1 means no AI; AIAS 2 limits AI to exploration, research, or planning; AIAS 3 makes AI a collaborator whose output the learner evaluates and transforms; AIAS 4 fully integrates AI under the learner's critical direction; AIAS 5 covers exploring and co-designing new AI uses. Use `not-applicable` only when the AIAS framework genuinely does not apply, and never leave AIAS undecided in a generated scenario.
 
-For `init`, pass the system, level, and competency frameworks whenever they are known, for example: `$SCENARISATION init design.json --school-system france --school-level quatrieme --competency-framework crcn`.
+For `init`, pass the system, level, competency frameworks, and teacher materials whenever they are known, for example: `$SCENARISATION init design.json --school-system france --school-level quatrieme --competency-framework crcn --teacher-materials "Projector and tablets"`.
 
 Use the canonical values above for `--pacing` and `--mode`; the CLI also accepts their main French and English equivalents.
 
@@ -1069,14 +1069,14 @@ scenarisation list school-systems</pre>
                 <div class="help-details-grid">
                     <div>
                         <strong>1. Initialiser le fichier</strong>
-                        <p><code>init</code> crée le fichier JSON de départ avec le titre, la langue, la durée, la modalité, le système ou la classification, le niveau et les référentiels de compétences. Consultez d’abord les catalogues du CLI : ils fournissent les identifiants et les libellés exacts.</p>
+                        <p><code>init</code> crée le fichier JSON de départ avec le titre, la langue, la durée, la modalité, le système ou la classification, le niveau, les référentiels de compétences et le matériel enseignant. Consultez d’abord les catalogues du CLI&nbsp;: ils fournissent les identifiants et les libellés exacts.</p>
                         <div class="help-code-wrap">
                             <button class="help-copy-btn" type="button" aria-label="Copier la commande" title="Copier"><i class="fa-regular fa-copy" aria-hidden="true"></i></button>
                             <pre class="help-code">scenarisation list school-systems
 scenarisation list school-levels --system france
 scenarisation list competency-frameworks
 scenarisation list competencies --framework pix-ia --search générative --details
-scenarisation init design.json --title "Atelier IA" --lang fr --duration 120 --mode hybride --school-system france --school-level quatrieme --competency-framework pix-ia --group-size 24</pre>
+scenarisation init design.json --title "Atelier IA" --lang fr --duration 120 --mode hybride --school-system france --school-level quatrieme --competency-framework pix-ia --group-size 24 --teacher-materials "Vidéoprojecteur et tablettes"</pre>
                         </div>
                     </div>
                     <div>

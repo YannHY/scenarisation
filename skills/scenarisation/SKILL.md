@@ -25,7 +25,7 @@ First, when working inside a Scenarisation repository that contains `./bin/scena
 ./bin/scenarisation add-activity --help
 ```
 
-Use it as `SCENARISATION=./bin/scenarisation` when all catalog commands succeed, the `init` help includes `--school-system`, `--school-level`, and `--competency-framework`, and the activity help includes `--group`, `--teaching`, `--pacing`, `--mode`, `--evaluation`, and `--aias`. Prefer this repository CLI over a global installation because it matches the current project.
+Use it as `SCENARISATION=./bin/scenarisation` when all catalog commands succeed, the `init` help includes `--school-system`, `--school-level`, `--competency-framework`, and `--teacher-materials`, and the activity help includes `--group`, `--teaching`, `--pacing`, `--mode`, `--evaluation`, and `--aias`. Prefer this repository CLI over a global installation because it matches the current project.
 
 When no compatible repository CLI is available, probe the global command in the same way:
 
@@ -94,6 +94,7 @@ Complementary questions to ask only when useful:
 - Bloom level for each outcome if known
 - competencies to mobilize, if the user already knows them
 - imposed supports, works, resources, or tools
+- physical equipment, software, and digital services required by the teacher
 
 Distinguish teaching objectives from learning outcomes. If the user gives only teaching objectives, transform them into observable learning outcomes with action verbs and Bloom levels.
 
@@ -154,7 +155,7 @@ $SCENARISATION list school-levels --system france
 Create the file:
 
 ```bash
-$SCENARISATION init design.json --title "TITLE" --lang fr --duration 90 --mode onsite --school-system france --school-level quatrieme --competency-framework crcn --group-size 24 --description "DESCRIPTION" --objectives "TEACHING OBJECTIVES"
+$SCENARISATION init design.json --title "TITLE" --lang fr --duration 90 --mode onsite --school-system france --school-level quatrieme --competency-framework crcn --group-size 24 --description "DESCRIPTION" --teacher-materials "TEACHER MATERIALS" --objectives "TEACHING OBJECTIVES"
 ```
 
 Add each moment:

@@ -35,6 +35,8 @@ test('AI prompts document terminal requirements and install the competency catal
   assert.match(help, /never simulate using the CLI/);
   assert.match(help, /demandez explicitement sa publication\u00a0: l’IA lance alors/);
   assert.doesNotMatch(help, /demandez explicitement sa publication : l’IA lance alors/);
+  assert.match(help, /L’aide de `init` doit inclure[^\n]+`--teacher-materials`/);
+  assert.match(help, /The `init` help must include[^\n]+`--teacher-materials`/);
   assert.equal(help.split(catalogDownload).length - 1, 2);
   assert.equal(help.split(catalogFallback).length - 1, 2);
 });
@@ -98,6 +100,32 @@ test('CLI resolves competencies inside declared frameworks and preserves legacy 
       JSON.parse(fs.readFileSync(legacyDesign, 'utf8')).sessions[0].activities[0].tools,
       ['competency:acquerir:1']
     );
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test('CLI init records teacher materials and includes them in the Codex prompt', () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'scenarisation-cli-materials-'));
+  const design = path.join(directory, 'design.json');
+  try {
+    const frenchHelp = expectSuccess(run(['init', '--help']));
+    assert.match(frenchHelp, /--teacher-materials/);
+    assert.match(frenchHelp, /--materiel-enseignant/);
+
+    const englishHelp = expectSuccess(run(['--lang', 'en', 'init', '--help']));
+    assert.match(englishHelp, /Physical and digital tools required by the teacher/);
+
+    expectSuccess(run([
+      'init', design, '--title', 'Test matériel',
+      '--matériel-enseignant', 'Vidéoprojecteur et tablettes'
+    ]));
+
+    const document = JSON.parse(fs.readFileSync(design, 'utf8'));
+    assert.equal(document.meta.teacherMaterials, 'Vidéoprojecteur et tablettes');
+
+    const prompt = expectSuccess(run(['prompt', design]));
+    assert.match(prompt, /Teacher materials: Vidéoprojecteur et tablettes/);
   } finally {
     fs.rmSync(directory, { recursive: true, force: true });
   }
