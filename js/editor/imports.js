@@ -377,6 +377,7 @@ function buildStateFromCsv(csvText) {
       imported.meta.dayHours = dayHours;
       imported.meta.description = read("design_description");
       imported.meta.command = read("design_institutional_brief");
+      imported.meta.teacherMaterials = read("design_teacher_materials");
       imported.meta.personas = read("design_personas");
       imported.meta.sliders = read("design_sliders");
 
@@ -586,10 +587,11 @@ function buildStateFromMarkdown(markdownText) {
       const settingSection = line.match(/^###\s+(.+)$/);
       if (settingSection) {
         const title = normalizeToken(settingSection[1]);
-        if (title === "description" || title === "commande institutionnelle" || title === "objectifs") {
+        if (["description", "commande institutionnelle", "materiel enseignant", "teacher materials", "objectifs"].includes(title)) {
           const block = readMarkdownBlock(lines, index + 1);
           if (title === "description") imported.meta.description = block.value;
           if (title === "commande institutionnelle") imported.meta.command = block.value;
+          if (["materiel enseignant", "teacher materials"].includes(title)) imported.meta.teacherMaterials = block.value;
           if (title === "objectifs") imported.meta.personas = block.value;
           index = block.nextIndex;
           continue;

@@ -48,6 +48,7 @@ const DEFAULT_META = {
   sizeClass: "",
   designers: "",
   trainers: "",
+  teacherMaterials: "",
   description: "",
   command: "",
   personas: "",
@@ -139,6 +140,7 @@ const metaDayHoursInput = document.getElementById("meta-day-hours");
 const metaSizeClassInput = document.getElementById("meta-size-class");
 const metaDesignersInput = document.getElementById("meta-designers");
 const metaTrainersInput = document.getElementById("meta-trainers");
+const metaTeacherMaterialsInput = document.getElementById("meta-teacher-materials");
 const metaDescriptionInput = document.getElementById("meta-description");
 const metaCommandInput = document.getElementById("meta-command");
 const metaPersonasInput = document.getElementById("meta-personas");
@@ -522,6 +524,7 @@ function applyLocalizedUI() {
   document.getElementById("label-meta-size-class").textContent = t("metaSizeLabel");
   document.getElementById("label-meta-designers").textContent = t("metaDesignersLabel");
   document.getElementById("label-meta-trainers").textContent = t("metaTrainersLabel");
+  document.getElementById("label-meta-teacher-materials").textContent = t("metaTeacherMaterialsLabel");
   document.getElementById("label-meta-personas").textContent = t("metaPersonasLabel");
   document.getElementById("label-meta-outcomes").textContent = t("outcomesLabel");
   document.getElementById("outcomes-description").textContent = t("outcomesDescription");
@@ -616,6 +619,7 @@ function applyLocalizedUI() {
   exportDesignBtn.setAttribute("aria-haspopup", "dialog");
   board.setAttribute("aria-label", t("boardRegion"));
   metaCommandInput.placeholder = t("commandPlaceholder");
+  metaTeacherMaterialsInput.placeholder = t("teacherMaterialsPlaceholder");
   metaPersonasInput.placeholder = t("personasPlaceholder");
   metaLearningDaysInput.setAttribute("aria-label", t("learningDaysLabel"));
   metaLearningHoursInput.setAttribute("aria-label", t("learningHoursLabel"));
@@ -2270,6 +2274,7 @@ function renderTopPanel() {
     metaSizeClassInput.value = state.meta.sizeClass;
     metaDesignersInput.value = state.meta.designers;
     metaTrainersInput.value = state.meta.trainers;
+    metaTeacherMaterialsInput.value = state.meta.teacherMaterials;
     metaDescriptionInput.value = state.meta.description;
     metaCommandInput.value = state.meta.command;
     metaPersonasInput.value = state.meta.personas;
@@ -3733,11 +3738,12 @@ function render() {
     setButtonLabel(
       toggleIntentionsBtn,
       intentionsVisible ? "fa-solid fa-eye" : "fa-solid fa-eye-slash",
-      intentionsVisible ? t("hideIntentions") : t("showIntentions")
+      t("intentions")
     );
     const intentionsLabel = intentionsVisible ? t("hideIntentions") : t("showIntentions");
+    toggleIntentionsBtn.setAttribute("aria-pressed", intentionsVisible ? "true" : "false");
     toggleIntentionsBtn.setAttribute("aria-label", intentionsLabel);
-    toggleIntentionsBtn.setAttribute("title", intentionsLabel);
+    toggleIntentionsBtn.setAttribute("title", t("intentions"));
   }
 
   if (boardLayout === "grid") {
@@ -4266,6 +4272,10 @@ function bindTopPanelEvents() {
   });
   metaTrainersInput.addEventListener("input", (event) => {
     state.meta.trainers = event.target.value;
+    saveState();
+  });
+  metaTeacherMaterialsInput.addEventListener("input", (event) => {
+    state.meta.teacherMaterials = event.target.value;
     saveState();
   });
   metaDescriptionInput.addEventListener("input", (event) => {

@@ -89,6 +89,13 @@ app_start_session();
                 <button class="expand-btn" type="button" aria-label="Plein écran">⤢</button>
               </div>
             </div>
+            <div class="form-row">
+              <label id="label-meta-teacher-materials" for="meta-teacher-materials" data-tooltip-i18n="metaTeacherMaterialsTooltip">Matériel enseignant</label>
+              <div class="expandable-field">
+                <textarea id="meta-teacher-materials" class="panel-textarea" placeholder="Décrivez les outils physiques et numériques nécessaires..."></textarea>
+                <button class="expand-btn" type="button" aria-label="Plein écran">⤢</button>
+              </div>
+            </div>
           </div>
           <div class="panel-column panel-column-right">
             <div class="form-row">

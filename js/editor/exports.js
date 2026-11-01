@@ -126,6 +126,11 @@ function buildMarkdownExport(scope = "full", sessionIds = null) {
     lines.push(getState().meta.command);
     lines.push("");
   }
+  if (getState().meta.teacherMaterials) {
+    lines.push("### Matériel enseignant");
+    lines.push(getState().meta.teacherMaterials);
+    lines.push("");
+  }
   if (getState().meta.personas) {
     lines.push("### Objectifs");
     lines.push(getState().meta.personas);
@@ -289,6 +294,13 @@ function buildHtmlExportDocument(scope = "full", sessionIds = null) {
       getState().meta.command
         ? `<p><strong>Commande institutionnelle:</strong><br />${escapeHtmlWithBreaks(
             getState().meta.command
+          )}</p>`
+        : ""
+    }
+    ${
+      getState().meta.teacherMaterials
+        ? `<p><strong>Matériel enseignant:</strong><br />${escapeHtmlWithBreaks(
+            getState().meta.teacherMaterials
           )}</p>`
         : ""
     }
@@ -712,6 +724,11 @@ function buildFullWordBody(sessionIds = null) {
     body.push(wordMarkdownBlocks(getState().meta.command, { style: "BodyText" }));
     body.push(wordSpacer(80));
   }
+  if (getState().meta.teacherMaterials) {
+    body.push(wordParagraph("Matériel enseignant", "Heading2"));
+    body.push(wordMarkdownBlocks(getState().meta.teacherMaterials, { style: "BodyText" }));
+    body.push(wordSpacer(80));
+  }
   if (getState().meta.personas) {
     body.push(wordParagraph("Objectifs", "Heading2"));
     body.push(wordMarkdownBlocks(getState().meta.personas, { style: "BodyText" }));
@@ -926,6 +943,7 @@ function buildSpreadsheetRows(scope = "full", sessionIds = null) {
           getDayHours(),
           getState().meta.description || "",
           getState().meta.command || "",
+          getState().meta.teacherMaterials || "",
           getState().meta.personas || "",
           slidersToString(getState().meta.sliders)
         ]
@@ -971,6 +989,7 @@ function buildSpreadsheetRows(scope = "full", sessionIds = null) {
           getDayHours(),
           getState().meta.description || "",
           getState().meta.command || "",
+          getState().meta.teacherMaterials || "",
           getState().meta.personas || "",
           slidersToString(getState().meta.sliders)
         ]
@@ -1012,6 +1031,7 @@ const SPREADSHEET_COLUMNS = [
   { key: "design_day_hours", label: "Heures par jour", width: 14 },
   { key: "design_description", label: "Description du scénario", width: 30 },
   { key: "design_institutional_brief", label: "Commande institutionnelle", width: 30 },
+  { key: "design_teacher_materials", label: "Matériel enseignant", width: 30 },
   { key: "design_personas", label: "Personas", width: 26 },
   { key: "design_sliders", label: "Objectifs / curseurs", width: 26 }
 ];
