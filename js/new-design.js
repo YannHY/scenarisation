@@ -46,6 +46,90 @@
   const en = () => document.documentElement.lang === 'en';
   const text = (fr, english) => en() ? english : fr;
   const label = (entry, key) => entry[key + (en() ? 'En' : 'Fr')] || entry[key + 'Fr'] || '';
+  const sequence = (prefix, first, last) => Array.from({ length: last - first + 1 }, (_, index) => `${prefix}${first + index}`);
+  const schoolStages = {
+    france: [
+      ['maternelle', 'Maternelle', 'Pre-primary school', ['petite_section', 'moyenne_section', 'grande_section']],
+      ['elementaire', 'École élémentaire', 'Primary school', ['cp', 'ce1', 'ce2', 'cm1', 'cm2']],
+      ['college', 'Collège', 'Lower secondary school', ['sixieme', 'cinquieme', 'quatrieme', 'troisieme']],
+      ['lycee', 'Lycée', 'Upper secondary school', ['seconde', 'premiere', 'terminale']]
+    ],
+    switzerland: [
+      ['cycle_1', 'Cycle 1', 'Cycle 1', sequence('ch_', 1, 4).map(value => `${value}p`)],
+      ['cycle_2', 'Cycle 2', 'Cycle 2', sequence('ch_', 5, 8).map(value => `${value}p`)],
+      ['cycle_3', 'Cycle 3 — secondaire I', 'Cycle 3 — lower secondary', ['ch_9s', 'ch_10s', 'ch_11s']],
+      ['secondaire_2', 'Secondaire II', 'Upper secondary', ['ch_sec2_1', 'ch_sec2_2', 'ch_sec2_3']]
+    ],
+    united_states: [
+      ['elementary', 'École élémentaire', 'Elementary school', ['us_k', ...sequence('us_grade_', 1, 5)]],
+      ['middle', 'Collège', 'Middle school', sequence('us_grade_', 6, 8)],
+      ['high', 'Lycée', 'High school', sequence('us_grade_', 9, 12)]
+    ],
+    belgium_french: [
+      ['maternelle', 'Enseignement maternel', 'Pre-primary education', sequence('be_fr_m', 1, 3)],
+      ['primaire', 'Enseignement primaire', 'Primary education', sequence('be_fr_p', 1, 6)],
+      ['secondaire', 'Enseignement secondaire', 'Secondary education', sequence('be_fr_s', 1, 7)]
+    ],
+    belgium_flemish: [
+      ['maternelle', 'Enseignement maternel', 'Pre-primary education', sequence('be_nl_k', 1, 3)],
+      ['primaire', 'Enseignement primaire', 'Primary education', sequence('be_nl_l', 1, 6)],
+      ['secondaire', 'Enseignement secondaire', 'Secondary education', sequence('be_nl_s', 1, 7)]
+    ],
+    belgium_german: [
+      ['maternelle', 'Enseignement maternel', 'Pre-primary education', sequence('be_de_k', 1, 3)],
+      ['primaire', 'Enseignement primaire', 'Primary education', sequence('be_de_p', 1, 6)],
+      ['secondaire', 'Enseignement secondaire', 'Secondary education', sequence('be_de_s', 1, 7)]
+    ],
+    uk_england: [
+      ['early_years', 'Petite enfance', 'Early years', ['uk_england_nursery', 'uk_england_reception']],
+      ['primary', 'Enseignement primaire', 'Primary education', sequence('uk_england_year_', 1, 6)],
+      ['secondary', 'Enseignement secondaire', 'Secondary education', sequence('uk_england_year_', 7, 11)],
+      ['sixth_form', 'Sixth form', 'Sixth form', sequence('uk_england_year_', 12, 13)]
+    ],
+    uk_wales: [
+      ['early_years', 'Petite enfance', 'Early years', ['uk_wales_nursery', 'uk_wales_reception']],
+      ['primary', 'Enseignement primaire', 'Primary education', sequence('uk_wales_year_', 1, 6)],
+      ['secondary', 'Enseignement secondaire', 'Secondary education', sequence('uk_wales_year_', 7, 11)],
+      ['sixth_form', 'Sixth form', 'Sixth form', sequence('uk_wales_year_', 12, 13)]
+    ],
+    uk_scotland: [
+      ['early_years', 'Petite enfance', 'Early years', ['uk_scotland_early_learning']],
+      ['primary', 'Enseignement primaire', 'Primary education', sequence('uk_scotland_p', 1, 7)],
+      ['secondary', 'Enseignement secondaire', 'Secondary education', sequence('uk_scotland_s', 1, 6)]
+    ],
+    uk_northern_ireland: [
+      ['early_years', 'Petite enfance', 'Early years', ['uk_northern_ireland_preschool']],
+      ['primary', 'Enseignement primaire', 'Primary education', sequence('uk_northern_ireland_p', 1, 7)],
+      ['secondary', 'Enseignement secondaire', 'Secondary education', sequence('uk_northern_ireland_year_', 8, 14)]
+    ],
+    european_schools: [
+      ['nursery', 'Cycle maternel', 'Nursery cycle', sequence('eu_school_n', 1, 2)],
+      ['primary', 'Cycle primaire', 'Primary cycle', sequence('eu_school_p', 1, 5)],
+      ['observation', 'Cycle d’observation', 'Observation cycle', sequence('eu_school_s', 1, 3)],
+      ['pre_orientation', 'Cycle de pré-orientation', 'Pre-orientation cycle', sequence('eu_school_s', 4, 5)],
+      ['baccalaureate', 'Cycle du Baccalauréat européen', 'European Baccalaureate cycle', sequence('eu_school_s', 6, 7)]
+    ],
+    ib: [
+      ['pyp', 'Programme primaire (PYP)', 'Primary Years Programme (PYP)', ['ib_pyp']],
+      ['myp', 'Programme d’éducation intermédiaire (MYP)', 'Middle Years Programme (MYP)', sequence('ib_myp_', 1, 5)],
+      ['diploma', 'Programme du diplôme (DP)', 'Diploma Programme (DP)', sequence('ib_dp_', 1, 2)],
+      ['career', 'Programme à orientation professionnelle (CP)', 'Career-related Programme (CP)', sequence('ib_cp_', 1, 2)]
+    ],
+    isced_2011: [
+      ['early', 'Éducation de la petite enfance', 'Early childhood education', ['isced_0']],
+      ['primary', 'Enseignement primaire', 'Primary education', ['isced_1']],
+      ['lower_secondary', 'Premier cycle du secondaire', 'Lower secondary education', ['isced_2']],
+      ['upper_secondary', 'Deuxième cycle du secondaire et post-secondaire', 'Upper secondary and post-secondary education', ['isced_3', 'isced_4']],
+      ['tertiary', 'Enseignement supérieur', 'Tertiary education', sequence('isced_', 5, 8)]
+    ]
+  };
+  const config = () => window.LearningDesignerModules?.config || {};
+  const stageEntries = system => (schoolStages[system] || []).map(([id, fr, english, levels]) => ({ id, label: text(fr, english), levels }));
+  const stageForLevel = (system, level) => stageEntries(system).find(stage => stage.levels.includes(level));
+  const splitFilterValue = value => {
+    const separator = value.indexOf(':');
+    return separator < 0 ? ['', value] : [value.slice(0, separator), value.slice(separator + 1)];
+  };
   const node = (tag, className, value) => {
     const el = document.createElement(tag);
     el.className = className;
@@ -250,16 +334,11 @@
   function parsedData(value, fallback) {
     try { return JSON.parse(value || ''); } catch (_) { return fallback; }
   }
-  function localizedLabels(value) {
-    const labels = parsedData(value, {});
-    return labels[en() ? 'en' : 'fr'] || labels.fr || '';
-  }
-  function fillSharedSelect(select, caption, entries) {
+  function fillSharedSelect(select, caption, entries, sort = true) {
     const selected = select.value;
     select.replaceChildren(new Option(caption, ''));
-    entries
-      .sort((a, b) => a.label.localeCompare(b.label, en() ? 'en' : 'fr'))
-      .forEach(entry => select.add(new Option(entry.label, entry.value)));
+    const options = sort ? [...entries].sort((a, b) => a.label.localeCompare(b.label, en() ? 'en' : 'fr')) : entries;
+    options.forEach(entry => select.add(new Option(entry.label, entry.value)));
     if ([...select.options].some(option => option.value === selected)) select.value = selected;
   }
   function uniqueSharedOptions(entries) {
@@ -269,23 +348,55 @@
     });
     return [...unique.values()];
   }
-  function prepareSharedFilters() {
-    const systems = [];
-    const stages = [];
-    const levels = [];
-    const competencies = [];
-    sharedCards.forEach(card => {
-      systems.push({ value: card.dataset.schoolSystem, label: localizedLabels(card.dataset.schoolSystemLabels) });
-      stages.push({ value: card.dataset.schoolStage, label: localizedLabels(card.dataset.schoolStageLabels) });
-      levels.push({ value: card.dataset.schoolLevel, label: localizedLabels(card.dataset.schoolLevelLabels) });
-      parsedData(card.dataset.competencies, []).forEach(item => competencies.push({
+  function updateSharedSchoolOptions() {
+    const systems = config().SCHOOL_SYSTEM_OPTIONS || [];
+    const levelsBySystem = config().SCHOOL_LEVEL_OPTIONS || {};
+    const systemLabels = new Map(systems.map(item => [item.value, item.labels[en() ? 'en' : 'fr'] || item.labels.fr]));
+    const selectedSystem = sharedSystem.value;
+    const systemsForStages = selectedSystem ? systems.filter(item => item.value === selectedSystem) : systems;
+    const stages = systemsForStages.flatMap(system => stageEntries(system.value).map(stage => ({
+      value: `${system.value}:${stage.id}`,
+      label: selectedSystem ? stage.label : `${systemLabels.get(system.value)} — ${stage.label}`
+    })));
+    fillSharedSelect(sharedStage, text('Tous les cycles', 'All stages'), stages, false);
+    const [stageSystem, stageId] = splitFilterValue(sharedStage.value);
+    const systemsForLevels = selectedSystem
+      ? systems.filter(item => item.value === selectedSystem)
+      : stageSystem
+        ? systems.filter(item => item.value === stageSystem)
+        : systems;
+    const levels = systemsForLevels.flatMap(system => (levelsBySystem[system.value] || [])
+      .filter(level => !stageId || stageForLevel(system.value, level.value)?.id === stageId)
+      .map(level => ({
+        value: `${system.value}:${level.value}`,
+        label: systemsForLevels.length === 1
+          ? (level.labels[en() ? 'en' : 'fr'] || level.labels.fr)
+          : `${systemLabels.get(system.value)} — ${level.labels[en() ? 'en' : 'fr'] || level.labels.fr}`
+      })));
+    fillSharedSelect(sharedLevel, text('Tous les niveaux', 'All levels'), levels, false);
+  }
+  async function prepareSharedFilters() {
+    const systems = (config().SCHOOL_SYSTEM_OPTIONS || []).map(item => ({
+      value: item.value,
+      label: item.labels[en() ? 'en' : 'fr'] || item.labels.fr
+    }));
+    fillSharedSelect(sharedSystem, text('Tous les systèmes', 'All systems'), systems, false);
+    updateSharedSchoolOptions();
+    let competencies = [];
+    try {
+      const response = await fetch('data/cli-competencies.json');
+      if (!response.ok) throw new Error('competencies');
+      const competencyCatalog = await response.json();
+      competencies = (competencyCatalog.competencies || []).map(item => ({
+        value: item.id,
+        label: item[en() ? 'labelEn' : 'labelFr'] || item.labelFr || item.id
+      }));
+    } catch (_) {
+      sharedCards.forEach(card => parsedData(card.dataset.competencies, []).forEach(item => competencies.push({
         value: item.id,
         label: item[en() ? 'en' : 'fr'] || item.fr || item.id
-      }));
-    });
-    fillSharedSelect(sharedSystem, text('Tous les systèmes', 'All systems'), uniqueSharedOptions(systems));
-    fillSharedSelect(sharedStage, text('Tous les cycles', 'All stages'), uniqueSharedOptions(stages));
-    fillSharedSelect(sharedLevel, text('Tous les niveaux', 'All levels'), uniqueSharedOptions(levels));
+      })));
+    }
     fillSharedSelect(sharedCompetency, text('Toutes les compétences', 'All competencies'), uniqueSharedOptions(competencies));
     sharedSystem.setAttribute('aria-label', text('Système scolaire', 'School system'));
     sharedStage.setAttribute('aria-label', text('Cycle scolaire', 'School stage'));
@@ -294,12 +405,15 @@
     sharedReset.textContent = text('Réinitialiser', 'Reset');
   }
   function applySharedFilters() {
+    const [stageSystem, stageId] = splitFilterValue(sharedStage.value);
+    const [levelSystem, levelId] = splitFilterValue(sharedLevel.value);
     let visible = 0;
     sharedCards.forEach(card => {
       const competencyIds = parsedData(card.dataset.competencies, []).map(item => item.id);
+      const cardStage = stageForLevel(card.dataset.schoolSystem, card.dataset.schoolLevel);
       const matches = (!sharedSystem.value || card.dataset.schoolSystem === sharedSystem.value)
-        && (!sharedStage.value || card.dataset.schoolStage === sharedStage.value)
-        && (!sharedLevel.value || card.dataset.schoolLevel === sharedLevel.value)
+        && (!sharedStage.value || (card.dataset.schoolSystem === stageSystem && cardStage?.id === stageId))
+        && (!sharedLevel.value || (card.dataset.schoolSystem === levelSystem && card.dataset.schoolLevel === levelId))
         && (!sharedCompetency.value || competencyIds.includes(sharedCompetency.value));
       card.hidden = !matches;
       if (matches) visible += 1;
@@ -326,7 +440,8 @@
       status.textContent = '';
       elements.forEach(el => content.append(clean(el)));
       sharedCards = [...content.querySelectorAll('.shared-card')];
-      prepareSharedFilters();
+      await prepareSharedFilters();
+      if (id !== requestId || !dialog.open) return;
       applySharedFilters();
       content.querySelectorAll('a[href^="view.php?"]').forEach(link => link.addEventListener('click', event => {
         event.preventDefault();
@@ -440,9 +555,21 @@
     [family, modelDuration, modelMoments, modelMode, modelType].forEach(select => { select.value = ''; });
     if (catalog) renderModels();
   });
-  [sharedSystem, sharedStage, sharedLevel, sharedCompetency].forEach(select => select.addEventListener('change', applySharedFilters));
+  sharedSystem.addEventListener('change', () => {
+    sharedStage.value = '';
+    sharedLevel.value = '';
+    updateSharedSchoolOptions();
+    applySharedFilters();
+  });
+  sharedStage.addEventListener('change', () => {
+    sharedLevel.value = '';
+    updateSharedSchoolOptions();
+    applySharedFilters();
+  });
+  [sharedLevel, sharedCompetency].forEach(select => select.addEventListener('change', applySharedFilters));
   sharedReset.addEventListener('click', () => {
     [sharedSystem, sharedStage, sharedLevel, sharedCompetency].forEach(select => { select.value = ''; });
+    updateSharedSchoolOptions();
     applySharedFilters();
   });
   back.addEventListener('click', () => {

@@ -22,6 +22,7 @@ $choices = [
     <link rel="stylesheet" href="css/account-pages.css?v=20260904-content-rhythm">
     <link rel="stylesheet" href="css/new-design.css?v=<?= hash_file('sha256', __DIR__ . '/css/new-design.css') ?>">
     <script defer src="js/scenario-file-transfer.js?v=<?= hash_file('sha256', __DIR__ . '/js/scenario-file-transfer.js') ?>"></script>
+    <script defer src="js/editor/config.js?v=<?= hash_file('sha256', __DIR__ . '/js/editor/config.js') ?>"></script>
     <script defer src="js/new-design.js?v=<?= hash_file('sha256', __DIR__ . '/js/new-design.js') ?>"></script>
 </head>
 <body class="new-design-page">
