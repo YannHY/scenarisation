@@ -44,6 +44,9 @@ $choices = [
     </div>
 </main>
 <dialog id="new-design-import" class="modal import-modal new-design-import" aria-labelledby="new-design-import-title">
+    <button id="new-design-import-close" class="new-design-import-close" type="button" aria-label="Fermer">
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+    </button>
     <h2 id="new-design-import-title" class="modal-title"></h2>
     <section id="new-design-file-section" class="import-source hidden" aria-labelledby="new-design-file-heading">
         <h3 id="new-design-file-heading" class="import-section-title" data-site-i18n-fr="Depuis mon ordinateur" data-site-i18n-en="From my computer">Depuis mon ordinateur</h3>
@@ -59,15 +62,57 @@ $choices = [
         <p class="import-file-formats">LDJ, JSON, CSV, Excel, Markdown · 5 Mo max.</p>
         <p id="new-design-file-status" class="import-models-status" role="status" aria-live="polite"></p>
     </section>
-    <div id="new-design-import-filters" class="import-models-filters">
-        <input id="new-design-import-search" class="panel-input" type="search" aria-label="Rechercher" placeholder="Rechercher…">
-        <select id="new-design-import-family" class="panel-select" aria-label="Famille de modèles"></select>
+    <div id="new-design-import-filters" class="import-models-filters new-design-model-filters">
+        <label class="new-design-filter-field new-design-filter-search">
+            <span data-site-i18n-fr="Recherche" data-site-i18n-en="Search">Recherche</span>
+            <input id="new-design-import-search" class="panel-input" type="search" aria-label="Rechercher" placeholder="Rechercher…">
+        </label>
+        <label class="new-design-filter-field">
+            <span data-site-i18n-fr="Famille" data-site-i18n-en="Family">Famille</span>
+            <select id="new-design-import-family" class="panel-select" aria-label="Famille de modèles"></select>
+        </label>
+        <label class="new-design-filter-field">
+            <span data-site-i18n-fr="Durée" data-site-i18n-en="Duration">Durée</span>
+            <select id="new-design-import-duration" class="panel-select" aria-label="Durée"></select>
+        </label>
+        <label class="new-design-filter-field">
+            <span data-site-i18n-fr="Nombre de moments" data-site-i18n-en="Number of moments">Nombre de moments</span>
+            <select id="new-design-import-moments" class="panel-select" aria-label="Nombre de moments"></select>
+        </label>
+        <label class="new-design-filter-field">
+            <span data-site-i18n-fr="Mode de diffusion" data-site-i18n-en="Delivery mode">Mode de diffusion</span>
+            <select id="new-design-import-mode" class="panel-select" aria-label="Mode de diffusion"></select>
+        </label>
+        <label class="new-design-filter-field">
+            <span data-site-i18n-fr="Type d’apprentissage" data-site-i18n-en="Learning type">Type d’apprentissage</span>
+            <select id="new-design-import-type" class="panel-select" aria-label="Type d’apprentissage"></select>
+        </label>
+        <button id="new-design-import-reset" class="btn btn-light" type="button">Réinitialiser</button>
     </div>
+    <section id="new-design-shared-filters" class="new-design-shared-filters hidden" aria-labelledby="new-design-shared-heading">
+        <h3 id="new-design-shared-heading" class="import-section-title" data-site-i18n-fr="Depuis la bibliothèque partagée" data-site-i18n-en="From the shared library">Depuis la bibliothèque partagée</h3>
+        <label class="new-design-filter-field">
+            <span data-site-i18n-fr="Système scolaire" data-site-i18n-en="School system">Système scolaire</span>
+            <select id="new-design-shared-system" class="panel-select" aria-label="Système scolaire"></select>
+        </label>
+        <label class="new-design-filter-field">
+            <span data-site-i18n-fr="Cycle" data-site-i18n-en="Stage">Cycle</span>
+            <select id="new-design-shared-stage" class="panel-select" aria-label="Cycle scolaire"></select>
+        </label>
+        <label class="new-design-filter-field">
+            <span data-site-i18n-fr="Niveau" data-site-i18n-en="Level">Niveau</span>
+            <select id="new-design-shared-level" class="panel-select" aria-label="Niveau"></select>
+        </label>
+        <label class="new-design-filter-field">
+            <span data-site-i18n-fr="Compétence" data-site-i18n-en="Competency">Compétence</span>
+            <select id="new-design-shared-competency" class="panel-select" aria-label="Compétence"></select>
+        </label>
+        <button id="new-design-shared-reset" class="btn btn-light" type="button">Réinitialiser</button>
+    </section>
     <p id="new-design-import-status" class="import-models-status" role="status" aria-live="polite"></p>
     <div id="new-design-import-content" class="import-models-list"></div>
     <div class="modal-actions">
         <button id="new-design-import-back" class="btn btn-light hidden" type="button">Retour</button>
-        <button id="new-design-import-close" class="btn btn-light" type="button">Fermer</button>
     </div>
     <div class="import-drop-active-message" role="status" aria-live="polite">
         <span class="import-drop-active-icon" aria-hidden="true"><i class="fa-solid fa-file-import"></i></span>

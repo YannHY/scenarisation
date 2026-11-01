@@ -1989,19 +1989,19 @@ html body:not(.home-page) h3.analysis-section-title {
   align-items: center;
   gap: 5px;
   min-width: 0;
-  background: var(--bloom-bg, var(--panel));
-  border: 1px solid transparent;
+  background: var(--panel);
+  border: 1px solid var(--line);
   cursor: pointer;
   padding: 4px 9px;
   border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
-  color: var(--bloom-ink, var(--text-body));
+  color: var(--text-body);
   text-align: left;
 }
 
 .outcome-verb-btn:hover {
-  background: var(--bloom-bg, var(--hover));
+  background: var(--hover);
   border-color: currentColor;
 }
 
@@ -2069,8 +2069,9 @@ html body:not(.home-page) h3.analysis-section-title {
   align-self: flex-start;
   padding: 3px 8px;
   border-radius: 999px;
-  background: var(--bloom-bg);
-  color: var(--bloom-ink);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--text-body);
   font-size: 12px;
   font-weight: 600;
 }
@@ -2947,7 +2948,7 @@ main {
 }
 
 .activities::before {
-  content: "Activités";
+  content: attr(data-label);
   display: block;
   font-size: 10px;
   font-weight: 700;
@@ -2960,7 +2961,7 @@ main {
 }
 
 .activities:empty::before {
-  content: "Activités — aucune pour l’instant";
+  content: attr(data-empty-label);
   opacity: 0.7;
 }
 

@@ -7,6 +7,7 @@ if (($argv[1] ?? '') === 'render') {
     require_once __DIR__ . '/../lib/bootstrap.php';
     app_start_session();
     if (($argv[2] ?? '') === 'signed-in') $_SESSION['user'] = ['id' => 1];
+    if (($argv[3] ?? '') === 'embed') $_GET['embed'] = '1';
     ob_start();
     require __DIR__ . '/../share.php';
     $html = ob_get_clean();
@@ -17,9 +18,9 @@ if (($argv[1] ?? '') === 'render') {
 function gallery_check(bool $ok, string $message): void {
     if (!$ok) throw new RuntimeException($message);
 }
-function gallery_render(string $dsn, bool $signedIn = false): array {
+function gallery_render(string $dsn, bool $signedIn = false, bool $embed = false): array {
     putenv('APP_DB_DSN=' . $dsn);
-    $process = proc_open([PHP_BINARY, __FILE__, 'render', $signedIn ? 'signed-in' : 'guest'],
+    $process = proc_open([PHP_BINARY, __FILE__, 'render', $signedIn ? 'signed-in' : 'guest', $embed ? 'embed' : 'page'],
         [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
     fclose($pipes[0]);
     $output = stream_get_contents($pipes[1]);
@@ -46,11 +47,15 @@ try {
     $db = new PDO($dsn, null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
     $db->exec("INSERT INTO users (username, email, password_hash, role) VALUES ('Teacher', 'teacher@example.test', 'test-only', 'designer')");
     $insert = $db->prepare('INSERT INTO learning_designs (owner_user_id, title, document_json, is_published, is_listed, share_token) VALUES (1, ?, ?, ?, ?, ?)');
-    $insert->execute(['Public example', '{"meta":{"name":"Public example"},"sessions":[]}', 1, 1, 'public-example']);
+    $insert->execute(['Public example', '{"meta":{"name":"Public example","schoolSystem":"france","schoolLevel":"quatrieme"},"sessions":[{"activities":[{"tools":["competency:acquerir:1"]}]}]}', 1, 1, 'public-example']);
     $insert->execute(['Private example', '{"sessions":[]}', 0, 0, null]);
     $result = gallery_render($dsn);
     gallery_check($result['status'] === 200 && str_contains($result['html'], 'Public example'), 'Published catalogue still loads');
     gallery_check(!str_contains($result['html'], 'Private example'), 'Private scenarios stay excluded');
+    $embedded = gallery_render($dsn, false, true);
+    gallery_check(str_contains($embedded['html'], 'data-school-stage="college"'), 'French lower-secondary stage is exposed for filtering');
+    gallery_check(str_contains($embedded['html'], 'data-school-level="quatrieme"'), 'Exact school level is exposed for filtering');
+    gallery_check(str_contains($embedded['html'], 'competency:acquerir:1'), 'Activity competencies are exposed for filtering');
     echo "Shared gallery checks passed\n";
 } finally {
     $db = null;

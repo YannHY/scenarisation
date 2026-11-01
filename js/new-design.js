@@ -22,6 +22,17 @@
   const filters = document.getElementById('new-design-import-filters');
   const search = document.getElementById('new-design-import-search');
   const family = document.getElementById('new-design-import-family');
+  const modelDuration = document.getElementById('new-design-import-duration');
+  const modelMoments = document.getElementById('new-design-import-moments');
+  const modelMode = document.getElementById('new-design-import-mode');
+  const modelType = document.getElementById('new-design-import-type');
+  const modelReset = document.getElementById('new-design-import-reset');
+  const sharedFilters = document.getElementById('new-design-shared-filters');
+  const sharedSystem = document.getElementById('new-design-shared-system');
+  const sharedStage = document.getElementById('new-design-shared-stage');
+  const sharedLevel = document.getElementById('new-design-shared-level');
+  const sharedCompetency = document.getElementById('new-design-shared-competency');
+  const sharedReset = document.getElementById('new-design-shared-reset');
   const status = document.getElementById('new-design-import-status');
   const content = document.getElementById('new-design-import-content');
   const back = document.getElementById('new-design-import-back');
@@ -31,6 +42,7 @@
   let trigger;
   let requestId = 0;
   let sharedUrl = 'share.php';
+  let sharedCards = [];
   const en = () => document.documentElement.lang === 'en';
   const text = (fr, english) => en() ? english : fr;
   const label = (entry, key) => entry[key + (en() ? 'En' : 'Fr')] || entry[key + 'Fr'] || '';
@@ -71,13 +83,28 @@
     content.classList.remove('is-preview');
     back.classList.add('hidden');
     filters.classList.toggle('hidden', mode !== 'models');
+    sharedFilters.classList.toggle('hidden', mode !== 'shared');
+    filters.classList.remove('has-load-error');
+    sharedFilters.classList.remove('has-load-error');
     title.textContent = mode === 'models' ? text('Importer un modèle', 'Import a template') : text('Importer un scénario partagé', 'Import a shared scenario');
   }
   function renderModels() {
     listView();
     content.replaceChildren();
     const tokens = search.value.toLocaleLowerCase().trim().split(/\s+/).filter(Boolean);
-    const entries = catalog.models.filter(entry => (!family.value || entry.family === family.value) && tokens.every(token => [label(entry, 'title'), label(entry, 'summary'), label(entry, 'familyLabel'), entry.keywords].join(' ').toLocaleLowerCase().includes(token)));
+    const entries = catalog.models.filter(entry => {
+      const types = (entry.outline || []).flatMap(moment => (moment.activities || []).map(activity => activity.type));
+      const durationMatches = !modelDuration.value
+        || (modelDuration.value === 'short' && entry.minutes <= 60)
+        || (modelDuration.value === 'medium' && entry.minutes > 60 && entry.minutes <= 120)
+        || (modelDuration.value === 'long' && entry.minutes > 120);
+      return (!family.value || entry.family === family.value)
+        && durationMatches
+        && (!modelMoments.value || entry.momentCount === Number(modelMoments.value))
+        && (!modelMode.value || entry.mode === modelMode.value)
+        && (!modelType.value || types.includes(modelType.value))
+        && tokens.every(token => [label(entry, 'title'), label(entry, 'summary'), label(entry, 'familyLabel'), entry.keywords].join(' ').toLocaleLowerCase().includes(token));
+    });
     status.textContent = entries.length ? text(`${entries.length} modèles`, `${entries.length} templates`) : text('Aucun modèle ne correspond à votre recherche.', 'No templates match your search.');
     entries.forEach(entry => {
       const card = node('article', 'import-model-card');
@@ -116,10 +143,40 @@
       if (id !== requestId || !dialog.open) return;
       family.replaceChildren(new Option(text('Toutes les familles', 'All families'), ''));
       (catalog.families || []).forEach(item => family.add(new Option(label(item, 'label'), item.id)));
+      modelDuration.replaceChildren(
+        new Option(text('Toutes les durées', 'All durations'), ''),
+        new Option(text('60 min ou moins', '60 min or less'), 'short'),
+        new Option(text('De 61 à 120 min', '61 to 120 min'), 'medium'),
+        new Option(text('Plus de 120 min', 'More than 120 min'), 'long')
+      );
+      fillSharedSelect(modelMoments, text('Tous les nombres de moments', 'Any number of moments'), uniqueSharedOptions(
+        catalog.models.map(entry => ({ value: String(entry.momentCount), label: text(`${entry.momentCount} moments`, `${entry.momentCount} moments`) }))
+      ));
+      const modeLabels = {
+        onsite: text('Présentiel', 'Onsite'),
+        hybrid: text('Hybride', 'Blended'),
+        online: text('Distanciel', 'Online')
+      };
+      fillSharedSelect(modelMode, text('Tous les modes', 'All delivery modes'), uniqueSharedOptions(
+        catalog.models.map(entry => ({ value: entry.mode, label: modeLabels[entry.mode] || entry.mode }))
+      ));
+      fillSharedSelect(modelType, text('Tous les types d’apprentissage', 'All learning types'), uniqueSharedOptions(
+        catalog.models.flatMap(entry => (entry.outline || []).flatMap(moment => (moment.activities || []).map(activity => ({
+          value: activity.type,
+          label: label(activity, 'typeLabel') || activity.type
+        }))))
+      ));
+      modelDuration.setAttribute('aria-label', text('Durée', 'Duration'));
+      modelMoments.setAttribute('aria-label', text('Nombre de moments', 'Number of moments'));
+      modelMode.setAttribute('aria-label', text('Mode de diffusion', 'Delivery mode'));
+      modelType.setAttribute('aria-label', text('Type d’apprentissage', 'Learning type'));
+      modelReset.textContent = text('Réinitialiser', 'Reset');
       renderModels();
     } catch (_) { if (id === requestId) showError(loadModels); }
   }
   function showError(retry) {
+    if (mode === 'shared') sharedFilters.classList.add('has-load-error');
+    else filters.classList.add('has-load-error');
     status.textContent = text('Chargement impossible. Veuillez réessayer.', 'Unable to load. Please try again.');
     const button = action(text('Réessayer', 'Try again'));
     button.addEventListener('click', retry);
@@ -129,6 +186,7 @@
     fileSection.classList.add('hidden');
     title.textContent = caption;
     filters.classList.add('hidden');
+    sharedFilters.classList.add('hidden');
     back.classList.remove('hidden');
     content.classList.add('is-preview');
     content.replaceChildren();
@@ -189,6 +247,67 @@
     });
     return element;
   }
+  function parsedData(value, fallback) {
+    try { return JSON.parse(value || ''); } catch (_) { return fallback; }
+  }
+  function localizedLabels(value) {
+    const labels = parsedData(value, {});
+    return labels[en() ? 'en' : 'fr'] || labels.fr || '';
+  }
+  function fillSharedSelect(select, caption, entries) {
+    const selected = select.value;
+    select.replaceChildren(new Option(caption, ''));
+    entries
+      .sort((a, b) => a.label.localeCompare(b.label, en() ? 'en' : 'fr'))
+      .forEach(entry => select.add(new Option(entry.label, entry.value)));
+    if ([...select.options].some(option => option.value === selected)) select.value = selected;
+  }
+  function uniqueSharedOptions(entries) {
+    const unique = new Map();
+    entries.forEach(entry => {
+      if (entry.value && entry.label && !unique.has(entry.value)) unique.set(entry.value, entry);
+    });
+    return [...unique.values()];
+  }
+  function prepareSharedFilters() {
+    const systems = [];
+    const stages = [];
+    const levels = [];
+    const competencies = [];
+    sharedCards.forEach(card => {
+      systems.push({ value: card.dataset.schoolSystem, label: localizedLabels(card.dataset.schoolSystemLabels) });
+      stages.push({ value: card.dataset.schoolStage, label: localizedLabels(card.dataset.schoolStageLabels) });
+      levels.push({ value: card.dataset.schoolLevel, label: localizedLabels(card.dataset.schoolLevelLabels) });
+      parsedData(card.dataset.competencies, []).forEach(item => competencies.push({
+        value: item.id,
+        label: item[en() ? 'en' : 'fr'] || item.fr || item.id
+      }));
+    });
+    fillSharedSelect(sharedSystem, text('Tous les systèmes', 'All systems'), uniqueSharedOptions(systems));
+    fillSharedSelect(sharedStage, text('Tous les cycles', 'All stages'), uniqueSharedOptions(stages));
+    fillSharedSelect(sharedLevel, text('Tous les niveaux', 'All levels'), uniqueSharedOptions(levels));
+    fillSharedSelect(sharedCompetency, text('Toutes les compétences', 'All competencies'), uniqueSharedOptions(competencies));
+    sharedSystem.setAttribute('aria-label', text('Système scolaire', 'School system'));
+    sharedStage.setAttribute('aria-label', text('Cycle scolaire', 'School stage'));
+    sharedLevel.setAttribute('aria-label', text('Niveau', 'Level'));
+    sharedCompetency.setAttribute('aria-label', text('Compétence', 'Competency'));
+    sharedReset.textContent = text('Réinitialiser', 'Reset');
+  }
+  function applySharedFilters() {
+    let visible = 0;
+    sharedCards.forEach(card => {
+      const competencyIds = parsedData(card.dataset.competencies, []).map(item => item.id);
+      const matches = (!sharedSystem.value || card.dataset.schoolSystem === sharedSystem.value)
+        && (!sharedStage.value || card.dataset.schoolStage === sharedStage.value)
+        && (!sharedLevel.value || card.dataset.schoolLevel === sharedLevel.value)
+        && (!sharedCompetency.value || competencyIds.includes(sharedCompetency.value));
+      card.hidden = !matches;
+      if (matches) visible += 1;
+    });
+    status.textContent = visible
+      ? text(`${visible} scénario${visible > 1 ? 's' : ''}`, `${visible} scenario${visible > 1 ? 's' : ''}`)
+      : text('Aucun scénario ne correspond à ces filtres.', 'No scenarios match these filters.');
+  }
   async function loadShared(url = sharedUrl) {
     sharedUrl = url;
     const id = ++requestId;
@@ -196,7 +315,9 @@
     content.replaceChildren();
     status.textContent = text('Chargement des scénarios…', 'Loading scenarios…');
     try {
-      const response = await fetch(url);
+      const requestUrl = new URL(url, window.location.href);
+      requestUrl.searchParams.set('embed', '1');
+      const response = await fetch(requestUrl);
       if (!response.ok) throw new Error('gallery');
       const html = new DOMParser().parseFromString(await response.text(), 'text/html');
       if (id !== requestId || !dialog.open) return;
@@ -204,6 +325,9 @@
       if (!elements.length) throw new Error('gallery');
       status.textContent = '';
       elements.forEach(el => content.append(clean(el)));
+      sharedCards = [...content.querySelectorAll('.shared-card')];
+      prepareSharedFilters();
+      applySharedFilters();
       content.querySelectorAll('a[href^="view.php?"]').forEach(link => link.addEventListener('click', event => {
         event.preventDefault();
         previewShared(link.href);
@@ -238,7 +362,10 @@
     search.placeholder = text('Rechercher un modèle…', 'Search templates…');
     search.setAttribute('aria-label', text('Rechercher un modèle', 'Search templates'));
     family.setAttribute('aria-label', text('Famille de modèles', 'Template family'));
-    close.textContent = text('Fermer', 'Close');
+    [family, modelDuration, modelMoments, modelMode, modelType].forEach(select => { select.value = ''; });
+    [sharedSystem, sharedStage, sharedLevel, sharedCompetency].forEach(select => { select.value = ''; });
+    const closeLabel = text('Fermer', 'Close');
+    close.setAttribute('aria-label', closeLabel);
     back.textContent = text('Retour', 'Back');
     dialog.showModal();
     if (mode === 'models') void loadModels();
@@ -307,7 +434,17 @@
   document.addEventListener('dragend', resetDrop);
   dialog.addEventListener('close', resetDrop);
   search.addEventListener('input' , () => { if (catalog) renderModels(); });
-  family.addEventListener('change', () => { if (catalog) renderModels(); });
+  [family, modelDuration, modelMoments, modelMode, modelType].forEach(select => select.addEventListener('change', () => { if (catalog) renderModels(); }));
+  modelReset.addEventListener('click', () => {
+    search.value = '';
+    [family, modelDuration, modelMoments, modelMode, modelType].forEach(select => { select.value = ''; });
+    if (catalog) renderModels();
+  });
+  [sharedSystem, sharedStage, sharedLevel, sharedCompetency].forEach(select => select.addEventListener('change', applySharedFilters));
+  sharedReset.addEventListener('click', () => {
+    [sharedSystem, sharedStage, sharedLevel, sharedCompetency].forEach(select => { select.value = ''; });
+    applySharedFilters();
+  });
   back.addEventListener('click', () => {
     ++requestId;
     if (mode === 'models') renderModels();

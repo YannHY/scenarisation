@@ -3756,6 +3756,8 @@ function render() {
     const objectives = frag.querySelector(".session-objectives");
     const intentions = frag.querySelector(".session-intentions");
     const activitiesWrap = frag.querySelector(".activities");
+    activitiesWrap.dataset.label = t("activitiesHeading");
+    activitiesWrap.dataset.emptyLabel = t("activitiesEmpty");
     const totalDuration = frag.querySelector(".total-duration");
     const sessionNotes = frag.querySelector(".session-notes");
     const sessionNotesInput = frag.querySelector(".session-notes-input");

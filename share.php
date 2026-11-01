@@ -9,6 +9,7 @@ $pageSize = 24;
 $pageCount = 1;
 $currentPage = 1;
 $galleryUnavailable = false;
+$embeddedCatalog = ($_GET['embed'] ?? '') === '1';
 
 try {
     $db = app_db();
@@ -17,18 +18,23 @@ try {
     $itemCount = (int)$db->query("SELECT COUNT(*)
         FROM learning_designs
         WHERE is_published = 1 AND is_listed = 1 AND share_token IS NOT NULL")->fetchColumn();
-    $pageCount = max(1, (int)ceil($itemCount / $pageSize));
-    $currentPage = min($pageCount, max(1, (int)($_GET['page'] ?? 1)));
+    $pageCount = $embeddedCatalog ? 1 : max(1, (int)ceil($itemCount / $pageSize));
+    $currentPage = $embeddedCatalog ? 1 : min($pageCount, max(1, (int)($_GET['page'] ?? 1)));
     $offset = ($currentPage - 1) * $pageSize;
 
-    $stmt = $db->prepare("SELECT d.title, d.document_json, d.share_token, d.license_code, d.updated_at, d.listed_at, u.username
+    $sql = "SELECT d.title, d.document_json, d.share_token, d.license_code, d.updated_at, d.listed_at, u.username
         FROM learning_designs d
         JOIN users u ON u.id = d.owner_user_id
         WHERE d.is_published = 1 AND d.is_listed = 1 AND d.share_token IS NOT NULL
-        ORDER BY d.listed_at DESC, d.id DESC
-        LIMIT :limit OFFSET :offset");
-    $stmt->bindValue(':limit', $pageSize, PDO::PARAM_INT);
-    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        ORDER BY d.listed_at DESC, d.id DESC";
+    if (!$embeddedCatalog) {
+        $sql .= " LIMIT :limit OFFSET :offset";
+    }
+    $stmt = $db->prepare($sql);
+    if (!$embeddedCatalog) {
+        $stmt->bindValue(':limit', $pageSize, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    }
     $stmt->execute();
     $rows = $stmt->fetchAll();
 } catch (PDOException | RuntimeException $error) {
@@ -48,11 +54,16 @@ foreach ($rows as $row) {
     $sessions = is_array($document['sessions'] ?? null) ? $document['sessions'] : [];
     $activityCount = 0;
     $duration = 0;
+    $competencyIds = [];
     foreach ($sessions as $session) {
         $activities = is_array($session['activities'] ?? null) ? $session['activities'] : [];
         $activityCount += count($activities);
         foreach ($activities as $activity) {
             $duration += max(0, (int)($activity['duration'] ?? 0));
+            foreach ((array)($activity['tools'] ?? []) as $toolId) {
+                $toolId = trim((string)$toolId);
+                if ($toolId !== '') $competencyIds[$toolId] = true;
+            }
         }
     }
 
@@ -75,6 +86,14 @@ foreach ($rows as $row) {
     }
 
     $mode = trim((string)($meta['modeDelivery'] ?? ''));
+    $schoolSystem = trim((string)($meta['schoolSystem'] ?? ''));
+    $schoolLevel = trim((string)($meta['schoolLevel'] ?? ''));
+    $competencyLabels = share_competency_labels();
+    $competencies = [];
+    foreach (array_keys($competencyIds) as $competencyId) {
+        $labels = $competencyLabels[$competencyId] ?? ['fr' => $competencyId, 'en' => $competencyId];
+        $competencies[] = ['id' => $competencyId, 'fr' => $labels['fr'], 'en' => $labels['en']];
+    }
     $designedDuration = share_designed_minutes($meta);
     $license = creative_commons_license((string)($row['license_code'] ?? ''));
     $items[] = [
@@ -88,6 +107,12 @@ foreach ($rows as $row) {
         'activity_count' => $activityCount,
         'duration' => $designedDuration > 0 ? $designedDuration : $duration,
         'mode' => $mode,
+        'school_system' => $schoolSystem,
+        'school_system_labels' => share_school_system_labels($schoolSystem),
+        'school_level' => $schoolLevel,
+        'school_level_labels' => share_school_level_labels($schoolSystem, $schoolLevel),
+        'school_stage' => share_school_stage($schoolSystem, $schoolLevel),
+        'competencies' => $competencies,
         'license' => $license,
     ];
 }
@@ -95,6 +120,74 @@ foreach ($rows as $row) {
 function share_designed_minutes(array $meta): int
 {
     return max(0, (int)($meta['designedMinutes'] ?? 0));
+}
+
+function share_school_system_labels(string $system): array
+{
+    $labels = [
+        'france' => ['fr' => 'France', 'en' => 'France'],
+        'switzerland' => ['fr' => 'Suisse (HarmoS)', 'en' => 'Switzerland (HarmoS)'],
+        'united_states' => ['fr' => 'États-Unis (K–12)', 'en' => 'United States (K–12)'],
+        'belgium_french' => ['fr' => 'Belgique — Fédération Wallonie-Bruxelles', 'en' => 'Belgium — French Community'],
+        'belgium_flemish' => ['fr' => 'Belgique — Communauté flamande', 'en' => 'Belgium — Flemish Community'],
+        'belgium_german' => ['fr' => 'Belgique — Communauté germanophone', 'en' => 'Belgium — German-speaking Community'],
+        'uk_england' => ['fr' => 'Royaume-Uni — Angleterre', 'en' => 'United Kingdom — England'],
+        'uk_wales' => ['fr' => 'Royaume-Uni — Pays de Galles', 'en' => 'United Kingdom — Wales'],
+        'uk_scotland' => ['fr' => 'Royaume-Uni — Écosse', 'en' => 'United Kingdom — Scotland'],
+        'uk_northern_ireland' => ['fr' => 'Royaume-Uni — Irlande du Nord', 'en' => 'United Kingdom — Northern Ireland'],
+        'european_schools' => ['fr' => 'Système des Écoles européennes', 'en' => 'European Schools system'],
+        'ib' => ['fr' => 'International Baccalaureate (IB)', 'en' => 'International Baccalaureate (IB)'],
+        'isced_2011' => ['fr' => 'International — ISCED 2011 (CITE)', 'en' => 'International — ISCED 2011'],
+    ];
+    return $labels[$system] ?? ['fr' => $system, 'en' => $system];
+}
+
+function share_school_level_labels(string $system, string $level): array
+{
+    $france = [
+        'petite_section' => 'Petite section (PS)', 'moyenne_section' => 'Moyenne section (MS)', 'grande_section' => 'Grande section (GS)',
+        'cp' => 'CP', 'ce1' => 'CE1', 'ce2' => 'CE2', 'cm1' => 'CM1', 'cm2' => 'CM2',
+        'sixieme' => '6e', 'cinquieme' => '5e', 'quatrieme' => '4e', 'troisieme' => '3e',
+        'seconde' => 'Seconde', 'premiere' => 'Première', 'terminale' => 'Terminale',
+    ];
+    if ($system === 'france' && isset($france[$level])) {
+        return ['fr' => $france[$level], 'en' => $france[$level]];
+    }
+    $fallback = trim(str_replace('_', ' ', $level));
+    return ['fr' => $fallback, 'en' => $fallback];
+}
+
+function share_school_stage(string $system, string $level): array
+{
+    if ($system !== 'france') return ['id' => '', 'fr' => '', 'en' => ''];
+    $groups = [
+        'maternelle' => [['petite_section', 'moyenne_section', 'grande_section'], 'Maternelle', 'Pre-primary school'],
+        'elementaire' => [['cp', 'ce1', 'ce2', 'cm1', 'cm2'], 'École élémentaire', 'Primary school'],
+        'college' => [['sixieme', 'cinquieme', 'quatrieme', 'troisieme'], 'Collège', 'Lower secondary school'],
+        'lycee' => [['seconde', 'premiere', 'terminale'], 'Lycée', 'Upper secondary school'],
+    ];
+    foreach ($groups as $id => [$levels, $fr, $en]) {
+        if (in_array($level, $levels, true)) return ['id' => $id, 'fr' => $fr, 'en' => $en];
+    }
+    return ['id' => '', 'fr' => '', 'en' => ''];
+}
+
+function share_competency_labels(): array
+{
+    static $labels = null;
+    if (is_array($labels)) return $labels;
+    $labels = [];
+    $path = __DIR__ . '/data/cli-competencies.json';
+    $catalog = is_file($path) ? json_decode((string)file_get_contents($path), true) : null;
+    foreach ((array)($catalog['competencies'] ?? []) as $competency) {
+        $id = trim((string)($competency['id'] ?? ''));
+        if ($id === '') continue;
+        $labels[$id] = [
+            'fr' => trim((string)($competency['labelFr'] ?? $id)),
+            'en' => trim((string)($competency['labelEn'] ?? $competency['labelFr'] ?? $id)),
+        ];
+    }
+    return $labels;
 }
 
 function share_format_minutes(int $minutes, string $language = 'fr'): string
@@ -340,7 +433,14 @@ function share_count_label(int $count, string $singular, ?string $plural = null)
       <?php else: ?>
         <section class="shared-grid" aria-label="Scénarios publiés dans le catalogue" data-site-i18n-attr="aria-label" data-site-i18n-en="Scenarios published in the catalog" data-site-i18n-fr="Scénarios publiés dans le catalogue">
           <?php foreach ($items as $item): ?>
-            <article class="shared-card">
+            <article class="shared-card"
+              data-school-system="<?= h($item['school_system']) ?>"
+              data-school-system-labels="<?= h((string)json_encode($item['school_system_labels'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) ?>"
+              data-school-level="<?= h($item['school_level']) ?>"
+              data-school-level-labels="<?= h((string)json_encode($item['school_level_labels'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) ?>"
+              data-school-stage="<?= h($item['school_stage']['id']) ?>"
+              data-school-stage-labels="<?= h((string)json_encode(['fr' => $item['school_stage']['fr'], 'en' => $item['school_stage']['en']], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) ?>"
+              data-competencies="<?= h((string)json_encode($item['competencies'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) ?>">
               <div>
                 <?php if ($item['title_is_default']): ?>
                   <h2 class="shared-card-title" data-site-i18n-en="Untitled scenario" data-site-i18n-fr="Production sans titre">Production sans titre</h2>
