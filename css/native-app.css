@@ -139,6 +139,31 @@ html body.native-consent-page .native-consent h1 {
     margin-top: 30px;
 }
 
+.native-consent-return {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    margin: 28px 0 18px;
+    padding: 11px 22px;
+    border: 1px solid #222;
+    border-radius: 10px;
+    background: #222;
+    color: #fff;
+    font: inherit;
+    text-decoration: none;
+}
+
+.native-consent-return:hover {
+    background: #3a3a3a;
+    color: #fff;
+}
+
+.native-consent-return:focus-visible {
+    outline: 2px solid var(--text-strong, #222);
+    outline-offset: 3px;
+}
+
 .native-consent-actions button {
     width: auto;
     min-height: 44px;
@@ -229,13 +254,15 @@ body.dark-mode .native-app-icon {
     background: #181818;
 }
 
-html[data-theme="dark"] .native-consent-actions button:not(.account-secondary-button) {
+html[data-theme="dark"] .native-consent-actions button:not(.account-secondary-button),
+html[data-theme="dark"] .native-consent-return {
     background: #f0f0ee;
     border-color: #f0f0ee;
     color: #181818;
 }
 
-html[data-theme="dark"] .native-consent-actions button:not(.account-secondary-button):hover {
+html[data-theme="dark"] .native-consent-actions button:not(.account-secondary-button):hover,
+html[data-theme="dark"] .native-consent-return:hover {
     background: #dcdcd9;
     border-color: #dcdcd9;
 }

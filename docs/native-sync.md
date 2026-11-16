@@ -21,6 +21,8 @@ Le chemin de retour est exactement `/auth/callback` et l’hôte exactement `127
 
 Une demande non connectée passe par la connexion web existante, avec un retour lié à la session du navigateur. Le consentement affiche le compte et les permissions. Son formulaire vérifie l’origine, un jeton CSRF et le compte qui a vu la demande. Un refus renvoie `error=access_denied`. Une autorisation renvoie un code à usage unique, le `state` et `iss` (l’URL canonique du site).
 
+Le formulaire termine sa navigation sur une confirmation du même site (`oauth-authorize.php?complete=…`), puis `js/native-consent.js` ouvre le retour local. Le lien **Revenir à l’app** reste disponible si la navigation automatique est bloquée. Cette étape évite de faire dépendre le retour local d’une redirection externe de formulaire. Le retour est lié à la session du navigateur et au compte ayant donné son accord, valable cinq minutes, non mis en cache et envoyé sans référent. Un second envoi du même consentement, avec le même compte, la même décision et un jeton CSRF valide, retrouve cette confirmation sans créer de nouveau code.
+
 L’app doit vérifier `state`, `iss` et le retour exact avant d’échanger le code. Le code est valable cinq minutes. Son échange utilise un formulaire `application/x-www-form-urlencoded` :
 
 ```text

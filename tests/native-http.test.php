@@ -49,6 +49,24 @@ function csrf_from(string $html): string {
     if (!preg_match('/name="csrf_token" value="([a-f0-9]{64})"/', $html, $match)) throw new RuntimeException('CSRF field missing');
     return $match[1];
 }
+function completion_callback(array $response): array {
+    check($response['status'] === 303
+        && preg_match('/^oauth-authorize\.php\?complete=[a-f0-9]{32}$/D', $response['headers']['location'] ?? '') === 1,
+        'Consent finishes its form redirect on the same site');
+    $page = request($response['headers']['location']);
+    check($page['status'] === 200 && ($page['headers']['referrer-policy'] ?? '') === 'no-referrer',
+        'Return page is available without disclosing its code through referrers');
+    check(($page['headers']['cache-control'] ?? '') === 'no-store', 'Return page is not cached');
+    check(str_contains($page['body'], 'js/native-consent.js') && str_contains($page['body'], 'Revenir à l’app'),
+        'Return page includes automatic navigation and a visible fallback link');
+    if (!preg_match('/id="native-return"[^>]*href="([^"]+)"/', $page['body'], $match)) {
+        throw new RuntimeException('Return link missing');
+    }
+    $url = html_entity_decode($match[1], ENT_QUOTES, 'UTF-8');
+    check(str_starts_with($url, 'http://127.0.0.1:54123/auth/callback?'), 'Return link uses only the registered Mac loopback');
+    parse_str(parse_url($url, PHP_URL_QUERY), $parameters);
+    return $parameters;
+}
 function auth_query(string $scope = 'designs:read designs:write'): array {
     return ['client_id' => NATIVE_CLIENT_ID, 'response_type' => 'code',
         'redirect_uri' => 'http://127.0.0.1:54123/auth/callback', 'code_challenge_method' => 'S256',
@@ -99,7 +117,9 @@ try {
     check(!str_contains($consent['body'], 'native-test-password'), 'Consent never includes the password');
     check(($consent['headers']['x-frame-options'] ?? '') === 'DENY', 'Consent cannot be framed');
     check(($consent['headers']['referrer-policy'] ?? '') === 'same-origin', 'Same-origin form verification retains its origin without leaking URLs to third parties');
-    check(str_contains($consent['headers']['content-security-policy'] ?? '', 'http://127.0.0.1:54123/auth/callback'), 'Form policy allows the validated callback redirect');
+    check(str_contains($consent['headers']['content-security-policy'] ?? '', "form-action 'self'")
+        && !str_contains($consent['headers']['content-security-policy'] ?? '', 'http://127.0.0.1:'),
+        'Form navigation remains restricted to the site');
     $csrf = csrf_from($consent['body']);
     parse_str(parse_url($signedIn['headers']['location'], PHP_URL_QUERY), $authorization);
     check(str_contains($consent['body'], 'action="oauth-authorize.php?request=' . $authorization['request'] . '"'),
@@ -116,13 +136,23 @@ try {
     $badConsent = request('oauth-authorize.php', 'POST', ['request' => $authorization['request'], 'decision' => 'allow', 'csrf_token' => 'invalid']);
     check($badConsent['status'] === 403 && !isset($badConsent['headers']['location']), 'Invalid consent CSRF cannot issue a code');
     $allowed = request('oauth-authorize.php', 'POST', ['request' => $authorization['request'], 'decision' => 'allow', 'csrf_token' => $csrf]);
-    check($allowed['status'] === 303 && str_starts_with($allowed['headers']['location'], 'http://127.0.0.1:54123/auth/callback?'), 'Consent returns only to the exact Mac callback');
-    parse_str(parse_url($allowed['headers']['location'], PHP_URL_QUERY), $callback);
+    $callback = completion_callback($allowed);
     check($callback['state'] === str_repeat('s', 32) && $callback['iss'] === $base, 'Callback binds state and issuer');
-    $tokens = exchange($callback['code']);
+    $secrets[] = $callback['code'];
+    $codes = (int)$db->query('SELECT COUNT(*) FROM native_oauth_codes')->fetchColumn();
     $repeated = request('oauth-authorize.php', 'POST', ['request' => $authorization['request'], 'decision' => 'allow', 'csrf_token' => $csrf]);
-    check($repeated['status'] === 400 && str_contains($repeated['body'], 'autorisation a déjà été traitée'),
-        'Repeated consent never issues another code and is distinguished from expiration');
+    check($repeated['headers']['location'] === $allowed['headers']['location'] && completion_callback($repeated) === $callback,
+        'Repeated consent returns to the existing confirmation instead of displaying an error');
+    check((int)$db->query('SELECT COUNT(*) FROM native_oauth_codes')->fetchColumn() === $codes,
+        'Repeated consent never issues another code');
+    $badRepeat = request('oauth-authorize.php', 'POST', ['request' => $authorization['request'], 'decision' => 'allow', 'csrf_token' => 'invalid']);
+    check($badRepeat['status'] === 403 && !isset($badRepeat['headers']['location']), 'Repeated consent still requires its CSRF token');
+    $changedDecision = request('oauth-authorize.php', 'POST', ['request' => $authorization['request'], 'decision' => 'deny', 'csrf_token' => $csrf]);
+    check($changedDecision['status'] === 403, 'Repeated consent cannot change the recorded decision');
+    $privateReturn = request($allowed['headers']['location'], browser: false);
+    check($privateReturn['status'] === 400 && !str_contains($privateReturn['body'], $callback['code']),
+        'Another browser session cannot read the return code');
+    $tokens = exchange($callback['code']);
     $me = request('api/v1/me.php', bearer: $tokens['access_token'], browser: false);
     check($me['status'] === 200 && decoded($me)['user']['id'] === 1, 'Bearer identifies the account through HTTP');
     check(!isset($me['headers']['set-cookie']), 'API requests do not create browser sessions');
@@ -177,7 +207,7 @@ try {
     $again = request('oauth-authorize.php?' . http_build_query(auth_query()));
     preg_match('/name="request" value="([a-f0-9]{32})"/', $again['body'], $pending);
     $denied = request('oauth-authorize.php?request=' . $pending[1], 'POST', ['decision' => 'deny', 'csrf_token' => csrf_from($again['body'])]);
-    parse_str(parse_url($denied['headers']['location'], PHP_URL_QUERY), $deniedCallback);
+    $deniedCallback = completion_callback($denied);
     check($deniedCallback['error'] === 'access_denied' && !isset($deniedCallback['code']), 'Consent denial issues no code');
     $stillSignedIn = request('login.php?native_request=https://attacker.test/');
     check($stillSignedIn['headers']['location'] === 'new-design.php', 'Login ignores arbitrary return destinations');
