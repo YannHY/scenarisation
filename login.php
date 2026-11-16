@@ -1,6 +1,11 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/lib/bootstrap.php';
+require_once __DIR__ . '/lib/native-oauth.php';
+
+$nativeRequestId = native_string($_POST, 'native_request') ?: native_string($_GET, 'native_request');
+$nativeReturn = native_login_return($nativeRequestId);
+if ($nativeReturn !== null) native_response_headers();
 
 $error = '';
 $verificationRequired = false;
@@ -12,7 +17,7 @@ try {
     }
 
     if (current_user()) {
-        header('Location: new-design.php');
+        header('Location: ' . ($nativeReturn ?? 'new-design.php'));
         exit;
     }
 } catch (Throwable $e) {
@@ -51,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ];
             $touch = $db->prepare("UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = ?");
             $touch->execute([(int)$user['id']]);
-            header('Location: new-design.php');
+            header('Location: ' . ($nativeReturn ?? 'new-design.php'));
             exit;
         }
     }
@@ -93,6 +98,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <h1 data-site-i18n-en="Sign in" data-site-i18n-fr="Connexion">Connexion</h1>
         <p class="account-copy" data-site-i18n-en="Sign in to save and access your work." data-site-i18n-fr="Connectez-vous pour sauvegarder et retrouver vos productions.">Connectez-vous pour sauvegarder et retrouver vos productions.</p>
         <form method="post" class="account-form">
+            <?php if ($nativeReturn !== null): ?>
+                <input type="hidden" name="native_request" value="<?= h($nativeRequestId) ?>">
+            <?php endif; ?>
             <div class="field">
                 <label for="email">Email</label>
                 <input id="email" name="email" type="email" required autocomplete="username">

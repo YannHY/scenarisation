@@ -101,6 +101,12 @@ Scénarisation accepte les scénarios issus de son ancien format LDJ ainsi que d
 
 Un scénario peut être exporté en Markdown, HTML, JSON, Excel ou Word. L'export peut produire une version enseignant ou élève et se limiter aux moments sélectionnés. La publication en ligne crée une page de consultation partageable ; les auteurs qui le souhaitent peuvent également rendre leur scénario visible dans le catalogue public.
 
+## Synchronisation de l’application Mac
+
+L’API native permet à Scénarisation pour Mac de retrouver et d’enregistrer les scénarios du compte. La connexion se fait dans le navigateur avec OAuth et PKCE ; les permissions de lecture et d’écriture restent distinctes de la publication. Le profil présente les applications connectées et permet de révoquer leur accès.
+
+Le [guide de synchronisation native](docs/native-sync.md) décrit les routes, la migration additive du schéma 10, les tests et les étapes de déploiement. Les fichiers PHP correspondants doivent être déployés ensemble. Le gestionnaire OAuth de l’app Mac reste à raccorder avant d’activer la connexion réelle.
+
 ## Installation locale
 
 Le projet ne nécessite pas d'étape de compilation. PHP avec PDO SQLite suffit pour le lancer. L’export de tous les scénarios depuis le profil nécessite aussi l’extension PHP `zip` et fournit une archive contenant un fichier JSON par scénario, réimportable dans l’éditeur après extraction :
@@ -166,6 +172,9 @@ Les tests utilisent des données isolées ; ils ne modifient pas la base du site
 node scripts/build-cli-competency-catalog.cjs
 node --test tests/*.test.cjs
 php tests/server-state.test.php
+php tests/native-sync.test.php
+php tests/native-http.test.php
+php tests/native-concurrency.test.php
 ```
 
 Régénérez `data/cli-competencies.json` avec la première commande après toute modification des référentiels de l’éditeur. Un test vérifie que les identifiants et les libellés restent synchronisés.

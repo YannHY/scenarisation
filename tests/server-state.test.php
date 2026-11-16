@@ -6,6 +6,7 @@ $fixture = sys_get_temp_dir() . '/ld-server-test-' . bin2hex(random_bytes(8));
 mkdir($fixture . '/web/lib', 0700, true);
 mkdir($fixture . '/sessions', 0700);
 copy(__DIR__ . '/../lib/bootstrap.php', $fixture . '/web/lib/bootstrap.php');
+copy(__DIR__ . '/../lib/native-schema.php', $fixture . '/web/lib/native-schema.php');
 copy(__DIR__ . '/../app-config.php', $fixture . '/web/app-config.php');
 file_put_contents($fixture . '/web/config.local.php', "<?php return ['APP_BASE_URL'=>'https://local.example.test/learning', 'APP_MAIL_FROM'=>'local@example.test'];");
 putenv('APP_DB_DSN=sqlite:' . $fixture . '/test.sqlite');

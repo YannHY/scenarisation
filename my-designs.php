@@ -14,15 +14,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     $action = trim((string)($_POST['action'] ?? ''));
 
     if ($action === 'delete' && $designId > 0) {
-        $stmt = $db->prepare('DELETE FROM learning_designs WHERE id = ? AND owner_user_id = ?');
-        $stmt->execute([$designId, (int)$user['id']]);
-        $flashMessage = $stmt->rowCount() > 0
+        $deleted = app_delete_design_document($db, (int)$user['id'], $designId);
+        $flashMessage = $deleted
             ? 'Production supprimée.'
             : 'Production introuvable.';
-        $flashMessageEn = $stmt->rowCount() > 0
+        $flashMessageEn = $deleted
             ? 'Scenario deleted.'
             : 'Scenario not found.';
-        $flashKind = $stmt->rowCount() > 0 ? 'success' : 'warning';
+        $flashKind = $deleted ? 'success' : 'warning';
     } elseif ($action === 'unlist' && $designId > 0) {
         $stmt = $db->prepare('UPDATE learning_designs
             SET is_listed = 0, listed_at = NULL

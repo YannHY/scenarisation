@@ -1,8 +1,9 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__ . '/native-schema.php';
 
 const APP_VERSION = '1.0.0';
-const APP_SCHEMA_VERSION = 9;
+const APP_SCHEMA_VERSION = 10;
 const TERMS_VERSION = '2026-09-26';
 const EMAIL_VERIFICATION_TTL_SECONDS = 86400;
 const EMAIL_VERIFICATION_RESEND_DELAY_SECONDS = 60;
@@ -240,6 +241,7 @@ function ensure_app_schema(PDO $db): void
     ensure_terms_acceptance_columns($db);
     ensure_manager_role($db);
     ensure_manager_permission_columns($db);
+    ensure_native_app_schema($db);
     ensure_app_schema_meta_table($db);
 
     $stmt = $db->prepare("SELECT schema_version FROM app_schema_meta WHERE id = 1");
@@ -1842,10 +1844,33 @@ function render_site_footer(): void
  * Compare and write in one SQL statement. The transaction keeps the returned
  * revision tied to this exact write, even if another writer is waiting.
  */
-function app_save_design_document(PDO $db, int $ownerId, int $designId, ?int $expectedRevision, string $title, string $payload, bool $publish = false): array
+function app_save_design_document(PDO $db, int $ownerId, int $designId, ?int $expectedRevision, string $title, string $payload, bool $publish = false, ?string $clientUUID = null): array
 {
     $db->beginTransaction();
     try {
+        if ($designId <= 0 && $clientUUID !== null) {
+            // The first write claims the UUID atomically, including concurrent creation requests.
+            try {
+                $db->prepare('INSERT INTO native_creations (owner_user_id, client_uuid, created_at) VALUES (?, ?, ?)')
+                    ->execute([$ownerId, $clientUUID, time()]);
+            } catch (PDOException $error) {
+                $db->rollBack();
+                $lookup = $db->prepare('SELECT c.design_id, d.id, d.title, d.revision, d.updated_at
+                    FROM native_creations c LEFT JOIN learning_designs d
+                    ON d.id = c.design_id AND d.owner_user_id = c.owner_user_id
+                    WHERE c.owner_user_id = ? AND c.client_uuid = ?');
+                $lookup->execute([$ownerId, $clientUUID]);
+                $existing = $lookup->fetch();
+                if (!$existing) throw $error;
+                if ($existing['id'] === null) {
+                    return ['status' => 404, 'success' => false, 'error' => 'Production supprimée.'];
+                }
+                return ['status' => 200, 'success' => true, 'design' => [
+                    'id' => (int)$existing['id'], 'title' => (string)$existing['title'],
+                    'revision' => (int)$existing['revision'], 'updatedAt' => (string)$existing['updated_at'],
+                ]];
+            }
+        }
         if ($designId > 0) {
             $changed = false;
             if ($expectedRevision !== null && $expectedRevision > 0) {
@@ -1873,6 +1898,10 @@ function app_save_design_document(PDO $db, int $ownerId, int $designId, ?int $ex
             $db->prepare("INSERT INTO learning_designs (owner_user_id, title, document_json) VALUES (?, ?, ?)")
                 ->execute([$ownerId, $title, $payload]);
             $designId = (int)$db->lastInsertId();
+            if ($clientUUID !== null) {
+                $db->prepare('UPDATE native_creations SET design_id = ? WHERE owner_user_id = ? AND client_uuid = ?')
+                    ->execute([$designId, $ownerId, $clientUUID]);
+            }
         }
         if ($publish) {
             $db->prepare("UPDATE learning_designs SET share_token = COALESCE(NULLIF(share_token, ''), ?), is_published = 1
@@ -1891,6 +1920,29 @@ function app_save_design_document(PDO $db, int $ownerId, int $designId, ?int $ex
             ],
             'share_token' => $saved['share_token'],
         ];
+    } catch (Throwable $error) {
+        if ($db->inTransaction()) $db->rollBack();
+        throw $error;
+    }
+}
+
+/** A tombstone and its deletion commit together; UUID creation records remain intact. */
+function app_delete_design_document(PDO $db, int $ownerId, int $designId): bool
+{
+    $db->beginTransaction();
+    try {
+        $sqlite = $db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite';
+        $sql = $sqlite
+            ? 'INSERT OR IGNORE INTO native_design_deletions (owner_user_id, design_id, deleted_at)
+                SELECT owner_user_id, id, ? FROM learning_designs WHERE id = ? AND owner_user_id = ?'
+            : 'INSERT IGNORE INTO native_design_deletions (owner_user_id, design_id, deleted_at)
+                SELECT owner_user_id, id, ? FROM learning_designs WHERE id = ? AND owner_user_id = ?';
+        $db->prepare($sql)->execute([time(), $designId, $ownerId]);
+        $delete = $db->prepare('DELETE FROM learning_designs WHERE id = ? AND owner_user_id = ?');
+        $delete->execute([$designId, $ownerId]);
+        $deleted = $delete->rowCount() > 0;
+        $db->commit();
+        return $deleted;
     } catch (Throwable $error) {
         if ($db->inTransaction()) $db->rollBack();
         throw $error;

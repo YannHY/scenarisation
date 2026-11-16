@@ -11,7 +11,6 @@ if ($designId <= 0) {
     app_json_response(['success' => false, 'error' => 'Identifiant invalide.'], 422);
 }
 
-$stmt = $db->prepare("DELETE FROM learning_designs WHERE id = ? AND owner_user_id = ?");
-$stmt->execute([$designId, (int)$user['id']]);
+app_delete_design_document($db, (int)$user['id'], $designId);
 
 app_json_response(['success' => true]);

@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/lib/bootstrap.php';
+require_once __DIR__ . '/lib/native-oauth.php';
 
 $message = '';
 $error = '';
@@ -68,6 +69,7 @@ if ($db !== null && $requestMethod === 'POST') {
         ]);
 
         if ($update->rowCount() === 1) {
+            native_revoke_user($db, (int)$account['id']);
             app_start_session();
             unset($_SESSION['user']);
             session_regenerate_id(true);

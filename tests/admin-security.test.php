@@ -7,6 +7,7 @@ $db = new PDO('sqlite::memory:', null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_
 $db->exec('PRAGMA foreign_keys = ON');
 ensure_app_tables($db);
 ensure_app_migrations($db);
+ensure_native_app_schema($db);
 ensure_admin_security_table($db);
 ensure_admin_security_table($db);
 function check(bool $ok, string $message): void {
@@ -25,6 +26,12 @@ $db->exec("INSERT INTO users (id,username,email,password_hash,role) VALUES
     (5,'Second designer','designer2@example.test','test','designer')");
 $db->exec("INSERT INTO learning_designs (owner_user_id,title,document_json,is_published,is_listed,share_token) VALUES (2,'Example','{}',1,1,'shared')");
 $db->exec("INSERT INTO learning_cli_tokens (user_id,name,token_hash,token_prefix) VALUES (2,'Test','hash','prefix')");
+$db->prepare('INSERT INTO native_app_sessions (id,user_id,client_id,name,scope,access_token_hash,access_expires_at,expires_at,created_at)
+    VALUES (?,2,?,?,?,?,?,?,?)')->execute([str_repeat('a', 32), NATIVE_CLIENT_ID, 'Mac', 'designs:read',
+        hash('sha256', 'test-access'), time() + 900, time() + 3600, time()]);
+$db->prepare('INSERT INTO native_oauth_codes (code_hash,user_id,client_id,redirect_uri,challenge,scope,expires_at)
+    VALUES (?,2,?,?,?,?,?)')->execute([hash('sha256', 'test-code'), NATIVE_CLIENT_ID,
+        'http://127.0.0.1:54123/auth/callback', str_repeat('a', 43), 'designs:read', time() + 300]);
 rejected(fn() => admin_moderate_user($db, 2, 1, 'delete', 'Abus', 'Admin'), 'non-admin rejected');
 rejected(fn() => admin_moderate_user($db, 4, 2, 'suspend', 'Abus'), 'limited manager rejected');
 rejected(fn() => admin_change_user_role($db, 4, 2, 'admin'), 'limited manager cannot change roles');
@@ -60,10 +67,13 @@ admin_moderate_user($db, 1, 2, 'suspend', 'Publications abusives');
 check($db->query('SELECT status FROM users WHERE id=2')->fetchColumn() === 'disabled', 'account suspended');
 check((int)$db->query('SELECT COUNT(*) FROM learning_designs WHERE is_published=1 OR is_listed=1')->fetchColumn() === 0, 'publications withdrawn');
 check((int)$db->query('SELECT COUNT(*) FROM learning_cli_tokens WHERE revoked_at IS NULL')->fetchColumn() === 0, 'CLI access revoked');
+check((int)$db->query('SELECT COUNT(*) FROM native_app_sessions WHERE user_id=2 AND revoked_at IS NULL')->fetchColumn() === 0, 'native access revoked');
+check((int)$db->query('SELECT expires_at FROM native_oauth_codes WHERE user_id=2')->fetchColumn() === 0, 'pending native authorization invalidated');
 rejected(fn() => admin_moderate_user($db, 1, 2, 'suspend', 'Repeated'), 'duplicate suspension rejected');
 admin_moderate_user($db, 1, 2, 'reactivate', 'Situation résolue');
 check($db->query('SELECT status FROM users WHERE id=2')->fetchColumn() === 'active', 'account reactivated');
 check((int)$db->query('SELECT is_published FROM learning_designs')->fetchColumn() === 0, 'reactivation does not republish');
+check((int)$db->query('SELECT COUNT(*) FROM native_app_sessions WHERE user_id=2 AND revoked_at IS NULL')->fetchColumn() === 0, 'reactivation does not restore native access');
 $db->exec("CREATE TRIGGER reject_audit BEFORE INSERT ON admin_security_log BEGIN SELECT RAISE(ABORT, 'test log failure'); END");
 try {
     admin_moderate_user($db, 1, 2, 'delete', 'Abus', 'Designer');

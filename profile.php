@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/lib/bootstrap.php';
+require_once __DIR__ . '/lib/native-oauth.php';
+require_once __DIR__ . '/lib/account-protection.php';
 
 $user = require_login_page();
 $db = app_db();
@@ -48,6 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $error = 'L’email de confirmation n’a pas pu être envoyé : votre adresse actuelle est conservée. Réessayez plus tard.';
                     } else {
                         mark_email_verification_sent($db, (int)$user['id']);
+                        native_revoke_user($db, (int)$user['id']);
                         $db->commit();
 
                         // La session en cours reste valide, mais la prochaine
@@ -91,6 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $upd = $db->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
                 $upd->execute([password_hash($next, PASSWORD_DEFAULT), (int)$user['id']]);
+                native_revoke_user($db, (int)$user['id']);
                 // Un identifiant de session capté avant le changement ne doit
                 // pas rester valide après.
                 session_regenerate_id(true);
@@ -129,6 +133,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message = $stmt->rowCount() > 0
                 ? 'Jeton CLI révoqué.'
                 : 'Jeton CLI introuvable ou deja révoqué.';
+        }
+    } elseif ($action === 'revoke_native_session') {
+        if (!account_csrf_valid('native_sessions')) {
+            $error = 'La confirmation a expiré. Rechargez la page.';
+        } else {
+            native_revoke_session($db, account_post_string('native_session_id'), (int)$user['id']);
+            $message = 'Accès de l’application révoqué.';
         }
     } elseif ($action === 'delete_account') {
         $password = (string)($_POST['delete_current_password'] ?? '');
@@ -176,6 +187,10 @@ $publishedDesigns = $publishedStmt->fetchAll();
 $cliTokensStmt = $db->prepare("SELECT id, name, token_prefix, created_at, last_used_at FROM learning_cli_tokens WHERE user_id = ? AND revoked_at IS NULL ORDER BY created_at DESC");
 $cliTokensStmt->execute([(int)$user['id']]);
 $cliTokens = $cliTokensStmt->fetchAll();
+$nativeSessionsStmt = $db->prepare('SELECT id, name, created_at, last_used_at FROM native_app_sessions
+    WHERE user_id = ? AND revoked_at IS NULL AND expires_at > ? ORDER BY created_at DESC');
+$nativeSessionsStmt->execute([(int)$user['id'], time()]);
+$nativeSessions = $nativeSessionsStmt->fetchAll();
 
 function e(string $value): string
 {
@@ -196,6 +211,7 @@ function e(string $value): string
     <link rel="stylesheet" href="css/interface.css?v=20260905-subtle-focus">
     <link rel="stylesheet" href="css/account-ui.css?v=20260906-highlight">
     <link rel="stylesheet" href="css/account-pages.css?v=20260910-profile-alignment">
+    <link rel="stylesheet" href="css/native-app.css?v=20261116-native-sync">
 </head>
 <body class="profile-page">
 <?php render_site_nav('profile'); ?>
@@ -388,6 +404,38 @@ function e(string $value): string
             <?php endif; ?>
         </section>
 
+        <section class="panel profile-native-apps" aria-labelledby="profile-native-title">
+            <h2 id="profile-native-title" class="title-with-icon"><i class="fa-solid fa-laptop" aria-hidden="true"></i><span data-site-i18n-fr="Applications connectées" data-site-i18n-en="Connected apps">Applications connectées</span></h2>
+            <p class="account-copy" data-site-i18n-fr="Gérez les accès de Scénarisation pour Mac à vos scénarios." data-site-i18n-en="Manage access to your scenarios from Scénarisation for Mac.">Gérez les accès de Scénarisation pour Mac à vos scénarios.</p>
+            <?php if (!$nativeSessions): ?>
+                <p class="profile-empty" data-site-i18n-fr="Aucune application connectée." data-site-i18n-en="No connected apps.">Aucune application connectée.</p>
+            <?php else: ?>
+                <ul class="native-session-list">
+                <?php foreach ($nativeSessions as $nativeSession): ?>
+                    <li class="native-session-row">
+                        <div>
+                            <h3><?= e((string)$nativeSession['name']) ?></h3>
+                            <p><span data-site-i18n-fr="Connectée le" data-site-i18n-en="Connected on">Connectée le</span> <?= e(gmdate('d/m/Y H:i', (int)$nativeSession['created_at'])) ?> UTC</p>
+                            <p><span data-site-i18n-fr="Dernière utilisation" data-site-i18n-en="Last used">Dernière utilisation</span>
+                                <?php if ($nativeSession['last_used_at'] === null): ?>
+                                    <span data-site-i18n-fr="Jamais" data-site-i18n-en="Never">Jamais</span>
+                                <?php else: ?>
+                                    <?= e(gmdate('d/m/Y H:i', (int)$nativeSession['last_used_at'])) ?> UTC
+                                <?php endif; ?>
+                            </p>
+                        </div>
+                        <form method="post">
+                            <input type="hidden" name="action" value="revoke_native_session">
+                            <input type="hidden" name="native_session_id" value="<?= e((string)$nativeSession['id']) ?>">
+                            <input type="hidden" name="csrf_token" value="<?= e(account_csrf_token('native_sessions')) ?>">
+                            <button type="submit" class="account-secondary-button" data-site-i18n-fr="Révoquer" data-site-i18n-en="Revoke">Révoquer</button>
+                        </form>
+                    </li>
+                <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+        </section>
+
         <section class="profile-delete" aria-labelledby="profile-delete-title">
         <h2 id="profile-delete-title" class="title-with-icon"><i class="fa-solid fa-trash-can" aria-hidden="true"></i>Supprimer mon compte</h2>
         <form method="post" class="account-form panel danger-panel" data-confirm-fr="Supprimer définitivement votre compte ?" data-confirm-en="Permanently delete your account?" onsubmit="return window.confirm(this.dataset.confirm || this.dataset.confirmFr);">
@@ -442,6 +490,8 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     var flashTranslations = {
+        'Accès de l’application révoqué.': 'App access revoked.',
+        'La confirmation a expiré. Rechargez la page.': 'Confirmation expired. Reload the page.',
         'Nom d’utilisateur et email requis.': 'Username and email are required.',
         'Adresse email invalide.': 'Invalid email address.',
         'Informations mises a jour.': 'Information updated.',

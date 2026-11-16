@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__ . '/native-oauth.php';
 
 function ensure_admin_security_table(PDO $db): void
 {
@@ -186,6 +187,7 @@ function admin_moderate_user(PDO $db, int $actorId, int $targetId, string $actio
             if ($action === 'suspend') {
                 $db->prepare('UPDATE learning_designs SET is_published = 0, is_listed = 0 WHERE owner_user_id = ?')->execute([$targetId]);
                 $db->prepare('UPDATE learning_cli_tokens SET revoked_at = CURRENT_TIMESTAMP WHERE user_id = ? AND revoked_at IS NULL')->execute([$targetId]);
+                native_revoke_user($db, $targetId);
                 $db->prepare('UPDATE users SET password_reset_token_hash = NULL, password_reset_expires_at = NULL WHERE id = ?')->execute([$targetId]);
             }
         }

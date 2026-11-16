@@ -2,6 +2,8 @@ DirectoryIndex index.php
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    # Preserve bearer credentials when PHP runs behind CGI/FastCGI.
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
     RewriteCond %{REQUEST_URI} ^(.*/)designer\.html$
     RewriteRule ^designer\.html$ %1designer.php [R=302,L,NE]
 </IfModule>
