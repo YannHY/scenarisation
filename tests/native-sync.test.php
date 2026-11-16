@@ -79,6 +79,13 @@ try {
         'redirect_uri' => 'http://127.0.0.1:54123/auth/callback', 'scope' => ['designs:read'],
     ]), 'invalid_scope');
     expect_error(fn() => native_issue_code($db, 3, authorization()), 'access_denied', 403);
+    check(native_active_user($db, 1) === ['id' => 1, 'username' => 'Designer', 'email' => 'designer@example.test'],
+        'Verified account exposes only its public identity');
+    $db->exec("UPDATE users SET email_verified_at = '' WHERE id = 3");
+    expect_error(fn() => native_issue_code($db, 3, authorization()), 'access_denied', 403);
+    $db->exec("UPDATE users SET email_verified_at = CURRENT_TIMESTAMP, status = 'disabled' WHERE id = 3");
+    expect_error(fn() => native_issue_code($db, 3, authorization()), 'access_denied', 403);
+    $db->exec("UPDATE users SET email_verified_at = NULL, status = 'active' WHERE id = 3");
     unset($_SERVER['HTTPS']);
     expect_error(fn() => native_require_https(), 'invalid_request');
     $_SERVER['HTTPS'] = 'on';

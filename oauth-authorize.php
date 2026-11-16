@@ -50,7 +50,9 @@ try {
 } catch (NativeRequestError $exception) {
     http_response_code($exception->status); $error = $exception->getMessage();
 } catch (Throwable $exception) {
-    error_log('Scénarisation native consent failed: ' . get_class($exception));
+    // Keep credentials and request contents out of logs, but retain a database error code for diagnosis.
+    error_log('Scénarisation native consent failed: ' . get_class($exception)
+        . ($exception instanceof PDOException ? ' SQLSTATE=' . (string)$exception->getCode() : ''));
     http_response_code(500); $error = 'La connexion est temporairement indisponible. Réessayez depuis l’application.';
 }
 ?>
@@ -65,20 +67,28 @@ try {
     <link rel="stylesheet" href="css/interface.css?v=20260905-subtle-focus">
     <link rel="stylesheet" href="css/account-ui.css?v=20260906-highlight">
     <link rel="stylesheet" href="css/account-pages.css?v=20260926-login-colour-rhythm">
-    <link rel="stylesheet" href="css/native-app.css?v=20261116-native-sync">
+    <link rel="stylesheet" href="css/native-app.css?v=20261116-consent-layout">
 </head>
-<body>
+<body class="native-consent-page">
 <?php render_site_nav(); ?>
 <main class="account-shell with-nav native-consent-shell">
     <section class="account-card native-consent" aria-labelledby="native-title">
-        <div class="native-app-icon" aria-hidden="true"><i class="fa-solid fa-laptop"></i></div>
-        <h1 id="native-title" data-site-i18n-fr="Connecter Scénarisation pour Mac" data-site-i18n-en="Connect Scénarisation for Mac">Connecter Scénarisation pour Mac</h1>
+        <header class="native-consent-header">
+            <div class="native-app-brand">
+                <span class="native-app-icon" aria-hidden="true"><i class="fa-solid fa-laptop"></i></span>
+                <span data-site-i18n-fr="Scénarisation pour Mac" data-site-i18n-en="Scénarisation for Mac">Scénarisation pour Mac</span>
+            </div>
+            <h1 id="native-title" data-site-i18n-fr="Connecter votre Mac" data-site-i18n-en="Connect your Mac">Connecter votre Mac</h1>
+        </header>
         <?php if ($error !== ''): ?>
             <p class="account-message error" role="alert"><?= h($error) ?></p>
             <a class="account-secondary-button" href="profile.php" data-site-i18n-fr="Mon compte" data-site-i18n-en="My account">Mon compte</a>
         <?php elseif ($user !== null && $request !== null): ?>
-            <p class="native-account"><?= h($user['username']) ?> <span><?= h($user['email']) ?></span></p>
-            <p data-site-i18n-fr="Autorisez l’application à synchroniser vos scénarios avec ce compte." data-site-i18n-en="Allow the app to synchronize scenarios with this account.">Autorisez l’application à synchroniser vos scénarios avec ce compte.</p>
+            <p class="native-consent-intro" data-site-i18n-fr="Retrouvez vos scénarios dans l’app et synchronisez vos modifications avec ce compte." data-site-i18n-en="Open your scenarios in the app and sync your changes with this account.">Retrouvez vos scénarios dans l’app et synchronisez vos modifications avec ce compte.</p>
+            <div class="native-account">
+                <i class="fa-regular fa-circle-user" aria-hidden="true"></i>
+                <p><?= h($user['username']) ?> <span><?= h($user['email']) ?></span></p>
+            </div>
             <ul class="native-permissions">
                 <?php if (str_contains($request['scope'], 'designs:read')): ?>
                     <li><i class="fa-solid fa-folder-open" aria-hidden="true"></i><span data-site-i18n-fr="Lire et ouvrir vos scénarios sur le Mac" data-site-i18n-en="Read and open your scenarios on the Mac">Lire et ouvrir vos scénarios sur le Mac</span></li>
@@ -87,7 +97,7 @@ try {
                     <li><i class="fa-solid fa-floppy-disk" aria-hidden="true"></i><span data-site-i18n-fr="Créer et enregistrer vos modifications" data-site-i18n-en="Create scenarios and save your changes">Créer et enregistrer vos modifications</span></li>
                 <?php endif; ?>
             </ul>
-            <p class="account-copy" data-site-i18n-fr="La synchronisation conserve la visibilité de vos scénarios. Vous pourrez retirer cet accès depuis votre profil." data-site-i18n-en="Synchronization preserves the visibility of your scenarios. You can revoke this access from your profile.">La synchronisation conserve la visibilité de vos scénarios. Vous pourrez retirer cet accès depuis votre profil.</p>
+            <p class="account-copy native-consent-note" data-site-i18n-fr="La visibilité de vos scénarios est conservée. Vous pourrez retirer cet accès depuis votre profil." data-site-i18n-en="Your scenarios keep their visibility. You can revoke this access from your profile.">La visibilité de vos scénarios est conservée. Vous pourrez retirer cet accès depuis votre profil.</p>
             <form method="post" class="native-consent-actions">
                 <input type="hidden" name="request" value="<?= h($requestId) ?>">
                 <input type="hidden" name="csrf_token" value="<?= h(account_csrf_token('native_authorize:' . $requestId)) ?>">

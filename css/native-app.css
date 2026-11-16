@@ -1,72 +1,159 @@
-.native-consent-shell {
-    max-width: 680px;
+body.native-consent-page {
+    --native-consent-width: 600px;
+    --native-consent-gutter: 40px;
+    background: var(--bg, #fff);
+}
+
+body.native-consent-page .site-breadcrumb {
+    width: min(var(--native-consent-width), calc(100% - var(--native-consent-gutter)));
+    margin: 32px auto 0;
+    font-size: .875rem;
+}
+
+.native-consent-shell.account-shell.with-nav {
+    display: block;
+    flex: 0 0 auto;
+    width: min(var(--native-consent-width), calc(100% - var(--native-consent-gutter)));
+    min-height: 0;
+    margin: 24px auto 64px;
+    padding: 0;
+}
+
+body.native-consent-page .site-footer {
+    margin-top: auto;
+}
+
+html[data-theme="dark"] body.native-consent-page {
+    --panel: #24231f;
+    --line: rgba(129, 124, 112, .42);
+    color: var(--text-body);
 }
 
 .native-consent.account-card {
     width: 100%;
     max-width: none;
+    padding: 40px;
+    background: var(--panel, #fff);
+    border-radius: 20px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, .055);
 }
 
-.native-consent.account-card h1 {
-    margin: 20px 0 24px;
-    font-size: clamp(1.5rem, 4vw, 2rem);
-    line-height: 1.2;
+html body.native-consent-page .native-consent h1 {
+    margin: 26px 0 14px;
+    font-size: clamp(1.75rem, 4vw, 2rem);
+    line-height: 1.15;
+}
+
+.native-app-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-strong, #222);
+    font-size: .875rem;
+    font-weight: 600;
 }
 
 .native-app-icon {
     display: grid;
     place-items: center;
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    border-radius: 10px;
     background: #f1f1f1;
     color: #111;
-    font-size: 22px;
+    font-size: 19px;
+}
+
+.native-consent-intro {
+    margin: 0;
+    color: var(--text-subtle, var(--muted));
+    line-height: 1.65;
 }
 
 .native-account {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 28px 0 0;
+    padding: 24px 0 0;
+    border-top: 1px solid var(--line);
     font-weight: 600;
+    color: var(--text-strong, #222);
     overflow-wrap: anywhere;
+}
+
+.native-account > i {
+    flex: 0 0 24px;
+    width: 24px;
+    font-size: 24px;
+    color: inherit;
+}
+
+.native-account p {
+    min-width: 0;
+    margin: 0;
 }
 
 .native-account span {
     display: block;
-    margin-top: 6px;
-    font-size: .9rem;
+    margin-top: 5px;
+    font-size: .875rem;
     font-weight: 400;
     color: var(--text-subtle, var(--muted));
 }
 
 .native-permissions {
     display: grid;
-    gap: 18px;
+    gap: 16px;
     list-style: none;
-    padding: 14px 0;
-    margin: 20px 0;
+    padding: 0;
+    margin: 28px 0 24px;
 }
 
 .native-permissions li {
     display: flex;
     align-items: baseline;
     gap: 14px;
+    line-height: 1.5;
+}
+
+.native-permissions i {
+    flex: 0 0 24px;
+    width: 24px;
+    text-align: center;
+    color: var(--text-strong, #222);
+}
+
+.native-consent-note.account-copy {
+    margin: 0;
+    color: var(--text-subtle, var(--muted));
+    font-size: .8125rem;
+    line-height: 1.65;
 }
 
 .native-consent-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 14px;
+    gap: 12px;
     margin-top: 30px;
 }
 
 .native-consent-actions button {
     width: auto;
-    padding: 11px 20px;
+    min-height: 44px;
+    padding: 11px 22px;
     border: 1px solid #222;
     border-radius: 10px;
     color: #fff;
     background: #222;
     font: inherit;
     cursor: pointer;
+}
+
+.native-consent-actions button:not(.account-secondary-button):hover {
+    background: #3a3a3a;
+    border-color: #3a3a3a;
 }
 
 .native-consent-actions .account-secondary-button {
@@ -84,6 +171,15 @@
     box-shadow: none;
 }
 
+.native-consent > .account-secondary-button {
+    display: inline-flex;
+    width: auto;
+    min-height: 44px;
+    margin-top: 20px;
+    padding: 11px 20px;
+    font: inherit;
+}
+
 .native-consent .account-secondary-button:is(:hover, :focus-visible),
 .profile-native-apps .account-secondary-button:is(:hover, :focus-visible) {
     background: var(--surface-menu, #f5f5f5);
@@ -93,7 +189,7 @@
 
 .native-consent-actions button:focus-visible,
 .native-session-row button:focus-visible {
-    outline: 2px solid currentColor;
+    outline: 2px solid var(--text-strong, #222);
     outline-offset: 3px;
 }
 
@@ -131,6 +227,34 @@ html[data-theme="dark"] .native-app-icon,
 body.dark-mode .native-app-icon {
     color: #fff;
     background: #181818;
+}
+
+html[data-theme="dark"] .native-consent-actions button:not(.account-secondary-button) {
+    background: #f0f0ee;
+    border-color: #f0f0ee;
+    color: #181818;
+}
+
+html[data-theme="dark"] .native-consent-actions button:not(.account-secondary-button):hover {
+    background: #dcdcd9;
+    border-color: #dcdcd9;
+}
+
+@media (max-width: 600px) {
+    body.native-consent-page {
+        --native-consent-gutter: 32px;
+    }
+    body.native-consent-page .site-breadcrumb {
+        margin-top: 24px;
+    }
+    .native-consent-shell.account-shell.with-nav {
+        margin-top: 20px;
+        margin-bottom: 40px;
+    }
+    .native-consent.account-card {
+        padding: 28px 24px;
+        border-radius: 16px;
+    }
 }
 
 @media (max-width: 600px) {

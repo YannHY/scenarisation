@@ -112,11 +112,13 @@ function native_login_return(string $requestId): ?string
 
 function native_active_user(PDO $db, int $id): ?array
 {
-    $query = $db->prepare("SELECT id, username, email FROM users
-        WHERE id = ? AND status = 'active' AND email_verified_at IS NOT NULL AND email_verified_at <> ''");
+    // MySQL rejects comparing a DATETIME with ''. SQLite can contain legacy empty strings.
+    $query = $db->prepare("SELECT id, username, email, email_verified_at FROM users
+        WHERE id = ? AND status = 'active' AND email_verified_at IS NOT NULL");
     $query->execute([$id]);
     $user = $query->fetch();
-    return $user ? ['id' => (int)$user['id'], 'username' => (string)$user['username'], 'email' => (string)$user['email']] : null;
+    if (!$user || trim((string)$user['email_verified_at']) === '') return null;
+    return ['id' => (int)$user['id'], 'username' => (string)$user['username'], 'email' => (string)$user['email']];
 }
 
 function native_issue_code(PDO $db, int $userId, array $request): string

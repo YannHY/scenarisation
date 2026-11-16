@@ -1668,6 +1668,9 @@ function site_breadcrumb_items(string $active = ''): array
         'login' => [
             ['fr' => 'Connexion', 'en' => 'Sign in'],
         ],
+        'oauth-authorize' => [
+            ['fr' => 'Connecter le Mac', 'en' => 'Connect your Mac'],
+        ],
         'legal' => [
             ['fr' => 'Mentions légales', 'en' => 'Legal notice'],
         ],
