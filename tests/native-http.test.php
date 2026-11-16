@@ -102,6 +102,17 @@ try {
     check(str_contains($consent['headers']['content-security-policy'] ?? '', 'http://127.0.0.1:54123/auth/callback'), 'Form policy allows the validated callback redirect');
     $csrf = csrf_from($consent['body']);
     parse_str(parse_url($signedIn['headers']['location'], PHP_URL_QUERY), $authorization);
+    check(str_contains($consent['body'], 'action="oauth-authorize.php?request=' . $authorization['request'] . '"'),
+        'Consent has an explicit same-origin action bound to the displayed request');
+    $missingForm = request('oauth-authorize.php', 'POST', ['decision' => 'allow', 'csrf_token' => $csrf]);
+    check($missingForm['status'] === 400 && str_contains($missingForm['body'], 'formulaire de connexion est incomplet'),
+        'Missing form identity is not reported as an expiration');
+    $lostSession = request('oauth-authorize.php?request=' . $authorization['request'], browser: false);
+    check($lostSession['status'] === 400 && str_contains($lostSession['body'], 'session du navigateur'),
+        'A request from another browser session is refused with an accurate message');
+    $mismatch = request('oauth-authorize.php?request=' . str_repeat('f', 32), 'POST',
+        ['request' => $authorization['request'], 'decision' => 'allow', 'csrf_token' => $csrf]);
+    check($mismatch['status'] === 400 && !isset($mismatch['headers']['location']), 'Mismatched form and action cannot authorize');
     $badConsent = request('oauth-authorize.php', 'POST', ['request' => $authorization['request'], 'decision' => 'allow', 'csrf_token' => 'invalid']);
     check($badConsent['status'] === 403 && !isset($badConsent['headers']['location']), 'Invalid consent CSRF cannot issue a code');
     $allowed = request('oauth-authorize.php', 'POST', ['request' => $authorization['request'], 'decision' => 'allow', 'csrf_token' => $csrf]);
@@ -109,6 +120,9 @@ try {
     parse_str(parse_url($allowed['headers']['location'], PHP_URL_QUERY), $callback);
     check($callback['state'] === str_repeat('s', 32) && $callback['iss'] === $base, 'Callback binds state and issuer');
     $tokens = exchange($callback['code']);
+    $repeated = request('oauth-authorize.php', 'POST', ['request' => $authorization['request'], 'decision' => 'allow', 'csrf_token' => $csrf]);
+    check($repeated['status'] === 400 && str_contains($repeated['body'], 'autorisation a déjà été traitée'),
+        'Repeated consent never issues another code and is distinguished from expiration');
     $me = request('api/v1/me.php', bearer: $tokens['access_token'], browser: false);
     check($me['status'] === 200 && decoded($me)['user']['id'] === 1, 'Bearer identifies the account through HTTP');
     check(!isset($me['headers']['set-cookie']), 'API requests do not create browser sessions');
@@ -162,7 +176,7 @@ try {
 
     $again = request('oauth-authorize.php?' . http_build_query(auth_query()));
     preg_match('/name="request" value="([a-f0-9]{32})"/', $again['body'], $pending);
-    $denied = request('oauth-authorize.php', 'POST', ['request' => $pending[1], 'decision' => 'deny', 'csrf_token' => csrf_from($again['body'])]);
+    $denied = request('oauth-authorize.php?request=' . $pending[1], 'POST', ['decision' => 'deny', 'csrf_token' => csrf_from($again['body'])]);
     parse_str(parse_url($denied['headers']['location'], PHP_URL_QUERY), $deniedCallback);
     check($deniedCallback['error'] === 'access_denied' && !isset($deniedCallback['code']), 'Consent denial issues no code');
     $stillSignedIn = request('login.php?native_request=https://attacker.test/');

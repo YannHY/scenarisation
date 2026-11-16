@@ -15,12 +15,35 @@ try {
         header('Allow: GET, POST');
         throw new NativeRequestError('invalid_request', 'Méthode non autorisée.', 405);
     }
-    $requestId = native_string($method === 'POST' ? $_POST : $_GET, 'request');
+    $queryRequestId = native_string($_GET, 'request');
+    $postedRequestId = native_string($_POST, 'request');
+    if ($method === 'POST' && $queryRequestId !== '' && $postedRequestId !== '' && $queryRequestId !== $postedRequestId) {
+        throw new NativeRequestError('invalid_request', 'Le formulaire ne correspond pas à cette demande. Relancez la connexion depuis l’application.');
+    }
+    $requestId = $method === 'POST' ? ($postedRequestId ?: $queryRequestId) : $queryRequestId;
     if ($requestId === '' && $method === 'GET') {
         $requestId = native_remember_authorization(native_validate_authorization($_GET));
     }
     $request = native_pending_authorization($requestId);
-    if ($request === null) throw new NativeRequestError('invalid_request', 'Cette demande a expiré. Recommencez depuis l’application.');
+    if ($request === null) {
+        $reason = 'expired';
+        $message = 'Cette demande a expiré. Recommencez depuis l’application.';
+        if (!preg_match('/^[a-f0-9]{32}$/D', $requestId)) {
+            $reason = 'missing_request';
+            $message = 'Le formulaire de connexion est incomplet. Relancez la connexion depuis l’application.';
+        } elseif ((int)($_SESSION['native_completed_authorizations'][$requestId] ?? 0) > time()) {
+            $reason = 'already_processed';
+            $message = 'Cette autorisation a déjà été traitée. Revenez dans l’application pour vérifier la connexion.';
+        } elseif (!isset($_SESSION['native_authorizations'][$requestId])) {
+            $reason = 'session_missing';
+            $message = 'La demande n’a pas été retrouvée dans cette session du navigateur. Relancez la connexion depuis l’application.';
+        }
+        // No session IDs, CSRF tokens, OAuth parameters or account details in diagnostic logs.
+        error_log('Scénarisation native consent rejected: reason=' . $reason . ' method=' . $method
+            . ' session_cookie=' . (isset($_COOKIE[session_name()]) ? 'present' : 'absent')
+            . ' posted_request=' . ($postedRequestId !== '' ? 'present' : 'absent'));
+        throw new NativeRequestError('invalid_request', $message);
+    }
     // Chrome applies form-action to a POST's redirect as well as its initial destination.
     // This callback was validated before it entered the session; it is never an arbitrary URL.
     header("Content-Security-Policy: frame-ancestors 'none'; base-uri 'self'; form-action 'self' " . $request['redirect_uri']);
@@ -43,6 +66,11 @@ try {
         if ($decision === 'allow') $parameters['code'] = native_issue_code(app_db(), $user['id'], $request);
         else $parameters['error'] = 'access_denied';
         unset($_SESSION['native_authorizations'][$requestId]);
+        // Distinguish a repeated submission from an expired or lost browser session.
+        $completed = array_filter($_SESSION['native_completed_authorizations'] ?? [], static fn($until) => (int)$until > time());
+        while (count($completed) >= 8) array_shift($completed);
+        $completed[$requestId] = time() + 600;
+        $_SESSION['native_completed_authorizations'] = $completed;
         header('Location: ' . $request['redirect_uri'] . '?' . http_build_query($parameters, '', '&', PHP_QUERY_RFC3986), true, 303);
         exit;
     }
@@ -98,7 +126,7 @@ try {
                 <?php endif; ?>
             </ul>
             <p class="account-copy native-consent-note" data-site-i18n-fr="La visibilité de vos scénarios est conservée. Vous pourrez retirer cet accès depuis votre profil." data-site-i18n-en="Your scenarios keep their visibility. You can revoke this access from your profile.">La visibilité de vos scénarios est conservée. Vous pourrez retirer cet accès depuis votre profil.</p>
-            <form method="post" class="native-consent-actions">
+            <form method="post" class="native-consent-actions" action="oauth-authorize.php?request=<?= h($requestId) ?>">
                 <input type="hidden" name="request" value="<?= h($requestId) ?>">
                 <input type="hidden" name="csrf_token" value="<?= h(account_csrf_token('native_authorize:' . $requestId)) ?>">
                 <button type="submit" name="decision" value="deny" class="account-secondary-button" data-site-i18n-fr="Annuler" data-site-i18n-en="Cancel">Annuler</button>
