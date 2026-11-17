@@ -118,6 +118,7 @@ struct FieldAIRequest: Sendable {
     let instruction: String
     let original: String
     let context: FieldAIContext
+    var profile = ""
 
     var canGenerate: Bool {
         action == .write ? !instruction.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -134,7 +135,7 @@ struct FieldAIRequest: Sendable {
         Retourne uniquement un objet JSON {"text":"texte proposé"}, sans balises Markdown autour du JSON.
         text contient uniquement le contenu à insérer dans le champ, sans préambule ni commentaire.
         Le contenu peut utiliser le Markdown et le LaTeX si cela est utile.
-        """
+        """ + AssistantPrompt.profile(profile)
     }
     func user() throws -> String {
         var payload = context.payload

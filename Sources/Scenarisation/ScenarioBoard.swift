@@ -9,11 +9,14 @@ struct BoardDrag: Codable {
 struct ScenarioBoard: View {
     @Binding var scenario: Scenario
     @Binding var focusMoment: String?
+    /// Disposition affichée : liste, colonnes ou grille.
+    let layout: String
     let askAI: () -> Void
     let openModels: () -> Void
     @State private var deleteID: String?
-    private var layout: String { scenario.meta["boardLayout"]?.string ?? "columns" }
+    @State private var viewport: CGFloat = 0
     private var hideIntentions: Bool { scenario.fields["intentionsCollapsed"] == .bool(true) }
+    private var columns: Bool { layout != "list" && layout != "grid" }
 
     var body: some View {
         Group {
@@ -29,36 +32,33 @@ struct ScenarioBoard: View {
                         Button(action: askAI) { ActionLabel(title: "Assistant IA", icon: "wand") }.studioButtons()
                     }.controlSize(.large)
                 }.frame(maxWidth: .infinity).padding(.vertical, 40)
-            } else if layout == "list" {
-                LazyVStack(spacing: 20) { cards; addCard }.padding(.horizontal, 28).frame(maxWidth: 820).frame(maxWidth: .infinity)
-            } else if layout == "grid" {
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 430), spacing: 20, alignment: .top)], alignment: .leading, spacing: 20) {
-                    cards
-                    addCard
-                }.padding(.horizontal, 28)
             } else {
+                // Une seule hiérarchie pour les trois dispositions : les cartes et leurs aperçus WebKit
+                // sont conservés d’un mode à l’autre au lieu d’être reconstruits, ce qui rend le changement immédiat.
                 ScrollViewReader { proxy in
                     ScrollView(.horizontal) {
-                        HStack(alignment: .top, spacing: 20) {
-                            ForEach(scenario.moments.indices, id: \.self) { index in card(index).frame(width: 460) }
-                            addCard.frame(width: 220)
-                        }.padding(.horizontal, 28).padding(.vertical, 6).padding(.bottom, 14)
+                        BoardLayout(mode: layout) {
+                            ForEach(scenario.moments.indices, id: \.self) { index in card(index) }
+                            addCard.layoutValue(key: BoardColumnWidth.self, value: 220)
+                        }
+                        // En liste et en grille, le tableau prend la largeur visible ; en colonnes, il défile.
+                        .frame(width: columns || viewport == 0 ? nil : max(0, viewport - 56), alignment: .topLeading)
+                        .padding(.horizontal, 28).padding(.vertical, 6).padding(.bottom, 14)
                     }
+                    .scrollDisabled(!columns)
                     .scrollClipDisabled()
+                    .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { viewport = $0 }
                     .onChange(of: focusMoment) { _, id in
-                        if let id { withAnimation(.smooth) { proxy.scrollTo("moment-" + id, anchor: .leading) } }
+                        if columns, let id { withAnimation(.smooth) { proxy.scrollTo("moment-" + id, anchor: .leading) } }
                     }
                 }
             }
         }
-        .animation(.snappy, value: layout)
+        .animation(.snappy(duration: 0.3), value: layout)
         .confirmationDialog("Supprimer ce moment et ses activités ?", isPresented: Binding(
             get: { deleteID != nil }, set: { if !$0 { deleteID = nil } })) {
                 Button("Supprimer", role: .destructive) { scenario.moments.removeAll { $0.id == deleteID }; deleteID = nil }
             }
-    }
-    private var cards: some View {
-        ForEach(scenario.moments.indices, id: \.self) { index in card(index) }
     }
     private func card(_ index: Int) -> some View {
         MomentCard(moment: $scenario.moments[index], hideIntentions: hideIntentions, remove: { deleteID = scenario.moments[index].id },
@@ -102,6 +102,74 @@ struct ScenarioBoard: View {
             scenario.moments.insert(moment, at: to)
         }
         return true
+    }
+}
+
+/// Largeur d’une carte en disposition « colonnes ».
+private struct BoardColumnWidth: LayoutValueKey {
+    static let defaultValue: CGFloat = 460
+}
+
+/// Place les cartes du tableau en liste centrée, en colonnes défilantes ou en grille adaptative.
+struct BoardLayout: Layout {
+    var mode: String
+    var spacing: CGFloat = 20
+    /// Largeur maximale d’une carte en liste.
+    private let listWidth: CGFloat = 764
+    /// Largeur minimale d’une colonne de la grille.
+    private let gridMinimum: CGFloat = 430
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        arrange(width: proposal.width, subviews: subviews).size
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let frames = arrange(width: bounds.width, subviews: subviews).frames
+        for (subview, frame) in zip(subviews, frames) {
+            subview.place(at: CGPoint(x: bounds.minX + frame.minX, y: bounds.minY + frame.minY),
+                          proposal: ProposedViewSize(width: frame.width, height: frame.height))
+        }
+    }
+
+    private func arrange(width: CGFloat?, subviews: Subviews) -> (frames: [CGRect], size: CGSize) {
+        var frames: [CGRect] = []
+        switch mode {
+        case "list":
+            let available = width.map { $0.isFinite ? $0 : listWidth } ?? listWidth
+            let column = min(available, listWidth)
+            let x = (available - column) / 2
+            var y: CGFloat = 0
+            for subview in subviews {
+                let height = subview.sizeThatFits(ProposedViewSize(width: column, height: nil)).height
+                frames.append(CGRect(x: x, y: y, width: column, height: height))
+                y += height + spacing
+            }
+            return (frames, CGSize(width: available, height: max(0, y - spacing)))
+        case "grid":
+            let available = width.map { $0.isFinite ? $0 : gridMinimum * 2 + spacing } ?? gridMinimum * 2 + spacing
+            let count = max(1, Int((available + spacing) / (gridMinimum + spacing)))
+            let column = max(0, (available - spacing * CGFloat(count - 1)) / CGFloat(count))
+            var y: CGFloat = 0
+            for start in stride(from: 0, to: subviews.count, by: count) {
+                let row = subviews[start..<min(start + count, subviews.count)]
+                let heights = row.map { $0.sizeThatFits(ProposedViewSize(width: column, height: nil)).height }
+                for offset in heights.indices {
+                    frames.append(CGRect(x: CGFloat(offset) * (column + spacing), y: y, width: column, height: heights[offset]))
+                }
+                y += (heights.max() ?? 0) + spacing
+            }
+            return (frames, CGSize(width: available, height: max(0, y - spacing)))
+        default:
+            var x: CGFloat = 0, height: CGFloat = 0
+            for subview in subviews {
+                let column = subview[BoardColumnWidth.self]
+                let size = subview.sizeThatFits(ProposedViewSize(width: column, height: nil))
+                frames.append(CGRect(x: x, y: 0, width: column, height: size.height))
+                x += column + spacing
+                height = max(height, size.height)
+            }
+            return (frames, CGSize(width: max(0, x - spacing), height: height))
+        }
     }
 }
 

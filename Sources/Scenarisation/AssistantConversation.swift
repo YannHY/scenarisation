@@ -18,22 +18,23 @@ enum AssistantConversation {
     typealias Generate = @MainActor (String, String) async throws -> String
     static let maximumToolCalls = 6
 
-    static func reply(scenario: Scenario, history: [AssistantTurn], configuration: AIConfiguration, key: String,
+    static func reply(scenario: Scenario, history: [AssistantTurn], profile: String = "", configuration: AIConfiguration, key: String,
                       sessionConfiguration: URLSessionConfiguration = .ephemeral) async throws -> AssistantReply {
-        try await reply(scenario: scenario, history: history) { system, user in
+        try await reply(scenario: scenario, history: history, profile: profile) { system, user in
             try await AIClient.generate(system: system, user: user, configuration: configuration, key: key,
                 sessionConfiguration: sessionConfiguration)
         }
     }
 
-    static func reply(scenario: Scenario, history: [AssistantTurn], generate: Generate) async throws -> AssistantReply {
+    static func reply(scenario: Scenario, history: [AssistantTurn], profile: String = "", generate: Generate) async throws -> AssistantReply {
+        let system = AssistantPrompt.dialogue(profile: profile)
         var working = scenario
         var exchanges: [JSONValue] = []
         var rejected = false
         for turn in 0...maximumToolCalls {
             try Task.checkCancellation()
             let user = try context(scenario: working, history: history, exchanges: exchanges)
-            let raw = try await generate(AssistantPrompt.dialogue, user)
+            let raw = try await generate(system, user)
             try Task.checkCancellation()
             let root = try object(from: raw)
             // Older/smaller models may still return a bare scenario.

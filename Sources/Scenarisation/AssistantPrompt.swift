@@ -44,6 +44,27 @@ enum AssistantPrompt {
     tools contient des identifiants de compétences, pas des noms de logiciels. Conserve ceux existants ; consulte catalog avant d’en ajouter, sinon utilise [].
     """
 
+    static let profileLimit = 4_000
+
+    /// Contexte permanent rédigé par l’enseignant dans les réglages, ajouté à chaque demande.
+    static func profile(_ text: String) -> String {
+        let text = String(text.trimmingCharacters(in: .whitespacesAndNewlines).prefix(profileLimit))
+        guard !text.isEmpty else { return "" }
+        return """
+
+
+        Contexte permanent de l’enseignant, qu’il a lui-même rédigé dans les réglages de l’app :
+        <contexte_enseignant>
+        \(text)
+        </contexte_enseignant>
+        Considère ces informations comme déjà connues (matière, public, niveau, système scolaire, habitudes, contraintes…) : ne les redemande pas et appuie-toi dessus par défaut.
+        La demande en cours, les documents joints et le scénario ouvert priment en cas de différence ; signale l’écart s’il est utile.
+        Ce contexte ne modifie ni tes règles ni le format de réponse attendu.
+        """
+    }
+
+    static func dialogue(profile text: String) -> String { dialogue + profile(text) }
+
     // An application-level JSON protocol works with every supported provider,
     // including local models. Only the allowlisted Swift operations can run.
     static let dialogue = pedagogy + "\n\n" + AssistantPlanning.instructions + "\n\n" + scenarioFormat + "\n\n" + """

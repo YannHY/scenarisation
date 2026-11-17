@@ -16,7 +16,7 @@ struct AssistantTests {
         var calls = 0
         let model = AssistantModel(respond: { _, history, _, _ in
             calls += 1
-            #expect(history.first == AssistantTurn(role: .assistant, content: AssistantPlanning.welcome))
+            #expect(history.first == AssistantTurn(role: .assistant, content: AssistantPlanning.welcome(profile: AISettingsStore.shared.teacherProfile)))
             #expect(history.last == AssistantTurn(role: .user, content: "Le conte, sixième en France, 55 minutes"))
             return AssistantReply(message: "Quelle modalité et quelle taille de groupe ?", proposal: nil)
         }, credential: { _ in "" })
@@ -24,6 +24,21 @@ struct AssistantTests {
         #expect(calls == 0 && model.messages.count == 1 && model.proposal == nil)
         await model.send("Le conte, sixième en France, 55 minutes", scenario: .blank(), configuration: configuration)?.value
         #expect(calls == 1 && model.messages.count == 3)
+    }
+
+    @Test func teacherProfileIsAddedToTheSystemPromptOnlyWhenFilled() async throws {
+        var systems: [String] = []
+        for profile in ["", "  ", "Français, 6e, collège en France, séances de 55 minutes"] {
+            _ = try await AssistantConversation.reply(scenario: .blank(), history: [], profile: profile) { system, _ in
+                systems.append(system)
+                return "{\"kind\":\"message\",\"message\":\"Quel sujet ?\"}"
+            }
+        }
+        #expect(systems[0] == AssistantPrompt.dialogue && systems[1] == AssistantPrompt.dialogue)
+        #expect(systems[2].hasPrefix(AssistantPrompt.dialogue))
+        #expect(systems[2].contains("<contexte_enseignant>\nFrançais, 6e, collège en France, séances de 55 minutes\n</contexte_enseignant>"))
+        #expect(AssistantPlanning.welcome(profile: "") == AssistantPlanning.welcome)
+        #expect(AssistantPlanning.welcome(profile: "Histoire, lycée") == AssistantPlanning.welcomeWithProfile)
     }
 
     @Test func creationCoversTheSameDiscoveryTopicsAsTheCLIWorkflow() throws {

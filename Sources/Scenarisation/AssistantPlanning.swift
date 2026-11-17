@@ -26,6 +26,17 @@ enum AssistantPlanning {
     • Pour quel public, niveau et système scolaire ?
     • De combien de temps disposez-vous ?
     """
+    /// Avec un contexte enregistré, seules les informations propres au nouveau scénario sont demandées.
+    static let welcomeWithProfile = """
+    Créons votre scénario ensemble. Je tiens compte de votre contexte d’enseignement enregistré dans les réglages. Pour commencer :
+
+    • Quel sujet ou thème souhaitez-vous travailler ?
+    • De combien de temps disposez-vous ?
+    • Le public ou le niveau diffère-t-il de votre contexte habituel ?
+    """
+    static func welcome(profile: String) -> String {
+        profile.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? welcome : welcomeWithProfile
+    }
     static let instructions = """
     Pour créer un scénario, reprends le cadrage du parcours CLI de Scénarisation.
     Questions indispensables à couvrir au fil de l’échange, sans reposer celles auxquelles le scénario ou l’enseignant répond déjà :

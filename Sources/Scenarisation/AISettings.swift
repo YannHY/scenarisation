@@ -30,10 +30,13 @@ final class AISettingsStore: ObservableObject {
     @Published private(set) var models: [AIModel] = []
     @Published private(set) var claudeEnabled: Bool
     @Published private(set) var subscriptionServices: Set<AIProvider>
+    /// Contexte d’enseignement transmis avec chaque demande, quel que soit le service choisi.
+    @Published private(set) var teacherProfile: String
     private let defaults: UserDefaults
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
+        teacherProfile = defaults.string(forKey: "ai.teacherProfile") ?? ""
         claudeEnabled = defaults.bool(forKey: "ai.claude.enabled")
         subscriptionServices = Set(AIProvider.allCases.filter { $0.usesACP && defaults.bool(forKey: "ai.\($0.rawValue).enabled") })
         let saved = AIProvider(rawValue: defaults.string(forKey: "ai.provider") ?? "") ?? .platformDefault
@@ -100,6 +103,13 @@ final class AISettingsStore: ObservableObject {
         models = []; defaults.removeObject(forKey: "ai.\(configuration.provider).models")
         defaults.removeObject(forKey: "ai.\(configuration.provider).models.account"); selectModel("")
     }
+    func setTeacherProfile(_ text: String) {
+        let text = String(text.prefix(AssistantPrompt.profileLimit))
+        guard text != teacherProfile else { return }
+        teacherProfile = text
+        defaults.set(text, forKey: "ai.teacherProfile")
+    }
+
     func enableClaude(_ enabled: Bool) {
         defaults.set(enabled, forKey: "ai.claude.enabled"); claudeEnabled = enabled
         if !enabled && configuration.service == .claude { resetModels() }

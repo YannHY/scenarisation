@@ -39,6 +39,9 @@ struct FieldAssistantTests {
         #expect(payload["request"] == .string("Avec une liste à puces"))
         #expect(!(try request.user()).contains("PRIVATE-"))
         #expect(payload["moment"]?.object["activities"] == nil)
+        #expect(!request.system.contains("contexte_enseignant"))
+        var withProfile = request; withProfile.profile = "Anglais, lycée, groupes de 12"
+        #expect(withProfile.system.contains("<contexte_enseignant>\nAnglais, lycée, groupes de 12\n</contexte_enseignant>"))
         let objectives = FieldAIContext(scenario: scenario, moment: moment).payload
         #expect(objectives["moment"]?.object["activities"]?.array.first?.object["description"] == .string("Comparer deux personnages"))
     }

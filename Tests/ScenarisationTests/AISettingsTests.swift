@@ -12,6 +12,16 @@ struct AISettingsTests {
         try await body(AISettingsStore(defaults: defaults), defaults)
     }
 
+    @Test func teacherProfileIsSavedAndLimited() async throws {
+        try await withSettings { settings, defaults in
+            #expect(settings.teacherProfile.isEmpty)
+            settings.setTeacherProfile("Mathématiques, 4e et 3e, Suisse romande")
+            #expect(AISettingsStore(defaults: defaults).teacherProfile == "Mathématiques, 4e et 3e, Suisse romande")
+            settings.setTeacherProfile(String(repeating: "a", count: AssistantPrompt.profileLimit + 50))
+            #expect(settings.teacherProfile.count == AssistantPrompt.profileLimit)
+        }
+    }
+
     @Test func legacyAPIAndOllamaSettingsKeepTheirCredentialAccounts() async throws {
         try await withSettings { _, defaults in
             defaults.set("compatible", forKey: "ai.provider")

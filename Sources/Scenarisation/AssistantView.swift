@@ -26,7 +26,8 @@ final class AssistantModel: ObservableObject {
 
     init(respond: Responder? = nil, credential: Credential? = nil) {
         self.respond = respond ?? { scenario, history, configuration, key in
-            try await AssistantConversation.reply(scenario: scenario, history: history, configuration: configuration, key: key)
+            try await AssistantConversation.reply(scenario: scenario, history: history,
+                profile: AISettingsStore.shared.teacherProfile, configuration: configuration, key: key)
         }
         self.credential = credential ?? { try await AICredentials.read($0) }
     }
@@ -113,7 +114,7 @@ final class AssistantModel: ObservableObject {
     }
     func beginCreation() {
         guard messages.isEmpty, !busy else { return }
-        record(AssistantPlanning.welcome)
+        record(AssistantPlanning.welcome(profile: AISettingsStore.shared.teacherProfile))
     }
     private func record(_ text: String) {
         messages.append(ChatEntry(role: "Assistant", text: text))
@@ -296,8 +297,20 @@ struct AssistantView: View {
                     suggestion("Clarifier les consignes",
                                "Reformule les consignes pour les élèves afin qu’elles soient plus claires et plus courtes.")
                 }
+                profileHint
             }
         }.padding(.top, 8)
+    }
+    /// Rappelle que le contexte permanent évite de répéter matière, niveau et système scolaire.
+    private var profileHint: some View {
+        let empty = settings.teacherProfile.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        return Button { showSettings = true } label: {
+            Label(empty ? "Enregistrer mon contexte d’enseignement (matière, niveau, système scolaire…)"
+                        : "Contexte d’enseignement enregistré · Modifier",
+                  systemImage: empty ? "person.text.rectangle" : "checkmark.circle")
+                .font(.callout)
+        }
+        .buttonStyle(.plain).foregroundStyle(empty ? Color.accentColor : Color.secondary)
     }
     /// Prépare la demande et ouvre le choix des fichiers s’il n’y en a pas encore de joints.
     private var documentsSuggestion: some View {
@@ -370,7 +383,7 @@ struct AssistantView: View {
                     Label("Proposition prête : \(proposal.name.isEmpty ? "sans titre" : proposal.name)", systemImage: "checkmark.circle.fill")
                         .font(.callout.weight(.medium)).foregroundStyle(.green)
                     HStack {
-                        Button("Examiner") { showReview = true }.disabled(model.busy).studioButtons(prominent: true)
+                        Button("Aperçu") { showReview = true }.disabled(model.busy).studioButtons(prominent: true)
                         Button("Écarter") { model.discard() }.studioButtons()
                     }
                 }.padding(12).frame(maxWidth: .infinity, alignment: .leading)
@@ -431,8 +444,9 @@ struct AssistantView: View {
                         Link("Gérer l’utilisation", destination: ChatGPTProtocol.usageURL)
                     }.font(.caption2).padding(.horizontal, 6)
                 }
-                Text(configuration.isOnThisMac ? "Scénario, échanges et documents joints · traités sur ce Mac." :
-                    "Scénario, échanges et documents joints · transmis à \(configuration.service.label).")
+                let sent = settings.teacherProfile.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                    ? "Scénario, échanges et documents joints" : "Contexte, scénario, échanges et documents joints"
+                Text(configuration.isOnThisMac ? "\(sent) · traités sur ce Mac." : "\(sent) · transmis à \(configuration.service.label).")
                     .font(.caption2).foregroundStyle(.tertiary).padding(.horizontal, 6)
             }
         }.padding(12)
@@ -456,7 +470,7 @@ struct ProposalReview: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Examiner la proposition").font(.title.bold())
+                Text("Aperçu de la proposition").font(.title.bold())
                 Text("La proposition remplacera le scénario ouvert. Cette opération pourra être annulée.").foregroundStyle(.secondary)
             }
             SplitPair {
@@ -511,6 +525,8 @@ struct ScenarioSummary: View {
                     Text((try? scenario.encoded()).map { String(decoding: $0, as: UTF8.self) } ?? "")
                         .font(.system(.caption, design: .monospaced)).textSelection(.enabled)
                 }
+                // La feuille donne le focus initial à ce triangle : SwiftUI dessine alors un anneau mal placé.
+                .focusEffectDisabled()
             }.padding(16).frame(maxWidth: .infinity, alignment: .leading)
         }.frame(minWidth: 350)
     }

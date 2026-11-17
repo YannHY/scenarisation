@@ -141,6 +141,7 @@ struct AISettingsView: View {
                          : "Votre scénario sera transmis à ce service uniquement lorsque vous solliciterez l’assistant.")
                 }
             }
+            TeacherProfileSection(settings: settings)
         }
         .formStyle(.grouped)
         .frame(width: 540, height: 640)
@@ -160,6 +161,39 @@ struct AISettingsView: View {
     private var endpointField: some View {
         TextField("Adresse du serveur", text: Binding(get: { configuration.endpoint }, set: { settings.setEndpoint($0) }))
             .autocorrectionDisabled()
+    }
+}
+
+/// Informations permanentes que l’assistant connaît sans les redemander à chaque conversation.
+struct TeacherProfileSection: View {
+    @ObservedObject var settings: AISettingsStore
+    private static let placeholder = """
+    Exemple :
+    J’enseigne le français au collège en France (cycle 3 et 4), surtout en 6e.
+    Séances de 55 minutes, classes de 25 élèves, vidéoprojecteur et iPads.
+    Référentiels : Socle commun et CRCN/Pix.
+    Je privilégie le travail en îlots et des consignes courtes.
+    """
+
+    var body: some View {
+        Section {
+            TextEditor(text: Binding(get: { settings.teacherProfile }, set: { settings.setTeacherProfile($0) }))
+                .font(.body).frame(minHeight: 130)
+                .scrollContentBackground(.hidden)
+                .overlay(alignment: .topLeading) {
+                    if settings.teacherProfile.isEmpty {
+                        Text(Self.placeholder).foregroundStyle(.tertiary)
+                            .padding(.leading, 5).padding(.top, 1).allowsHitTesting(false)
+                    }
+                }
+                .accessibilityLabel("Mon contexte d’enseignement")
+        } header: {
+            Text("Mon contexte d’enseignement")
+        } footer: {
+            Text("Matière, niveaux, système scolaire, durée des séances, effectifs, équipement, référentiels, habitudes… "
+                 + "L’assistant et l’Aide IA en tiennent compte sans vous les redemander ; une demande précise reste prioritaire. "
+                 + "Ce texte est transmis au service choisi avec chaque demande.")
+        }
     }
 }
 

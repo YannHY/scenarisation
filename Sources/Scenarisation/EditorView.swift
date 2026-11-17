@@ -58,11 +58,19 @@ struct EditorView: View {
     @State private var deleteMoment: String?
     @State private var adopted = false
     @State private var syncCheckpoint: Scenario
+    /// Titre que le nom du fichier suit actuellement.
+    @State private var fileTitle: String
+    /// Emplacement après un renommage, au cas où `fileURL` ne serait pas encore actualisé.
+    @State private var renamedFileURL: URL?
+    /// Disposition affichée, mise à jour avant le document pour que le sélecteur réagisse aussitôt.
+    @State private var boardLayout: String
 
     init(document: Binding<ScenarioDocument>, fileURL: URL? = nil) {
         _document = document
         self.fileURL = fileURL
         _syncCheckpoint = State(initialValue: document.wrappedValue.scenario)
+        _fileTitle = State(initialValue: document.wrappedValue.scenario.name)
+        _boardLayout = State(initialValue: document.wrappedValue.scenario.meta["boardLayout"]?.string ?? "columns")
         _started = State(initialValue: document.wrappedValue.enteredEditor)
         let arguments = ProcessInfo.processInfo.arguments
         let requested = ["board": StudioPane.board, "settings": .settings, "analysis": .analysis, "chronology": .chronology]
@@ -97,7 +105,7 @@ struct EditorView: View {
             exportScenario: { if started { showExport = true } }, toggleAssistant: {
                 if started { if pane == .assistant { pane = .board } else { showAssistant.toggle() } }
             },
-            setLayout: { mode in if started { pane = .board; scenario.meta["boardLayout"].wrappedValue = .string(mode) } },
+            setLayout: { mode in if started { pane = .board; chooseLayout(mode) } },
             searchSite: { if started { siteSearchFocused = true } }))
         .sheet(isPresented: $showModels) {
             TemplateLibrary { design in
@@ -133,6 +141,9 @@ struct EditorView: View {
         .onAppear { if let fileURL, fileURL.pathExtension.lowercased() != "json" { adoptIntoFolder() } }
         .onChange(of: started) { _, entered in if entered && fileURL == nil { adoptIntoFolder() } }
         .onChange(of: pane) { _, value in if value == .assistant { showAssistant = false } }
+        .task(id: document.scenario.name) { await renameFileAfterTitle() }
+        // Annuler, synchronisation ou remplacement du scénario : la disposition suit le document.
+        .onChange(of: layout) { _, value in boardLayout = value }
         .task(id: UploadReadiness(pending: document.pendingUpload && document.syncIdentity == nil,
                                   connected: siteAccount.networkAvailable,
                                   hasContent: ScenarioFolder.hasContent(document.scenario))) {
@@ -252,7 +263,7 @@ struct EditorView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 22) {
                         boardHeader
-                        ScenarioBoard(scenario: scenario, focusMoment: $focusMoment,
+                        ScenarioBoard(scenario: scenario, focusMoment: $focusMoment, layout: boardLayout,
                                       askAI: { showAssistant = true }, openModels: { showModels = true })
                     }.padding(.top, 22).padding(.bottom, 36)
                 }
@@ -311,7 +322,7 @@ struct EditorView: View {
 #endif
         if pane == .board {
             ToolbarItem(placement: .primaryAction) {
-                Picker("Disposition", selection: Binding(get: { layout }, set: { scenario.meta["boardLayout"].wrappedValue = .string($0) })) {
+                Picker("Disposition", selection: Binding(get: { boardLayout }, set: { chooseLayout($0) })) {
                     Label("Liste", systemImage: "list.bullet").tag("list").help("Moments en liste (⌘1)")
                     Label("Colonnes", systemImage: "rectangle.split.3x1").tag("columns").help("Moments en colonnes (⌘2)")
                     Label("Grille", systemImage: "square.grid.2x2").tag("grid").help("Moments en grille (⌘3)")
@@ -362,6 +373,16 @@ struct EditorView: View {
 
     // MARK: Actions
 
+    /// Le tableau change tout de suite ; le document, son annulation et sa synchronisation suivent
+    /// au tour suivant, pour ne pas retarder l’affichage du choix.
+    private func chooseLayout(_ mode: String) {
+        guard mode != boardLayout else { return }
+        boardLayout = mode
+        Task { @MainActor in
+            guard boardLayout == mode, layout != mode else { return }
+            scenario.meta["boardLayout"].wrappedValue = .string(mode)
+        }
+    }
     private func addMoment() {
         guard started else { return }
         let moment = Moment.blank(title: "Moment \(document.scenario.moments.count + 1)")
@@ -395,6 +416,22 @@ struct EditorView: View {
                 if let original, original.fileURL == fileURL { original.close() }
             } catch { message = error.localizedDescription }
         }
+#endif
+    }
+    /// Le fichier prend le titre du scénario quelques secondes après sa dernière modification,
+    /// tant qu’il s’appelle « Sans titre » ou porte l’ancien titre.
+    private func renameFileAfterTitle() async {
+#if os(macOS)
+        try? await Task.sleep(for: .seconds(2))
+        guard !Task.isCancelled, let fileURL = renamedFileURL ?? fileURL,
+              let target = ScenarioFolder.renamedURL(for: fileURL, previousTitle: fileTitle, title: document.scenario.name),
+              let file = NSDocumentController.shared.documents.first(where: { $0.fileURL?.standardizedFileURL == fileURL.standardizedFileURL })
+        else { return }
+        do {
+            try await file.move(to: target)
+            ScenarioFolder.hideExtension(target)
+            renamedFileURL = target; fileTitle = document.scenario.name
+        } catch { message = error.localizedDescription }
 #endif
     }
     /// Un nouveau scénario rejoint le compte dès qu’il a un contenu et qu’une connexion existe ;

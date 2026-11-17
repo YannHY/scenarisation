@@ -394,14 +394,38 @@ enum SiteLibraryDate {
 @MainActor
 enum SiteDocumentOpener {
     static func open(_ id: UUID, workspace: SiteSyncWorkspace) async throws {
-        let url = try workspace.workingFileURL(id)
-        if let document = NSDocumentController.shared.documents.first(where: { $0.fileURL == url }) {
+        let identity = SyncDocumentIdentity(id: id, accountKey: workspace.account.key)
+        let working = try workspace.workingFileURL(id)
+        // Une fenêtre déjà ouverte sur ce scénario, depuis le dossier ou la copie de travail, est réutilisée.
+        if let document = NSDocumentController.shared.documents.first(where: { document in
+            guard let url = document.fileURL else { return false }
+            return url == working || ScenarioFolder.identity(of: url) == identity
+        }) {
             document.showWindows()
             document.windowControllers.first?.window?.makeKeyAndOrderFront(nil)
             return
         }
-        let file = try workspace.workingFile(id)
+        let file = try folderFile(identity, workspace: workspace) ?? workspace.workingFile(id)
         _ = try await NSDocumentController.shared.openDocument(withContentsOf: file, display: true)
+    }
+
+    /// Le scénario s’ouvre depuis le dossier des scénarios, sous son titre : le fichier déjà lié
+    /// est actualisé avec la dernière version connue, sinon un fichier est créé.
+    /// Sans dossier choisi, la copie de travail interne reste utilisée.
+    private static func folderFile(_ identity: SyncDocumentIdentity, workspace: SiteSyncWorkspace) throws -> URL? {
+        guard let folder = ScenarioFolder.current, let record = workspace.record(identity.id) else { return nil }
+        let data = try ScenarioDocument.data(record.local, identity: identity)
+        guard let existing = ScenarioFolder.files(linkedTo: identity, in: folder).first else {
+            return try ScenarioFolder.write(data, named: ScenarioFolder.fileName(record.local), in: folder)
+        }
+        // Seul un fichier antérieur à la dernière synchronisation est remplacé : des modifications
+        // faites hors connexion au compte ne sont jamais écrasées.
+        let modified = (try? existing.resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate
+        if (try? Data(contentsOf: existing)) != data, let synced = record.lastSyncedAt, let modified, modified <= synced {
+            try data.write(to: existing, options: .atomic)
+            ScenarioFolder.hideExtension(existing)
+        }
+        return existing
     }
 }
 #endif

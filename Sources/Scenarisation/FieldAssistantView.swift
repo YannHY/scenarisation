@@ -64,7 +64,7 @@ struct FieldAssistantSheet: View {
     private func request(_ action: FieldAIAction) {
         guard ready else { return }
         model.request(FieldAIRequest(label: label, purpose: purpose, action: action, instruction: instruction,
-            original: text, context: context), configuration: configuration)
+            original: text, context: context, profile: settings.teacherProfile), configuration: configuration)
     }
 
     var body: some View {
