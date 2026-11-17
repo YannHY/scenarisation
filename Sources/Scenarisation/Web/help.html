@@ -1,0 +1,98 @@
+<section id="demarrer">
+<h1>Concevoir, analyser et partager un scénario</h1>
+<p class="lead">Scénarisation pour Mac permet de concevoir et d’analyser vos scénarios hors ligne. Cette rubrique présente les commandes de l’application.</p>
+<p>La barre latérale donne aussi accès au <a href="https://scenarisation.eu/help.php">guide complet du site</a> et aux repères pédagogiques : <a href="https://scenarisation.eu/learning-design.php">learning design</a>, <a href="https://scenarisation.eu/bloom.php">taxonomie de Bloom</a> et <a href="https://scenarisation.eu/cadre-conversationnel.php">Cadre conversationnel</a>. Ces documents, leurs icônes et leurs schémas sont intégrés à l’application et consultables sans connexion.</p>
+<h2>Démarrer</h2>
+<p>Au lancement, la fenêtre d’accueil propose quatre entrées :</p>
+<ul>
+<li><strong>Créer un scénario</strong> ouvre un concepteur vide ;</li>
+<li><strong>Importer un modèle</strong> ouvre la bibliothèque des 28 modèles du site ;</li>
+<li><strong>Ouvrir un scénario</strong> charge un fichier exporté par le site ou par l’app ;</li>
+<li><strong>Créer avec l’IA</strong> ouvre un chat guidé pour construire votre scénario.</li>
+</ul>
+<p>Le concepteur suit les codes de macOS : la barre latérale donne accès à <strong>Conception</strong>, <strong>Paramètres</strong>, <strong>Analyse</strong>, <strong>Chronologie</strong>, <strong>Assistant IA</strong> et à la liste des moments ; la barre d’outils regroupe l’affichage, les modèles, l’import, l’export et l’assistant IA. <strong>Fichier → Enregistrer</strong> choisit l’emplacement du document ; macOS gère ensuite l’enregistrement automatique. <strong>Édition → Annuler</strong> revient sur n’importe quelle modification.</p>
+<p>Avec <strong>Créer avec l’IA</strong>, votre service configuré est repris. Si aucun modèle n’est prêt, choisissez un service local ou en ligne dans les réglages : Ollama, LM Studio, ChatGPT, Claude ou une API compatible. Vous pouvez changer de service ou de modèle depuis le menu du chat. L’assistant reprend les questions du parcours CLI, par petits groupes : sujet, public, durée, modalités, objectifs, acquis, contraintes et référentiels. Après examen, <strong>Appliquer</strong> ouvre votre scénario dans le concepteur.</p>
+</section>
+
+<section id="mise-en-forme">
+<h2>Mettre en forme le texte (Markdown)</h2>
+<p>Les champs longs — descriptions, consignes, objectifs, intentions et notes — acceptent une mise en forme Markdown légère, identique à celle du site. Cliquez sur l’icône <strong>Agrandir</strong> d’un champ pour ouvrir l’éditeur complet : il affiche la <strong>barre de formatage</strong>, l’<strong>assistant de formules</strong> et un <strong>aperçu en direct</strong> (Écrire, Côte à côte ou Aperçu). Dans les cartes, le Markdown et les formules sont rendus par défaut. Cliquez sur <strong>Modifier</strong> ou double-cliquez sur le contenu pour saisir le texte. Le rendu revient en quittant le champ ou l’éditeur agrandi ; <strong>Aperçu</strong> permet aussi de l’afficher pendant la saisie.</p>
+<table>
+<tr><th>Pour obtenir</th><th>Écrire</th><th>Bouton</th><th>Raccourci</th></tr>
+<tr><td><strong>Gras</strong></td><td><code>**texte**</code></td><td>B</td><td><kbd>⌘B</kbd></td></tr>
+<tr><td><em>Italique</em></td><td><code>*texte*</code></td><td>I</td><td><kbd>⌘I</kbd></td></tr>
+<tr><td>Titre</td><td><code>## Titre</code></td><td>Aa</td><td><kbd>⇧⌘H</kbd></td></tr>
+<tr><td>Liste à puces</td><td><code>- élément</code></td><td>•</td><td><kbd>⇧⌘L</kbd></td></tr>
+<tr><td>Liste numérotée</td><td><code>1. élément</code></td><td>1.</td><td><kbd>⇧⌘7</kbd></td></tr>
+<tr><td>Citation</td><td><code>&gt; citation</code></td><td>❝</td><td><kbd>⇧⌘Q</kbd></td></tr>
+<tr><td>Lien ou ressource</td><td><code>[titre](https://…)</code></td><td>Lien</td><td><kbd>⌘K</kbd></td></tr>
+<tr><td>Formule</td><td><code>$…$</code> ou <code>$$…$$</code></td><td>∑</td><td><kbd>⇧⌘M</kbd></td></tr>
+</table>
+<p>Sans sélection, un bouton insère un exemple déjà sélectionné, qu’il suffit de remplacer. Pour créer un lien, sélectionnez son libellé, utilisez <kbd>⌘K</kbd>, puis remplacez <code>https://</code> par l’adresse voulue. Dans une liste, <kbd>Entrée</kbd> crée la puce ou le numéro suivant ; sur un élément vide, elle termine la liste ; <kbd>⇧Entrée</kbd> insère un simple saut de ligne. Toutes ces modifications s’annulent avec <kbd>⌘Z</kbd>.</p>
+</section>
+
+<section id="latex">
+<h2>Écrire des formules mathématiques avec LaTeX</h2>
+<p>Dans l’éditeur agrandi, cliquez sur <strong>∑</strong> (ou <kbd>⇧⌘M</kbd>). L’assistant permet de saisir une formule, de vérifier immédiatement son aperçu et de partir de modèles classés par catégories : essentiels, opérateurs, relations, ensembles, lettres grecques et structures. Une formule sélectionnée dans le texte est reprise dans l’assistant pour être modifiée.</p>
+<table>
+<tr><th>Usage</th><th>Syntaxe</th><th>Rendu</th></tr>
+<tr><td>Formule dans une phrase</td><td><code>Le cercle vérifie $x^2 + y^2 = 1$.</code></td><td>Le cercle vérifie $x^2 + y^2 = 1$.</td></tr>
+<tr><td>Formule centrée</td><td><code>$$\frac{a}{b}$$</code></td><td>$$\frac{a}{b}$$</td></tr>
+<tr><td>Fonction affine</td><td><code>$f(x) = ax + b$</code></td><td>$f(x) = ax + b$</td></tr>
+</table>
+<p>Le bouton <strong>Dans le texte</strong> insère la formule entre deux signes <code>$</code> ; <strong>Centrée</strong> l’insère sur ses propres lignes entre <code>$$</code>. Le rendu utilise KaTeX, embarqué dans l’app : il fonctionne sans connexion. L’export HTML compose aussi les formules ; les exports JSON, Markdown, CSV et Excel conservent le code LaTeX afin qu’il reste modifiable et réimportable.</p>
+</section>
+
+<section id="fichiers">
+<h2>Enregistrer, importer et exporter</h2>
+<p>Le document natif est un fichier <strong>JSON</strong> compatible avec le site. Les champs que l’app n’affiche pas encore sont conservés lors de l’enregistrement.</p>
+<h3>Retrouver ses scénarios sur le site</h3>
+<p><strong>Fichier → Mon compte et mes scénarios… → Se connecter à Scénarisation</strong> ouvre le navigateur. Connectez-vous à votre compte du site et autorisez l’application, puis revenez sur le Mac. <strong>Ouvrir</strong> télécharge un scénario du site sur ce Mac. <strong>Synchroniser</strong>, dans la bibliothèque ou la barre d’outils du concepteur, échange ses modifications avec le site. L’envoi d’un nouveau scénario crée une copie privée dans votre compte.</p>
+<p>La synchronisation est manuelle. En cas de conflit, <strong>Conserver les deux versions</strong> garde la version du site et crée une copie Mac de votre travail. <strong>Compte → Se déconnecter</strong> conserve les copies locales et leurs changements ; reconnectez le même compte pour reprendre les échanges.</p>
+<p><strong>Scénario → Importer un scénario</strong> (<kbd>⇧⌘I</kbd>), l’accueil et <strong>Fichier → Ouvrir</strong> acceptent JSON, Markdown, CSV, Excel (<code>.xlsx</code>), HTML, Word (<code>.docx</code>) et les anciens fichiers LDJ. Les exports enseignant et élève du site sont reconnus. Seules les informations présentes dans le fichier sont récupérées ; lorsqu’une durée manque, elle est fixée à 10 minutes et peut être ajustée. Enregistrez ensuite le scénario en JSON pour conserver sa structure éditable.</p>
+<h3>Formats d’export</h3>
+<table>
+<tr><th>Format</th><th>À choisir pour…</th></tr>
+<tr><td>JSON</td><td>Conserver toutes les données structurées et réimporter le scénario, sur le site ou dans l’app.</td></tr>
+<tr><td>Markdown</td><td>Éditer en texte brut, versionner ou transmettre à une IA. Le code LaTeX reste modifiable.</td></tr>
+<tr><td>HTML</td><td>Partager une page autonome lisible dans un navigateur, avec les formules composées.</td></tr>
+<tr><td>Word</td><td>Relire, annoter, imprimer ou diffuser un document bureautique.</td></tr>
+<tr><td>Excel, CSV</td><td>Analyser, filtrer ou retravailler les activités dans un tableur.</td></tr>
+</table>
+<p>L’export propose une version <strong>enseignant</strong> ou <strong>élève</strong> ; la version élève retire les métadonnées, objectifs, notes et descriptions réservés à l’enseignant.</p>
+<h3>Partir d’un modèle</h3>
+<p><strong>Scénario → Importer un modèle</strong> (<kbd>⇧⌘M</kbd>) ouvre la bibliothèque des modèles du site, avec recherche et filtres. Il reste à remplacer les jalons entre crochets, comme <code>[MATIÈRE]</code> ou <code>[NOTION 1]</code>, par le contenu de votre discipline.</p>
+</section>
+
+<section id="assistant">
+<h2>Travailler avec l’assistant IA</h2>
+<p>L’inspecteur <strong>Assistant IA</strong> (<kbd>⌥⌘I</kbd>) dialogue avec un modèle local (Ollama, LM Studio) ou un service compatible (OpenAI, Mistral, etc.). Chaque demande transmet le scénario complet et les échanges au service choisi ; rien n’est envoyé pendant la simple édition. L’assistant peut poser des questions, expliquer ses choix ou préparer une proposition en s’appuyant sur les acquis de Bloom, les types d’apprentissage et l’alignement des activités avec l’évaluation.</p>
+<p>Il peut consulter les catalogues, calculer les durées et préparer des modifications ciblées. Celles-ci restent dans une copie temporaire : <strong>Examiner</strong> compare les versions, <strong>Appliquer</strong> remplace le scénario (annulable), <strong>Écarter</strong> laisse le document intact. La validation technique ne remplace pas votre appréciation pédagogique. Le bouton <strong>Nouvelle conversation</strong> efface les échanges et la proposition en attente ; la conversation n’est pas enregistrée dans le fichier.</p>
+<p>Pour une aide ponctuelle, cliquez sur <strong>Aide IA</strong> près d’une description d’activité, d’une consigne ou d’un objectif, y compris dans l’éditeur agrandi. Décrivez votre besoin puis cliquez sur <strong>Générer</strong>, ou utilisez <strong>Reformuler</strong>, <strong>Raccourcir</strong> ou <strong>Préciser</strong> sur un texte existant. Le modèle configuré reçoit le texte et son contexte pédagogique. Relisez et ajustez la proposition avant de choisir <strong>Insérer</strong> ou <strong>Remplacer</strong> : seul ce champ est modifié, avec annulation possible par <kbd>⌘Z</kbd>. Fermer la fenêtre abandonne la proposition.</p>
+<p>Dans les réglages, <strong>Avec votre compte</strong> propose <strong>ChatGPT</strong>, <strong>Claude</strong>, <strong>Gemini / Antigravity</strong> et <strong>Grok</strong>, sans clé API. Pour Claude, Antigravity ou Grok, installez respectivement <strong>Claude Code</strong>, <strong>Antigravity CLI</strong> ou <strong>Grok Build</strong> grâce au lien des réglages, puis cliquez sur <strong>Continuer</strong> pour vous connecter. Les modèles apparaissent après la connexion et les quotas de votre abonnement s’appliquent. Retirer le compte de l’app conserve la connexion de l’outil officiel. Pour ChatGPT, <strong>Continuer avec ChatGPT</strong> autorise l’utilisation de votre abonnement et <strong>Gérer l’utilisation</strong> ouvre ses limites.</p>
+</section>
+
+<section id="raccourcis">
+<h2>Raccourcis clavier</h2>
+<table>
+<tr><th>Action</th><th>Raccourci</th></tr>
+<tr><td>Nouveau scénario · Ouvrir · Enregistrer</td><td><kbd>⌘N</kbd> · <kbd>⌘O</kbd> · <kbd>⌘S</kbd></td></tr>
+<tr><td>Accueil</td><td><kbd>⇧⌘0</kbd></td></tr>
+<tr><td>Ajouter un moment</td><td><kbd>⇧⌘N</kbd></td></tr>
+<tr><td>Importer un modèle · un fichier</td><td><kbd>⇧⌘M</kbd> · <kbd>⇧⌘I</kbd></td></tr>
+<tr><td>Exporter</td><td><kbd>⇧⌘E</kbd></td></tr>
+<tr><td>Liste · Colonnes · Grille</td><td><kbd>⌘1</kbd> · <kbd>⌘2</kbd> · <kbd>⌘3</kbd></td></tr>
+<tr><td>Assistant IA</td><td><kbd>⌥⌘I</kbd></td></tr>
+<tr><td>Envoyer un message à l’assistant</td><td><kbd>↩</kbd> ou <kbd>⌘↩</kbd></td></tr>
+<tr><td>Nouvelle ligne dans un message</td><td><kbd>⇧↩</kbd></td></tr>
+<tr><td>Aide</td><td><kbd>⌘?</kbd></td></tr>
+<tr><td>Mise en forme (dans un champ agrandi)</td><td><kbd>⌘B</kbd> <kbd>⌘I</kbd> <kbd>⌘K</kbd> <kbd>⇧⌘H</kbd> <kbd>⇧⌘L</kbd> <kbd>⇧⌘7</kbd> <kbd>⇧⌘Q</kbd> <kbd>⇧⌘M</kbd></td></tr>
+</table>
+<p class="note">Dans un champ agrandi, <kbd>⇧⌘M</kbd> ouvre l’assistant de formules plutôt que la bibliothèque de modèles.</p>
+</section>
+
+<section id="licence">
+<h2>Licence et crédits</h2>
+<p>Scénarisation est inspiré de l’<a href="https://www.ucl.ac.uk/learning-designer/">UCL Learning Designer</a> (UCL Knowledge Lab, UCL Institute of Education, 2013–2026). Conçu et développé par Yann Houry et François Jourde (2026). Code source du site : <a href="https://github.com/YannHY/scenarisation">github.com/YannHY/scenarisation</a>.</p>
+<p>Le code et les contenus originaux sont distribués sous licence <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.fr">Creative Commons Attribution – Partage dans les mêmes conditions 4.0 International (CC BY-SA 4.0)</a>. Le détail des conditions, les composants tiers et le texte intégral de la licence figurent dans <strong>Aide → Licence et crédits</strong>. Les <a href="https://scenarisation.eu/conditions-utilisation.php">conditions d’utilisation</a> et la <a href="https://scenarisation.eu/politique-confidentialite.php">politique de confidentialité</a> du site sont intégrées dans la section <strong>Informations légales</strong> de cette fenêtre.</p>
+</section>

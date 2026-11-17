@@ -1,0 +1,408 @@
+import SwiftUI
+
+struct ChatEntry: Identifiable {
+    let id = UUID()
+    let role: String
+    let text: String
+}
+
+@MainActor
+final class AssistantModel: ObservableObject {
+    typealias Responder = @MainActor (Scenario, [AssistantTurn], AIConfiguration, String) async throws -> AssistantReply
+    typealias Credential = @MainActor (AIConfiguration) async throws -> String
+    @Published var messages: [ChatEntry] = []
+    @Published var proposal: Scenario?
+    @Published var baseline: Scenario?
+    @Published var busy = false
+    @Published var error: String?
+    private var task: Task<Void, Never>?
+    private var requestID = UUID()
+    private var history: [AssistantTurn] = []
+    private let respond: Responder
+    private let credential: Credential
+
+    init(respond: Responder? = nil, credential: Credential? = nil) {
+        self.respond = respond ?? { scenario, history, configuration, key in
+            try await AssistantConversation.reply(scenario: scenario, history: history, configuration: configuration, key: key)
+        }
+        self.credential = credential ?? { try await AICredentials.read($0) }
+    }
+
+    @discardableResult
+    func send(_ prompt: String, scenario: Scenario, configuration: AIConfiguration) -> Task<Void, Never>? {
+        guard !busy, !prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return nil }
+        if let baseline, baseline != scenario {
+            error = "Le scénario a changé. Écartez la proposition pour repartir de sa version actuelle."
+            return nil
+        }
+        let reference = proposal ?? scenario
+        let source = baseline ?? scenario
+        let conversation = history + [AssistantTurn(role: .user, content: prompt)]
+        messages.append(ChatEntry(role: "Vous", text: prompt))
+        error = nil; busy = true
+        let id = UUID(); requestID = id
+        let chatgptClientID = configuration.service == .chatgpt ? ChatGPTAuth.shared.activeAccount?.id : nil
+        task = Task {
+            do {
+                guard configuration.isReady else { throw ScenarioError.invalid("Choisissez un modèle dans les réglages de l’assistant.") }
+                let key = try await credential(configuration)
+                let result = try await respond(reference, conversation, configuration, key)
+                guard !Task.isCancelled, requestID == id else { return }
+                if let proposed = result.proposal { proposal = proposed; baseline = source }
+                history = conversation + [AssistantTurn(role: .assistant, content: result.message)]
+                messages.append(ChatEntry(role: "Assistant", text: result.message))
+                busy = false; task = nil
+            } catch {
+                guard requestID == id else { return }
+                if configuration.service == .chatgpt { ChatGPTAuth.shared.handleAPIError(error, clientID: chatgptClientID) }
+                busy = false; task = nil
+                if !Task.isCancelled { self.error = error.localizedDescription }
+            }
+        }
+        return task
+    }
+
+    func cancel() {
+        requestID = UUID(); task?.cancel(); task = nil; busy = false
+        if proposal == nil { baseline = nil }
+    }
+    func discard() {
+        cancel(); proposal = nil; baseline = nil; error = nil
+        record("Proposition écartée. Le scénario ouvert est conservé.")
+    }
+    func applied() {
+        cancel(); proposal = nil; baseline = nil; error = nil
+        record("Proposition appliquée. Vous pouvez annuler avec ⌘Z.")
+    }
+    func newConversation() {
+        cancel(); proposal = nil; baseline = nil; error = nil
+        history = []; messages = []
+    }
+    func beginCreation() {
+        guard messages.isEmpty, !busy else { return }
+        record(AssistantPlanning.welcome)
+    }
+    private func record(_ text: String) {
+        messages.append(ChatEntry(role: "Assistant", text: text))
+        history.append(AssistantTurn(role: .assistant, content: text))
+    }
+}
+
+struct AssistantView: View {
+    @ObservedObject var model: AssistantModel
+    @Binding var scenario: Scenario
+    var creationMode = false
+    var onApplied: () -> Void = {}
+    @ObservedObject private var settings = AISettingsStore.shared
+    @ObservedObject private var chatgpt = ChatGPTAuth.shared
+    @ObservedObject private var accounts = AIAccountConnections.shared
+    @State private var prompt = ""
+    @State private var showSettings = false
+    @State private var showReview = false
+    @State private var preparedCreation = false
+    @FocusState private var composerFocused: Bool
+
+    private var configuration: AIConfiguration { settings.configuration }
+    private var trimmedPrompt: String { prompt.trimmingCharacters(in: .whitespacesAndNewlines) }
+    private var ready: Bool {
+        guard configuration.isReady else { return false }
+        if configuration.service == .chatgpt { return !chatgpt.signingIn && chatgpt.activeAccount?.canUsePlan == true }
+        if configuration.service == .claude { return settings.claudeEnabled && accounts.claudeAccount != nil }
+        if configuration.service.usesACP { return settings.subscriptionServices.contains(configuration.service) && accounts.connectedSubscriptions.contains(configuration.service) }
+        return true
+    }
+    private var modelName: String { settings.models.first { $0.id == configuration.model }?.name ?? configuration.model }
+    private var canSend: Bool { !trimmedPrompt.isEmpty && ready }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            header
+            Divider().opacity(0.5)
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 12) {
+                        if model.messages.isEmpty { emptyState }
+                        ForEach(model.messages) { message in bubble(message).id(message.id) }
+                        if model.busy {
+                            HStack(spacing: 8) { ProgressView().controlSize(.small); Text("Préparation de la réponse…").foregroundStyle(.secondary) }
+                                .padding(.leading, 4)
+                        }
+                    }.padding(16).frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .onChange(of: model.messages.count) { _, _ in
+                    if let id = model.messages.last?.id { withAnimation(.smooth) { proxy.scrollTo(id, anchor: .bottom) } }
+                }
+            }
+            footer
+        }
+        .sheet(isPresented: $showSettings) {
+            VStack(spacing: 0) {
+                AISettingsView()
+                HStack { Spacer(); Button(creationMode && ready ? "Commencer" : "Terminé") { showSettings = false }.studioButtons() }
+                    .padding([.horizontal, .bottom], 20)
+            }
+        }
+        .sheet(isPresented: $showReview) {
+            if let proposal = model.proposal {
+                ProposalReview(current: scenario, proposed: proposal, stale: model.baseline != scenario) {
+                    guard model.baseline == scenario else {
+                        model.error = "Le scénario a changé. Relancez une demande depuis sa version actuelle."
+                        showReview = false
+                        return
+                    }
+                    scenario = proposal; model.applied(); showReview = false; onApplied()
+                }
+            }
+        }
+        .task(id: configuration.service) {
+            if configuration.service.isAccountConnection { accounts.prepare(settings) }
+        }
+        .task {
+            guard creationMode, !preparedCreation else { return }
+            preparedCreation = true
+            // Returning to an existing chat must preserve its service choice.
+            guard model.messages.isEmpty else { return }
+            let available = settings.restoreForCreation(chatGPTAvailable: chatgpt.activeAccount?.canUsePlan == true)
+            if available && ready { model.beginCreation(); composerFocused = true }
+            if !available { showSettings = true }
+        }
+        .onChange(of: ready) { _, value in
+            if !value && configuration.service.usesACP { model.cancel() }
+            if value && creationMode { model.beginCreation(); composerFocused = true }
+        }
+        .onChange(of: configuration) { _, _ in model.cancel() }
+        .onChange(of: chatgpt.signingIn) { _, signingIn in
+            if signingIn && configuration.service == .chatgpt { model.cancel() }
+        }
+        .onChange(of: chatgpt.activeAccount) { previous, current in
+            if configuration.service == .chatgpt && (previous?.id != current?.id || current?.connected != true) { model.cancel() }
+        }
+        .onChange(of: settings.claudeEnabled) { _, enabled in
+            if !enabled && configuration.service == .claude { model.cancel() }
+        }
+    }
+
+    private var header: some View {
+        HStack(spacing: 10) {
+            FA(name: "wand", size: 14).foregroundStyle(.white).frame(width: 30, height: 30)
+                .background(LinearGradient(colors: [Color.accentColor, Color.accentColor.opacity(0.7)], startPoint: .top, endPoint: .bottom),
+                            in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+            VStack(alignment: .leading, spacing: 1) {
+                Text("Assistant").font(.headline)
+                Menu {
+                    ForEach(settings.models) { item in
+                        Button { settings.selectModel(item.id) } label: {
+                            if item.id == configuration.model { Label(item.name ?? item.id, systemImage: "checkmark") }
+                            else { Text(item.name ?? item.id) }
+                        }
+                    }
+                    let otherServices = settings.savedConfigurations.filter { $0.service != configuration.service }
+                    if !otherServices.isEmpty {
+                        Divider()
+                        ForEach(otherServices, id: \.provider) { saved in
+                            Button("\(saved.service.label) · \(saved.model)") { settings.selectProvider(saved.service) }
+                        }
+                    }
+                    if !settings.models.isEmpty { Divider() }
+                    Button("Choisir un service…") { showSettings = true }
+                } label: {
+                    Text(ready ? "\(configuration.service.label) · \(modelName)" : "Choisir un modèle…")
+                        .font(.caption).lineLimit(1)
+                }
+                .menuStyle(.borderlessButton).fixedSize(horizontal: false, vertical: true)
+                .disabled(model.busy)
+            }
+            Spacer()
+            IconButton(title: "Nouvelle conversation", icon: "plus", size: 13) {
+                model.newConversation()
+                if creationMode && ready { model.beginCreation() }
+                prompt = ""; composerFocused = true
+            }
+                .disabled(model.busy || model.messages.isEmpty)
+            IconButton(title: "Réglages de l’assistant", icon: "settings", size: 13) { showSettings = true }
+        }.padding(.horizontal, 16).padding(.vertical, 12)
+    }
+
+    private var emptyState: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            if !ready {
+                Text("Choisissez votre assistant.").font(.title3.weight(.semibold))
+                Text(creationMode ? "Connectez le service de votre choix pour créer votre scénario." :
+                    "Utilisez un modèle sur votre Mac ou connectez un service en ligne.")
+                    .foregroundStyle(.secondary)
+                if accounts.busy {
+                    HStack(spacing: 8) { ProgressView().controlSize(.small); Text("Connexion au service…").font(.callout).foregroundStyle(.secondary) }
+                }
+                Button("Choisir un modèle") { showSettings = true }.studioButtons(prominent: true)
+            } else {
+                Text("Construisons votre scénario.").font(.title3.weight(.semibold))
+                Text("Décrivez le public, les objectifs et le temps disponible. Vous pouvez aussi demander une adaptation du scénario ouvert.")
+                    .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 8) {
+                    suggestion("Construire une séance de 55 minutes",
+                               "Construis un scénario de 55 minutes pour des élèves de 6e sur [sujet]. Ils devront être capables de [objectif]. Prévois une évaluation formative.")
+                    suggestion("Ajouter une évaluation formative",
+                               "Ajoute une évaluation formative courte à la fin de chaque moment du scénario ouvert.")
+                    suggestion("Clarifier les consignes",
+                               "Reformule les consignes pour les élèves afin qu’elles soient plus claires et plus courtes.")
+                }
+            }
+        }.padding(.top, 8)
+    }
+    private func suggestion(_ title: String, _ text: String) -> some View {
+        Button { prompt = text; composerFocused = true } label: {
+            HStack { FA(name: "wand", size: 11).foregroundStyle(Color.accentColor); Text(title); Spacer(minLength: 0) }
+                .padding(.horizontal, 12).padding(.vertical, 9).frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        }.buttonStyle(.plain).hoverLift()
+    }
+
+    private func bubble(_ message: ChatEntry) -> some View {
+        let mine = message.role == "Vous"
+        return HStack {
+            if mine { Spacer(minLength: 40) }
+            Text(message.text).textSelection(.enabled)
+                .padding(.horizontal, 13).padding(.vertical, 9)
+                .foregroundStyle(mine ? Color.white : Color.primary)
+                .background(mine ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(Color.primary.opacity(0.07)),
+                            in: RoundedRectangle(cornerRadius: 17, style: .continuous))
+            if !mine { Spacer(minLength: 40) }
+        }
+    }
+
+    private var footer: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            if let error = model.error {
+                Label { Text(error).textSelection(.enabled) } icon: { Image(systemName: "exclamationmark.triangle.fill") }
+                    .font(.callout).foregroundStyle(.red)
+                Button("Réglages de l’assistant") { showSettings = true }.font(.callout)
+            }
+            if let proposal = model.proposal {
+                VStack(alignment: .leading, spacing: 10) {
+                    Label("Proposition prête : \(proposal.name.isEmpty ? "sans titre" : proposal.name)", systemImage: "checkmark.circle.fill")
+                        .font(.callout.weight(.medium)).foregroundStyle(.green)
+                    HStack {
+                        Button("Examiner") { showReview = true }.disabled(model.busy).studioButtons(prominent: true)
+                        Button("Écarter") { model.discard() }.studioButtons()
+                    }
+                }.padding(12).frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.green.opacity(0.10), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            }
+            HStack(alignment: .bottom, spacing: 8) {
+                TextField("Décrivez ce que vous souhaitez…", text: $prompt, axis: .vertical)
+                    .textFieldStyle(.plain).lineLimit(1...8).focused($composerFocused)
+                    .onKeyPress(.return, phases: .down) { press in
+                        guard press.modifiers.isEmpty else { return .ignored }
+                        if !model.busy { submit() }
+                        return .handled
+                    }
+                    .help("Retour pour envoyer ; Maj+Retour pour insérer une nouvelle ligne.")
+                    .disabled(model.busy).padding(.vertical, 5).padding(.leading, 4)
+                Button(action: submit) {
+                    Image(systemName: model.busy ? "stop.fill" : "arrow.up").font(.system(size: 12, weight: .bold)).foregroundStyle(.white)
+                        .frame(width: 28, height: 28)
+                        .background(model.busy || canSend ? Color.accentColor : Color.secondary.opacity(0.4), in: Circle())
+                }
+                .buttonStyle(.plain).keyboardShortcut(.return, modifiers: [.command])
+                .disabled(!model.busy && !canSend)
+                .help(model.busy ? "Arrêter" : "Envoyer (↩ ou ⌘↩)").accessibilityLabel(model.busy ? "Arrêter" : "Envoyer")
+            }
+            .padding(8).glassSurface(radius: 22)
+            if !ready && !model.messages.isEmpty {
+                Button("Connecter un modèle pour envoyer votre demande") { showSettings = true }
+                    .buttonStyle(.plain).foregroundStyle(Color.accentColor)
+                    .font(.caption).padding(.horizontal, 6)
+            }
+            if ready {
+                if configuration.service == .chatgpt {
+                    HStack {
+                        Text("Abonnement ChatGPT utilisé").foregroundStyle(.secondary)
+                        Spacer()
+                        Link("Gérer l’utilisation", destination: ChatGPTProtocol.usageURL)
+                    }.font(.caption2).padding(.horizontal, 6)
+                }
+                Text(configuration.isOnThisMac ? "Scénario et échanges · traités sur ce Mac." :
+                    "Scénario et échanges · transmis à \(configuration.service.label).")
+                    .font(.caption2).foregroundStyle(.tertiary).padding(.horizontal, 6)
+            }
+        }.padding(12)
+    }
+
+    private func submit() {
+        if model.busy { model.cancel(); return }
+        guard canSend else { return }
+        model.send(trimmedPrompt, scenario: scenario, configuration: configuration)
+        prompt = ""
+    }
+}
+
+struct ProposalReview: View {
+    let current: Scenario
+    let proposed: Scenario
+    let stale: Bool
+    let apply: () -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Examiner la proposition").font(.title.bold())
+                Text("La proposition remplacera le scénario ouvert. Cette opération pourra être annulée.").foregroundStyle(.secondary)
+            }
+            HSplitView {
+                ScenarioSummary(title: "Version actuelle", scenario: current).padding(.trailing, 8)
+                ScenarioSummary(title: "Proposition", scenario: proposed).padding(.leading, 8)
+            }
+            if stale {
+                Label("Le document a été modifié depuis la demande. Écartez la proposition et relancez l’assistant.",
+                      systemImage: "exclamationmark.triangle.fill").foregroundStyle(.red)
+            }
+            HStack {
+                Spacer()
+                Button("Fermer") { dismiss() }.keyboardShortcut(.cancelAction).studioButtons()
+                Button("Appliquer", action: apply).disabled(stale).keyboardShortcut(.defaultAction).studioButtons(prominent: true)
+            }
+        }.padding(24).frame(minWidth: 860, idealWidth: 1000, minHeight: 650)
+    }
+}
+
+struct ScenarioSummary: View {
+    let title: String
+    let scenario: Scenario
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
+                Text(title.uppercased()).font(.caption.weight(.bold)).tracking(0.6).foregroundStyle(.secondary)
+                Text(scenario.name).font(.title2.bold())
+                Label("\(scenario.duration.formatted()) min · \(scenario.activityCount) activités", systemImage: "clock").foregroundStyle(.secondary)
+                if let text = scenario.meta["description"]?.string, !text.isEmpty { Text(text) }
+                ForEach(scenario.moments) { moment in
+                    VStack(alignment: .leading, spacing: 12) {
+                        Divider()
+                        Text(moment["title"]).font(.headline)
+                        if !moment["objectives"].isEmpty { Text(moment["objectives"]).foregroundStyle(.secondary) }
+                        ForEach(moment.activities) { activity in
+                            HStack(alignment: .top, spacing: 10) {
+                                TypeBadge(type: activity["type"], size: 22)
+                                VStack(alignment: .leading, spacing: 5) {
+                                    Text("\(activity["description"]) · \(activity.duration.formatted()) min").fontWeight(.medium)
+                                    Text(activity["instructions"])
+                                    Text([Pedagogy.label(activity["type"], in: Pedagogy.types),
+                                        Pedagogy.label(activity["groupMode"], in: Pedagogy.groups),
+                                        Pedagogy.label(activity["teachingMode"], in: Pedagogy.teaching),
+                                        Pedagogy.label(activity["evaluationMode"], in: Pedagogy.evaluations)].joined(separator: " · "))
+                                        .font(.caption).foregroundStyle(.secondary)
+                                }
+                            }
+                        }
+                    }
+                }
+                DisclosureGroup("Document complet (JSON)") {
+                    Text((try? scenario.encoded()).map { String(decoding: $0, as: UTF8.self) } ?? "")
+                        .font(.system(.caption, design: .monospaced)).textSelection(.enabled)
+                }
+            }.padding(16).frame(maxWidth: .infinity, alignment: .leading)
+        }.frame(minWidth: 350)
+    }
+}
