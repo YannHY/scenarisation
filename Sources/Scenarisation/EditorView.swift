@@ -269,7 +269,8 @@ struct EditorView: View {
                 }
                 .onChange(of: focusMoment) { _, id in
                     guard let id else { return }
-                    withAnimation(.smooth) { proxy.scrollTo("moment-" + id, anchor: .top) }
+                    // Cartes et tableau restent montés ensemble : on vise la disposition affichée.
+                    withAnimation(.smooth) { proxy.scrollTo((boardLayout == "grid" ? "grid-moment-" : "moment-") + id, anchor: .top) }
                     Task { @MainActor in try? await Task.sleep(for: .milliseconds(500)); focusMoment = nil }
                 }
             }
@@ -325,7 +326,7 @@ struct EditorView: View {
                 Picker("Disposition", selection: Binding(get: { boardLayout }, set: { chooseLayout($0) })) {
                     Label("Liste", systemImage: "list.bullet").tag("list").help("Moments en liste (⌘1)")
                     Label("Colonnes", systemImage: "rectangle.split.3x1").tag("columns").help("Moments en colonnes (⌘2)")
-                    Label("Grille", systemImage: "square.grid.2x2").tag("grid").help("Moments en grille (⌘3)")
+                    Label("Grille", systemImage: "tablecells").tag("grid").help("Scénario en tableau (⌘3)")
                 }.pickerStyle(.segmented).labelStyle(.iconOnly).help("Disposition des moments : liste (⌘1), colonnes (⌘2), grille (⌘3)")
             }
             ToolbarItem(placement: .primaryAction) {

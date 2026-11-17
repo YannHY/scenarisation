@@ -9,14 +9,26 @@ struct BoardDrag: Codable {
 struct ScenarioBoard: View {
     @Binding var scenario: Scenario
     @Binding var focusMoment: String?
-    /// Disposition affichée : liste, colonnes ou grille.
+    /// Disposition affichée : liste, colonnes ou grille (tableau, comme sur le site).
     let layout: String
     let askAI: () -> Void
     let openModels: () -> Void
     @State private var deleteID: String?
     @State private var viewport: CGFloat = 0
+    /// Dispositions déjà affichées, gardées montées ensuite.
+    @State private var cardsMounted = false
+    @State private var gridMounted = false
+    /// Dernière disposition en cartes, conservée pendant l’affichage du tableau.
+    @State private var lastCardMode: String?
+    /// Disposition une fois le changement affiché : la vue masquée n’est désactivée qu’ensuite,
+    /// pour que la bascule apparaisse sans attendre.
+    @State private var settledLayout: String?
     private var hideIntentions: Bool { scenario.fields["intentionsCollapsed"] == .bool(true) }
-    private var columns: Bool { layout != "list" && layout != "grid" }
+    private var grid: Bool { layout == "grid" }
+    private var columns: Bool { layout != "list" && !grid }
+    private var cardMode: String { grid ? lastCardMode ?? "columns" : layout }
+    /// Le tableau occupe la largeur visible, et défile horizontalement s’il n’y tient pas.
+    private var gridWidth: CGFloat { max(GridColumns.minimumWidth, viewport - 56) }
 
     var body: some View {
         Group {
@@ -33,19 +45,38 @@ struct ScenarioBoard: View {
                     }.controlSize(.large)
                 }.frame(maxWidth: .infinity).padding(.vertical, 40)
             } else {
-                // Une seule hiérarchie pour les trois dispositions : les cartes et leurs aperçus WebKit
-                // sont conservés d’un mode à l’autre au lieu d’être reconstruits, ce qui rend le changement immédiat.
+                // Une fois affichés, les cartes et le tableau restent montés : la disposition masquée garde
+                // sa géométrie (aucun aperçu WebKit à recharger ni à remettre en page), et changer de vue
+                // revient à basculer leur visibilité.
                 ScrollViewReader { proxy in
                     ScrollView(.horizontal) {
-                        BoardLayout(mode: layout) {
-                            ForEach(scenario.moments.indices, id: \.self) { index in card(index) }
-                            addCard.layoutValue(key: BoardColumnWidth.self, value: 220)
+                        ZStack(alignment: .topLeading) {
+                            if !grid || cardsMounted {
+                                // En liste, le tableau prend la largeur visible ; en colonnes, il défile.
+                                let width = cardMode != "list" || viewport == 0 ? nil : max(0, viewport - 56)
+                                StableLayer(key: CardsKey(moments: scenario.fields["sessions"], hideIntentions: hideIntentions, mode: cardMode, width: width)) {
+                                    BoardLayout(mode: cardMode) {
+                                        ForEach(scenario.moments.indices, id: \.self) { index in card(index) }
+                                        addCard.layoutValue(key: BoardColumnWidth.self, value: 220)
+                                    }
+                                    .frame(width: width, alignment: .topLeading)
+                                }
+                                .equatable()
+                                .boardLayer(visible: !grid, settled: settledLayout == "grid")
+                            }
+                            if grid || gridMounted {
+                                StableLayer(key: GridKey(moments: scenario.fields["sessions"], width: gridWidth)) {
+                                    ScenarioGrid(scenario: $scenario, width: gridWidth, addMoment: addMoment,
+                                                 duplicateMoment: duplicateMoment, moveMoment: moveMoment,
+                                                 removeMoment: { deleteID = scenario.moments[$0].id })
+                                }
+                                .equatable()
+                                .boardLayer(visible: grid, settled: settledLayout.map { $0 != "grid" } ?? false)
+                            }
                         }
-                        // En liste et en grille, le tableau prend la largeur visible ; en colonnes, il défile.
-                        .frame(width: columns || viewport == 0 ? nil : max(0, viewport - 56), alignment: .topLeading)
                         .padding(.horizontal, 28).padding(.vertical, 6).padding(.bottom, 14)
                     }
-                    .scrollDisabled(!columns)
+                    .scrollDisabled(!columns && !(grid && gridWidth > viewport - 56))
                     .scrollClipDisabled()
                     .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { viewport = $0 }
                     .onChange(of: focusMoment) { _, id in
@@ -54,7 +85,11 @@ struct ScenarioBoard: View {
                 }
             }
         }
-        .animation(.snappy(duration: 0.3), value: layout)
+        .onChange(of: layout, initial: true) { _, value in
+            if value == "grid" { gridMounted = true } else { cardsMounted = true; lastCardMode = value }
+            // La disposition visible n’est jamais désactivée : un ordre en retard reste sans effet.
+            Task { @MainActor in settledLayout = value }
+        }
         .confirmationDialog("Supprimer ce moment et ses activités ?", isPresented: Binding(
             get: { deleteID != nil }, set: { if !$0 { deleteID = nil } })) {
                 Button("Supprimer", role: .destructive) { scenario.moments.removeAll { $0.id == deleteID }; deleteID = nil }
@@ -105,19 +140,54 @@ struct ScenarioBoard: View {
     }
 }
 
+/// Ce dont dépendent les cartes : les moments, l’affichage des intentions et la géométrie.
+/// Le reste du document (dont la disposition enregistrée juste après un changement de vue) est ignoré.
+private struct CardsKey: Equatable {
+    let moments: JSONValue?
+    let hideIntentions: Bool
+    let mode: String
+    let width: CGFloat?
+}
+
+private struct GridKey: Equatable {
+    let moments: JSONValue?
+    let width: CGFloat
+}
+
+/// Ne réévalue son contenu que si sa clé change. Les fermetures et liaisons passées aux cartes
+/// et au tableau ne sont jamais égales pour SwiftUI : sans cette clé, changer de vue recalculerait
+/// aussi toute la disposition masquée.
+private struct StableLayer<Key: Equatable, Content: View>: View, Equatable {
+    let key: Key
+    @ViewBuilder let content: () -> Content
+    var body: some View { content() }
+    nonisolated static func == (lhs: Self, rhs: Self) -> Bool { lhs.key == rhs.key }
+}
+
+private extension View {
+    /// Une disposition masquée reste montée mais n’occupe aucune place, ne s’affiche pas
+    /// et ne reçoit ni clics, ni VoiceOver ; une fois la bascule affichée (`settled`), elle est
+    /// aussi désactivée pour que la touche Tab ne mène jamais à un champ invisible.
+    func boardLayer(visible: Bool, settled: Bool) -> some View {
+        self.disabled(!visible && settled)
+            .opacity(visible ? 1 : 0)
+            .allowsHitTesting(visible)
+            .accessibilityHidden(!visible)
+            .frame(width: visible ? nil : 0, height: visible ? nil : 0, alignment: .topLeading)
+    }
+}
+
 /// Largeur d’une carte en disposition « colonnes ».
 private struct BoardColumnWidth: LayoutValueKey {
     static let defaultValue: CGFloat = 460
 }
 
-/// Place les cartes du tableau en liste centrée, en colonnes défilantes ou en grille adaptative.
+/// Place les cartes du tableau en liste centrée ou en colonnes défilantes.
 struct BoardLayout: Layout {
     var mode: String
     var spacing: CGFloat = 20
     /// Largeur maximale d’une carte en liste.
     private let listWidth: CGFloat = 764
-    /// Largeur minimale d’une colonne de la grille.
-    private let gridMinimum: CGFloat = 430
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
         arrange(width: proposal.width, subviews: subviews).size
@@ -143,20 +213,6 @@ struct BoardLayout: Layout {
                 let height = subview.sizeThatFits(ProposedViewSize(width: column, height: nil)).height
                 frames.append(CGRect(x: x, y: y, width: column, height: height))
                 y += height + spacing
-            }
-            return (frames, CGSize(width: available, height: max(0, y - spacing)))
-        case "grid":
-            let available = width.map { $0.isFinite ? $0 : gridMinimum * 2 + spacing } ?? gridMinimum * 2 + spacing
-            let count = max(1, Int((available + spacing) / (gridMinimum + spacing)))
-            let column = max(0, (available - spacing * CGFloat(count - 1)) / CGFloat(count))
-            var y: CGFloat = 0
-            for start in stride(from: 0, to: subviews.count, by: count) {
-                let row = subviews[start..<min(start + count, subviews.count)]
-                let heights = row.map { $0.sizeThatFits(ProposedViewSize(width: column, height: nil)).height }
-                for offset in heights.indices {
-                    frames.append(CGRect(x: CGFloat(offset) * (column + spacing), y: y, width: column, height: heights[offset]))
-                }
-                y += (heights.max() ?? 0) + spacing
             }
             return (frames, CGSize(width: available, height: max(0, y - spacing)))
         default:

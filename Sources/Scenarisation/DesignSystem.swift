@@ -19,7 +19,7 @@ enum StudioStyle {
     /// Noms internes → symboles SF Symbols (iconographie native de macOS).
     static let symbols: [String: String] = ["plus": "plus", "layers": "square.stack.3d.up", "import": "square.and.arrow.down",
         "export": "square.and.arrow.up", "save": "tray.and.arrow.down", "folder": "folder", "eye": "eye",
-        "list": "list.bullet", "columns": "rectangle.split.3x1", "grid": "square.grid.2x2", "close": "xmark",
+        "list": "list.bullet", "columns": "rectangle.split.3x1", "grid": "tablecells", "close": "xmark",
         "copy": "plus.square.on.square", "clock": "clock", "expand": "arrow.up.left.and.arrow.down.right",
         "chevron": "chevron.down", "arrow": "arrow.right", "back": "chevron.left", "wand": "sparkles",
         "tools": "graduationcap",
