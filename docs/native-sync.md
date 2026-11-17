@@ -50,6 +50,7 @@ Toutes les requêtes utilisent `Authorization: Bearer <access_token>`. Les cooki
 | `GET /api/v1/list_designs.php` | `designs:read` | `{ "success": true, "items": [résumé, …], "deleted": [suppression, …] }` |
 | `GET /api/v1/get_design.php?design_id=7` | `designs:read` | `{ "success": true, "design": document_distant }` |
 | `POST /api/v1/save_design.php` | `designs:write` | `{ "success": true, "design": résumé }` |
+| `POST /api/v1/delete_design.php` | `designs:write` | `{ "success": true, "deleted": { "id": 7 } }` |
 
 Un résumé contient `id`, `title`, `revision` et `updatedAt`. Le document distant ajoute `document` (JSON pédagogique complet) et `provenance` (les informations d’origine vérifiées par le serveur). Les identifiants et les révisions sont des entiers strictement positifs. Les dates servent à l’affichage ; les conflits reposent sur les révisions.
 
@@ -99,7 +100,7 @@ Le schéma 10 ajoute cinq tables :
 - `native_oauth_codes` : code à usage unique, PKCE et retour exact ;
 - `native_refresh_tokens` : empreintes et historique de rotation jusqu’à l’expiration de la session ;
 - `native_creations` : correspondance durable entre UUID client et scénario ;
-- `native_design_deletions` : suppressions effectuées depuis l’éditeur et la liste des scénarios.
+- `native_design_deletions` : suppressions effectuées depuis l’éditeur, la liste des scénarios et l’app Mac.
 
 La migration est additive et idempotente. Elle est intégrée à `ensure_app_schema()` et prévue pour SQLite et MySQL/InnoDB. Les tests automatisés locaux utilisent SQLite ; la variante MySQL doit être vérifiée sur une base de test correspondant à celle de l’hébergement.
 
@@ -133,3 +134,7 @@ node --test tests/*.test.cjs
 Les tests utilisent des bases, sessions et processus temporaires. Le test HTTP parcourt les vraies routes avec un serveur PHP sur 127.0.0.1. Les tests de concurrence lancent deux processus pour vérifier les créations identiques et les consommations uniques des codes et des renouvellements. Ils ne contactent pas le site en production.
 
 Références : [OAuth pour applications natives, RFC 8252](https://www.rfc-editor.org/rfc/rfc8252.html) et [bonnes pratiques de sécurité OAuth, RFC 9700](https://www.rfc-editor.org/rfc/rfc9700.html).
+
+## Suppression depuis l’app
+
+Le corps de `POST /api/v1/delete_design.php` est `{ "design_id": 7, "expected_revision": 3 }`. La suppression n’a lieu que si le scénario est encore à cette révision : un scénario modifié sur le site depuis la dernière synchronisation de l’app renvoie 409 et reste intact. Elle enregistre la même trace que les suppressions du site, si bien qu’une création réessayée ne fait pas réapparaître le scénario. Une nouvelle demande pour un scénario déjà supprimé par son propriétaire réussit ; un identifiant inconnu ou appartenant à un autre compte renvoie 404.

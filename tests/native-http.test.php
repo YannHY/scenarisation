@@ -193,6 +193,15 @@ try {
     check(request('delete_design.php', 'POST', ['design_id' => $second], json: true)['status'] === 200, 'Editor deletion still succeeds');
     $deletedList = decoded(request('api/v1/list_designs.php', bearer: $tokens['access_token'], browser: false));
     check(count($deletedList['deleted']) === 2 && count($deletedList['items']) === 0, 'Both website deletion routes record their tombstones');
+    $createAgain['client_uuid'] = '0e6f3a52-7c1d-4f8b-a9e4-2d5b8c7a1f30';
+    $third = decoded(request('api/v1/save_design.php', 'POST', $createAgain, $tokens['access_token'], true, false))['design']['id'];
+    check(request('api/v1/delete_design.php', 'POST', ['design_id' => $third, 'expected_revision' => 2], $tokens['access_token'], true, false)['status'] === 409, 'HTTP stale deletions conflict');
+    check(request('api/v1/delete_design.php', 'POST', ['design_id' => $third, 'expected_revision' => 1], $tokens['access_token'], browser: false)['status'] === 415, 'HTTP deletions require JSON');
+    check(request('api/v1/delete_design.php', bearer: $tokens['access_token'], browser: false)['status'] === 405, 'HTTP deletion requires POST');
+    $nativeDeleted = request('api/v1/delete_design.php', 'POST', ['design_id' => $third, 'expected_revision' => 1], $tokens['access_token'], true, false);
+    check($nativeDeleted['status'] === 200 && decoded($nativeDeleted)['deleted']['id'] === $third, 'HTTP native deletion succeeds');
+    check(request('api/v1/get_design.php?design_id=' . $third, bearer: $tokens['access_token'], browser: false)['status'] === 404, 'HTTP native deletion removes the scenario');
+    check(request('api/v1/delete_design.php', 'POST', ['design_id' => $third, 'expected_revision' => 1], $tokens['access_token'], true, false)['status'] === 200, 'HTTP native deletion is idempotent');
 
     $profile = request('profile.php');
     check(str_contains($profile['body'], 'native-session-row') && str_contains($profile['body'], 'Scénarisation pour Mac'), 'Profile displays connected applications');

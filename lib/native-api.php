@@ -120,3 +120,43 @@ function native_api_save(PDO $db, int $userId, array $input): array
     unset($result['status'], $result['share_token']);
     return $result;
 }
+
+/** Supprime un scénario seulement s’il n’a pas changé sur le site depuis la révision connue de l’app. */
+function native_api_delete(PDO $db, int $userId, array $input): array
+{
+    $designId = $input['design_id'] ?? null;
+    if (!is_int($designId) || $designId <= 0) {
+        throw new NativeRequestError('invalid_request', 'Identifiant de scénario invalide.', 422);
+    }
+    $revision = $input['expected_revision'] ?? null;
+    if (!is_int($revision) || $revision <= 0) {
+        throw new NativeRequestError('conflict', 'Une révision valide est requise pour supprimer.', 409);
+    }
+    $sqlite = $db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'sqlite';
+    $tombstone = ($sqlite ? 'INSERT OR IGNORE' : 'INSERT IGNORE') . ' INTO native_design_deletions (owner_user_id, design_id, deleted_at)
+        SELECT owner_user_id, id, ? FROM learning_designs WHERE id = ? AND owner_user_id = ? AND revision = ?';
+    $db->beginTransaction();
+    try {
+        $db->prepare($tombstone)->execute([time(), $designId, $userId, $revision]);
+        $delete = $db->prepare('DELETE FROM learning_designs WHERE id = ? AND owner_user_id = ? AND revision = ?');
+        $delete->execute([$designId, $userId, $revision]);
+        $deleted = $delete->rowCount() > 0;
+        if (!$deleted) {
+            $current = $db->prepare('SELECT 1 FROM learning_designs WHERE id = ? AND owner_user_id = ?');
+            $current->execute([$designId, $userId]);
+            $changed = $current->fetchColumn() !== false;
+            $known = $db->prepare('SELECT 1 FROM native_design_deletions WHERE owner_user_id = ? AND design_id = ?');
+            $known->execute([$userId, $designId]);
+            $alreadyDeleted = $known->fetchColumn() !== false;
+        }
+        $db->commit();
+    } catch (Throwable $error) {
+        if ($db->inTransaction()) $db->rollBack();
+        throw $error;
+    }
+    if (!$deleted && $changed) {
+        throw new NativeRequestError('conflict', 'Le scénario a été modifié sur le site depuis la dernière synchronisation.', 409);
+    }
+    if (!$deleted && !$alreadyDeleted) throw new NativeRequestError('not_found', 'Production introuvable.', 404);
+    return ['success' => true, 'deleted' => ['id' => $designId]];
+}
