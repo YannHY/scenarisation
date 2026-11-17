@@ -1,5 +1,7 @@
-import AppKit
 import SwiftUI
+#if os(macOS)
+import AppKit
+#endif
 import WebKit
 
 // MARK: - Markdown léger → HTML
@@ -151,7 +153,8 @@ enum RichPage {
     :root{color-scheme:light dark}
     html,body{margin:0;padding:0;background:transparent}
     body{font:-apple-system-body;font-size:var(--size,14px);line-height:1.55;color:CanvasText;-webkit-font-smoothing:antialiased;word-wrap:break-word;padding:var(--pad,0)}
-    body>*:first-child{margin-top:0}body>*:last-child{margin-bottom:0}
+    body>*:first-child,#content>*:first-child{margin-top:0}body>*:last-child,#content>*:last-child{margin-bottom:0}
+    body{display:flow-root}
     p{margin:0 0 .7em}h1,h2,h3,h4{line-height:1.25;margin:1.1em 0 .45em}h2{font-size:1.35em}h3{font-size:1.15em}h4{font-size:1em}
     ul,ol{margin:0 0 .7em;padding-left:1.4em}li{margin:.15em 0}
     blockquote{margin:0 0 .7em;padding:.1em .9em;border-left:3px solid color-mix(in srgb,CanvasText 22%,transparent);color:color-mix(in srgb,CanvasText 72%,transparent)}
@@ -165,13 +168,18 @@ enum RichPage {
     kbd{font:600 .85em -apple-system;border:1px solid color-mix(in srgb,CanvasText 20%,transparent);border-bottom-width:2px;border-radius:5px;padding:0 .35em;white-space:nowrap}
     """
 
-    static func document(body: String, fontSize: CGFloat, padding: CGFloat, extraStyle: String = "", extraScript: String = "") -> String {
+    /// Une page sans formule n’embarque pas KaTeX (près de 700 Ko de script et de polices) :
+    /// les nombreux aperçus d’un scénario se chargent ainsi beaucoup plus vite.
+    static func needsMath(_ body: String) -> Bool { body.contains("$") }
+
+    static func document(body: String, fontSize: CGFloat, padding: CGFloat, extraStyle: String = "", extraScript: String = "",
+                         math: Bool = true) -> String {
         """
-        <!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">\(KaTeX.head)
+        <!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">\(math ? KaTeX.head : "<script>\(KaTeX.renderCall)</script>")
         <style>\(style)\(extraStyle)</style></head>
         <body style="--size:\(Int(fontSize))px;--pad:\(Int(padding))px"><main id="content">\(body)</main>
         <script>
-        function report(){ try { window.webkit.messageHandlers.size.postMessage(Math.ceil(document.documentElement.scrollHeight)); } catch(e){} }
+        function report(){ try { window.webkit.messageHandlers.size.postMessage(Math.ceil(document.body.getBoundingClientRect().height)); } catch(e){} }
         function setContent(html){ const c=document.getElementById('content'); c.innerHTML=html; document.dispatchEvent(new Event('rich-content-updated')); renderMath(c); report(); }
         function reveal(id){ const el=document.getElementById(id); if(!el) return; let p=el; while(p){ if(p.tagName==='DETAILS') p.open=true; p=p.parentElement; } const chapter=el.querySelector(':scope > details'); if(chapter) chapter.open=true; el.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'}); }
         renderMath(document.getElementById('content'));
@@ -183,7 +191,7 @@ enum RichPage {
 
 /// Vue WebKit qui affiche du HTML local (Markdown rendu, formules KaTeX, aide).
 /// Les liens externes s’ouvrent dans le navigateur par défaut.
-struct RichWebView: NSViewRepresentable {
+struct RichWebView {
     var body: String
     var fontSize: CGFloat = 14
     var padding: CGFloat = 0
@@ -196,24 +204,39 @@ struct RichWebView: NSViewRepresentable {
     /// Renvoie true lorsqu’un lien est pris en charge dans l’application (aide locale).
     var onNavigate: ((URL) -> Bool)? = nil
 
-    func makeCoordinator() -> Coordinator { Coordinator() }
+    @MainActor func makeCoordinator() -> Coordinator { Coordinator() }
 
-    func makeNSView(context: Context) -> WKWebView {
+    @MainActor private func makeWebView(_ coordinator: Coordinator) -> WKWebView {
         let configuration = WKWebViewConfiguration()
-        configuration.userContentController.add(WeakScriptHandler(context.coordinator), name: "size")
+        configuration.userContentController.add(WeakScriptHandler(coordinator), name: "size")
+#if os(macOS)
+        // Les aperçus sont inertes à la souris (voir PassiveWebView) ; seule l’aide reste interactive.
+        let view = contentHeight != nil ? PassiveWebView(frame: .zero, configuration: configuration)
+            : WKWebView(frame: .zero, configuration: configuration)
+#else
         let view = WKWebView(frame: .zero, configuration: configuration)
+#endif
+#if os(macOS)
         view.setValue(false, forKey: "drawsBackground")
-        view.navigationDelegate = context.coordinator
         view.allowsMagnification = false
-        context.coordinator.parent = self
-        context.coordinator.load(into: view)
+#else
+        view.isOpaque = false
+        view.backgroundColor = .clear
+        view.scrollView.backgroundColor = .clear
+        // Les aperçus prennent la hauteur de leur contenu : seule l’aide fait défiler sa page.
+        view.scrollView.isScrollEnabled = contentHeight == nil
+        view.scrollView.bounces = contentHeight == nil
+#endif
+        view.navigationDelegate = coordinator
+        coordinator.parent = self
+        coordinator.load(into: view)
         return view
     }
 
-    func updateNSView(_ view: WKWebView, context: Context) {
-        let coordinator = context.coordinator
+    @MainActor private func updateWebView(_ view: WKWebView, coordinator: Coordinator) {
         coordinator.parent = self
-        if coordinator.loadedStyle != "\(fontSize)|\(padding)|\(extraStyle)|\(extraScript)" {
+        if coordinator.loadedStyle != "\(fontSize)|\(padding)|\(extraStyle)|\(extraScript)"
+            || (!coordinator.loadedMath && RichPage.needsMath(body)) {
             coordinator.load(into: view)
         } else if coordinator.shownBody != body {
             coordinator.shownBody = body
@@ -227,7 +250,7 @@ struct RichWebView: NSViewRepresentable {
         }
     }
 
-    static func dismantleNSView(_ view: WKWebView, coordinator: Coordinator) {
+    @MainActor private static func dismantleWebView(_ view: WKWebView) {
         view.configuration.userContentController.removeScriptMessageHandler(forName: "size")
     }
 
@@ -236,6 +259,7 @@ struct RichWebView: NSViewRepresentable {
         var shownBody = ""
         var shownAnchor: String?
         var loadedStyle = ""
+        var loadedMath = false
         var ready = false
 
         static func jsString(_ value: String) -> String {
@@ -250,13 +274,17 @@ struct RichWebView: NSViewRepresentable {
             shownBody = parent.body
             shownAnchor = nil
             loadedStyle = "\(parent.fontSize)|\(parent.padding)|\(parent.extraStyle)|\(parent.extraScript)"
+            // L’aide garde KaTeX en permanence ; un aperçu ne le charge que s’il contient une formule.
+            loadedMath = parent.contentHeight == nil || RichPage.needsMath(parent.body)
             view.loadHTMLString(RichPage.document(body: parent.body, fontSize: parent.fontSize, padding: parent.padding,
-                                                  extraStyle: parent.extraStyle, extraScript: parent.extraScript), baseURL: nil)
+                                                  extraStyle: parent.extraStyle, extraScript: parent.extraScript,
+                                                  math: loadedMath), baseURL: nil)
         }
 
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
             ready = true
             if let parent {
+                if !loadedMath && RichPage.needsMath(parent.body) { load(into: webView); return }
                 if parent.body != shownBody { shownBody = parent.body; webView.evaluateJavaScript("setContent(\(Self.jsString(parent.body)))") }
                 if let anchor = parent.anchor { shownAnchor = anchor; webView.evaluateJavaScript("reveal(\(Self.jsString(anchor)))") }
             }
@@ -267,7 +295,7 @@ struct RichWebView: NSViewRepresentable {
             if action.navigationType == .linkActivated, let url = action.request.url {
                 if parent?.onNavigate?(url) == true { decisionHandler(.cancel); return }
                 if url.scheme == "about" { decisionHandler(.allow); return }
-                NSWorkspace.shared.open(url)
+                Platform.open(url)
                 decisionHandler(.cancel); return
             }
             decisionHandler(.allow)
@@ -280,6 +308,31 @@ struct RichWebView: NSViewRepresentable {
         }
     }
 }
+
+#if os(macOS)
+extension RichWebView: NSViewRepresentable {
+    func makeNSView(context: Context) -> WKWebView { makeWebView(context.coordinator) }
+    func updateNSView(_ view: WKWebView, context: Context) { updateWebView(view, coordinator: context.coordinator) }
+    static func dismantleNSView(_ view: WKWebView, coordinator: Coordinator) { dismantleWebView(view) }
+}
+#else
+extension RichWebView: UIViewRepresentable {
+    func makeUIView(context: Context) -> WKWebView { makeWebView(context.coordinator) }
+    func updateUIView(_ view: WKWebView, context: Context) { updateWebView(view, coordinator: context.coordinator) }
+    static func dismantleUIView(_ view: WKWebView, coordinator: Coordinator) { dismantleWebView(view) }
+}
+#endif
+
+#if os(macOS)
+/// Aperçu inerte à la souris. Sans cela, WebKit garde la molette (la page ne défile plus sous le pointeur)
+/// et son suivi du survol neutralise ensuite toutes les bulles d’aide de la fenêtre.
+/// Clics et défilement reviennent à SwiftUI ; l’éditeur agrandi s’ouvre d’un clic sur le texte.
+final class PassiveWebView: WKWebView {
+    override func hitTest(_ point: NSPoint) -> NSView? { nil }
+    override func addTrackingArea(_ trackingArea: NSTrackingArea) {}
+    override func updateTrackingAreas() {}
+}
+#endif
 
 /// Évite le cycle de rétention entre WebKit et le coordinateur.
 private final class WeakScriptHandler: NSObject, WKScriptMessageHandler {

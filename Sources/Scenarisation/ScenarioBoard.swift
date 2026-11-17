@@ -222,7 +222,7 @@ struct ActivityCard: View {
     }
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack(spacing: 5) {
+            HStack(spacing: 8) {
                 typeMenu
                 HStack(spacing: 4) {
                     FA(name: "clock", size: 10).foregroundStyle(.secondary)
@@ -328,14 +328,21 @@ struct CompetencyTags: View {
             ForEach(Array(selected.enumerated()), id: \.offset) { _, value in
                 let item = catalog?.competencies.first { $0.id == value.string }
                 HStack(spacing: 5) {
-                    FA(name: "tools", size: 9).foregroundStyle(.secondary)
-                    Text(item.flatMap { catalog?.shortLabel(for: $0) } ?? value.string).lineLimit(1)
-                    Button { activity.fields["tools"] = .array(selected.filter { $0 != value }) } label: { FA(name: "close", size: 8) }
-                        .buttonStyle(.plain).foregroundStyle(.secondary).accessibilityLabel("Retirer \(item?.labelFr ?? value.string)")
+                    // La bulle couvre toute la pastille, pas seulement les lettres.
+                    HStack(spacing: 5) {
+                        FA(name: "tools", size: 9).foregroundStyle(.secondary)
+                        Text(item.flatMap { catalog?.shortLabel(for: $0) } ?? value.string).lineLimit(1)
+                    }
+                    .padding(.leading, 9).padding(.vertical, 4).contentShape(Rectangle())
+                    .help(item.map { "\(catalog?.context(for: $0) ?? $0.frameworkId)\n\($0.code) · \($0.labelFr)" } ?? value.string)
+                    Button { activity.fields["tools"] = .array(selected.filter { $0 != value }) } label: {
+                        FA(name: "close", size: 8).padding(.trailing, 9).padding(.vertical, 4).contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain).foregroundStyle(.secondary)
+                    .help("Retirer cette compétence").accessibilityLabel("Retirer \(item?.labelFr ?? value.string)")
                 }
-                .font(.system(size: 11, weight: .medium)).padding(.horizontal, 9).padding(.vertical, 4)
+                .font(.system(size: 11, weight: .medium))
                 .background(Color.primary.opacity(0.06), in: Capsule())
-                .help(item.map { "\(catalog?.context(for: $0) ?? $0.frameworkId)\n\($0.code) · \($0.labelFr)" } ?? value.string)
                 .accessibilityElement(children: .contain)
                 .accessibilityLabel(item?.labelFr ?? value.string)
             }

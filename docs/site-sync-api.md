@@ -78,7 +78,7 @@ Le champ `_scenarisationMac` est réservé aux fichiers Mac et n’est jamais en
 | --- | --- |
 | `401` | Conserver les changements locaux et demander une nouvelle connexion si le jeton utilisé est toujours celui de la session courante. Une ancienne réponse ne déconnecte pas un compte plus récent. |
 | `403` | Signaler le refus d’accès à cette ressource et conserver la session et les changements locaux. |
-| `404` sur un scénario | Marquer la copie comme indisponible côté site ; proposer une copie indépendante, sans recréation automatique. |
+| `404` sur un scénario | Retirer la copie de ce Mac si elle ne contient aucune modification non envoyée ; sinon la marquer comme indisponible côté site et proposer une copie indépendante. Jamais de recréation automatique. |
 | `409` | Relire la version distante ; conserver les deux versions et proposer leur examen si elles divergent. |
 | Autre erreur / réponse HTML / JSON invalide / coupure | Conserver le suivi local et permettre une nouvelle tentative manuelle. |
 
@@ -91,6 +91,8 @@ Une mise à jour dont la réponse est perdue est récupérée à la lecture suiv
 Le corps de `POST delete_design.php` est `{ "design_id": 7, "expected_revision": 3 }`, avec la dernière révision synchronisée. Le serveur ne supprime que si le scénario est encore à cette révision ; sinon il répond `409` et l’app conserve sa copie en invitant à synchroniser. La suppression enregistre la même trace que celles du site, si bien qu’une création réessayée répond `404`. Une nouvelle demande pour un scénario déjà supprimé réussit.
 
 Comme une route absente répond aussi `404`, l’app relit le scénario après un `404` : elle n’oublie sa copie locale que si cette lecture confirme la disparition. La copie locale n’est retirée qu’après la réponse du site ; hors connexion, rien n’est supprimé.
+
+À chaque lecture de `list_designs.php` (ouverture, retour dans l’app, toutes les deux minutes, **Actualiser**), l’app relit avec `get_design.php` chaque scénario suivi qui n’apparaît plus dans la liste. Seul un `404` confirme la suppression : une liste incomplète, une coupure ou une autre erreur laissent la copie intacte. Une copie sans modification non envoyée est alors retirée, sa fenêtre fermée et son fichier du dossier des scénarios placé dans la Corbeille.
 
 ## État local et limites de cette étape
 

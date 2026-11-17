@@ -9,8 +9,11 @@ binary_dir="$(swift build -c "$configuration" --show-bin-path)"
 app_dir="$PWD/dist/Scénarisation.app"
 mkdir -p "$app_dir/Contents/MacOS" "$app_dir/Contents/Resources"
 cp "$binary_dir/Scenarisation" "$app_dir/Contents/MacOS/Scenarisation"
+# Les données de test ne font pas partie de l’app distribuée.
+rm -rf "$app_dir"/Contents/Resources/*Tests.bundle
 for resource in "$binary_dir"/*.bundle; do
     [ -d "$resource" ] || continue
+    case "$(basename "$resource")" in *Tests.bundle) continue ;; esac
     ditto "$resource" "$app_dir/Contents/Resources/$(basename "$resource")"
 done
 cp packaging/Info.plist "$app_dir/Contents/Info.plist"

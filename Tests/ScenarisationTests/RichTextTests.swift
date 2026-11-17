@@ -27,6 +27,17 @@ import Testing
         #expect(!RichText.containsMath("10 $ seulement"))
     }
 
+    @Test func previewPagesLoadKaTeXOnlyWhenNeeded() {
+        let plain = RichPage.document(body: RichText.html("Lire **le texte**"), fontSize: 14, padding: 0,
+                                      math: RichPage.needsMath(RichText.html("Lire **le texte**")))
+        #expect(!plain.contains("@font-face"))
+        #expect(plain.utf8.count < 20_000)
+        #expect(plain.contains("function renderMath"))
+        let formula = RichText.html("Soit $x^2$")
+        #expect(RichPage.needsMath(formula))
+        #expect(RichPage.document(body: formula, fontSize: 14, padding: 0, math: true).contains("@font-face"))
+    }
+
     @Test func htmlExportEmbedsKaTeXOnlyWithMath() throws {
         var scenario = Scenario.blank()
         #expect(!ScenarioExporter.html(scenario, students: false).contains("katex"))

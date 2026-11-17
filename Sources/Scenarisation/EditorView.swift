@@ -1,5 +1,7 @@
 import SwiftUI
+#if os(macOS)
 import AppKit
+#endif
 import UniformTypeIdentifiers
 
 @MainActor
@@ -40,6 +42,8 @@ struct EditorView: View {
     @Environment(\.openWindow) private var openWindow
     @StateObject private var undo = DocumentUndo()
     @StateObject private var assistant = AssistantModel()
+    @StateObject private var siteSearch = SiteSearchModel()
+    @FocusState private var siteSearchFocused: Bool
     @ObservedObject private var siteAccount = SiteAccountModel.shared
     @State private var started: Bool
     @State private var pane: StudioPane
@@ -93,7 +97,8 @@ struct EditorView: View {
             exportScenario: { if started { showExport = true } }, toggleAssistant: {
                 if started { if pane == .assistant { pane = .board } else { showAssistant.toggle() } }
             },
-            setLayout: { mode in if started { pane = .board; scenario.meta["boardLayout"].wrappedValue = .string(mode) } }))
+            setLayout: { mode in if started { pane = .board; scenario.meta["boardLayout"].wrappedValue = .string(mode) } },
+            searchSite: { if started { siteSearchFocused = true } }))
         .sheet(isPresented: $showModels) {
             TemplateLibrary { design in
                 showModels = false
@@ -149,51 +154,46 @@ struct EditorView: View {
             detail
                 .background(StudioStyle.canvas)
                 .navigationSubtitle("\(document.scenario.duration.formatted()) min · \(document.scenario.activityCount) activités")
+#if !os(macOS)
+                // Sur iPad, la barre d’outils appartient à la colonne de détail.
+                .navigationTitle(document.scenario.name.isEmpty ? "Sans titre" : document.scenario.name)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar { toolbarContent }
+#endif
         }
         .inspector(isPresented: $showAssistant) {
             AssistantView(model: assistant, scenario: scenario)
                 .inspectorColumnWidth(min: 320, ideal: 370, max: 520)
         }
+#if os(macOS)
         .toolbar { toolbarContent }
+#endif
         .onAppear {
             // Évite que le titre du scénario soit sélectionné d’office à l’ouverture.
             Task { @MainActor in
                 try? await Task.sleep(for: .milliseconds(250))
-                NSApp.keyWindow?.makeFirstResponder(nil)
+                Platform.clearInitialFocus()
             }
+#if os(macOS)
             // À l’ouverture depuis le Finder, l’accueil est présenté après le document : on le referme.
             Task { @MainActor in
                 try? await Task.sleep(for: .milliseconds(350))
                 dismissWindow(id: "welcome")
             }
+#endif
         }
     }
 
     private var sidebar: some View {
         List(selection: Binding<StudioPane?>(get: { pane }, set: { if let value = $0 { withAnimation(.snappy) { pane = value } } })) {
-            Section("Scénario") {
-                Label("Conception", systemImage: StudioStyle.symbols["board"]!).tag(StudioPane.board)
-                Label("Paramètres", systemImage: StudioStyle.symbols["settings"]!).tag(StudioPane.settings)
-                Label("Analyse", systemImage: StudioStyle.symbols["analysis"]!).tag(StudioPane.analysis)
-                Label("Chronologie", systemImage: StudioStyle.symbols["chronology"]!).tag(StudioPane.chronology)
-                Label("Assistant IA", systemImage: StudioStyle.symbols["wand"]!).tag(StudioPane.assistant)
-            }
-            Section("Moments") {
-                if document.scenario.moments.isEmpty {
-                    Text("Aucun moment").foregroundStyle(.secondary).font(.callout)
-                }
-                ForEach(Array(document.scenario.moments.enumerated()), id: \.element.id) { index, moment in
-                    Button { reveal(moment.id) } label: { momentRow(index, moment) }
-                        .buttonStyle(.plain)
-                        .contextMenu {
-                            Button("Afficher") { reveal(moment.id) }
-                            Divider()
-                            Button("Supprimer le moment…", role: .destructive) { deleteMoment = moment.id }
-                        }
-                }
+            if siteSearch.isActive {
+                SiteSearchResults(model: siteSearch)
+            } else {
+                studioSections
             }
         }
         .listStyle(.sidebar)
+        .safeAreaInset(edge: .top, spacing: 0) { SiteSearchBar(model: siteSearch, focused: $siteSearchFocused) }
         .confirmationDialog("Supprimer ce moment et ses activités ?", isPresented: Binding(
             get: { deleteMoment != nil }, set: { if !$0 { deleteMoment = nil } })) {
                 Button("Supprimer", role: .destructive) {
@@ -201,8 +201,34 @@ struct EditorView: View {
                 }
             }
         .safeAreaInset(edge: .bottom) {
-            Button(action: addMoment) { Label("Ajouter un moment", systemImage: "plus").frame(maxWidth: .infinity) }
-                .studioButtons().controlSize(.large).padding(12)
+            if !siteSearch.isActive {
+                Button(action: addMoment) { Label("Ajouter un moment", systemImage: "plus").frame(maxWidth: .infinity) }
+                    .studioButtons().controlSize(.large).padding(12)
+            }
+        }
+    }
+
+    @ViewBuilder private var studioSections: some View {
+        Section("Scénario") {
+            Label("Conception", systemImage: StudioStyle.symbols["board"]!).tag(StudioPane.board)
+            Label("Paramètres", systemImage: StudioStyle.symbols["settings"]!).tag(StudioPane.settings)
+            Label("Analyse", systemImage: StudioStyle.symbols["analysis"]!).tag(StudioPane.analysis)
+            Label("Chronologie", systemImage: StudioStyle.symbols["chronology"]!).tag(StudioPane.chronology)
+            Label("Assistant IA", systemImage: StudioStyle.symbols["wand"]!).tag(StudioPane.assistant)
+        }
+        Section("Moments") {
+            if document.scenario.moments.isEmpty {
+                Text("Aucun moment").foregroundStyle(.secondary).font(.callout)
+            }
+            ForEach(Array(document.scenario.moments.enumerated()), id: \.element.id) { index, moment in
+                Button { reveal(moment.id) } label: { momentRow(index, moment) }
+                    .buttonStyle(.plain)
+                    .contextMenu {
+                        Button("Afficher") { reveal(moment.id) }
+                        Divider()
+                        Button("Supprimer le moment…", role: .destructive) { deleteMoment = moment.id }
+                    }
+            }
         }
     }
 
@@ -273,16 +299,23 @@ struct EditorView: View {
 
     @ToolbarContentBuilder private var toolbarContent: some ToolbarContent {
         ToolbarItem(placement: .navigation) {
-            Button { openWindow(id: "welcome") } label: { Label("Accueil", systemImage: "house") }
+            Button { openStudioWindow("welcome", openWindow) } label: { Label("Accueil", systemImage: "house") }
                 .help("Revenir à l’accueil : créer, importer, ouvrir ou créer avec l’IA (⇧⌘0)")
         }
+#if !os(macOS)
+        // Sur Mac, Édition → Annuler ; sur iPad, des boutons en plus du clavier et des gestes à trois doigts.
+        ToolbarItemGroup(placement: .navigation) {
+            Button { undoManager?.undo() } label: { Label("Annuler", systemImage: "arrow.uturn.backward") }
+            Button { undoManager?.redo() } label: { Label("Rétablir", systemImage: "arrow.uturn.forward") }
+        }
+#endif
         if pane == .board {
             ToolbarItem(placement: .primaryAction) {
                 Picker("Disposition", selection: Binding(get: { layout }, set: { scenario.meta["boardLayout"].wrappedValue = .string($0) })) {
-                    Label("Liste", systemImage: "list.bullet").tag("list")
-                    Label("Colonnes", systemImage: "rectangle.split.3x1").tag("columns")
-                    Label("Grille", systemImage: "square.grid.2x2").tag("grid")
-                }.pickerStyle(.segmented).labelStyle(.iconOnly).help("Disposition des moments")
+                    Label("Liste", systemImage: "list.bullet").tag("list").help("Moments en liste (⌘1)")
+                    Label("Colonnes", systemImage: "rectangle.split.3x1").tag("columns").help("Moments en colonnes (⌘2)")
+                    Label("Grille", systemImage: "square.grid.2x2").tag("grid").help("Moments en grille (⌘3)")
+                }.pickerStyle(.segmented).labelStyle(.iconOnly).help("Disposition des moments : liste (⌘1), colonnes (⌘2), grille (⌘3)")
             }
             ToolbarItem(placement: .primaryAction) {
                 Toggle(isOn: Binding(get: { intentionsVisible }, set: { scenario.fields["intentionsCollapsed"].wrappedValue = .bool(!$0) })) {
@@ -316,7 +349,7 @@ struct EditorView: View {
                     if let identity = document.syncIdentity, identity.accountKey != workspace.account.key {
                         message = SiteSyncError.wrongAccount.localizedDescription
                     } else { showSync = true }
-                } else { openWindow(id: "site-account") }
+                } else { openStudioWindow("site-account", openWindow) }
             } label: {
                 if let workspace = siteAccount.workspace {
                     DocumentSyncLabel(identity: document.syncIdentity, workspace: workspace)
@@ -346,6 +379,7 @@ struct EditorView: View {
     /// Un document sans titre ou ouvert depuis un autre format devient un fichier JSON du dossier des scénarios,
     /// que macOS enregistre ensuite en continu. Le fichier d’origine n’est pas modifié.
     private func adoptIntoFolder() {
+#if os(macOS)
         guard !adopted else { return }
         adopted = true
         let documents = NSDocumentController.shared.documents
@@ -361,6 +395,7 @@ struct EditorView: View {
                 if let original, original.fileURL == fileURL { original.close() }
             } catch { message = error.localizedDescription }
         }
+#endif
     }
     /// Un nouveau scénario rejoint le compte dès qu’il a un contenu et qu’une connexion existe ;
     /// la synchronisation automatique le crée ensuite sur le site.

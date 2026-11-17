@@ -1,5 +1,11 @@
-import AppKit
 import SwiftUI
+#if os(macOS)
+import AppKit
+typealias PlatformTextView = NSTextView
+#else
+import UIKit
+typealias PlatformTextView = UITextView
+#endif
 
 // MARK: - Actions de mise en forme
 
@@ -29,6 +35,7 @@ enum MarkdownAction: String, CaseIterable, Identifiable {
     }
     var shortcutLabel: String { (key.shift ? "⇧⌘" : "⌘") + key.character.uppercased() }
 
+#if os(macOS)
     static func matching(_ event: NSEvent) -> MarkdownAction? {
         let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
         guard flags.contains(.command), !flags.contains(.option), !flags.contains(.control) else { return nil }
@@ -41,6 +48,7 @@ enum MarkdownAction: String, CaseIterable, Identifiable {
             return character == action.key.character
         }
     }
+#endif
 }
 
 // MARK: - Contrôleur d’édition
@@ -48,14 +56,24 @@ enum MarkdownAction: String, CaseIterable, Identifiable {
 /// Relie la barre d’outils au champ de texte natif. Toutes les modifications passent par
 /// NSTextView : elles sont annulables (⌘Z) et mettent à jour le document.
 @MainActor final class MarkdownEditorController: ObservableObject {
-    weak var textView: NSTextView?
+    weak var textView: PlatformTextView?
     @Published var mathRequest: NSRange?
+    /// Sur iPad, les remplacements programmatiques ne passent pas par le délégué : le champ est prévenu ici.
+    var onProgrammaticChange: ((String) -> Void)?
 
+#if os(macOS)
     private var string: NSString { (textView?.string ?? "") as NSString }
+    private func selectedRange() -> NSRange? { textView?.selectedRange() }
+    private func focus() { textView?.window?.makeFirstResponder(textView) }
+#else
+    private var string: NSString { (textView?.text ?? "") as NSString }
+    private func selectedRange() -> NSRange? { textView?.selectedRange }
+    private func focus() { textView?.becomeFirstResponder() }
+#endif
 
     func perform(_ action: MarkdownAction) {
-        guard let textView else { return }
-        textView.window?.makeFirstResponder(textView)
+        guard textView != nil else { return }
+        focus()
         switch action {
         case .bold: wrap("**", "**", placeholder: "texte en gras")
         case .italic: wrap("*", "*", placeholder: "texte en italique")
@@ -64,20 +82,31 @@ enum MarkdownAction: String, CaseIterable, Identifiable {
         case .orderedList: prefixLines { "\($0 + 1). " }
         case .quote: prefixLines { _ in "> " }
         case .link: insertLink()
-        case .math: mathRequest = textView.selectedRange()
+        case .math: mathRequest = selectedRange()
         }
     }
 
     func replace(_ range: NSRange, with replacement: String, select selection: NSRange) {
+#if os(macOS)
         guard let textView, textView.shouldChangeText(in: range, replacementString: replacement) else { return }
         textView.textStorage?.replaceCharacters(in: range, with: replacement)
         textView.didChangeText()
         textView.setSelectedRange(selection)
         textView.scrollRangeToVisible(selection)
+#else
+        // UITextInput : le remplacement rejoint la pile d’annulation du champ.
+        guard let textView, let start = textView.position(from: textView.beginningOfDocument, offset: range.location),
+              let end = textView.position(from: start, offset: range.length),
+              let target = textView.textRange(from: start, to: end) else { return }
+        textView.replace(target, withText: replacement)
+        textView.selectedRange = selection
+        textView.scrollRangeToVisible(selection)
+        onProgrammaticChange?(textView.text)
+#endif
     }
 
     private func wrap(_ before: String, _ after: String, placeholder: String) {
-        guard let range = textView?.selectedRange() else { return }
+        guard let range = selectedRange() else { return }
         let content = range.length > 0 ? string.substring(with: range) : placeholder
         replace(range, with: before + content + after,
                 select: NSRange(location: range.location + before.utf16.count, length: content.utf16.count))
@@ -85,7 +114,7 @@ enum MarkdownAction: String, CaseIterable, Identifiable {
 
     /// Préfixe les lignes sélectionnées, ou la ligne courante ; sur une ligne vide, insère un exemple sélectionné.
     private func prefixLines(_ prefix: (Int) -> String) {
-        guard let selection = textView?.selectedRange() else { return }
+        guard let selection = selectedRange() else { return }
         let lines = string.lineRange(for: selection)
         var block = string.substring(with: lines)
         let trailingNewline = block.hasSuffix("\n")
@@ -103,7 +132,7 @@ enum MarkdownAction: String, CaseIterable, Identifiable {
     }
 
     private func insertLink() {
-        guard let range = textView?.selectedRange() else { return }
+        guard let range = selectedRange() else { return }
         let label = range.length > 0 ? string.substring(with: range) : "texte du lien"
         let url = "https://"
         let replacement = "[\(label)](\(url))"
@@ -130,15 +159,15 @@ enum MarkdownAction: String, CaseIterable, Identifiable {
         let trailing = block && !after.isEmpty && !after.hasPrefix("\n") ? "\n\n" : ""
         let replacement = block ? "\(leading)$$\n\(code)\n$$\(trailing)" : "$\(code)$"
         mathRequest = nil
-        textView?.window?.makeFirstResponder(textView)
+        focus()
         let caret = range.location + (replacement as NSString).length - (trailing as NSString).length
         replace(range, with: replacement, select: NSRange(location: caret, length: 0))
     }
 
     /// Entrée dans une liste : nouvelle puce ou numéro suivant ; sur un élément vide, termine la liste.
     func continueList() -> Bool {
-        guard let textView, textView.selectedRange().length == 0 else { return false }
-        let caret = textView.selectedRange().location
+        guard let selection = selectedRange(), selection.length == 0 else { return false }
+        let caret = selection.location
         let lineRange = string.lineRange(for: NSRange(location: caret, length: 0))
         let beforeCaret = string.substring(with: NSRange(location: lineRange.location, length: caret - lineRange.location))
         let pattern = try! NSRegularExpression(pattern: #"^(\s*)([-*+]|\d+[.)])\s+(.*)$"#)
@@ -164,6 +193,7 @@ enum MarkdownAction: String, CaseIterable, Identifiable {
 
 // MARK: - Champ de texte natif
 
+#if os(macOS)
 final class MarkdownNSTextView: NSTextView {
     weak var controller: MarkdownEditorController?
     var placeholder = ""
@@ -265,6 +295,7 @@ struct MarkdownTextView: NSViewRepresentable {
         }
     }
 }
+#endif
 
 // MARK: - Barre d’outils
 
@@ -465,12 +496,12 @@ struct MarkdownEditorSheet: View {
                 Image(systemName: "info.circle").foregroundStyle(.secondary)
                 Text(verbatim: "Markdown : **gras**, *italique*, ## titre, - liste, > citation, [lien](https://…). LaTeX : $…$ ou $$…$$.")
                     .font(.caption).foregroundStyle(.secondary).lineLimit(2)
-                Button("Aide") { HelpCenter.shared.show(.formatting, openWindow) }.buttonStyle(.link).font(.caption)
+                Button("Aide") { HelpCenter.shared.show(.formatting, openWindow) }.linkButton().font(.caption)
                 Spacer()
                 Button("Terminé", action: onDone).keyboardShortcut(.defaultAction).studioButtons(prominent: true)
             }
         }
         .padding(24)
-        .frame(minWidth: 760, idealWidth: 1000, minHeight: 480, idealHeight: 640)
+        .desktopFrame(minWidth: 760, idealWidth: 1000, minHeight: 480, idealHeight: 640)
     }
 }

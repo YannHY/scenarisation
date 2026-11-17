@@ -1,5 +1,7 @@
 import Foundation
+#if os(macOS)
 import AppKit
+#endif
 import CryptoKit
 import Security
 
@@ -111,11 +113,16 @@ enum SiteBrowserAuthorization {
     static func authorize(_ configuration: SiteOAuthConfiguration) async throws -> SiteOAuthGrant {
         let callback = OAuthLoopback()
         defer { callback.stop() }
+        defer { AuthBrowser.close() }
         let redirect = try await callback.start()
         let attempt = try SiteSignInAttempt(configuration: configuration, redirectURI: redirect)
-        guard NSWorkspace.shared.open(attempt.authorizationURL()) else { throw SiteAuthError.unavailable }
+        guard AuthBrowser.open(attempt.authorizationURL(), onCancel: { callback.stop(SiteAuthError.denied) }) else {
+            throw SiteAuthError.unavailable
+        }
         let grant = try attempt.callback(await callback.waitForCallback())
+#if os(macOS)
         NSApp.activate()
+#endif
         return grant
     }
 }

@@ -142,10 +142,13 @@ struct SiteSyncTests {
         #expect(try await service.download(1).revision == 2)
     }
 
-    @Test func missingRemoteDocumentsAreNotRecreatedAndCanBeCopied() async throws {
+    @Test func missingRemoteDocumentsWithUnsentEditsAreNotRecreatedAndCanBeCopied() async throws {
         let service = try MissingSiteService()
         let ws = try workspace(service: service)
-        let record = try await ws.downloadToMac(1)
+        let downloaded = try await ws.downloadToMac(1)
+        var edited = downloaded.local; edited.meta["name"] = .string("Pas encore envoyé")
+        try ws.stage(SyncDocumentIdentity(id: downloaded.id, accountKey: ws.account.key), scenario: edited)
+        let record = try #require(ws.record(downloaded.id))
         await service.remove()
         await #expect(throws: SiteSyncError.self) { try await ws.synchronize(record.id) }
         #expect(ws.record(record.id)?.status == .missing)
@@ -154,6 +157,61 @@ struct SiteSyncTests {
         let copy = try ws.copyDeleted(record.id)
         #expect(copy.local == record.local && copy.remoteID == nil)
         #expect(ws.record(record.id)?.local == record.local)
+    }
+
+    @Test func scenariosDeletedOnTheSiteDisappearFromTheMacAtTheNextRefresh() async throws {
+        let directory = temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let service = FakeSiteService()
+        let ws = try workspace(service: service, directory: directory)
+        let deleted = try await ws.downloadToMac(1)
+        let kept = try await ws.downloadToMac(2)
+        let file = try ws.workingFile(deleted.id)
+        var notified: [(SyncDocumentIdentity, URL?)] = []
+        ws.onRemovedFromSite = { notified.append(($0, $1)) }
+        try await service.delete(1, expectedRevision: 1)
+        try await ws.refresh()
+        #expect(ws.records.map(\.id) == [kept.id])
+        #expect(!FileManager.default.fileExists(atPath: file.path))
+        #expect(notified.map(\.0) == [SyncDocumentIdentity(id: deleted.id, accountKey: ws.account.key)])
+        #expect(notified.first?.1 == file)
+        #expect(try workspace(service: service, directory: directory).records.map(\.id) == [kept.id])
+    }
+
+    @Test func aScenarioDeletedOnTheSiteKeepsUnsentEditsOnTheMac() async throws {
+        let service = FakeSiteService()
+        let ws = try workspace(service: service)
+        let record = try await ws.downloadToMac(1)
+        var edited = record.local; edited.meta["name"] = .string("Modifié hors ligne")
+        try ws.stage(SyncDocumentIdentity(id: record.id, accountKey: ws.account.key), scenario: edited)
+        try await service.delete(1, expectedRevision: 1)
+        try await ws.refresh()
+        #expect(ws.record(record.id)?.status == .missing)
+        #expect(ws.record(record.id)?.local == edited)
+    }
+
+    @Test func anIncompleteListOrAnUnconfirmedDeletionNeverRemovesAScenario() async throws {
+        let service = try IncompleteListService()
+        let ws = try workspace(service: service)
+        let record = try await ws.downloadToMac(1)
+        try await ws.refresh()
+        #expect(ws.record(record.id)?.status == .synced)
+        await service.setDownloadsFail(true)
+        try await ws.refresh()
+        #expect(ws.record(record.id)?.status == .synced)
+    }
+
+    @Test func synchronizingAScenarioDeletedOnTheSiteRemovesItWithoutError() async throws {
+        let service = FakeSiteService()
+        let ws = try workspace(service: service)
+        let record = try await ws.downloadToMac(1)
+        var removed: [UUID] = []
+        ws.onRemovedFromSite = { identity, _ in removed.append(identity.id) }
+        try await service.delete(1, expectedRevision: 1)
+        try await ws.synchronize(record.id)
+        #expect(ws.record(record.id) == nil)
+        #expect(removed == [record.id])
+        #expect(try await service.list().map(\.id) == [2])
     }
 
     @Test func deletingAScenarioRemovesItFromTheSiteAndTheMac() async throws {
@@ -327,6 +385,20 @@ private actor NoDeletionRouteService: SiteSyncService {
     func download(_ id: Int) async throws -> SiteDesign { try await server.download(id) }
     func save(_ request: SiteSaveRequest) async throws -> SiteDesignSummary { try await server.save(request) }
     func delete(_ id: Int, expectedRevision: Int) async throws { throw SiteSyncError.missing }
+}
+
+/// Liste vide alors que les scénarios existent encore : une liste seule ne prouve pas une suppression.
+private actor IncompleteListService: SiteSyncService {
+    let server = FakeSiteService()
+    private var downloadsFail = false
+    init() throws {}
+    func setDownloadsFail(_ value: Bool) { downloadsFail = value }
+    func list() async throws -> [SiteDesignSummary] { [] }
+    func download(_ id: Int) async throws -> SiteDesign {
+        if downloadsFail { throw URLError(.notConnectedToInternet) }
+        return try await server.download(id)
+    }
+    func save(_ request: SiteSaveRequest) async throws -> SiteDesignSummary { try await server.save(request) }
 }
 
 private actor MissingSiteService: SiteSyncService {

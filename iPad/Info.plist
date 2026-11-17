@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- La bibliothèque (dossier Documents de l’app) apparaît dans Fichiers › Sur mon iPad › Scénarisation. -->
+    <key>UIFileSharingEnabled</key><true/>
+    <key>LSSupportsOpeningDocumentsInPlace</key><true/>
+    <key>CFBundleDocumentTypes</key>
+    <array><dict>
+        <key>CFBundleTypeName</key><string>Scénario pédagogique</string>
+        <key>CFBundleTypeRole</key><string>Editor</string>
+        <key>LSHandlerRank</key><string>Alternate</string>
+        <key>LSItemContentTypes</key><array><string>public.json</string></array>
+    </dict><dict>
+        <key>CFBundleTypeName</key><string>Scénario à importer</string>
+        <key>CFBundleTypeRole</key><string>Viewer</string>
+        <key>LSHandlerRank</key><string>Alternate</string>
+        <key>LSItemContentTypes</key><array>
+            <string>net.daringfireball.markdown</string>
+            <string>eu.scenarisation.ldj</string>
+            <string>public.comma-separated-values-text</string>
+            <string>org.openxmlformats.spreadsheetml.sheet</string>
+            <string>public.html</string>
+            <string>org.openxmlformats.wordprocessingml.document</string>
+        </array>
+    </dict></array>
+    <key>UTImportedTypeDeclarations</key><array>
+        <dict>
+            <key>UTTypeIdentifier</key><string>net.daringfireball.markdown</string>
+            <key>UTTypeDescription</key><string>Markdown</string>
+            <key>UTTypeConformsTo</key><array><string>public.plain-text</string></array>
+            <key>UTTypeTagSpecification</key><dict>
+                <key>public.filename-extension</key><array><string>md</string><string>markdown</string></array>
+                <key>public.mime-type</key><string>text/markdown</string>
+            </dict>
+        </dict>
+        <dict>
+            <key>UTTypeIdentifier</key><string>eu.scenarisation.ldj</string>
+            <key>UTTypeDescription</key><string>Learning Designer JSON</string>
+            <key>UTTypeConformsTo</key><array><string>public.json</string></array>
+            <key>UTTypeTagSpecification</key><dict>
+                <key>public.filename-extension</key><string>ldj</string>
+            </dict>
+        </dict>
+    </array>
+</dict>
+</plist>

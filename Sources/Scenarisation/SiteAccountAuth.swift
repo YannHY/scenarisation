@@ -209,14 +209,14 @@ final class SiteAccountAuth: ObservableObject {
         var warning: String?
         if let session {
             do { try persist(session) }
-            catch { warning = "Les jetons sont désactivés sur ce Mac, mais le Trousseau n’a pas pu être mis à jour." }
+            catch { warning = "Les jetons sont désactivés sur \(Platform.thisDevice), mais le Trousseau n’a pas pu être mis à jour." }
         }
         publish()
         var revoke = previous?.tokens?.refresh
         if let pending, let refreshed = try? await pending.task.value { revoke = refreshed.tokens?.refresh }
         if let revoke {
             do { try await client.revoke(revoke) }
-            catch { warning = "Déconnexion effectuée sur ce Mac. La révocation distante n’a pas pu être confirmée ; vous pouvez retirer l’accès depuis votre profil sur le site." }
+            catch { warning = "Déconnexion effectuée sur \(Platform.thisDevice). La révocation distante n’a pas pu être confirmée ; vous pouvez retirer l’accès depuis votre profil sur le site." }
         }
         return warning
     }

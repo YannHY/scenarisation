@@ -4,6 +4,8 @@ struct AssistantTurn: Codable, Equatable, Sendable {
     enum Role: String, Codable, Sendable { case user, assistant }
     let role: Role
     let content: String
+    /// Documents joints par l’enseignant à ce message.
+    var documents: [AssistantDocument]? = nil
 }
 
 struct AssistantReply: Sendable {
@@ -80,7 +82,17 @@ enum AssistantConversation {
 
     private static func context(scenario: Scenario, history: [AssistantTurn], exchanges: [JSONValue]) throws -> String {
         let value = JSONValue.object([
-            "conversation": .array(history.map { .object(["role": .string($0.role.rawValue), "content": .string($0.content)]) }),
+            "conversation": .array(history.map { turn in
+                var entry: [String: JSONValue] = ["role": .string(turn.role.rawValue), "content": .string(turn.content)]
+                if let documents = turn.documents, !documents.isEmpty {
+                    entry["documents"] = .array(documents.map { document in
+                        var value: [String: JSONValue] = ["name": .string(document.name), "text": .string(document.text)]
+                        if document.truncated { value["truncated"] = .bool(true) }
+                        return .object(value)
+                    })
+                }
+                return .object(entry)
+            }),
             "scenario": .object(scenario.fields), "analysis": AssistantTools.analysis(scenario),
             "tool_exchanges": .array(exchanges)
         ])

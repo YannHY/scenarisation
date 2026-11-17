@@ -1,5 +1,7 @@
 import SwiftUI
+#if os(macOS)
 import AppKit
+#endif
 
 struct DocumentSyncLabel: View {
     let identity: SyncDocumentIdentity?
@@ -57,23 +59,25 @@ struct SiteAccountView: View {
                 SiteLibraryView(workspace: workspace, model: model)
             } else {
                 ContentUnavailableView {
-                    Label("Retrouver ses scénarios sur Mac", systemImage: "icloud")
+                    Label("Retrouver ses scénarios sur \(Platform.deviceName)", systemImage: "icloud")
                 } description: {
-                    Text("Connectez votre compte scenarisation.eu pour retrouver vos scénarios et les garder sur ce Mac.")
+                    Text("Connectez votre compte scenarisation.eu pour retrouver vos scénarios et les garder sur \(Platform.thisDevice).")
                 } actions: {
                     SiteConnectionButton(model: model).controlSize(.large)
                 }
                 .toolbar { ToolbarItem(placement: .primaryAction) { SiteAccountMenu(model: model) } }
             }
         }
-        .frame(minWidth: 640, minHeight: 500)
+        .desktopFrame(minWidth: 640, minHeight: 500)
         .onAppear {
             // Avec la navigation au clavier, le premier bouton de la liste recevrait d’office le cadre de focus.
+#if os(macOS)
             Task { @MainActor in
                 try? await Task.sleep(for: .milliseconds(250))
                 let window = NSApp.windows.first { $0.identifier?.rawValue.hasPrefix("site-account") == true } ?? NSApp.keyWindow
                 window?.makeFirstResponder(nil)
             }
+#endif
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             if let message = model.auth.storageMessage {
@@ -170,10 +174,10 @@ private struct SiteLibraryView: View {
     var body: some View {
         Form {
             Section { account }
-            Section("Sur ce Mac") {
+            Section("Sur \(Platform.thisDevice)") {
                 ForEach(locals) { localRow($0) }
                 if locals.isEmpty {
-                    Text(!search.isEmpty ? "Aucun scénario sur ce Mac ne correspond à « \(search) »."
+                    Text(!search.isEmpty ? "Aucun scénario sur \(Platform.thisDevice) ne correspond à « \(search) »."
                          : "Les scénarios ouverts depuis votre compte resteront disponibles ici.")
                         .foregroundStyle(.secondary)
                 }
@@ -223,8 +227,8 @@ private struct SiteLibraryView: View {
     }
 
     private func removalWarning(_ record: SiteSyncRecord) -> String {
-        if record.remoteID == nil || record.remoteMissing { return "Il sera définitivement supprimé de ce Mac." }
-        return "Il sera définitivement supprimé de ce Mac et de votre compte scenarisation.eu."
+        if record.remoteID == nil || record.remoteMissing { return "Il sera définitivement supprimé de \(Platform.thisDevice)." }
+        return "Il sera définitivement supprimé de \(Platform.thisDevice) et de votre compte scenarisation.eu."
     }
     private func remove(_ record: SiteSyncRecord) {
         let key = record.id.uuidString
@@ -234,8 +238,10 @@ private struct SiteLibraryView: View {
             do {
                 let url = try workspace.workingFileURL(record.id)
                 try await workspace.delete(record.id)
-                // Une fenêtre encore ouverte n’aurait plus de copie à tenir à jour.
-                NSDocumentController.shared.documents.first { $0.fileURL == url }?.close()
+                // Une fenêtre encore ouverte n’aurait plus de copie à tenir à jour ; le fichier lié du dossier
+                // des scénarios part à la Corbeille, comme pour une suppression faite sur le site.
+                SiteDeletionCleanup.apply(SyncDocumentIdentity(id: record.id, accountKey: workspace.account.key),
+                                          workingFile: url)
             } catch { model.message = error.localizedDescription }
         }
     }
@@ -317,7 +323,7 @@ private struct SiteLibraryView: View {
 
     private func remoteRow(_ summary: SiteDesignSummary) -> some View {
         HStack(spacing: 12) {
-            SiteRowGlyph(symbol: "icloud", tint: Color(nsColor: .systemGray))
+            SiteRowGlyph(symbol: "icloud", tint: Color.platformGray)
             VStack(alignment: .leading, spacing: 2) {
                 Text(summary.title.isEmpty ? "Sans titre" : summary.title).fontWeight(.medium).lineLimit(1)
                 Text(SiteLibraryDate.caption(summary)).font(.caption).foregroundStyle(.secondary)
@@ -325,7 +331,7 @@ private struct SiteLibraryView: View {
             Spacer(minLength: 12)
             if opening == summary.id { ProgressView().controlSize(.small) }
             Button { download(summary.id) } label: { Label("Ouvrir", systemImage: "icloud.and.arrow.down") }
-                .labelStyle(.iconOnly).buttonStyle(.borderless).help("Ouvrir sur ce Mac")
+                .labelStyle(.iconOnly).buttonStyle(.borderless).help("Ouvrir sur \(Platform.thisDevice)")
                 .disabled(opening != nil || !model.networkAvailable)
             Button(role: .destructive) { removingRemote = summary } label: { Label("Supprimer", systemImage: "trash") }
                 .labelStyle(.iconOnly).buttonStyle(.borderless).help("Supprimer ce scénario de votre compte")
@@ -384,6 +390,7 @@ enum SiteLibraryDate {
     }
 }
 
+#if os(macOS)
 @MainActor
 enum SiteDocumentOpener {
     static func open(_ id: UUID, workspace: SiteSyncWorkspace) async throws {
@@ -397,6 +404,7 @@ enum SiteDocumentOpener {
         _ = try await NSDocumentController.shared.openDocument(withContentsOf: file, display: true)
     }
 }
+#endif
 
 struct ScenarioSyncSheet: View {
     @Binding var document: ScenarioDocument
@@ -430,7 +438,7 @@ struct ScenarioSyncSheet: View {
                         }
                     }.environmentObject(workspace)
                 } else if record.remoteMissing {
-                    Text("Votre travail reste sur ce Mac. Vous pouvez en faire une nouvelle copie indépendante.").foregroundStyle(.secondary)
+                    Text("Votre travail reste sur \(Platform.thisDevice). Vous pouvez en faire une nouvelle copie indépendante.").foregroundStyle(.secondary)
                     Button("Conserver une copie") {
                         do {
                             let duplicate = try workspace.copyDeleted(record.id)
@@ -455,12 +463,12 @@ struct ScenarioSyncSheet: View {
                 HStack {
                     Text("Reconnectez votre compte pour synchroniser.").font(.callout).foregroundStyle(.secondary)
                     Spacer()
-                    Button("Mon compte") { dismiss(); openWindow(id: "site-account") }
+                    Button("Mon compte") { dismiss(); openStudioWindow("site-account", openWindow) }
                 }
             }
             if let message { Text(message).font(.callout).foregroundStyle(.red).textSelection(.enabled) }
         }
-        .padding(28).frame(minWidth: 580, maxWidth: 900).disabled(busy)
+        .padding(28).desktopFrame(minWidth: 580, maxWidth: 900).disabled(busy)
     }
 
     private var syncButton: some View {
@@ -500,11 +508,11 @@ private struct SiteConflictContent: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Le scénario a changé sur le Mac et sur le site. Conservez les deux versions pour poursuivre votre travail.")
+            Text("Le scénario a changé sur \(Platform.theDevice) et sur le site. Conservez les deux versions pour poursuivre votre travail.")
                 .foregroundStyle(.secondary)
             DisclosureGroup("Examiner les versions", isExpanded: $showJSON) {
                 HStack(alignment: .top, spacing: 16) {
-                    version("Version du Mac", record.local)
+                    version("Version \(Platform.ofTheDevice)", record.local)
                     if let remote = record.remoteConflict { version("Version du site · révision \(remote.revision)", remote.document) }
                 }.padding(.top, 8)
             }
@@ -512,7 +520,7 @@ private struct SiteConflictContent: View {
                 do { onKept(try workspace.keepBoth(record.id)) }
                 catch { self.error = error.localizedDescription }
             }.studioButtons(prominent: true)
-            Text("Votre version devient une copie Mac indépendante, en attente de synchronisation.")
+            Text("Votre version devient une copie \(Platform.deviceName) indépendante, en attente de synchronisation.")
                 .font(.caption).foregroundStyle(.secondary)
             if let error { Text(error).foregroundStyle(.red) }
         }
@@ -542,6 +550,6 @@ private struct SiteConflictView: View {
             if let record = workspace.record(recordID), record.remoteConflict != nil {
                 SiteConflictContent(record: record) { _ in dismiss() }.environmentObject(workspace)
             }
-        }.padding(28).frame(minWidth: 640, maxWidth: 900)
+        }.padding(28).desktopFrame(minWidth: 640, maxWidth: 900)
     }
 }

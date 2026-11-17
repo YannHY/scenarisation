@@ -11,6 +11,9 @@ final class SiteSyncWorkspace: ObservableObject {
     @Published private(set) var syncing: Set<UUID> = []
     @Published private(set) var refreshing = false
     private var queuedAutomatic: Set<UUID> = []
+    /// Appelé quand un scénario supprimé sur le site vient d’être retiré de ce Mac,
+    /// pour fermer sa fenêtre et retirer le fichier correspondant.
+    var onRemovedFromSite: ((SyncDocumentIdentity, URL?) -> Void)?
 
     init(account: SiteSyncAccount, service: any SiteSyncService, disk: SiteSyncDisk? = nil) throws {
         self.account = account; self.service = service; self.disk = disk
@@ -51,6 +54,43 @@ final class SiteSyncWorkspace: ObservableObject {
         let designs = try await service.list()
         try Task.checkCancellation()
         remoteDesigns = designs
+        await forgetScenariosDeletedOnSite(listed: Set(designs.map(\.id)))
+    }
+
+    /// Les scénarios absents de la liste du compte sont relus un par un : seule une réponse
+    /// « introuvable » confirme leur suppression, jamais une liste incomplète ou une coupure.
+    private func forgetScenariosDeletedOnSite(listed: Set<Int>) async {
+        let candidates = records.filter { record in
+            guard let remoteID = record.remoteID else { return false }
+            return !listed.contains(remoteID) && !syncing.contains(record.id)
+        }
+        for candidate in candidates {
+            guard let remoteID = candidate.remoteID else { continue }
+            if !candidate.remoteMissing {
+                do { _ = try await service.download(remoteID); continue }
+                catch SiteSyncError.missing {}
+                catch { continue }
+            }
+            guard !Task.isCancelled, !syncing.contains(candidate.id) else { continue }
+            try? forgetDeletedOnSite(candidate.id)
+        }
+    }
+
+    /// Un scénario supprimé sur le site disparaît aussi de ce Mac. Seules des modifications
+    /// pas encore envoyées le retiennent : il reste alors marqué « Supprimé sur le site ».
+    /// - Returns: `true` si le scénario a été retiré de ce Mac.
+    @discardableResult
+    private func forgetDeletedOnSite(_ id: UUID) throws -> Bool {
+        guard let current = record(id) else { return true }
+        guard current.local == current.base, current.remoteConflict == nil else {
+            if !current.remoteMissing { try update(id) { $0.remoteMissing = true } }
+            return false
+        }
+        let file = disk?.workingFileURL(id, account: account)
+        try commit(records.filter { $0.id != id })
+        try? disk?.removeWorkingFile(id, account: account)
+        onRemovedFromSite?(SyncDocumentIdentity(id: id, accountKey: account.key), file)
+        return true
     }
 
     func downloadToMac(_ remoteID: Int) async throws -> SiteSyncRecord {
@@ -103,12 +143,12 @@ final class SiteSyncWorkspace: ObservableObject {
                 try Task.checkCancellation()
                 try integrate(remote, into: id)
             } catch SiteSyncError.missing {
-                try update(id) { $0.remoteMissing = true }
+                if try forgetDeletedOnSite(id) { return }
                 throw SiteSyncError.missing
             }
         } catch SiteSyncError.missing {
             // Never recreate a document that the server has deleted.
-            if original.remoteID != nil { try update(id) { $0.remoteMissing = true } }
+            if original.remoteID != nil, try forgetDeletedOnSite(id) { return }
             throw SiteSyncError.missing
         }
     }
@@ -139,7 +179,7 @@ final class SiteSyncWorkspace: ObservableObject {
             throw SiteSyncError.invalidResponse
         }
         var copy = original.local
-        copy.meta["name"] = .string((copy.name.isEmpty ? "Sans titre" : copy.name) + " — copie Mac")
+        copy.meta["name"] = .string((copy.name.isEmpty ? "Sans titre" : copy.name) + " — copie \(Platform.deviceName)")
         let duplicate = SiteSyncRecord(id: UUID(), local: copy)
         var next = records
         let index = next.firstIndex { $0.id == id }!

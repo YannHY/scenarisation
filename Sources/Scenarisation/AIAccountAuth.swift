@@ -1,6 +1,8 @@
-import AppKit
 import Foundation
 import Network
+#if os(macOS)
+import AppKit
+#endif
 
 /// A short-lived callback server bound only to IPv4 loopback. It never logs URLs.
 @MainActor
@@ -214,13 +216,14 @@ final class ChatGPTAuth: ObservableObject {
         let configuration = try await client.discovery()
         let callback = OAuthLoopback()
         defer { callback.stop() }
+        defer { AuthBrowser.close() }
         let redirect = try await callback.start()
         let attempt = try ChatGPTSignInAttempt(redirectURI: redirect, hostID: hostID,
             clientID: selected?.clientID ?? pendingID)
         let url = try attempt.authorizationURL(endpoint: configuration.authorization_endpoint,
             idTokenHint: selected?.idToken, reconsent: reconsent)
         try Task.checkCancellation()
-        guard NSWorkspace.shared.open(url) else { throw ScenarioError.invalid("Impossible d’ouvrir le navigateur pour connecter ChatGPT.") }
+        guard AuthBrowser.open(url, onCancel: { callback.stop() }) else { throw ScenarioError.invalid("Impossible d’ouvrir le navigateur pour connecter ChatGPT.") }
         let result = try attempt.callback(await callback.waitForCallback())
         if selected == nil {
             vault.pendingClientID = result.clientID
@@ -243,7 +246,9 @@ final class ChatGPTAuth: ObservableObject {
         updated.selectedClientID = credential.clientID; updated.pendingClientID = nil
         try persist(updated)
         refreshTask?.cancel(); refreshTask = nil; sessionVersion = UUID()
+#if os(macOS)
         NSApplication.shared.activate(ignoringOtherApps: true)
+#endif
     }
 
     func selectAccount(_ id: String) throws {

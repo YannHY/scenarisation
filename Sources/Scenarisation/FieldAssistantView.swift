@@ -28,9 +28,9 @@ struct FieldAIButton: View {
     @State private var presented = false
 
     var body: some View {
-        Button("Aide IA") { presented = true }
-            .buttonStyle(.borderless).font(.caption).foregroundStyle(.secondary)
-            .help("Rédiger ou améliorer : \(label)").accessibilityLabel("Aide IA : \(label)")
+        Button { presented = true } label: { FA(name: "wand", size: 13) }
+            .studioButtons()
+            .help("Aide IA : rédiger ou améliorer le texte").accessibilityLabel("Aide IA : \(label)")
             .sheet(isPresented: $presented) {
                 FieldAssistantSheet(label: label, text: $text, purpose: purpose,
                     context: FieldAIContext(scenario: scenario, moment: moment, activity: activity))

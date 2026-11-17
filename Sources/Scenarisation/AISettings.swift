@@ -36,7 +36,8 @@ final class AISettingsStore: ObservableObject {
         self.defaults = defaults
         claudeEnabled = defaults.bool(forKey: "ai.claude.enabled")
         subscriptionServices = Set(AIProvider.allCases.filter { $0.usesACP && defaults.bool(forKey: "ai.\($0.rawValue).enabled") })
-        let provider = AIProvider(rawValue: defaults.string(forKey: "ai.provider") ?? "ollama") ?? .ollama
+        let saved = AIProvider(rawValue: defaults.string(forKey: "ai.provider") ?? "") ?? .platformDefault
+        let provider = saved.availableOnThisDevice ? saved : .platformDefault
         configuration = Self.load(provider, defaults: defaults)
         models = Self.loadModels(configuration, defaults: defaults)
     }

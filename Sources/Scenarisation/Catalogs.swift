@@ -171,7 +171,7 @@ struct CompetencySheet: View {
                         .accessibilityLabel("Rechercher une compétence par mot-clé, domaine ou code")
                     if !search.isEmpty {
                         Button { search = "" } label: { FA(name: "close").foregroundStyle(.secondary) }
-                            .buttonStyle(.plain).accessibilityLabel("Effacer la recherche")
+                            .buttonStyle(.plain).help("Effacer la recherche").accessibilityLabel("Effacer la recherche")
                     }
                 }.padding(.horizontal, 10).padding(.vertical, 7)
                     .background(StudioStyle.field, in: RoundedRectangle(cornerRadius: 9, style: .continuous))
@@ -182,7 +182,7 @@ struct CompetencySheet: View {
                 Spacer()
                 Button("Terminé") { dismiss() }.keyboardShortcut(.defaultAction).studioButtons(prominent: true)
             }
-        }.padding(24).frame(minWidth: 720, idealWidth: 800, minHeight: 580, idealHeight: 680)
+        }.padding(24).desktopFrame(minWidth: 720, idealWidth: 800, minHeight: 580, idealHeight: 680)
             .onChange(of: framework) { _, _ in domain = "" }
     }
 
@@ -209,7 +209,7 @@ struct CompetencySheet: View {
             HStack {
                 Text("\(items.count) résultat(s)").foregroundStyle(.secondary)
                 Spacer()
-                Toggle("Afficher la sélection", isOn: $selectionOnly).toggleStyle(.checkbox)
+                Toggle("Afficher la sélection", isOn: $selectionOnly).checkboxStyle()
                 if !framework.isEmpty || !domain.isEmpty || !search.isEmpty || selectionOnly {
                     Button("Réinitialiser") { framework = ""; domain = ""; search = ""; selectionOnly = false }
                 }
@@ -226,7 +226,7 @@ struct CompetencySheet: View {
                     }
                 }
             }
-            .listStyle(.inset(alternatesRowBackgrounds: false))
+            .plainInsetList()
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             .overlay {
                 if items.isEmpty {
@@ -256,7 +256,7 @@ struct CompetencySheet: View {
                 }
             }.padding(.vertical, 6).frame(maxWidth: .infinity, alignment: .leading)
         }
-        .toggleStyle(.checkbox)
+        .checkboxStyle()
         .accessibilityLabel("\(catalog.context(for: item)), \(item.code), \(item.labelFr)")
     }
 }

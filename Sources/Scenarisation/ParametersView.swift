@@ -198,9 +198,6 @@ struct BloomOutcomes: View {
                     }.buttonStyle(.plain).help("Modifier le niveau de Bloom et le verbe")
                     TextField("L’élève sera capable de…", text: outcomeText(index), axis: .vertical)
                         .textFieldStyle(.plain).multilineTextAlignment(.leading)
-                    FieldAIButton(label: "Acquis d’apprentissage", text: outcomeText(index), purpose: .outcome(
-                        category: outcomes[index].object["categoryLabel"]?.string ?? "",
-                        verb: outcomes[index].object["verb"]?.string ?? ""))
                     IconButton(title: "Retirer l’acquis", icon: "close", size: 10) {
                         var values = outcomes; values.remove(at: index); scenario.meta["sliders"] = .array(values)
                     }

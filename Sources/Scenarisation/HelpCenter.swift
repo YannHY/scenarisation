@@ -1,5 +1,7 @@
-import AppKit
 import SwiftUI
+#if os(macOS)
+import AppKit
+#endif
 
 // MARK: - Aide
 
@@ -75,7 +77,7 @@ enum HelpTopic: String, CaseIterable, Identifiable, Hashable {
 
     func show(_ topic: HelpTopic, _ openWindow: OpenWindowAction) {
         select(topic)
-        openWindow(id: "help")
+        openStudioWindow("help", openWindow)
     }
 
     static func resource(_ name: String) -> String {
@@ -135,7 +137,7 @@ struct HelpWindow: View {
     var body: some View {
         NavigationSplitView {
             List(selection: Binding(get: { center.topic }, set: { if let topic = $0 { center.select(topic) } })) {
-                Section("Utiliser sur Mac") {
+                Section("Utiliser sur \(Platform.deviceName)") {
                     ForEach(HelpTopic.mac) { Label($0.title, systemImage: $0.symbol).tag($0) }
                 }
                 Section("Guide du site") {
@@ -156,7 +158,7 @@ struct HelpWindow: View {
                 .id(center.topic.pageName)
             .navigationTitle(center.topic.title)
         }
-        .frame(minWidth: 820, minHeight: 540)
+        .desktopFrame(minWidth: 820, minHeight: 540)
     }
 }
 
@@ -176,7 +178,7 @@ struct LicenseWindow: View {
                 HStack(spacing: 14) {
                     BrandMark().frame(width: 46, height: 46)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Scénarisation pour Mac").font(.title.bold())
+                        Text("Scénarisation pour \(Platform.deviceName)").font(.title.bold())
                         Text("Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "de développement")")
                             .foregroundStyle(.secondary)
                     }
@@ -209,7 +211,7 @@ struct LicenseWindow: View {
                     }
                 }
                 block("Conditions et confidentialité") {
-                    Text("Les conditions d’utilisation et la politique de confidentialité du site sont intégrées à l’aide. L’app Mac fonctionne sans compte ni serveur : vos scénarios restent dans vos fichiers, et seul l’assistant IA transmet le scénario, au service que vous choisissez.")
+                    Text("Les conditions d’utilisation et la politique de confidentialité du site sont intégrées à l’aide. L’app \(Platform.deviceName) fonctionne sans compte ni serveur : vos scénarios restent dans vos fichiers, et seul l’assistant IA transmet le scénario, au service que vous choisissez.")
                     HStack(spacing: 10) {
                         Button("Conditions d’utilisation") { HelpCenter.shared.show(.terms, openWindow) }
                         Button("Politique de confidentialité") { HelpCenter.shared.show(.privacy, openWindow) }
@@ -225,7 +227,7 @@ struct LicenseWindow: View {
                         Text("• **Font Awesome Free 6.5.2** — icônes de l’aide, © Fonticons, Inc. : fontes sous SIL OFL 1.1, code sous MIT et icônes sous CC BY 4.0. Les licences sont embarquées avec les ressources de l’aide.")
                         Text("• **Référentiels de compétences** (Florimont, Socle commun, GreenComp, DigComp, CRCN, Pix, Pix IA, PER romand) — conditions et attributions de leurs éditeurs ; les liens source figurent dans les catalogues.")
                         Text("• **AI Assessment Scale 2.1** — échelle AIAS de Perkins, Furze, Roe et MacVaugh.")
-                        Text("• **SF Symbols** — icônes fournies par macOS.")
+                        Text("• **SF Symbols** — icônes fournies par \(Platform.deviceName == "Mac" ? "macOS" : "iPadOS").")
                     }
                     if let katex = Self.katexLicense {
                         DisclosureGroup("Licence MIT de KaTeX") {
@@ -237,7 +239,7 @@ struct LicenseWindow: View {
             }
             .padding(28).frame(maxWidth: 720, alignment: .leading).frame(maxWidth: .infinity)
         }
-        .frame(minWidth: 560, minHeight: 480)
+        .desktopFrame(minWidth: 560, minHeight: 480)
     }
 
     private func block(_ title: String, @ViewBuilder content: () -> some View) -> some View {
@@ -254,9 +256,11 @@ struct LicenseWindow: View {
 struct HelpCommands: Commands {
     @Environment(\.openWindow) private var openWindow
     var body: some Commands {
+#if os(macOS)
         CommandGroup(replacing: .appInfo) {
             Button("À propos de Scénarisation") { AboutPanel.show() }
         }
+#endif
         CommandGroup(replacing: .help) {
             Button("Aide de Scénarisation") { HelpCenter.shared.show(.start, openWindow) }
                 .keyboardShortcut("?", modifiers: .command)
@@ -266,7 +270,7 @@ struct HelpCommands: Commands {
             Button("Formules LaTeX") { HelpCenter.shared.show(.latex, openWindow) }
             Button("Raccourcis clavier") { HelpCenter.shared.show(.shortcuts, openWindow) }
             Divider()
-            Button("Licence et crédits") { openWindow(id: "license") }
+            Button("Licence et crédits") { openStudioWindow("license", openWindow) }
             Button("Conditions d’utilisation") { HelpCenter.shared.show(.terms, openWindow) }
             Button("Politique de confidentialité") { HelpCenter.shared.show(.privacy, openWindow) }
             Divider()
@@ -275,6 +279,7 @@ struct HelpCommands: Commands {
     }
 }
 
+#if os(macOS)
 @MainActor enum AboutPanel {
     static func show() {
         let credits = NSMutableAttributedString()
@@ -294,3 +299,4 @@ struct HelpCommands: Commands {
         NSApp.activate()
     }
 }
+#endif

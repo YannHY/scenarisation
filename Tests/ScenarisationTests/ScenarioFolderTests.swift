@@ -46,4 +46,21 @@ struct ScenarioFolderTests {
         var untitledWithMoment = Scenario.blank(); untitledWithMoment.moments = [.blank()]
         #expect(ScenarioFolder.hasContent(untitledWithMoment))
     }
+
+    @Test func linkedFilesAreFoundByTheirAccountIdentity() throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let identity = SyncDocumentIdentity(id: UUID(), accountKey: "compte")
+        let linked = folder.appendingPathComponent("Fractions.json")
+        try ScenarioDocument.data(named("Fractions"), identity: identity).write(to: linked)
+        try ScenarioDocument.data(named("Autre"), identity: SyncDocumentIdentity(id: UUID(), accountKey: "compte"))
+            .write(to: folder.appendingPathComponent("Autre.json"))
+        try ScenarioDocument.data(named("Même identité, autre compte"), identity: SyncDocumentIdentity(id: identity.id, accountKey: "autre"))
+            .write(to: folder.appendingPathComponent("Autre compte.json"))
+        _ = try ScenarioFolder.save(named("Non lié"), in: folder)
+        try Data("pas du JSON".utf8).write(to: folder.appendingPathComponent("Notes.json"))
+        #expect(ScenarioFolder.files(linkedTo: identity, in: folder).map(\.lastPathComponent) == ["Fractions.json"])
+        #expect(ScenarioFolder.identity(of: linked) == identity)
+    }
 }

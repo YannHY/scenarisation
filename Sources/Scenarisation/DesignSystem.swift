@@ -4,9 +4,9 @@ import SwiftUI
 
 enum StudioStyle {
     /// Fond des cartes : blanc en clair, gris élevé en sombre (couleur système, suit le mode).
-    static let surface = Color(nsColor: .controlBackgroundColor)
+    static let surface = Color.platformSurface
     /// Fond de la zone de travail.
-    static let canvas = Color(nsColor: .windowBackgroundColor)
+    static let canvas = Color.platformCanvas
     /// Fond discret des champs de saisie.
     static let field = Color.primary.opacity(0.055)
     static let line = Color.primary.opacity(0.09)
@@ -22,14 +22,19 @@ enum StudioStyle {
         "list": "list.bullet", "columns": "rectangle.split.3x1", "grid": "square.grid.2x2", "close": "xmark",
         "copy": "plus.square.on.square", "clock": "clock", "expand": "arrow.up.left.and.arrow.down.right",
         "chevron": "chevron.down", "arrow": "arrow.right", "back": "chevron.left", "wand": "sparkles",
-        "tools": "graduationcap", "undefined": "circle.dashed", "read": "book", "investigate": "magnifyingglass",
-        "practice": "pencil.and.ruler", "produce": "hammer", "discuss": "bubble.left.and.bubble.right",
-        "collaborate": "person.2", "whole": "person.3", "subgroups": "rectangle.3.group", "individual": "person",
-        "directed": "megaphone", "guided": "signpost.right", "supported": "lifepreserver", "independent": "figure.walk",
-        "sync": "dot.radiowaves.left.and.right", "async": "calendar", "onsite": "building.columns",
-        "location_based": "mappin.and.ellipse", "online": "globe", "hybrid": "rectangle.on.rectangle",
-        "other": "ellipsis", "none": "circle", "diagnostic": "stethoscope", "formative": "pencil.line",
-        "summative": "checkmark.seal", "certificative": "rosette", "sidebar": "sidebar.leading",
+        "tools": "graduationcap",
+        // Options pédagogiques : équivalents SF Symbols des icônes Font Awesome du site
+        // (scenarisation.eu, js/editor/config.js). Garder les deux tables alignées.
+        "undefined": "circle", "read": "book", "investigate": "magnifyingglass",
+        "practice": "dumbbell", "produce": "compass.drawing", "discuss": "bubble.left.and.bubble.right",
+        "collaborate": "person.3", "whole": "person.3", "subgroups": "person.2", "individual": "person",
+        "directed": "rectangle.inset.filled.and.person.filled",
+        "guided": "point.topleft.down.to.point.bottomright.curvepath",
+        "supported": "figure.and.child.holdinghands", "independent": "figure.walk",
+        "sync": "clock", "async": "calendar", "onsite": "building.columns",
+        "location_based": "mappin.and.ellipse", "online": "desktopcomputer", "hybrid": "shuffle",
+        "other": "ellipsis", "none": "circle", "diagnostic": "magnifyingglass", "formative": "square.and.pencil",
+        "summative": "graduationcap", "certificative": "rosette", "sidebar": "sidebar.leading",
         "settings": "slider.horizontal.3", "analysis": "chart.pie", "chronology": "chart.bar.xaxis",
         "board": "rectangle.split.3x1", "moment": "square.stack", "doc": "doc.text", "sliders": "slider.horizontal.3",
         "account": "person.crop.circle"]
@@ -170,9 +175,7 @@ struct IconButton: View {
 /// L’accueil et l’aide reprennent le même fichier que l’icône de l’application.
 struct BrandMark: View {
     var body: some View {
-        let icon = Bundle.main.url(forResource: "AppIcon", withExtension: "icns")
-            .flatMap { NSImage(contentsOf: $0) } ?? NSApplication.shared.applicationIconImage ?? NSImage()
-        Image(nsImage: icon).resizable().scaledToFit().accessibilityHidden(true)
+        Platform.appIcon.resizable().scaledToFit().accessibilityHidden(true)
     }
 }
 
@@ -180,8 +183,6 @@ struct StudioField: View {
     let label: String
     @Binding var text: String
     var multiline = false
-    var focusOnAppear = false
-    var onFocusChange: ((Bool) -> Void)? = nil
     @FocusState private var focused: Bool
     var body: some View {
         TextField(label, text: $text, axis: multiline ? .vertical : .horizontal)
@@ -193,48 +194,43 @@ struct StudioField: View {
                 .strokeBorder(Color.accentColor.opacity(focused ? 0.65 : 0), lineWidth: 2))
             .animation(.easeOut(duration: 0.15), value: focused)
             .accessibilityLabel(label)
-            .onAppear { if focusOnAppear { focused = true } }
-            .onChange(of: focused) { _, value in onFocusChange?(value) }
     }
 }
 
+/// Champ long affiché avec son rendu Markdown et LaTeX. Les flèches (ou un clic sur le contenu)
+/// ouvrent l’éditeur agrandi, seul endroit où l’on saisit le texte et où l’Aide IA est proposée.
 struct ExpandableText: View {
     let label: String
     @Binding var text: String
-    var showLabel = true
     var aiPurpose: FieldAIPurpose? = nil
     @State private var expanded = false
-    @State private var preview = true
+    private var isEmpty: Bool { text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            if showLabel {
-                HStack(spacing: 4) {
-                    Text(label).font(.subheadline.weight(.medium)).foregroundStyle(.secondary)
-                    Spacer()
-                    Button(preview ? "Modifier" : "Aperçu") { withAnimation(.snappy) { preview.toggle() } }
-                        .buttonStyle(.borderless).font(.caption).foregroundStyle(.secondary)
-                        .help(preview ? "Revenir à la saisie" : "Afficher le rendu Markdown et LaTeX")
-                    if let aiPurpose { FieldAIButton(label: label, text: $text, purpose: aiPurpose) }
-                    IconButton(title: "Agrandir \(label)", icon: "expand", size: 10) { expanded = true }
+            HStack(spacing: 4) {
+                Text(label).font(.subheadline.weight(.medium)).foregroundStyle(.secondary)
+                Spacer()
+                IconButton(title: "Agrandir et modifier : \(label)", icon: "expand", size: 10) { expanded = true }
+            }
+            Group {
+                if isEmpty {
+                    Text("Cliquer pour rédiger").font(.callout).foregroundStyle(.tertiary)
+                } else {
+                    MarkdownPreview(text: text)
                 }
             }
-            if preview && !text.isEmpty {
-                MarkdownPreview(text: text)
-                    .padding(10).frame(maxWidth: .infinity, alignment: .leading)
-                    .background(StudioStyle.field.opacity(0.6), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
-                    .contentShape(Rectangle())
-                    .onTapGesture(count: 2) { withAnimation(.snappy) { preview = false } }
-            } else {
-                StudioField(label: label, text: $text, multiline: true, focusOnAppear: !preview,
-                            onFocusChange: { preview = !$0 })
-                    .overlay(alignment: .topTrailing) {
-                        if !showLabel {
-                            IconButton(title: "Agrandir \(label)", icon: "expand", size: 10) { expanded = true }.padding(3)
-                        }
-                    }
-            }
+            .padding(10).frame(maxWidth: .infinity, alignment: .leading)
+            .background(StudioStyle.field.opacity(0.6), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+            // Le calque capte le clic avant le rendu web, pour ouvrir l’éditeur agrandi.
+            .overlay { Color.clear.contentShape(Rectangle()).onTapGesture { expanded = true } }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(label)
+            .accessibilityValue(isEmpty ? "Vide" : text)
+            .accessibilityAddTraits(.isButton)
+            .accessibilityHint("Ouvre l’éditeur agrandi")
+            .accessibilityAction { expanded = true }
         }
-        .sheet(isPresented: $expanded, onDismiss: { preview = true }) {
+        .sheet(isPresented: $expanded) {
             MarkdownEditorSheet(label: label, text: $text, aiPurpose: aiPurpose) { expanded = false }
         }
     }

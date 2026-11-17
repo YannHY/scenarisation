@@ -57,7 +57,7 @@ enum SiteSyncError: LocalizedError {
         switch self {
         case .unavailable: "La connexion au site est temporairement indisponible. Réessayez."
         case .unauthorized: "Votre session a expiré. Reconnectez votre compte avant de synchroniser."
-        case .forbidden: "Votre compte n’autorise pas cette opération. Vos changements restent sur ce Mac."
+        case .forbidden: "Votre compte n’autorise pas cette opération. Vos changements restent sur \(Platform.thisDevice)."
         case .conflict: "Le scénario a aussi été modifié sur le site. Vos changements sont conservés."
         case .missing: "Ce scénario n’est plus disponible sur le site. Votre copie locale est conservée."
         case .invalidResponse: "Le site a renvoyé une réponse inattendue. Votre copie locale est conservée."
@@ -89,7 +89,7 @@ enum SiteSyncStatus: String, Codable, Sendable {
     case local, pending, synced, conflict, missing
     var label: String {
         switch self {
-        case .local: "Sur ce Mac"
+        case .local: "Sur \(Platform.thisDevice)"
         case .pending: "Modifications en attente"
         case .synced: "Synchronisé"
         case .conflict: "Conflit à examiner"

@@ -16,6 +16,8 @@ struct ScenarioExportView: View {
     @State private var students = false
     @State private var selected: Set<String>
     @State private var error: String?
+    /// Fichier prêt à enregistrer, sur iPad, avec le sélecteur de Fichiers.
+    @State private var exported: ExportedFile?
     init(scenario: Scenario) {
         self.scenario = scenario
         _selected = State(initialValue: Set(scenario.moments.map(\.id)))
@@ -49,18 +51,34 @@ struct ScenarioExportView: View {
                     .disabled(!scenario.moments.isEmpty && selected.isEmpty)
                     .keyboardShortcut(.defaultAction).studioButtons(prominent: true)
             }.padding([.horizontal, .bottom], 20).padding(.top, 4)
-        }.frame(width: 540, height: 560)
+        }
+#if os(macOS)
+        .frame(width: 540, height: 560)
+#else
+        .fileExporter(isPresented: Binding(get: { exported != nil }, set: { if !$0 { exported = nil } }),
+                      document: exported, contentType: exported?.type ?? .data, defaultFilename: exported?.name) { result in
+            switch result {
+            case .success: dismiss()
+            case .failure(let failure): error = failure.localizedDescription
+            }
+        }
+#endif
     }
     private func export() {
         do {
             let data = try ScenarioExporter.data(scenario, format: format, students: students, moments: selected)
-            let panel = NSSavePanel()
-            panel.allowedContentTypes = [UTType(filenameExtension: format.rawValue) ?? .data]
+            let type = UTType(filenameExtension: format.rawValue) ?? .data
             let filename = scenario.name.isEmpty ? "scenario" : scenario.name.replacingOccurrences(of: "/", with: "-")
+#if os(macOS)
+            let panel = NSSavePanel()
+            panel.allowedContentTypes = [type]
             panel.nameFieldStringValue = filename + (students ? " — élèves" : "") + "." + format.rawValue
             guard panel.runModal() == .OK, let url = panel.url else { return }
             try data.write(to: url, options: .atomic)
             dismiss()
+#else
+            exported = ExportedFile(data: data, type: type, name: filename + (students ? " — élèves" : ""))
+#endif
         } catch { self.error = error.localizedDescription }
     }
 }

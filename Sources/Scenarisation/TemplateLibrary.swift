@@ -1,5 +1,7 @@
 import SwiftUI
+#if os(macOS)
 import AppKit
+#endif
 
 struct ScenarioTemplate: Decodable, Identifiable, Sendable {
     struct Entry: Decodable, Sendable {
@@ -34,29 +36,34 @@ struct WelcomeView: View {
     /// Présent sur l’accueil de l’app uniquement : ouvre le compte et les scénarios du site.
     var account: (() -> Void)? = nil
     var body: some View {
-        HStack(alignment: .center, spacing: 40) {
-            brand.frame(width: 330)
-            VStack(spacing: 12) {
-                startRow("Créer un scénario", icon: "plus", tint: Color.accentColor,
-                         description: "Partez d’une page blanche et donnez forme à votre scénario pédagogique.", perform: create)
-                startRow("Importer un modèle", icon: "layers", tint: StudioStyle.color("practice"),
-                         description: "Parcourez la bibliothèque, visualisez les modèles, puis adaptez celui qui vous convient.", perform: models)
-                startRow("Ouvrir un scénario partagé", icon: "folder", tint: StudioStyle.color("read"),
-                         description: "JSON, Markdown, Excel, CSV, Word, HTML ou LDJ.", perform: open)
-                startRow("Créer avec l’IA", icon: "wand", tint: StudioStyle.color("discuss"),
-                         description: "Construisez votre scénario en dialoguant avec l’assistant de votre choix.", perform: createWithAI)
-                if let account {
-                    startRow("Mon compte et mes scénarios", icon: "account", tint: StudioStyle.color("collaborate"),
-                             description: "Retrouvez sur ce Mac les scénarios de votre compte scenarisation.eu.", perform: account)
-                }
-            }.frame(width: 400)
+        // Un seul bloc compact, centré dans la fenêtre quelle que soit sa taille ;
+        // côte à côte, ou l’un sous l’autre lorsque la largeur manque (iPad en portrait).
+        ViewThatFits(in: .horizontal) {
+            HStack(alignment: .center, spacing: 40) { brand.frame(width: 330); actions }.fixedSize()
+            VStack(spacing: 28) { brand.frame(width: 330); actions }.fixedSize()
         }
-        // Un seul bloc compact, centré dans la fenêtre quelle que soit sa taille.
-        .fixedSize()
         .padding(40)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .ignoresSafeArea(.container, edges: .top)
+#if os(macOS)
         .background(WelcomeInitialFocus().frame(width: 0, height: 0))
+#endif
+    }
+    private var actions: some View {
+        VStack(spacing: 12) {
+            startRow("Créer un scénario", icon: "plus", tint: Color.accentColor,
+                     description: "Partez d’une page blanche et donnez forme à votre scénario pédagogique.", perform: create)
+            startRow("Importer un modèle", icon: "layers", tint: StudioStyle.color("practice"),
+                     description: "Parcourez la bibliothèque, visualisez les modèles, puis adaptez celui qui vous convient.", perform: models)
+            startRow("Ouvrir un scénario partagé", icon: "folder", tint: StudioStyle.color("read"),
+                     description: "JSON, Markdown, Excel, CSV, Word, HTML ou LDJ.", perform: open)
+            startRow("Créer avec l’IA", icon: "wand", tint: StudioStyle.color("discuss"),
+                     description: "Construisez votre scénario en dialoguant avec l’assistant de votre choix.", perform: createWithAI)
+            if let account {
+                startRow("Mon compte et mes scénarios", icon: "account", tint: StudioStyle.color("collaborate"),
+                         description: "Retrouvez sur \(Platform.thisDevice) les scénarios de votre compte scenarisation.eu.", perform: account)
+            }
+        }.frame(width: 400)
     }
     private var brand: some View {
         VStack(spacing: 18) {
@@ -93,6 +100,7 @@ struct WelcomeView: View {
 }
 
 
+#if os(macOS)
 /// Retirer une seule fois le focus initial, dans la fenêtre qui contient l’accueil.
 /// Les contrôles conservent ensuite leur navigation et leur cadre de focus natifs.
 private struct WelcomeInitialFocus: NSViewRepresentable {
@@ -130,6 +138,7 @@ private struct WelcomeInitialFocus: NSViewRepresentable {
         }
     }
 }
+#endif
 
 struct TemplateLibrary: View {
     let use: (Scenario) -> Void
@@ -169,7 +178,7 @@ struct TemplateLibrary: View {
                 }
             }
         }
-        .frame(minWidth: 820, idealWidth: 980, minHeight: 560, idealHeight: 700)
+        .desktopFrame(minWidth: 820, idealWidth: 980, minHeight: 560, idealHeight: 700)
     }
 
     private func previewPage(_ item: ScenarioTemplate) -> some View {

@@ -1,5 +1,11 @@
-import Foundation
 import Combine
+#if os(macOS)
+import AppKit
+private let didBecomeActive = NSApplication.didBecomeActiveNotification
+#else
+import UIKit
+private let didBecomeActive = UIApplication.didBecomeActiveNotification
+#endif
 
 @MainActor
 final class SiteAccountModel: ObservableObject {
@@ -14,6 +20,8 @@ final class SiteAccountModel: ObservableObject {
     private var cachedUser: SiteUser?
     private var authChanges: AnyCancellable?
     private var operation: Task<Void, Never>?
+    private var refreshLoop: Task<Void, Never>?
+    private var activation: NSObjectProtocol?
     private struct CachedIdentity: Codable { let issuer: URL; let user: SiteUser }
 
     init(defaults: UserDefaults = .standard, directory: URL? = nil, auth: SiteAccountAuth? = nil) {
@@ -46,7 +54,30 @@ final class SiteAccountModel: ObservableObject {
     private func activateLiveAccount() throws {
         guard let user else { workspace = nil; return }
         let account = SiteSyncAccount.live(server: auth.configuration.issuer, user: user)
-        workspace = try SiteSyncWorkspace(account: account, service: auth.api(for: account.key), disk: disk())
+        let next = try SiteSyncWorkspace(account: account, service: auth.api(for: account.key), disk: disk())
+        next.onRemovedFromSite = { identity, file in SiteDeletionCleanup.apply(identity, workingFile: file) }
+        workspace = next
+    }
+
+    /// Relit le compte au retour dans l’app et toutes les deux minutes, pour que les scénarios
+    /// supprimés sur le site disparaissent aussi de ce Mac sans action de l’utilisateur.
+    func startAutomaticRefresh() {
+        guard refreshLoop == nil else { return }
+        refreshLoop = Task { [weak self] in
+            while !Task.isCancelled {
+                await self?.refreshQuietly()
+                try? await Task.sleep(for: .seconds(120))
+            }
+        }
+        activation = NotificationCenter.default.addObserver(forName: didBecomeActive,
+                                                            object: nil, queue: .main) { [weak self] _ in
+            Task { @MainActor in await self?.refreshQuietly() }
+        }
+    }
+
+    private func refreshQuietly() async {
+        guard networkAvailable, let workspace, !workspace.refreshing else { return }
+        try? await workspace.refresh()
     }
 
     @discardableResult

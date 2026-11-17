@@ -4,6 +4,7 @@ struct ChatEntry: Identifiable {
     let id = UUID()
     let role: String
     let text: String
+    var attachments: [String] = []
 }
 
 @MainActor
@@ -15,6 +16,8 @@ final class AssistantModel: ObservableObject {
     @Published var baseline: Scenario?
     @Published var busy = false
     @Published var error: String?
+    /// Documents joints au message en cours de rédaction.
+    @Published var attachments: [AssistantDocument] = []
     private var task: Task<Void, Never>?
     private var requestID = UUID()
     private var history: [AssistantTurn] = []
@@ -28,17 +31,45 @@ final class AssistantModel: ObservableObject {
         self.credential = credential ?? { try await AICredentials.read($0) }
     }
 
+    /// Ajoute des fichiers à la prochaine demande. Les fichiers illisibles sont signalés sans bloquer les autres.
+    func attach(_ urls: [URL]) {
+        var failures: [String] = []
+        var used = (history.flatMap { $0.documents ?? [] } + attachments).reduce(0) { $0 + $1.text.count }
+        for url in urls {
+            guard attachments.count < AssistantDocumentReader.maximumFiles else {
+                failures.append("\(AssistantDocumentReader.maximumFiles) documents au plus par message."); break
+            }
+            let access = url.startAccessingSecurityScopedResource()
+            defer { if access { url.stopAccessingSecurityScopedResource() } }
+            do {
+                let document = try AssistantDocumentReader.read(url)
+                guard used + document.text.count <= AssistantDocumentReader.totalLimit else {
+                    failures.append("« \(document.name) » dépasse la quantité de texte que l’assistant peut lire dans une conversation.")
+                    continue
+                }
+                used += document.text.count
+                attachments.append(document)
+            } catch { failures.append(error.localizedDescription) }
+        }
+        error = failures.isEmpty ? nil : failures.joined(separator: "\n")
+    }
+    func removeAttachment(_ document: AssistantDocument) { attachments.removeAll { $0.id == document.id } }
+
     @discardableResult
     func send(_ prompt: String, scenario: Scenario, configuration: AIConfiguration) -> Task<Void, Never>? {
-        guard !busy, !prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return nil }
+        var prompt = prompt.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !busy, !prompt.isEmpty || !attachments.isEmpty else { return nil }
         if let baseline, baseline != scenario {
             error = "Le scénario a changé. Écartez la proposition pour repartir de sa version actuelle."
             return nil
         }
+        if prompt.isEmpty { prompt = "Voici mes documents." }
+        let documents = attachments
+        attachments = []
         let reference = proposal ?? scenario
         let source = baseline ?? scenario
-        let conversation = history + [AssistantTurn(role: .user, content: prompt)]
-        messages.append(ChatEntry(role: "Vous", text: prompt))
+        let conversation = history + [AssistantTurn(role: .user, content: prompt, documents: documents.isEmpty ? nil : documents)]
+        messages.append(ChatEntry(role: "Vous", text: prompt, attachments: documents.map(\.name)))
         error = nil; busy = true
         let id = UUID(); requestID = id
         let chatgptClientID = configuration.service == .chatgpt ? ChatGPTAuth.shared.activeAccount?.id : nil
@@ -56,6 +87,8 @@ final class AssistantModel: ObservableObject {
                 guard requestID == id else { return }
                 if configuration.service == .chatgpt { ChatGPTAuth.shared.handleAPIError(error, clientID: chatgptClientID) }
                 busy = false; task = nil
+                // Les documents restent joints pour réessayer sans les choisir de nouveau.
+                if attachments.isEmpty { attachments = documents }
                 if !Task.isCancelled { self.error = error.localizedDescription }
             }
         }
@@ -76,7 +109,7 @@ final class AssistantModel: ObservableObject {
     }
     func newConversation() {
         cancel(); proposal = nil; baseline = nil; error = nil
-        history = []; messages = []
+        history = []; messages = []; attachments = []
     }
     func beginCreation() {
         guard messages.isEmpty, !busy else { return }
@@ -100,7 +133,10 @@ struct AssistantView: View {
     @State private var showSettings = false
     @State private var showReview = false
     @State private var preparedCreation = false
+    @State private var showAttach = false
     @FocusState private var composerFocused: Bool
+
+    private static let documentsPrompt = "Crée un scénario pédagogique complet à partir de mes documents : public, acquis d’apprentissage, moments, activités, durées et évaluations. Pose-moi d’abord les questions indispensables auxquelles mes documents ne répondent pas."
 
     private var configuration: AIConfiguration { settings.configuration }
     private var trimmedPrompt: String { prompt.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -112,7 +148,7 @@ struct AssistantView: View {
         return true
     }
     private var modelName: String { settings.models.first { $0.id == configuration.model }?.name ?? configuration.model }
-    private var canSend: Bool { !trimmedPrompt.isEmpty && ready }
+    private var canSend: Bool { (!trimmedPrompt.isEmpty || !model.attachments.isEmpty) && ready }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -123,6 +159,11 @@ struct AssistantView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         if model.messages.isEmpty { emptyState }
                         ForEach(model.messages) { message in bubble(message).id(message.id) }
+                        // En création, le message d’accueil remplace l’état vide : la suggestion reste proposée
+                        // jusqu’à la première demande.
+                        if ready, !model.busy, !model.messages.isEmpty, !model.messages.contains(where: { $0.role == "Vous" }) {
+                            documentsSuggestion
+                        }
                         if model.busy {
                             HStack(spacing: 8) { ProgressView().controlSize(.small); Text("Préparation de la réponse…").foregroundStyle(.secondary) }
                                 .padding(.leading, 4)
@@ -134,6 +175,13 @@ struct AssistantView: View {
                 }
             }
             footer
+        }
+        .fileImporter(isPresented: $showAttach, allowedContentTypes: AssistantDocumentReader.contentTypes,
+                      allowsMultipleSelection: true) { result in
+            switch result {
+            case .success(let urls): model.attach(urls); composerFocused = true
+            case .failure(let error): model.error = error.localizedDescription
+            }
         }
         .sheet(isPresented: $showSettings) {
             VStack(spacing: 0) {
@@ -218,7 +266,7 @@ struct AssistantView: View {
                 if creationMode && ready { model.beginCreation() }
                 prompt = ""; composerFocused = true
             }
-                .disabled(model.busy || model.messages.isEmpty)
+                .disabled(model.busy || (model.messages.isEmpty && model.attachments.isEmpty))
             IconButton(title: "Réglages de l’assistant", icon: "settings", size: 13) { showSettings = true }
         }.padding(.horizontal, 16).padding(.vertical, 12)
     }
@@ -228,7 +276,8 @@ struct AssistantView: View {
             if !ready {
                 Text("Choisissez votre assistant.").font(.title3.weight(.semibold))
                 Text(creationMode ? "Connectez le service de votre choix pour créer votre scénario." :
-                    "Utilisez un modèle sur votre Mac ou connectez un service en ligne.")
+                    AIProvider.allCases.contains { $0.isLocal && $0.availableOnThisDevice }
+                        ? "Utilisez un modèle sur votre Mac ou connectez un service en ligne." : "Connectez un service en ligne.")
                     .foregroundStyle(.secondary)
                 if accounts.busy {
                     HStack(spacing: 8) { ProgressView().controlSize(.small); Text("Connexion au service…").font(.callout).foregroundStyle(.secondary) }
@@ -239,6 +288,7 @@ struct AssistantView: View {
                 Text("Décrivez le public, les objectifs et le temps disponible. Vous pouvez aussi demander une adaptation du scénario ouvert.")
                     .foregroundStyle(.secondary)
                 VStack(alignment: .leading, spacing: 8) {
+                    documentsSuggestion
                     suggestion("Construire une séance de 55 minutes",
                                "Construis un scénario de 55 minutes pour des élèves de 6e sur [sujet]. Ils devront être capables de [objectif]. Prévois une évaluation formative.")
                     suggestion("Ajouter une évaluation formative",
@@ -249,9 +299,19 @@ struct AssistantView: View {
             }
         }.padding(.top, 8)
     }
-    private func suggestion(_ title: String, _ text: String) -> some View {
-        Button { prompt = text; composerFocused = true } label: {
-            HStack { FA(name: "wand", size: 11).foregroundStyle(Color.accentColor); Text(title); Spacer(minLength: 0) }
+    /// Prépare la demande et ouvre le choix des fichiers s’il n’y en a pas encore de joints.
+    private var documentsSuggestion: some View {
+        suggestion("Crée un scénario pédagogique complet à partir de mes documents", Self.documentsPrompt, systemImage: "doc.text") {
+            if model.attachments.isEmpty { showAttach = true }
+        }
+    }
+    private func suggestion(_ title: String, _ text: String, systemImage: String? = nil, then: @escaping () -> Void = {}) -> some View {
+        Button { prompt = text; composerFocused = true; then() } label: {
+            HStack {
+                if let systemImage { Image(systemName: systemImage).font(.system(size: 11, weight: .semibold)).foregroundStyle(Color.accentColor) }
+                else { FA(name: "wand", size: 11).foregroundStyle(Color.accentColor) }
+                Text(title).multilineTextAlignment(.leading); Spacer(minLength: 0)
+            }
                 .padding(.horizontal, 12).padding(.vertical, 9).frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                 .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
@@ -262,13 +322,40 @@ struct AssistantView: View {
         let mine = message.role == "Vous"
         return HStack {
             if mine { Spacer(minLength: 40) }
-            Text(message.text).textSelection(.enabled)
-                .padding(.horizontal, 13).padding(.vertical, 9)
-                .foregroundStyle(mine ? Color.white : Color.primary)
-                .background(mine ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(Color.primary.opacity(0.07)),
-                            in: RoundedRectangle(cornerRadius: 17, style: .continuous))
+            VStack(alignment: mine ? .trailing : .leading, spacing: 6) {
+                if !message.attachments.isEmpty {
+                    VStack(alignment: .trailing, spacing: 4) {
+                        ForEach(Array(message.attachments.enumerated()), id: \.offset) { _, name in
+                            Label(name, systemImage: "doc.text").font(.caption).lineLimit(1).truncationMode(.middle)
+                                .padding(.horizontal, 10).padding(.vertical, 6)
+                                .background(Color.primary.opacity(0.07), in: Capsule())
+                        }
+                    }
+                }
+                Text(message.text).textSelection(.enabled)
+                    .padding(.horizontal, 13).padding(.vertical, 9)
+                    .foregroundStyle(mine ? Color.white : Color.primary)
+                    .background(mine ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(Color.primary.opacity(0.07)),
+                                in: RoundedRectangle(cornerRadius: 17, style: .continuous))
+            }
             if !mine { Spacer(minLength: 40) }
         }
+    }
+
+    private func attachmentChip(_ document: AssistantDocument) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: "doc.text").foregroundStyle(Color.accentColor)
+            Text(document.name).lineLimit(1).truncationMode(.middle)
+            if document.truncated {
+                Image(systemName: "scissors").foregroundStyle(.secondary)
+                    .help("Document long : seul le début de son texte sera transmis.")
+            }
+            Button { model.removeAttachment(document) } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary) }
+                .buttonStyle(.plain).disabled(model.busy)
+                .help("Retirer").accessibilityLabel("Retirer \(document.name)")
+        }
+        .font(.caption).padding(.leading, 9).padding(.trailing, 6).padding(.vertical, 5)
+        .background(Color.primary.opacity(0.07), in: Capsule())
     }
 
     private var footer: some View {
@@ -289,26 +376,48 @@ struct AssistantView: View {
                 }.padding(12).frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color.green.opacity(0.10), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             }
-            HStack(alignment: .bottom, spacing: 8) {
-                TextField("Décrivez ce que vous souhaitez…", text: $prompt, axis: .vertical)
-                    .textFieldStyle(.plain).lineLimit(1...8).focused($composerFocused)
-                    .onKeyPress(.return, phases: .down) { press in
-                        guard press.modifiers.isEmpty else { return .ignored }
-                        if !model.busy { submit() }
-                        return .handled
+            VStack(alignment: .leading, spacing: 8) {
+                if !model.attachments.isEmpty {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 6) { ForEach(model.attachments) { attachmentChip($0) } }
                     }
-                    .help("Retour pour envoyer ; Maj+Retour pour insérer une nouvelle ligne.")
-                    .disabled(model.busy).padding(.vertical, 5).padding(.leading, 4)
-                Button(action: submit) {
-                    Image(systemName: model.busy ? "stop.fill" : "arrow.up").font(.system(size: 12, weight: .bold)).foregroundStyle(.white)
-                        .frame(width: 28, height: 28)
-                        .background(model.busy || canSend ? Color.accentColor : Color.secondary.opacity(0.4), in: Circle())
                 }
-                .buttonStyle(.plain).keyboardShortcut(.return, modifiers: [.command])
-                .disabled(!model.busy && !canSend)
-                .help(model.busy ? "Arrêter" : "Envoyer (↩ ou ⌘↩)").accessibilityLabel(model.busy ? "Arrêter" : "Envoyer")
+                HStack(alignment: .bottom, spacing: 8) {
+                    Button { showAttach = true } label: {
+                        Image(systemName: "plus").font(.system(size: 13, weight: .semibold)).foregroundStyle(.secondary)
+                            .frame(width: 28, height: 28)
+                            .background(Color.primary.opacity(0.07), in: Circle())
+                            .contentShape(Circle())
+                    }
+                    .buttonStyle(.plain).disabled(model.busy)
+                    .help("Ajouter des fichiers (PDF, Word, PowerPoint, Excel, texte)").accessibilityLabel("Ajouter des fichiers")
+                    TextField(model.attachments.isEmpty ? "Décrivez ce que vous souhaitez…" : "Ajoutez une consigne (facultatif)…",
+                              text: $prompt, axis: .vertical)
+                        .textFieldStyle(.plain).lineLimit(1...8).focused($composerFocused)
+                        .onKeyPress(.return, phases: .down) { press in
+                            guard press.modifiers.isEmpty else { return .ignored }
+                            if !model.busy { submit() }
+                            return .handled
+                        }
+                        .help("Retour pour envoyer ; Maj+Retour pour insérer une nouvelle ligne.")
+                        .disabled(model.busy).padding(.vertical, 5).padding(.leading, 4)
+                    Button(action: submit) {
+                        Image(systemName: model.busy ? "stop.fill" : "arrow.up").font(.system(size: 12, weight: .bold)).foregroundStyle(.white)
+                            .frame(width: 28, height: 28)
+                            .background(model.busy || canSend ? Color.accentColor : Color.secondary.opacity(0.4), in: Circle())
+                    }
+                    .buttonStyle(.plain).keyboardShortcut(.return, modifiers: [.command])
+                    .disabled(!model.busy && !canSend)
+                    .help(model.busy ? "Arrêter" : "Envoyer (↩ ou ⌘↩)").accessibilityLabel(model.busy ? "Arrêter" : "Envoyer")
+                }
             }
             .padding(8).glassSurface(radius: 22)
+            .dropDestination(for: URL.self) { urls, _ in
+                let files = urls.filter(\.isFileURL)
+                guard !model.busy, !files.isEmpty else { return false }
+                model.attach(files); composerFocused = true
+                return true
+            }
             if !ready && !model.messages.isEmpty {
                 Button("Connecter un modèle pour envoyer votre demande") { showSettings = true }
                     .buttonStyle(.plain).foregroundStyle(Color.accentColor)
@@ -322,8 +431,8 @@ struct AssistantView: View {
                         Link("Gérer l’utilisation", destination: ChatGPTProtocol.usageURL)
                     }.font(.caption2).padding(.horizontal, 6)
                 }
-                Text(configuration.isOnThisMac ? "Scénario et échanges · traités sur ce Mac." :
-                    "Scénario et échanges · transmis à \(configuration.service.label).")
+                Text(configuration.isOnThisMac ? "Scénario, échanges et documents joints · traités sur ce Mac." :
+                    "Scénario, échanges et documents joints · transmis à \(configuration.service.label).")
                     .font(.caption2).foregroundStyle(.tertiary).padding(.horizontal, 6)
             }
         }.padding(12)
@@ -350,7 +459,7 @@ struct ProposalReview: View {
                 Text("Examiner la proposition").font(.title.bold())
                 Text("La proposition remplacera le scénario ouvert. Cette opération pourra être annulée.").foregroundStyle(.secondary)
             }
-            HSplitView {
+            SplitPair {
                 ScenarioSummary(title: "Version actuelle", scenario: current).padding(.trailing, 8)
                 ScenarioSummary(title: "Proposition", scenario: proposed).padding(.leading, 8)
             }
@@ -363,7 +472,7 @@ struct ProposalReview: View {
                 Button("Fermer") { dismiss() }.keyboardShortcut(.cancelAction).studioButtons()
                 Button("Appliquer", action: apply).disabled(stale).keyboardShortcut(.defaultAction).studioButtons(prominent: true)
             }
-        }.padding(24).frame(minWidth: 860, idealWidth: 1000, minHeight: 650)
+        }.padding(24).desktopFrame(minWidth: 860, idealWidth: 1000, minHeight: 650)
     }
 }
 

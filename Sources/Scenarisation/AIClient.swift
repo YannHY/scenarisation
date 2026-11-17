@@ -74,7 +74,7 @@ struct AIConfiguration: Equatable, Sendable {
         guard let base = URL(string: endpoint.trimmingCharacters(in: .whitespacesAndNewlines)),
               let host = base.host, base.user == nil, base.password == nil, base.query == nil, base.fragment == nil,
               base.scheme == "https" || (base.scheme == "http" && ["localhost", "127.0.0.1", "::1", "[::1]"].contains(host)) else {
-            throw ScenarioError.invalid("Utilisez une adresse HTTPS, ou HTTP pour un serveur sur ce Mac.")
+            throw ScenarioError.invalid("Utilisez une adresse HTTPS, ou HTTP pour un serveur sur \(Platform.thisDevice).")
         }
         return base
     }
@@ -375,7 +375,7 @@ struct AIClient {
             return ScenarioError.invalid(configuration.isOnThisMac
                 ? "Le modèle local met trop de temps à répondre. Raccourcissez la demande ou choisissez un modèle plus léger."
                 : "Le service met trop de temps à répondre. Réessayez dans un instant.")
-        case .notConnectedToInternet: return ScenarioError.invalid("Votre Mac n’est pas connecté à Internet.")
+        case .notConnectedToInternet: return ScenarioError.invalid("Votre \(Platform.deviceName) n’est pas connecté à Internet.")
         default: return error
         }
     }

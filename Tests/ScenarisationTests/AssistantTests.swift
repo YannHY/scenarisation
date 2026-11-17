@@ -309,4 +309,51 @@ struct AssistantTests {
         }
         #expect(scenario == reference)
     }
+
+    @Test func attachedDocumentsReachTheModelAndStayInTheConversation() async throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let notes = folder.appendingPathComponent("programme.md")
+        try Data("# Le conte\n\nLire et raconter un conte en sixième.".utf8).write(to: notes)
+        let empty = folder.appendingPathComponent("vide.txt")
+        try Data("  \n".utf8).write(to: empty)
+        var received: [[AssistantTurn]] = []
+        let model = AssistantModel(respond: { _, history, _, _ in
+            received.append(history)
+            return AssistantReply(message: "Combien de temps ?", proposal: nil)
+        }, credential: { _ in "" })
+        model.attach([notes, empty])
+        #expect(model.attachments.map(\.name) == ["programme.md"])
+        #expect(model.error?.contains("vide.txt") == true)
+        await model.send("", scenario: .blank(), configuration: configuration)?.value
+        #expect(model.attachments.isEmpty)
+        #expect(model.messages.first?.attachments == ["programme.md"])
+        let first = try #require(received.first?.last)
+        #expect(first.content == "Voici mes documents.")
+        #expect(first.documents?.first?.text.contains("raconter un conte") == true)
+        await model.send("55 minutes", scenario: .blank(), configuration: configuration)?.value
+        #expect(received.last?.first?.documents?.count == 1)
+
+        var sent = ""
+        _ = try await AssistantConversation.reply(scenario: .blank(), history: received.last ?? []) { _, user in
+            sent = user
+            return #"{"kind":"message","message":"OK"}"#
+        }
+        let conversation = try context(sent)["conversation"]
+        guard case .array(let turns)? = conversation, case .object(let turn) = turns.first,
+              case .array(let documents)? = turn["documents"], case .object(let document) = documents.first else {
+            Issue.record("Les documents joints manquent dans la demande."); return
+        }
+        #expect(document["name"] == .string("programme.md"))
+    }
+
+    @Test func documentReaderExtractsOfficeAndTruncatesLongTexts() throws {
+        let word = try Data(contentsOf: try #require(Bundle.module.url(forResource: "site-student", withExtension: "docx", subdirectory: "Fixtures")))
+        #expect(!(try AssistantDocumentReader.document(word, name: "cours.docx").text.isEmpty))
+        let long = String(repeating: "a", count: AssistantDocumentReader.characterLimit + 10)
+        let document = try AssistantDocumentReader.document(Data(long.utf8), name: "long.txt")
+        #expect(document.truncated && document.text.count == AssistantDocumentReader.characterLimit)
+        #expect(throws: ScenarioError.self) { try AssistantDocumentReader.document(Data("<p> </p>".utf8), name: "vide.html") }
+    }
 }

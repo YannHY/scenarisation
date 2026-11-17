@@ -17,14 +17,18 @@ struct AISettingsView: View {
 
     var body: some View {
         Form {
+#if os(macOS)
             ScenarioFolderSection()
+#endif
             Section {
                 Picker("Service", selection: Binding(get: { service }, set: { settings.selectProvider($0) })) {
                     Section("Avec votre compte") {
-                        ForEach([AIProvider.chatgpt, .claude, .antigravity, .grok]) { Text($0.label).tag($0) }
+                        ForEach([AIProvider.chatgpt, .claude, .antigravity, .grok].filter(\.availableOnThisDevice)) { Text($0.label).tag($0) }
                     }
-                    Section("Sur ce Mac") {
-                        ForEach(AIProvider.allCases.filter(\.isLocal)) { Text($0.label).tag($0) }
+                    if AIProvider.allCases.contains(where: { $0.isLocal && $0.availableOnThisDevice }) {
+                        Section("Sur ce Mac") {
+                            ForEach(AIProvider.allCases.filter(\.isLocal)) { Text($0.label).tag($0) }
+                        }
                     }
                     Section("Avec une clé API") {
                         ForEach([AIProvider.openai, .mistral]) { Text($0.label).tag($0) }
