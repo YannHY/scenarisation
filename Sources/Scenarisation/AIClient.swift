@@ -217,17 +217,6 @@ struct AIClient {
         }
     }
 
-    static func propose(scenario: Scenario, prompt: String, configuration: AIConfiguration, key: String,
-                        sessionConfiguration: URLSessionConfiguration = .ephemeral) async throws -> Scenario {
-        let source = String(decoding: try scenario.encoded(), as: UTF8.self)
-        let system = AssistantPrompt.pedagogy + "\n" + AssistantPrompt.scenarioFormat
-            + "\nRetourne uniquement un objet JSON complet compatible avec Scénarisation, sans balises Markdown."
-        let user = "Demande de l’enseignant:\n\(prompt)\n\nScénario actuel:\n\(source)"
-        let text = try await generate(system: system, user: user, configuration: configuration, key: key,
-            sessionConfiguration: sessionConfiguration)
-        return try Self.scenario(from: text)
-    }
-
     static func generate(system: String, user: String, configuration: AIConfiguration, key: String,
                          sessionConfiguration: URLSessionConfiguration = .ephemeral) async throws -> String {
         if configuration.service.usesACP {
@@ -319,7 +308,7 @@ struct AIClient {
             }
             var text = ""
             var blank = 0
-            for try await line in bytes.lines {
+            for try await line in BoundedResponse.Lines(bytes: bytes) {
                 try Task.checkCancellation()
                 var payload = Substring(line)
                 if events {
@@ -387,7 +376,7 @@ struct AIClient {
         defer { session.invalidateAndCancel() }
         let data: Data
         let response: URLResponse
-        do { (data, response) = try await session.data(for: request) }
+        do { (data, response) = try await BoundedResponse.data(for: request, session: session) }
         catch let error as URLError { throw transportError(error, configuration: configuration) }
         try Task.checkCancellation()
         try check(response)

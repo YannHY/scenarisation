@@ -170,6 +170,21 @@ struct ImportTests {
         #expect(throws: ScenarioError.self) { try ScenarioImporter.decode(corrupt, filename: "corrupt.xlsx") }
     }
 
+    @Test func sparseSpreadsheetCannotAmplifyIntoMillionsOfCells() throws {
+        let rows = (1...245).map { "<row><c r=\"FAN\($0)\"><v>1</v></c></row>" }.joined()
+        let archive = StoredZip.archive([
+            ("xl/workbook.xml", "<workbook><sheet id=\"1\"/></workbook>"),
+            ("xl/_rels/workbook.xml.rels", "<Relationships><Relationship Id=\"1\" Type=\"/worksheet\" Target=\"worksheets/sheet1.xml\"/></Relationships>"),
+            ("xl/worksheets/sheet1.xml", "<worksheet><sheetData>\(rows)</sheetData></worksheet>")
+        ])
+        do {
+            _ = try ScenarioOfficeReader.spreadsheet(archive)
+            Issue.record("Le budget global de cellules aurait dû interrompre l’import.")
+        } catch {
+            #expect(error.localizedDescription.contains("trop de cellules"))
+        }
+    }
+
     @Test func allEntryPointsAdvertiseTheSameFormatsAndWriteJSON() {
         for ext in ScenarioImporter.extensions {
             #expect(ScenarioDocument.readableContentTypes.contains { $0 == UTType(filenameExtension: ext) })

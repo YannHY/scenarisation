@@ -11,8 +11,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		D2A57DC1D883FD21FB995169 /* Scenarisation.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Scenarisation.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		718779752B851AC0DC6281A8 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
+		D2A57DC1D883FD21FB995169 /* Scenarisation.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Scenarisation.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -29,9 +29,28 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		9E81E7B963C71363E2FB3EEF /* Shared */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (DD1D88A286890F886CE5C677 /* Exceptions for "Shared" folder in "ScenarisationPad" target */, ); explicitFolders = (Web, ); name = Shared; path = ../Sources/Scenarisation; sourceTree = "<group>"; };
-		F2AB5FB218DA8B84623F4557 /* Sources */ = {isa = PBXFileSystemSynchronizedRootGroup; path = Sources; sourceTree = "<group>"; };
-		55B558C7EF820E6E00E5993B /* Resources */ = {isa = PBXFileSystemSynchronizedRootGroup; path = Resources; sourceTree = "<group>"; };
+		55B558C7EF820E6E00E5993B /* Resources */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		9E81E7B963C71363E2FB3EEF /* Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				DD1D88A286890F886CE5C677 /* Exceptions for "Shared" folder in "ScenarisationPad" target */,
+			);
+			explicitFolders = (
+				Web,
+			);
+			name = Shared;
+			path = ../Sources/Scenarisation;
+			sourceTree = "<group>";
+		};
+		F2AB5FB218DA8B84623F4557 /* Sources */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Sources;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -45,6 +64,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		86024CAD1E83101D97359D73 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D2A57DC1D883FD21FB995169 /* Scenarisation.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		8D3FC6DB5D0827F168A73277 = {
 			isa = PBXGroup;
 			children = (
@@ -54,14 +81,6 @@
 				718779752B851AC0DC6281A8 /* LICENSE */,
 				86024CAD1E83101D97359D73 /* Products */,
 			);
-			sourceTree = "<group>";
-		};
-		86024CAD1E83101D97359D73 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				D2A57DC1D883FD21FB995169 /* Scenarisation.app */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -80,9 +99,9 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				F2AB5FB218DA8B84623F4557 /* Sources */,
-				9E81E7B963C71363E2FB3EEF /* Shared */,
 				55B558C7EF820E6E00E5993B /* Resources */,
+				9E81E7B963C71363E2FB3EEF /* Shared */,
+				F2AB5FB218DA8B84623F4557 /* Sources */,
 			);
 			name = ScenarisationPad;
 			packageProductDependencies = (
@@ -147,26 +166,58 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		553194FECB7E1C4EBBAFB6CE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 4;
+				DEVELOPMENT_TEAM = D73WW234K6;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Scénarisation";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Scénarisation — Yann Houry, d’après François Jourde et UCL Learning Designer. CC BY-SA 4.0.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.4.2;
+				PRODUCT_BUNDLE_IDENTIFIER = eu.scenarisation.ipad;
+				PRODUCT_NAME = Scenarisation;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TARGETED_DEVICE_FAMILY = 2;
+			};
+			name = Release;
+		};
 		59233E4D684FB5A1A72525B8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
-				SDKROOT = iphoneos;
-				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = 2;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				ENABLE_TESTABILITY = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 2;
 			};
 			name = Debug;
 		};
@@ -176,17 +227,17 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = 2;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_NS_ASSERTIONS = NO;
-				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -197,7 +248,8 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
+				DEVELOPMENT_TEAM = D73WW234K6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Scénarisation";
@@ -211,7 +263,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.1;
+				MARKETING_VERSION = 0.4.2;
 				PRODUCT_BUNDLE_IDENTIFIER = eu.scenarisation.ipad;
 				PRODUCT_NAME = Scenarisation;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -221,37 +273,6 @@
 				TARGETED_DEVICE_FAMILY = 2;
 			};
 			name = Debug;
-		};
-		553194FECB7E1C4EBBAFB6CE /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Scénarisation";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Scénarisation — Yann Houry, d’après François Jourde et UCL Learning Designer. CC BY-SA 4.0.";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 0.2.1;
-				PRODUCT_BUNDLE_IDENTIFIER = eu.scenarisation.ipad;
-				PRODUCT_NAME = Scenarisation;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				TARGETED_DEVICE_FAMILY = 2;
-			};
-			name = Release;
 		};
 /* End XCBuildConfiguration section */
 

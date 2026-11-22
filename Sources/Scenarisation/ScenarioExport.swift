@@ -110,11 +110,11 @@ enum ScenarioExporter {
         switch format {
         case .json: return try scenario.encoded()
         case .markdown: return Data(markdown(scenario, students: students).utf8)
-        case .html: return Data(html(scenario, students: students).utf8)
+        case .html: return Data(try htmlDocument(scenario, students: students).utf8)
         case .csv:
             let text = rows(scenario, students: students).map { $0.map { "\"" + $0.replacingOccurrences(of: "\"", with: "\"\"") + "\"" }.joined(separator: ",") }.joined(separator: "\r\n")
             return Data(("\u{feff}" + text).utf8)
-        case .word: return word(scenario, students: students)
+        case .word: return try ExportWord.document(scenario, students: students)
         case .excel: return excel(scenario, students: students)
         }
     }
@@ -155,28 +155,12 @@ enum ScenarioExporter {
             .unicodeScalars.filter { $0.value >= 32 || [9, 10, 13].contains($0.value) }.map(String.init).joined()
     }
     static func html(_ scenario: Scenario, students: Bool) -> String {
-        // La structure (un paragraphe par bloc) reste celle que relit l’import HTML.
-        let source = markdown(scenario, students: students)
-        let body = source.components(separatedBy: "\n\n").map { block in
-            for level in (1...3) {
-                let prefix = String(repeating: "#", count: level) + " "
-                if block.hasPrefix(prefix) {
-                    let lines = block.components(separatedBy: "\n")
-                    return "<h\(level)>\(xml(String(lines[0].dropFirst(prefix.count))))</h\(level)>" +
-                        (lines.count > 1 ? "<p>\(xml(lines.dropFirst().joined(separator: "\n")))</p>" : "")
-                }
-            }
-            return "<p>" + xml(block).replacingOccurrences(of: "\n", with: "<br>") + "</p>"
-        }.joined(separator: "\n")
-        // Les formules $…$ et $$…$$ restent dans le texte et sont composées à l’ouverture par KaTeX (MIT),
-        // intégré seulement si le scénario en contient : le fichier reste autonome et hors ligne.
-        let math = RichText.containsMath(source)
-        return """
-        <!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>\(xml(scenario.name))</title>
-        \(math ? KaTeX.head : "")
-        <style>body{font:16px/1.6 system-ui,sans-serif;color:#222;max-width:950px;margin:48px auto;padding:0 28px}h1{font-size:32px}h2{margin-top:40px;border-top:1px solid #ddd;padding-top:24px}h3{margin-top:28px}p{white-space:pre-wrap}@media print{body{margin:0;max-width:none}h2,h3{break-after:avoid}}</style>
-        </head><body><main>\(body)</main>\(math ? "<script>renderMath(document.body)</script>" : "")</body></html>
-        """
+        (try? htmlDocument(scenario, students: students)) ?? ""
+    }
+    /// Page autonome et hors ligne. Les formules $…$ et $$…$$ sont composées à l’ouverture par KaTeX (MIT),
+    /// intégré seulement si le scénario en contient.
+    static func htmlDocument(_ scenario: Scenario, students: Bool) throws -> String {
+        try ExportHTML.document(scenario, students: students, math: RichText.containsMath(markdown(scenario, students: students)))
     }
 
     static let headers = ["N° de séance", "Titre de la séance", "Objectifs de la séance", "Choix pédagogiques de la séance", "Notes de la séance",
@@ -213,18 +197,6 @@ enum ScenarioExporter {
 
     private static let packageRelationships = "http://schemas.openxmlformats.org/package/2006/relationships"
     private static let documentRelationships = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
-    static func word(_ scenario: Scenario, students: Bool) -> Data {
-        let paragraphs = markdown(scenario, students: students).components(separatedBy: "\n").map { line in
-            let heading = line.hasPrefix("# ") ? 32 : line.hasPrefix("## ") ? 26 : line.hasPrefix("### ") ? 23 : 21
-            let content = line.replacingOccurrences(of: "^#{1,3} ", with: "", options: .regularExpression)
-            return "<w:p><w:pPr><w:spacing w:after=\"160\"/></w:pPr><w:r><w:rPr><w:sz w:val=\"\(heading)\"/>\(heading > 21 ? "<w:b/>" : "")</w:rPr><w:t xml:space=\"preserve\">\(xml(content))</w:t></w:r></w:p>"
-        }.joined()
-        let document = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><w:document xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\"><w:body>\(paragraphs)<w:sectPr><w:pgSz w:w=\"11906\" w:h=\"16838\"/><w:pgMar w:top=\"1134\" w:right=\"1134\" w:bottom=\"1134\" w:left=\"1134\"/></w:sectPr></w:body></w:document>"
-        return StoredZip.archive([
-            ("[Content_Types].xml", "<?xml version=\"1.0\"?><Types xmlns=\"http://schemas.openxmlformats.org/package/2006/content-types\"><Default Extension=\"rels\" ContentType=\"application/vnd.openxmlformats-package.relationships+xml\"/><Override PartName=\"/word/document.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml\"/></Types>"),
-            ("_rels/.rels", "<?xml version=\"1.0\"?><Relationships xmlns=\"\(packageRelationships)\"><Relationship Id=\"rId1\" Type=\"\(documentRelationships)/officeDocument\" Target=\"word/document.xml\"/></Relationships>"),
-            ("word/document.xml", document)])
-    }
     static func excel(_ scenario: Scenario, students: Bool) -> Data {
         let sheetRows = rows(scenario, students: students).enumerated().map { rowIndex, values in
             let cells = values.enumerated().map { index, value in

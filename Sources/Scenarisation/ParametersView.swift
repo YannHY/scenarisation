@@ -11,6 +11,8 @@ struct ParametersView: View {
     private func number(_ key: String, fallback: Double = 0, minimum: Double = 0) -> Binding<Double> {
         Binding(get: { scenario.meta[key]?.number ?? fallback }, set: { scenario.meta[key] = .number(max(minimum, min(100_000, $0))) })
     }
+    @Environment(\.scenarioReadOnly) private var readOnly
+
     var body: some View {
         GeometryReader { geometry in
             let contentWidth = min(max(0, geometry.size.width - 56), 1240)
@@ -30,6 +32,8 @@ struct ParametersView: View {
                         detailsColumn.frame(width: twoColumns ? min(360, contentWidth * 0.33) : nil)
                     }
                 }
+                // En consultation seule, les champs restent lisibles et la page défile, sans modification possible.
+                .disabled(readOnly)
                 .frame(width: contentWidth, alignment: .leading)
                 .padding(.vertical, 28)
                 .frame(maxWidth: .infinity, alignment: .center)
@@ -40,13 +44,14 @@ struct ParametersView: View {
     private var mainColumn: some View {
         VStack(alignment: .leading, spacing: 24) {
             parameterCard {
-                ExpandableText(label: "Description", text: text("description"))
+                ExpandableText(label: "Description", text: text("description"), focus: "scenario::description")
             }
             parameterCard {
-                ExpandableText(label: "Commande institutionnelle", text: text("command"))
+                ExpandableText(label: "Commande institutionnelle", text: text("command"), focus: "scenario::command")
             }
             parameterCard {
-                ExpandableText(label: "Objectifs de la formation", text: text("personas"), aiPurpose: .objectives)
+                ExpandableText(label: "Objectifs de la formation", text: text("personas"), aiPurpose: .objectives,
+                               focus: "scenario::personas")
             }
             parameterCard("Acquis d’apprentissage") {
                 BloomOutcomes(scenario: $scenario)
@@ -92,7 +97,7 @@ struct ParametersView: View {
                 contextField("Enseignant(s)", key: "trainers", prompt: "Facultatif")
             }
             parameterCard {
-                ExpandableText(label: "Matériel enseignant", text: text("teacherMaterials"))
+                ExpandableText(label: "Matériel enseignant", text: text("teacherMaterials"), focus: "scenario::teacherMaterials")
             }
         }
     }

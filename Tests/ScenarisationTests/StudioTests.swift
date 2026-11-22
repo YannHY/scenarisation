@@ -103,9 +103,14 @@ struct StudioTests {
         while offset + 30 <= data.count && u32(offset) == 0x04034b50 {
             let nameLength = u16(offset + 26); let extra = u16(offset + 28)
             let size = Int(u32(offset + 18)); let start = offset + 30 + nameLength + extra
-            let parser = XMLParser(data: data.subdata(in: start..<(start + size)))
-            #expect(parser.parse(), "XML invalide : \(parser.parserError?.localizedDescription ?? "")")
-            count += 1; offset = start + size
+            // Seules les parties XML ; l’export Word embarque aussi le scénario en JSON.
+            let name = String(decoding: data.subdata(in: (offset + 30)..<(offset + 30 + nameLength)), as: UTF8.self)
+            if name.hasSuffix(".xml") || name.hasSuffix(".rels") {
+                let parser = XMLParser(data: data.subdata(in: start..<(start + size)))
+                #expect(parser.parse(), "XML invalide (\(name)) : \(parser.parserError?.localizedDescription ?? "")")
+                count += 1
+            }
+            offset = start + size
         }
         #expect(count >= 3)
     }

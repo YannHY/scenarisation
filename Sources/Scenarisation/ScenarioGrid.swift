@@ -38,8 +38,10 @@ struct ScenarioGrid: View {
         let columns = GridColumns(width: width)
         VStack(spacing: 0) {
             header(columns)
-            ForEach(scenario.moments.indices, id: \.self) { index in
-                momentRows(index, columns: columns)
+            ForEach(Array(scenario.moments.enumerated()), id: \.element.id) { index, _ in
+                VStack(spacing: 0) { momentRows(index, columns: columns) }
+                    .background(StudioStyle.surface)
+                    .boardDrop(moment: scenario.moments[index].id, target: .moment)
             }
             Button(action: addMoment) {
                 Text("+ Ajouter un moment").font(.system(size: 12))
@@ -97,25 +99,13 @@ struct ScenarioGrid: View {
 
     @ViewBuilder private func momentRows(_ index: Int, columns: GridColumns) -> some View {
         let moment = scenario.moments[index]
-        GridMomentRow(number: index + 1, title: Binding(get: { scenario.moments[index]["title"] },
+        GridMomentRow(momentID: moment.id, number: index + 1, title: Binding(get: { scenario.moments[index]["title"] },
                                                         set: { scenario.moments[index]["title"] = $0 }),
                       duration: moment.duration, duplicate: { duplicateMoment(index) },
                       move: { moveMoment(index, $0) }, remove: { removeMoment(index) },
                       canMoveUp: index > 0, canMoveDown: index + 1 < scenario.moments.count)
             .id("grid-moment-" + moment.id)
-            .dropDestination(for: String.self) { payloads, _ in
-                guard let text = payloads.first,
-                      let drag = try? JSONDecoder().decode(BoardDrag.self, from: Data(text.utf8)),
-                      let activityID = drag.activity, drag.moment != moment.id,
-                      let from = scenario.moments.firstIndex(where: { $0.id == drag.moment }),
-                      let position = scenario.moments[from].activities.firstIndex(where: { $0.id == activityID }) else { return false }
-                var moments = scenario.moments
-                let activity = moments[from].activities.remove(at: position)
-                moments[index].activities.append(activity)
-                scenario.moments = moments
-                return true
-            }
-        ForEach(moment.activities.indices, id: \.self) { position in
+        ForEach(Array(moment.activities.enumerated()), id: \.element.id) { position, _ in
             GridActivityRow(activity: $scenario.moments[index].activities[position], momentID: moment.id,
                             number: position + 1, columns: columns,
                             canMoveUp: position > 0, canMoveDown: position + 1 < moment.activities.count,
@@ -129,6 +119,7 @@ struct ScenarioGrid: View {
                                 scenario.moments[index].activities.insert(copy, at: position + 1)
                             },
                             remove: { pendingDelete = ActivityReference(moment: moment.id, activity: moment.activities[position].id) })
+                .boardDrop(moment: moment.id, target: .activity(moment.activities[position].id))
         }
         Button { scenario.moments[index].activities.append(.blank()) } label: {
             Text("+ Activité").font(.system(size: 11))
@@ -142,6 +133,8 @@ struct ScenarioGrid: View {
         .padding(.horizontal, 4).padding(.vertical, 3)
         .overlay(alignment: .bottom) { Rectangle().fill(StudioStyle.line).frame(height: 1) }
         .accessibilityLabel("Ajouter une activité au moment \(index + 1)")
+        .boardDrop(moment: moment.id, target: .end)
+        .help("Déposer une activité ici pour la placer à la fin de ce moment")
     }
 }
 
@@ -162,6 +155,7 @@ private struct GridDashedButtonStyle: ButtonStyle {
 }
 
 private struct GridMomentRow: View {
+    let momentID: String
     let number: Int
     @Binding var title: String
     let duration: Double
@@ -177,6 +171,8 @@ private struct GridMomentRow: View {
         HStack(spacing: 6) {
             Text("MOMENT \(number)").font(.system(size: 11, weight: .bold)).tracking(0.55).foregroundStyle(.secondary)
                 .fixedSize()
+                .boardHandle(BoardDrag(moment: momentID))
+                .help("Glisser pour déplacer le moment")
             TextField("Titre du moment", text: $title)
                 .textFieldStyle(.plain).font(.system(size: 13, weight: .semibold)).lineLimit(1).focused($focused)
                 .padding(.horizontal, 4).padding(.vertical, 2)
@@ -223,8 +219,8 @@ private struct GridActivityRow: View {
         HStack(spacing: 0) {
             Text("\(number)").font(.system(size: 11, weight: .semibold)).foregroundStyle(.secondary)
                 .frame(width: GridColumns.number)
-                .draggable(BoardDrag(moment: momentID, activity: activity.id).text)
-                .help("Glisser vers un autre moment")
+                .boardHandle(BoardDrag(moment: momentID, activity: activity.id))
+                .help("Glisser pour déplacer l’activité")
             cell(GridColumns.type) {
                 HStack(spacing: 5) {
                     Circle().fill(tint).frame(width: 8, height: 8)
@@ -251,7 +247,7 @@ private struct GridActivityRow: View {
         }
         .padding(.vertical, 3)
         .frame(minHeight: 30)
-        .background(hovering ? Color.primary.opacity(0.035) : .clear)
+        .background(hovering ? Color.primary.opacity(0.035) : .clear).background(StudioStyle.surface)
         .overlay(alignment: .leading) { Rectangle().fill(tint).frame(width: 3) }
         .overlay(alignment: .bottom) { Rectangle().fill(StudioStyle.line).frame(height: 1) }
         .onHover { hovering = $0 }

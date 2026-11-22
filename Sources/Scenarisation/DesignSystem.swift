@@ -11,9 +11,11 @@ enum StudioStyle {
     static let field = Color.primary.opacity(0.055)
     static let line = Color.primary.opacity(0.09)
     static let muted = Color.secondary
-    static let colors: [String: Color] = ["undefined": Color(hex: 0xc4c9d1), "read": Color(hex: 0x4fd1c5),
-        "investigate": Color(hex: 0xf28b88), "practice": Color(hex: 0xb98af0), "produce": Color(hex: 0x8fd16a),
-        "discuss": Color(hex: 0x6aa8f2), "collaborate": Color(hex: 0xf0b242)]
+    /// Couleurs des types d’apprentissage, partagées avec les exports HTML et Word.
+    static let typeHex: [String: UInt32] = ["undefined": 0xc4c9d1, "read": 0x4fd1c5, "investigate": 0xf28b88,
+        "practice": 0xb98af0, "produce": 0x8fd16a, "discuss": 0x6aa8f2, "collaborate": 0xf0b242]
+    static func hex(_ type: String) -> UInt32 { typeHex[type] ?? typeHex["undefined"]! }
+    static let colors: [String: Color] = typeHex.mapValues { Color(hex: $0) }
     static func color(_ type: String) -> Color { colors[type] ?? colors["undefined"]! }
 
     /// Noms internes → symboles SF Symbols (iconographie native de macOS).
@@ -203,12 +205,16 @@ struct ExpandableText: View {
     let label: String
     @Binding var text: String
     var aiPurpose: FieldAIPurpose? = nil
+    /// Emplacement du champ (`activity:<id>:<champ>`…), pour signaler aux collègues qu’on le modifie.
+    var focus: String? = nil
     @State private var expanded = false
+    @Environment(CollaborationSession.self) private var collaboration: CollaborationSession?
     private var isEmpty: Bool { text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 4) {
                 Text(label).font(.subheadline.weight(.medium)).foregroundStyle(.secondary)
+                if let focus { FieldPresence(field: focus).padding(.leading, 4) }
                 Spacer()
                 IconButton(title: "Agrandir et modifier : \(label)", icon: "expand", size: 10) { expanded = true }
             }
@@ -231,7 +237,13 @@ struct ExpandableText: View {
             .accessibilityAction { expanded = true }
         }
         .sheet(isPresented: $expanded) {
-            MarkdownEditorSheet(label: label, text: $text, aiPurpose: aiPurpose) { expanded = false }
+            MarkdownEditorSheet(label: label, text: $text, aiPurpose: aiPurpose, collaborationField: focus) { expanded = false }
+                .environment(collaboration)
+        }
+        .onChange(of: expanded) { _, open in
+            guard let focus, let collaboration else { return }
+            if open { collaboration.editingField = focus }
+            else if collaboration.editingField == focus { collaboration.editingField = nil }
         }
     }
 }

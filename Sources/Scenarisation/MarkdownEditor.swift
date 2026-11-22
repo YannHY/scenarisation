@@ -272,9 +272,10 @@ struct MarkdownTextView: NSViewRepresentable {
         context.coordinator.parent = self
         guard let textView = scroll.documentView as? NSTextView, textView.string != text else { return }
         let selection = textView.selectedRange()
+        let previous = textView.string
         textView.string = text
-        let length = (text as NSString).length
-        textView.setSelectedRange(NSRange(location: min(selection.location, length), length: 0))
+        // Une modification venue d’un collègue ne déplace pas le curseur dans le texte.
+        textView.setSelectedRange(TextSelectionShift.adjusted(selection, from: previous, to: text))
     }
 
     @MainActor final class Coordinator: NSObject, NSTextViewDelegate {
@@ -459,6 +460,8 @@ struct MarkdownEditorSheet: View {
     let label: String
     @Binding var text: String
     var aiPurpose: FieldAIPurpose? = nil
+    /// Champ partagé : un bandeau signale un collègue qui modifie le même texte.
+    var collaborationField: String? = nil
     var onDone: () -> Void
     @StateObject private var controller = MarkdownEditorController()
     @AppStorage("markdownEditorLayout") private var layout: EditorLayout = .split
@@ -474,6 +477,7 @@ struct MarkdownEditorSheet: View {
                     ForEach(EditorLayout.allCases) { Label($0.title, systemImage: $0.symbol).tag($0) }
                 }.pickerStyle(.segmented).labelsHidden().fixedSize()
             }
+            if let collaborationField { CollaborationFieldBanner(field: collaborationField) }
             if layout != .preview { MarkdownToolbar(controller: controller) }
             HStack(spacing: 12) {
                 if layout != .preview {

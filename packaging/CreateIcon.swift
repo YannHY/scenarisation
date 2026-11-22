@@ -39,20 +39,6 @@ for size in [16, 32, 128, 256, 512] {
             sector.fill()
             start -= angle
         }
-        if ProcessInfo.processInfo.environment["SCENARISATION_BETA"] == "1" {
-            NSGraphicsContext.saveGraphicsState()
-            shape.addClip()
-            let ribbon = NSRect(x: origin, y: origin + body * 0.07, width: body, height: body * 0.22)
-            color(0x202637).setFill()
-            ribbon.fill()
-            let label = NSAttributedString(string: "BÊTA", attributes: [
-                .font: NSFont.systemFont(ofSize: body * 0.16, weight: .bold),
-                .foregroundColor: NSColor.white
-            ])
-            let textSize = label.size()
-            label.draw(at: NSPoint(x: ribbon.midX - textSize.width / 2, y: ribbon.midY - textSize.height / 2))
-            NSGraphicsContext.restoreGraphicsState()
-        }
         image.unlockFocus()
         let bitmap = NSBitmapImageRep(data: image.tiffRepresentation!)!
         let filename = "icon_\(size)x\(size)\(scale == 2 ? "@2x" : "").png"

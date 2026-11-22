@@ -66,7 +66,7 @@ struct SiteSyncTests {
         #expect(try await service.download(1).revision == 2)
     }
 
-    @Test func concurrentChangesPreserveBothVersionsWithoutOverwritingTheSite() async throws {
+    @Test func concurrentChangesMergeFieldByFieldAndReachTheSite() async throws {
         let service = FakeSiteService()
         let ws = try workspace(service: service)
         let record = try await ws.downloadToMac(1)
@@ -76,18 +76,143 @@ struct SiteSyncTests {
         try await service.simulateChange(1)
         let remote = try await service.download(1)
         try await ws.synchronize(record.id)
-        #expect(ws.record(record.id)?.status == .conflict)
-        #expect(ws.record(record.id)?.local == local)
-        #expect(ws.record(record.id)?.remoteConflict?.document == remote.document)
-        #expect(try await service.download(1) == remote)
-        let copy = try ws.keepBoth(record.id)
-        #expect(copy.id != record.id && copy.remoteID == nil && copy.status == .pending)
-        #expect(copy.local.name == "Version du Mac — copie Mac")
-        #expect(ws.record(record.id)?.local == remote.document)
-        #expect(try await service.list().count == 2)
-        try await ws.synchronize(copy.id)
-        #expect(try await service.list().count == 3)
-        #expect(try await service.download(1) == remote)
+        let merged = try #require(ws.record(record.id))
+        #expect(merged.status == .synced && merged.remoteConflict == nil && merged.revision == 3)
+        #expect(merged.local.name == "Version du Mac")
+        #expect(merged.local.meta["description"] == remote.document.meta["description"])
+        #expect(try await service.download(1).document == merged.local)
+    }
+
+    @Test func remoteChangesKeepPersonalViewSettingsWithoutUploadingThem() async throws {
+        let service = FakeSiteService()
+        let ws = try workspace(service: service)
+        let record = try await ws.downloadToMac(1)
+        let identity = SyncDocumentIdentity(id: record.id, accountKey: ws.account.key)
+        var local = record.local; local.meta["boardLayout"] = .string("grid")
+        try ws.stage(identity, scenario: local, previous: record.local)
+        try await ws.synchronize(record.id)
+        #expect(try await service.download(1).revision == 2)
+        // Un collègue modifie le scénario et choisit une autre disposition.
+        var theirs = try await service.download(1).document
+        theirs.meta["boardLayout"] = .string("list"); theirs.meta["description"] = .string("Ajout du collègue")
+        _ = try await service.save(SiteSaveRequest(client_uuid: UUID(), design_id: 1, expected_revision: 2,
+                                                   title: theirs.name, document: theirs))
+        try await ws.synchronize(record.id)
+        let updated = try #require(ws.record(record.id))
+        #expect(updated.local.meta["boardLayout"]?.string == "grid")
+        #expect(updated.local.meta["description"]?.string == "Ajout du collègue")
+        #expect(updated.status == .synced && updated.revision == 3)
+        // Aucun envoi ne renvoie la disposition locale au collègue.
+        #expect(try await service.download(1).revision == 3)
+        try await ws.synchronize(record.id)
+        #expect(try await service.download(1).revision == 3)
+    }
+
+    @Test func twoTeachersEditingAtTheSameTimeConverge() async throws {
+        let service = FakeSiteService()
+        let marie = try workspace(service: service, account: SiteSyncAccount(key: "https://example.org/account/1", label: "Marie"))
+        let paul = try workspace(service: service, account: SiteSyncAccount(key: "https://example.org/account/2", label: "Paul"))
+        let a = try await marie.downloadToMac(1), b = try await paul.downloadToMac(1)
+        let activityID = a.local.moments[0].activities[0].id
+        var mine = a.local
+        mine.moments[0].activities[0]["instructions"] = "Lire le document.\nRépondre aux questions."
+        mine.meta["boardLayout"] = .string("grid")
+        try marie.stage(SyncDocumentIdentity(id: a.id, accountKey: marie.account.key), scenario: mine, previous: a.local)
+        var theirs = b.local
+        theirs.moments[1]["title"] = "S’entraîner à deux"
+        var added = Activity.blank(); added["description"] = "Activité de Paul"
+        theirs.moments[2].activities.append(added)
+        theirs.moments[0].activities[0].duration = 20
+        try paul.stage(SyncDocumentIdentity(id: b.id, accountKey: paul.account.key), scenario: theirs, previous: b.local)
+        // Les deux envois partent en même temps : l’un des deux relit, fusionne et renvoie.
+        async let first: Void = marie.synchronize(a.id)
+        async let second: Void = paul.synchronize(b.id)
+        _ = try await (first, second)
+        try await marie.synchronize(a.id)
+        try await paul.synchronize(b.id)
+        let site = try await service.download(1).document
+        for copy in [try #require(marie.record(a.id)), try #require(paul.record(b.id))] {
+            #expect(copy.status == .synced)
+            #expect(ScenarioMerge.sameContent(copy.local, site))
+            let activity = try #require(copy.local.moments[0].activities.first { $0.id == activityID })
+            #expect(activity["instructions"] == "Lire le document.\nRépondre aux questions." && activity.duration == 20)
+            #expect(copy.local.moments[1]["title"] == "S’entraîner à deux")
+            #expect(copy.local.moments[2].activities.last?.id == added.id)
+        }
+        #expect(marie.record(a.id)?.local.meta["boardLayout"]?.string == "grid")
+        #expect(paul.record(b.id)?.local.meta["boardLayout"] == nil)
+    }
+
+    @Test func presenceReportsTheRevisionAndLeavingRemovesTheCopy() async throws {
+        let service = FakeSiteService()
+        let ws = try workspace(service: service)
+        try await ws.refresh()
+        let record = try await ws.downloadToMac(2)
+        await service.shareWithCaller(2)
+        try await ws.refresh()
+        #expect(ws.summary(for: 2)?.sharedWithMe == true)
+        let presence = try #require(try await ws.presence(of: record.id, clientID: UUID().uuidString.lowercased(), focus: nil))
+        #expect(presence.revision == 1 && presence.shared)
+        var removed: [SyncDocumentIdentity] = []
+        ws.onRemovedFromSite = { identity, _ in removed.append(identity) }
+        try await ws.leave(2, userID: 7)
+        #expect(ws.record(record.id) == nil && ws.summary(for: 2) == nil)
+        #expect(removed == [SyncDocumentIdentity(id: record.id, accountKey: ws.account.key)])
+        #expect(try await service.list().map(\.id) == [1])
+    }
+
+    @Test func aScenarioSharedForViewingFollowsTheSiteAndNeverUploads() async throws {
+        let service = FakeSiteService()
+        await service.shareWithCaller(1, role: .viewer)
+        let ws = try workspace(service: service)
+        try await ws.refresh()
+        #expect(ws.summary(for: 1)?.sharedWithMe == true && ws.summary(for: 1)?.readOnly == true)
+        let record = try await ws.downloadToMac(1)
+        #expect(record.isReadOnly)
+        let identity = SyncDocumentIdentity(id: record.id, accountKey: ws.account.key)
+
+        // Une modification locale (fenêtre restée ouverte, ancienne version) n’est jamais envoyée et disparaît.
+        var local = record.local
+        local.meta["description"] = .string("Modification interdite"); local.meta["boardLayout"] = .string("grid")
+        try ws.stage(identity, scenario: local, previous: record.local)
+        var theirs = record.local; theirs.meta["objectives"] = .string("Objectif du propriétaire")
+        try await service.saveAsOwner(1, document: theirs)
+        try await ws.synchronize(record.id)
+        let updated = try #require(ws.record(record.id))
+        #expect(updated.local.meta["description"] == record.local.meta["description"])
+        #expect(updated.local.meta["objectives"]?.string == "Objectif du propriétaire")
+        #expect(updated.status == .synced && updated.revision == 2 && updated.isReadOnly)
+        #expect(try await service.download(1).revision == 2)
+
+        // Les réglages d’affichage restent propres à cette copie.
+        var view = updated.local; view.meta["boardLayout"] = .string("grid")
+        try ws.stage(identity, scenario: view, previous: updated.local)
+        try await ws.synchronize(record.id)
+        #expect(ws.record(record.id)?.local.meta["boardLayout"]?.string == "grid")
+        #expect(ws.record(record.id)?.status == .synced)
+        #expect(try await service.download(1).revision == 2)
+
+        // Le propriétaire lui rend le droit de modifier : les envois reprennent.
+        await service.shareWithCaller(1, role: .editor)
+        var edit = try #require(ws.record(record.id)).local; edit.meta["description"] = .string("Enfin modifiable")
+        try ws.stage(identity, scenario: edit, previous: ws.record(record.id)!.local)
+        try await ws.synchronize(record.id)
+        #expect(ws.record(record.id)?.isReadOnly == false)
+        #expect(try await service.download(1).document.meta["description"]?.string == "Enfin modifiable")
+    }
+
+    @Test func aTeacherSwitchedToViewingDropsUnsentEditsInsteadOfFailing() async throws {
+        let service = FakeSiteService()
+        let ws = try workspace(service: service)
+        let record = try await ws.downloadToMac(1)
+        let identity = SyncDocumentIdentity(id: record.id, accountKey: ws.account.key)
+        await service.shareWithCaller(1, role: .viewer)
+        var local = record.local; local.meta["description"] = .string("Trop tard")
+        try ws.stage(identity, scenario: local, previous: record.local)
+        try await ws.synchronize(record.id)
+        let updated = try #require(ws.record(record.id))
+        #expect(updated.isReadOnly && updated.status == .synced)
+        #expect(updated.local.meta["description"] == record.local.meta["description"])
     }
 
     @Test func editsDuringAnUploadRemainPendingAfterAcknowledgement() async throws {
@@ -127,9 +252,14 @@ struct SiteSyncTests {
         #expect(restored.record(identity.id)?.local == next)
         #expect(restored.record(identity.id)?.status == .conflict)
         #expect(restored.record(identity.id)?.base != next)
+        // Sans version commune, les deux versions restent disponibles.
+        let copy = try restored.keepBoth(identity.id)
+        #expect(copy.id != identity.id && copy.remoteID == nil && copy.status == .pending)
+        #expect(copy.local.name == "Modification après coupure — copie \(Platform.deviceName)")
+        #expect(restored.record(identity.id)?.status == .synced)
     }
 
-    @Test func aConflictBetweenReadAndWriteIsFetchedAndPreserved() async throws {
+    @Test func aConflictBetweenReadAndWriteIsMergedAndRetried() async throws {
         let service = try RacingSiteService()
         let ws = try workspace(service: service)
         let record = try await ws.downloadToMac(1)
@@ -137,9 +267,22 @@ struct SiteSyncTests {
         var local = record.local; local.meta["name"] = .string("Modification concurrente")
         try ws.stage(identity, scenario: local)
         try await ws.synchronize(record.id)
-        #expect(ws.record(record.id)?.status == .conflict)
-        #expect(ws.record(record.id)?.local == local)
-        #expect(try await service.download(1).revision == 2)
+        #expect(ws.record(record.id)?.status == .synced)
+        let saved = try await service.download(1)
+        #expect(saved.revision == 3 && saved.document.name == "Modification concurrente")
+        #expect(saved.document.meta["description"]?.string.contains("révision 2") == true)
+    }
+
+    @Test func aServerThatKeepsChangingLeavesTheMergedCopyPending() async throws {
+        let service = try RacingSiteService(races: 10)
+        let ws = try workspace(service: service)
+        let record = try await ws.downloadToMac(1)
+        let identity = SyncDocumentIdentity(id: record.id, accountKey: ws.account.key)
+        var local = record.local; local.meta["name"] = .string("Modification concurrente")
+        try ws.stage(identity, scenario: local)
+        try await ws.synchronize(record.id)
+        #expect(ws.record(record.id)?.status == .pending)
+        #expect(ws.record(record.id)?.local.name == "Modification concurrente")
     }
 
     @Test func missingRemoteDocumentsWithUnsentEditsAreNotRecreatedAndCanBeCopied() async throws {
@@ -330,6 +473,66 @@ struct SiteSyncTests {
         #expect(throws: (any Error).self) { _ = try ws.addLocal(.template()) }
         #expect(ws.records.isEmpty)
     }
+
+    @Test func editsCheckpointOnlyTheirDocumentAndSurviveRestart() throws {
+        let directory = temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let ws = try workspace(directory: directory)
+        let identity = try ws.addLocal(.template())
+        let archive = directory.appendingPathComponent(SiteSyncAPI.accountKey(ws.account.key)).appendingPathComponent("state.json")
+        let before = try Data(contentsOf: archive)
+        var changed = Scenario.template()
+        changed.meta["name"] = .string("Modification persistée")
+        try ws.stage(identity, scenario: changed)
+        #expect(try Data(contentsOf: archive) == before)
+        #expect(try workspace(directory: directory).record(identity.id)?.local == changed)
+        // A full commit absorbs the checkpoint; a stale file must never revive an older edit.
+        let checkpoint = archive.deletingLastPathComponent().appendingPathComponent("Checkpoints/\(identity.id.uuidString).json")
+        let stale = try Data(contentsOf: checkpoint)
+        try ws.remove(identity.id)
+        try FileManager.default.createDirectory(at: checkpoint.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try stale.write(to: checkpoint)
+        #expect(try workspace(directory: directory).records.isEmpty)
+    }
+
+    @Test func failedEditCheckpointLeavesMemoryAndDiskUnchanged() throws {
+        let directory = temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let ws = try workspace(directory: directory)
+        let identity = try ws.addLocal(.template())
+        let original = ws.record(identity.id)?.local
+        let path = directory.appendingPathComponent(SiteSyncAPI.accountKey(ws.account.key)).appendingPathComponent("Checkpoints")
+        try Data("not a directory".utf8).write(to: path)
+        var changed = Scenario.template(); changed.meta["name"] = .string("Non enregistré")
+        #expect(throws: (any Error).self) { try ws.stage(identity, scenario: changed) }
+        #expect(ws.record(identity.id)?.local == original)
+        #expect(try workspace(directory: directory).record(identity.id)?.local == original)
+    }
+
+    @Test func legacyArchivesMigrateAndIgnoreStaleCheckpoints() throws {
+        let directory = temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let account = SiteSyncAccount(key: "legacy", label: "Compte")
+        let folder = directory.appendingPathComponent(SiteSyncAPI.accountKey(account.key))
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        let record = SiteSyncRecord(id: UUID(), local: .template())
+        let legacy = SiteSyncArchive(version: 1, account: account, records: [record])
+        try JSONEncoder().encode(legacy).write(to: folder.appendingPathComponent("state.json"))
+        let ws = try workspace(directory: directory, account: account)
+        let identity = SyncDocumentIdentity(id: record.id, accountKey: account.key)
+        var edited = record.local; edited.meta["name"] = .string("Version 1")
+        try ws.stage(identity, scenario: edited)
+        edited.meta["name"] = .string("Version 2")
+        try ws.stage(identity, scenario: edited)
+        let checkpoint = folder.appendingPathComponent("Checkpoints/\(record.id.uuidString).json")
+        let stale = try Data(contentsOf: checkpoint)
+        edited.meta["name"] = .string("Version 3")
+        try ws.stage(identity, scenario: edited)
+        _ = try ws.addLocal(.blank()) // Consolidate all current records into a new generation.
+        try FileManager.default.createDirectory(at: checkpoint.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try stale.write(to: checkpoint)
+        #expect(try workspace(directory: directory, account: account).record(record.id)?.local == edited)
+    }
 }
 
 private actor PausedSiteService: SiteSyncService {
@@ -367,13 +570,15 @@ private actor LostAcknowledgementService: SiteSyncService {
     }
 }
 
+/// Un autre enseignant enregistre entre la lecture et l’envoi, `races` fois de suite.
 private actor RacingSiteService: SiteSyncService {
     let server: FakeSiteService
-    init() throws { server = FakeSiteService() }
+    private var races: Int
+    init(races: Int = 1) throws { server = FakeSiteService(); self.races = races }
     func list() async throws -> [SiteDesignSummary] { try await server.list() }
     func download(_ id: Int) async throws -> SiteDesign { try await server.download(id) }
     func save(_ request: SiteSaveRequest) async throws -> SiteDesignSummary {
-        if let id = request.design_id { try await server.simulateChange(id) }
+        if let id = request.design_id, races > 0 { races -= 1; try await server.simulateChange(id) }
         return try await server.save(request)
     }
 }

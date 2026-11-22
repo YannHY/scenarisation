@@ -1,12 +1,212 @@
 import SwiftUI
 
-struct BoardDrag: Codable {
+struct BoardDrag: Hashable {
     let moment: String
     var activity: String?
-    var text: String { (try? JSONEncoder().encode(self)).map { String(decoding: $0, as: UTF8.self) } ?? "" }
+}
+
+enum BoardDropTarget: Hashable {
+    case moment, activity(String), end
+
+    func apply(_ drag: BoardDrag, to moment: String, after: Bool, in scenario: inout Scenario) -> Bool {
+        var moments = scenario.moments
+        guard let source = moments.firstIndex(where: { $0.id == drag.moment }),
+              let target = moments.firstIndex(where: { $0.id == moment }) else { return false }
+        switch (drag.activity, self) {
+        case (nil, .moment):
+            guard source != target else { return false }
+            let insertion = target + (after ? 1 : 0) - (source < target ? 1 : 0)
+            guard insertion != source else { return false }
+            let item = moments.remove(at: source)
+            moments.insert(item, at: insertion)
+        case (let id?, .activity(let anchor)):
+            // L’activité se place avant ou après une autre, dans son moment ou dans un autre.
+            guard id != anchor,
+                  let from = moments[source].activities.firstIndex(where: { $0.id == id }),
+                  moments[target].activities.contains(where: { $0.id == anchor }) else { return false }
+            let item = moments[source].activities.remove(at: from)
+            let insertion = moments[target].activities.firstIndex(where: { $0.id == anchor })! + (after ? 1 : 0)
+            guard source != target || insertion != from else { return false }
+            moments[target].activities.insert(item, at: insertion)
+        case (let id?, .end):
+            guard let from = moments[source].activities.firstIndex(where: { $0.id == id }),
+                  source != target || from != moments[source].activities.count - 1 else { return false }
+            let item = moments[source].activities.remove(at: from)
+            moments[target].activities.append(item)
+        default: return false
+        }
+        scenario.moments = moments
+        return true
+    }
+}
+
+private struct BoardDropEnabled: EnvironmentKey { static let defaultValue = true }
+private extension EnvironmentValues {
+    var boardDropEnabled: Bool {
+        get { self[BoardDropEnabled.self] }
+        set { self[BoardDropEnabled.self] = newValue }
+    }
+}
+
+struct DropSlot: Hashable {
+    let moment: String
+    let target: BoardDropTarget
+    var horizontal = false
+}
+
+private struct SlotFrames: PreferenceKey {
+    static var defaultValue: [DropSlot: CGRect] { [:] }
+    static func reduce(value: inout [DropSlot: CGRect], nextValue: () -> [DropSlot: CGRect]) {
+        value.merge(nextValue()) { _, next in next }
+    }
+}
+
+@Observable final class BoardMotion {
+    var drag: BoardDrag?
+    var offset: CGSize = .zero
+    var slot: DropSlot?
+    var after = false
+    /// Cadres des cibles, en coordonnées globales, tels que la mise en page les signale.
+    @ObservationIgnored var frames: [DropSlot: CGRect] = [:]
+    /// Cadre de l’élément saisi au début du geste : le sien suit ensuite le pointeur
+    /// et ne dit plus où il se trouvait dans la liste.
+    @ObservationIgnored private var origin: CGRect?
+
+    private func isOwn(_ slot: DropSlot, _ item: BoardDrag) -> Bool {
+        slot.moment == item.moment && slot.target == (item.activity.map(BoardDropTarget.activity) ?? .moment)
+    }
+
+    func update(_ item: BoardDrag, location point: CGPoint, translation: CGSize) {
+        if drag != item {
+            drag = item
+            origin = frames.first { isOwn($0.key, item) }?.value
+        }
+        offset = translation
+        let (target, edge) = item.activity == nil ? momentTarget(item, point) : activityTarget(item, point)
+        if slot != target { slot = target }
+        if after != edge { after = edge }
+    }
+
+    /// Un moment s’insère selon la position du pointeur par rapport au milieu des autres moments,
+    /// le long de l’axe de la disposition (vertical en liste, horizontal en colonnes).
+    private func momentTarget(_ item: BoardDrag, _ point: CGPoint) -> (DropSlot?, Bool) {
+        let moments = frames.filter { $0.key.target == .moment }
+        guard let horizontal = moments.keys.first?.horizontal else { return (nil, false) }
+        func center(_ frame: CGRect) -> CGFloat { horizontal ? frame.midX : frame.midY }
+        let others = moments.filter { !isOwn($0.key, item) }.sorted { center($0.value) < center($1.value) }
+        guard let last = others.last else { return (nil, false) }
+        let position = horizontal ? point.x : point.y
+        let insertion = others.firstIndex { position < center($0.value) } ?? others.count
+        let current = origin.map { own in others.count(where: { center($0.value) < center(own) }) }
+        if insertion == current { return (nil, false) }
+        return insertion < others.count ? (others[insertion].key, false) : (last.key, true)
+    }
+
+    /// Une activité va dans le moment survolé (ou le plus proche), entre les activités
+    /// dont le milieu encadre le pointeur.
+    private func activityTarget(_ item: BoardDrag, _ point: CGPoint) -> (DropSlot?, Bool) {
+        func distance(_ frame: CGRect) -> CGFloat {
+            hypot(max(frame.minX - point.x, 0, point.x - frame.maxX), max(frame.minY - point.y, 0, point.y - frame.maxY))
+        }
+        let moments = frames.filter { $0.key.target == .moment }
+        guard let destination = moments.min(by: { distance($0.value) < distance($1.value) }),
+              distance(destination.value) < 40 else { return (nil, false) }
+        let moment = destination.key.moment
+        let siblings = frames.filter { slot, _ in
+            guard slot.moment == moment, case .activity(let id) = slot.target else { return false }
+            return id != item.activity
+        }.sorted { $0.value.midY < $1.value.midY }
+        let insertion = siblings.firstIndex { point.y < $0.value.midY } ?? siblings.count
+        if moment == item.moment, let own = origin, insertion == siblings.count(where: { $0.value.midY < own.midY }) {
+            return (nil, false)
+        }
+        guard let last = siblings.last else {
+            return (frames.keys.first { $0.moment == moment && $0.target == .end }, false)
+        }
+        return insertion < siblings.count ? (siblings[insertion].key, false) : (last.key, true)
+    }
+
+    func reset() { drag = nil; offset = .zero; slot = nil; after = false; origin = nil }
+}
+
+private struct BoardHandle: ViewModifier {
+    @Environment(BoardMotion.self) var motion
+    @Environment(\.boardDocument) var document
+    @GestureState var dragging = false
+    let item: BoardDrag
+
+    func body(content: Content) -> some View {
+        content.contentShape(Rectangle()).gesture(DragGesture(minimumDistance: 5, coordinateSpace: .global)
+            .updating($dragging) { _, state, _ in state = true }
+            .onChanged { motion.update(item, location: $0.location, translation: $0.translation) }
+            .onEnded { value in
+                motion.update(item, location: value.location, translation: value.translation)
+                let slot = motion.slot, after = motion.after
+                // La carte rejoint sa nouvelle place (ou revient à l’ancienne) en douceur.
+                withAnimation(.snappy(duration: 0.25)) {
+                    motion.reset()
+                    if let document, let slot {
+                        var scenario = document.wrappedValue
+                        if slot.target.apply(item, to: slot.moment, after: after, in: &scenario) { document.wrappedValue = scenario }
+                    }
+                }
+            })
+            .onChange(of: dragging) { _, active in if !active && motion.drag == item { motion.reset() } }
+    }
+}
+
+private extension EnvironmentValues { @Entry var boardDocument: Binding<Scenario>? = nil }
+
+private struct BoardDropModifier: ViewModifier {
+    @Environment(\.boardDropEnabled) var enabled
+    @Environment(BoardMotion.self) var motion
+    let slot: DropSlot
+
+    func body(content: Content) -> some View {
+        if enabled {
+            let source = motion.drag
+            let moving = source.map { slot.moment == $0.moment && slot.target == ($0.activity.map(BoardDropTarget.activity) ?? .moment) } ?? false
+            let after = motion.after
+            let alignment: Alignment = slot.horizontal ? (after ? .trailing : .leading) : (after ? .bottom : .top)
+            // Le trait se place au milieu de l’espace entre deux cartes (20 pt entre moments,
+            // 12 entre activités, 16 au-dessus du bouton « Activité »).
+            let gap: CGFloat = (slot.target == .moment ? 10 : slot.target == .end ? 8 : 6) + 1.5
+            content
+                .shadow(color: moving ? .black.opacity(0.22) : .clear, radius: 14, y: 6)
+                .opacity(moving ? 0.92 : 1)
+                .offset(moving ? motion.offset : .zero)
+                .overlay(alignment: alignment) {
+                    if motion.slot == slot && !moving {
+                        Capsule().fill(Color.accentColor)
+                            .frame(width: slot.horizontal ? 3 : nil, height: slot.horizontal ? nil : 3)
+                            .offset(x: slot.horizontal ? (after ? gap : -gap) : 0, y: slot.horizontal ? 0 : (after ? gap : -gap))
+                            .allowsHitTesting(false)
+                    }
+                }
+                .background { GeometryReader { geometry in Color.clear.preference(key: SlotFrames.self, value: [slot: geometry.frame(in: .global)]) } }
+                .zIndex(moving || (slot.target == .moment && source?.moment == slot.moment) ? 1 : 0)
+        } else { content }
+    }
+}
+
+extension View {
+    func boardDrop(moment: String, target: BoardDropTarget, horizontal: Bool = false) -> some View {
+        modifier(BoardDropModifier(slot: DropSlot(moment: moment, target: target, horizontal: horizontal)))
+    }
+    func boardHandle(_ item: BoardDrag) -> some View { modifier(BoardHandle(item: item)) }
+    /// Sur Mac, toute la carte se saisit (hors champs et menus, qui gardent la souris) ;
+    /// sur iPad, seul l’en-tête, pour que le doigt puisse encore faire défiler la page.
+    @ViewBuilder func boardHandle(_ item: BoardDrag, wholeCard: Bool) -> some View {
+        #if os(macOS)
+        if wholeCard { boardHandle(item) } else { self }
+        #else
+        if wholeCard { self } else { boardHandle(item) }
+        #endif
+    }
 }
 
 struct ScenarioBoard: View {
+    @State private var motion = BoardMotion()
     @Binding var scenario: Scenario
     @Binding var focusMoment: String?
     /// Disposition affichée : liste, colonnes ou grille (tableau, comme sur le site).
@@ -15,18 +215,15 @@ struct ScenarioBoard: View {
     let openModels: () -> Void
     @State private var deleteID: String?
     @State private var viewport: CGFloat = 0
-    /// Dispositions déjà affichées, gardées montées ensuite.
-    @State private var cardsMounted = false
-    @State private var gridMounted = false
-    /// Dernière disposition en cartes, conservée pendant l’affichage du tableau.
-    @State private var lastCardMode: String?
+    /// Chaque disposition garde ses vues et sa géométrie, même avant son premier clic.
+    @State private var mountedLayouts: Set<String> = []
     /// Disposition une fois le changement affiché : la vue masquée n’est désactivée qu’ensuite,
     /// pour que la bascule apparaisse sans attendre.
     @State private var settledLayout: String?
+    @Environment(\.scenarioReadOnly) private var readOnly
     private var hideIntentions: Bool { scenario.fields["intentionsCollapsed"] == .bool(true) }
     private var grid: Bool { layout == "grid" }
     private var columns: Bool { layout != "list" && !grid }
-    private var cardMode: String { grid ? lastCardMode ?? "columns" : layout }
     /// Le tableau occupe la largeur visible, et défile horizontalement s’il n’y tient pas.
     private var gridWidth: CGFloat { max(GridColumns.minimumWidth, viewport - 56) }
 
@@ -42,29 +239,30 @@ struct ScenarioBoard: View {
                         Button(action: addMoment) { ActionLabel(title: "Créer un moment", icon: "plus") }.studioButtons(prominent: true)
                         Button(action: openModels) { ActionLabel(title: "Modèles", icon: "layers") }.studioButtons()
                         Button(action: askAI) { ActionLabel(title: "Assistant IA", icon: "wand") }.studioButtons()
-                    }.controlSize(.large)
+                    }.controlSize(.large).disabled(readOnly)
                 }.frame(maxWidth: .infinity).padding(.vertical, 40)
             } else {
-                // Une fois affichés, les cartes et le tableau restent montés : la disposition masquée garde
-                // sa géométrie (aucun aperçu WebKit à recharger ni à remettre en page), et changer de vue
-                // revient à basculer leur visibilité.
+                // Les trois dispositions restent montées après leur préparation différée.
+                // Liste et colonnes ont chacune leurs aperçus à la bonne largeur.
                 ScrollViewReader { proxy in
                     ScrollView(.horizontal) {
                         ZStack(alignment: .topLeading) {
-                            if !grid || cardsMounted {
-                                // En liste, le tableau prend la largeur visible ; en colonnes, il défile.
-                                let width = cardMode != "list" || viewport == 0 ? nil : max(0, viewport - 56)
-                                StableLayer(key: CardsKey(moments: scenario.fields["sessions"], hideIntentions: hideIntentions, mode: cardMode, width: width)) {
-                                    BoardLayout(mode: cardMode) {
-                                        ForEach(scenario.moments.indices, id: \.self) { index in card(index) }
-                                        addCard.layoutValue(key: BoardColumnWidth.self, value: 220)
+                            ForEach(["list", "columns"], id: \.self) { cardMode in
+                                if layout == cardMode || mountedLayouts.contains(cardMode) {
+                                    // En liste, les cartes prennent la largeur visible ; en colonnes, elles défilent.
+                                    let width = cardMode != "list" || viewport == 0 ? nil : max(0, viewport - 56)
+                                    StableLayer(key: CardsKey(moments: scenario.fields["sessions"], hideIntentions: hideIntentions, mode: cardMode, width: width)) {
+                                        BoardLayout(mode: cardMode) {
+                                            ForEach(Array(scenario.moments.enumerated()), id: \.element.id) { index, _ in card(index, mode: cardMode) }
+                                            addCard.layoutValue(key: BoardColumnWidth.self, value: 220)
+                                        }
+                                        .frame(width: width, alignment: .topLeading)
                                     }
-                                    .frame(width: width, alignment: .topLeading)
+                                    .equatable()
+                                    .boardLayer(visible: layout == cardMode, settled: settledLayout.map { $0 != cardMode } ?? false)
                                 }
-                                .equatable()
-                                .boardLayer(visible: !grid, settled: settledLayout == "grid")
                             }
-                            if grid || gridMounted {
+                            if grid || mountedLayouts.contains("grid") {
                                 StableLayer(key: GridKey(moments: scenario.fields["sessions"], width: gridWidth)) {
                                     ScenarioGrid(scenario: $scenario, width: gridWidth, addMoment: addMoment,
                                                  duplicateMoment: duplicateMoment, moveMoment: moveMoment,
@@ -75,35 +273,53 @@ struct ScenarioBoard: View {
                             }
                         }
                         .padding(.horizontal, 28).padding(.vertical, 6).padding(.bottom, 14)
+                        // Désactivé à l’intérieur du défilement : en consultation seule, les colonnes défilent encore.
+                        .disabled(readOnly)
                     }
                     .scrollDisabled(!columns && !(grid && gridWidth > viewport - 56))
                     .scrollClipDisabled()
                     .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { viewport = $0 }
                     .onChange(of: focusMoment) { _, id in
-                        if columns, let id { withAnimation(.smooth) { proxy.scrollTo("moment-" + id, anchor: .leading) } }
+                        if columns, let id { withAnimation(.smooth) { proxy.scrollTo("columns-moment-" + id, anchor: .leading) } }
                     }
                 }
             }
         }
+        .environment(motion)
+        .environment(\.boardDocument, $scenario)
+        .onPreferenceChange(SlotFrames.self) { motion.frames = $0 }
         .onChange(of: layout, initial: true) { _, value in
-            if value == "grid" { gridMounted = true } else { cardsMounted = true; lastCardMode = value }
+            motion.reset()
+            mountedLayouts.insert(value)
             // La disposition visible n’est jamais désactivée : un ordre en retard reste sans effet.
-            Task { @MainActor in settledLayout = value }
+            Task { @MainActor in
+                guard layout == value else { return }
+                settledLayout = value
+            }
+        }
+        .task(id: scenario.moments.isEmpty) {
+            guard !scenario.moments.isEmpty else { return }
+            // Laisse d’abord apparaître la disposition choisie, puis prépare une vue à la fois.
+            // SwiftUI/WebKit doivent être créés sur le thread principal ; l’attente le libère.
+            for mode in ["list", "columns", "grid"] {
+                guard !mountedLayouts.contains(mode) else { continue }
+                do { try await Task.sleep(for: .milliseconds(250)) }
+                catch { return }
+                guard !Task.isCancelled else { return }
+                mountedLayouts.insert(mode)
+            }
         }
         .confirmationDialog("Supprimer ce moment et ses activités ?", isPresented: Binding(
             get: { deleteID != nil }, set: { if !$0 { deleteID = nil } })) {
                 Button("Supprimer", role: .destructive) { scenario.moments.removeAll { $0.id == deleteID }; deleteID = nil }
             }
     }
-    private func card(_ index: Int) -> some View {
+    private func card(_ index: Int, mode: String) -> some View {
         MomentCard(moment: $scenario.moments[index], hideIntentions: hideIntentions, remove: { deleteID = scenario.moments[index].id },
                    duplicate: { duplicateMoment(index) }, move: { delta in moveMoment(index, delta) },
                    canMoveUp: index > 0, canMoveDown: index + 1 < scenario.moments.count)
-            .id("moment-" + scenario.moments[index].id)
-            .dropDestination(for: String.self) { payloads, _ in
-                guard let text = payloads.first, let drag = try? JSONDecoder().decode(BoardDrag.self, from: Data(text.utf8)) else { return false }
-                return move(drag, to: scenario.moments[index].id)
-            }
+            .id(mode + "-moment-" + scenario.moments[index].id)
+            .boardDrop(moment: scenario.moments[index].id, target: .moment, horizontal: mode == "columns")
     }
     private var addCard: some View {
         AddMomentCard(action: addMoment)
@@ -125,31 +341,18 @@ struct ScenarioBoard: View {
         guard scenario.moments.indices.contains(destination) else { return }
         scenario.moments.swapAt(index, destination)
     }
-    private func move(_ drag: BoardDrag, to destination: String) -> Bool {
-        guard let from = scenario.moments.firstIndex(where: { $0.id == drag.moment }),
-              let to = scenario.moments.firstIndex(where: { $0.id == destination }), from != to else { return false }
-        if let id = drag.activity {
-            guard let index = scenario.moments[from].activities.firstIndex(where: { $0.id == id }) else { return false }
-            let activity = scenario.moments[from].activities.remove(at: index)
-            scenario.moments[to].activities.append(activity)
-        } else {
-            let moment = scenario.moments.remove(at: from)
-            scenario.moments.insert(moment, at: to)
-        }
-        return true
-    }
 }
 
 /// Ce dont dépendent les cartes : les moments, l’affichage des intentions et la géométrie.
 /// Le reste du document (dont la disposition enregistrée juste après un changement de vue) est ignoré.
-private struct CardsKey: Equatable {
+private struct CardsKey: Equatable, Sendable {
     let moments: JSONValue?
     let hideIntentions: Bool
     let mode: String
     let width: CGFloat?
 }
 
-private struct GridKey: Equatable {
+private struct GridKey: Equatable, Sendable {
     let moments: JSONValue?
     let width: CGFloat
 }
@@ -157,8 +360,9 @@ private struct GridKey: Equatable {
 /// Ne réévalue son contenu que si sa clé change. Les fermetures et liaisons passées aux cartes
 /// et au tableau ne sont jamais égales pour SwiftUI : sans cette clé, changer de vue recalculerait
 /// aussi toute la disposition masquée.
-private struct StableLayer<Key: Equatable, Content: View>: View, Equatable {
-    let key: Key
+private struct StableLayer<Key: Equatable & Sendable, Content: View>: View, Equatable {
+    /// Hors de l’acteur principal : SwiftUI compare les clés depuis n’importe quel contexte.
+    nonisolated let key: Key
     @ViewBuilder let content: () -> Content
     var body: some View { content() }
     nonisolated static func == (lhs: Self, rhs: Self) -> Bool { lhs.key == rhs.key }
@@ -170,9 +374,11 @@ private extension View {
     /// aussi désactivée pour que la touche Tab ne mène jamais à un champ invisible.
     func boardLayer(visible: Bool, settled: Bool) -> some View {
         self.disabled(!visible && settled)
+            .environment(\.boardDropEnabled, visible)
             .opacity(visible ? 1 : 0)
             .allowsHitTesting(visible)
             .accessibilityHidden(!visible)
+            .fixedSize(horizontal: true, vertical: true)
             .frame(width: visible ? nil : 0, height: visible ? nil : 0, alignment: .topLeading)
     }
 }
@@ -273,7 +479,7 @@ struct MomentCard: View {
                         Image(systemName: "line.3.horizontal").font(.system(size: 10, weight: .bold))
                         Text("MOMENT").font(.system(size: 10, weight: .bold)).tracking(0.6)
                     }.foregroundStyle(.tertiary)
-                        .draggable(BoardDrag(moment: moment.id).text).help("Glisser pour déplacer le moment")
+                        .padding(.vertical, 3).contentShape(Rectangle())
                     TextField("Titre du moment", text: field("title"), axis: .vertical)
                         .textFieldStyle(.plain).font(.title3.weight(.semibold)).lineLimit(1...4)
                 }
@@ -282,8 +488,12 @@ struct MomentCard: View {
                     .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize().foregroundStyle(.secondary)
                     .help("Déplacer, dupliquer ou supprimer le moment").accessibilityLabel("Actions du moment")
             }
-            ExpandableText(label: "Objectifs du moment", text: field("objectives"), aiPurpose: .objectives)
-            if !hideIntentions { ExpandableText(label: "Intentions pédagogiques", text: field("intentions")) }
+            .boardHandle(BoardDrag(moment: moment.id), wholeCard: false).help("Glisser pour déplacer le moment")
+            ExpandableText(label: "Objectifs du moment", text: field("objectives"), aiPurpose: .objectives,
+                           focus: "moment:\(moment.id):objectives")
+            if !hideIntentions {
+                ExpandableText(label: "Intentions pédagogiques", text: field("intentions"), focus: "moment:\(moment.id):intentions")
+            }
             Divider()
             HStack {
                 Text("Activités").font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
@@ -291,27 +501,32 @@ struct MomentCard: View {
                 Label("\(moment.duration.formatted()) min", systemImage: "clock").font(.caption.weight(.medium)).foregroundStyle(.secondary)
             }
             VStack(spacing: 12) {
-                ForEach(moment.activities.indices, id: \.self) { index in
+                ForEach(Array(moment.activities.enumerated()), id: \.element.id) { index, _ in
                     ActivityCard(activity: $moment.activities[index], momentID: moment.id,
                         duplicate: { duplicateActivity(index) }, remove: { deleteActivity = moment.activities[index].id },
                         move: { offset in
                             let target = index + offset
                             if moment.activities.indices.contains(target) { withAnimation(.snappy) { moment.activities.swapAt(index, target) } }
                         }, canMoveUp: index > 0, canMoveDown: index + 1 < moment.activities.count)
+                        .boardDrop(moment: moment.id, target: .activity(moment.activities[index].id))
                 }
             }
             HStack(spacing: 8) {
                 Button { withAnimation(.snappy) { moment.activities.append(.blank()) } } label: { ActionLabel(title: "Activité", icon: "plus") }
                     .studioButtons().controlSize(.small)
+                    .boardDrop(moment: moment.id, target: .end)
+                    .help("Déposer une activité ici pour la placer à la fin de ce moment")
                 Button { withAnimation(.snappy) { notes.toggle() } } label: { ActionLabel(title: "Notes", icon: "doc") }
                     .buttonStyle(.borderless).foregroundStyle(notes ? Color.accentColor : .secondary).controlSize(.small)
                 Spacer()
             }
-            if notes { ExpandableText(label: "Notes de l’enseignant", text: field("notes")) }
+            if notes { ExpandableText(label: "Notes de l’enseignant", text: field("notes"), focus: "moment:\(moment.id):notes") }
         }
         .environment(\.fieldAIMoment, moment)
         .padding(16)
         .studioCard(radius: 20)
+        .boardHandle(BoardDrag(moment: moment.id), wholeCard: true)
+        .overlay { PresenceOutline(item: moment.id, cornerRadius: 20) }
         .contextMenu { actions }
         .confirmationDialog("Supprimer cette activité ?", isPresented: Binding(
             get: { deleteActivity != nil }, set: { if !$0 { deleteActivity = nil } })) {
@@ -347,6 +562,8 @@ struct ActivityCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 8) {
+                Image(systemName: "line.3.horizontal").foregroundStyle(.secondary)
+                    .help("Glisser pour déplacer l’activité")
                 typeMenu
                 HStack(spacing: 4) {
                     FA(name: "clock", size: 10).foregroundStyle(.secondary)
@@ -370,20 +587,26 @@ struct ActivityCard: View {
                     .help("Déplacer, dupliquer ou supprimer l’activité").accessibilityLabel("Actions de l’activité")
             }.padding(.horizontal, 9).padding(.vertical, 8)
                 .background(tint.opacity(0.21))
-                .draggable(BoardDrag(moment: momentID, activity: activity.id).text)
+                .boardHandle(BoardDrag(moment: momentID, activity: activity.id), wholeCard: false)
             VStack(alignment: .leading, spacing: 12) {
                 if case .array(let tools) = activity.fields["tools"], !tools.isEmpty {
                     CompetencyTags(activity: $activity)
                 }
-                ExpandableText(label: "Description de l’activité", text: field("description"), aiPurpose: .activityDescription)
-                ExpandableText(label: "Consignes pour les élèves", text: field("instructions"), aiPurpose: .instructions)
-                if !activity["notes"].isEmpty { ExpandableText(label: "Notes de l’activité", text: field("notes")) }
+                ExpandableText(label: "Description de l’activité", text: field("description"), aiPurpose: .activityDescription,
+                               focus: "activity:\(activity.id):description")
+                ExpandableText(label: "Consignes pour les élèves", text: field("instructions"), aiPurpose: .instructions,
+                               focus: "activity:\(activity.id):instructions")
+                if !activity["notes"].isEmpty {
+                    ExpandableText(label: "Notes de l’activité", text: field("notes"), focus: "activity:\(activity.id):notes")
+                }
             }.padding(12)
         }
         .environment(\.fieldAIActivity, activity)
         .background(StudioStyle.surface)
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(tint.opacity(0.6), lineWidth: 1))
+        .overlay { PresenceOutline(item: activity.id, cornerRadius: 14) }
+        .boardHandle(BoardDrag(moment: momentID, activity: activity.id), wholeCard: true)
         .animation(.easeOut(duration: 0.2), value: activity["type"])
         .contextMenu { actions }
         .sheet(isPresented: $showCompetencies) { CompetencySheet(activity: $activity) }

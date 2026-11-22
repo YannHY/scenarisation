@@ -88,9 +88,10 @@ struct MarkdownTextView: UIViewRepresentable {
         context.coordinator.parent = self
         guard view.text != text else { return }
         let selection = view.selectedRange
+        let previous = view.text ?? ""
         view.text = text
-        let length = (text as NSString).length
-        view.selectedRange = NSRange(location: min(selection.location, length), length: 0)
+        // Une modification venue d’un collègue ne déplace pas le curseur dans le texte.
+        view.selectedRange = TextSelectionShift.adjusted(selection, from: previous, to: text)
         view.setNeedsLayout()
     }
 

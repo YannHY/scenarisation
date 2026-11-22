@@ -46,7 +46,7 @@ struct WelcomeView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .ignoresSafeArea(.container, edges: .top)
 #if os(macOS)
-        .background(WelcomeInitialFocus().frame(width: 0, height: 0))
+        .clearsInitialFocus()
 #endif
     }
     private var actions: some View {
@@ -100,10 +100,21 @@ struct WelcomeView: View {
 }
 
 
+extension View {
+    /// Retire le focus que macOS donne d’office au premier bouton d’une fenêtre ou d’une feuille
+    /// (« Fermer » entouré de bleu). Le clavier garde ensuite sa navigation et son cadre natifs.
+    @ViewBuilder func clearsInitialFocus() -> some View {
 #if os(macOS)
-/// Retirer une seule fois le focus initial, dans la fenêtre qui contient l’accueil.
-/// Les contrôles conservent ensuite leur navigation et leur cadre de focus natifs.
-private struct WelcomeInitialFocus: NSViewRepresentable {
+        background(InitialFocusReset().frame(width: 0, height: 0))
+#else
+        self
+#endif
+    }
+}
+
+#if os(macOS)
+/// Retirer une seule fois le focus initial, dans la fenêtre qui contient la vue.
+private struct InitialFocusReset: NSViewRepresentable {
     func makeNSView(context: Context) -> FocusView { FocusView() }
     func updateNSView(_ nsView: FocusView, context: Context) {}
 

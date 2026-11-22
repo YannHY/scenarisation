@@ -233,7 +233,13 @@ enum SiteSearch {
 /// Interroge le site. Pagefind n’existe qu’en JavaScript (WebAssembly) : une vue web invisible,
 /// placée à l’origine du site et sans données de navigation persistantes, charge son index.
 @MainActor
-final class SiteSearchEngine: NSObject, WKNavigationDelegate {
+protocol SiteSearching: AnyObject {
+    func pages(_ query: String, offset: Int) async throws -> SiteSearchEngine.PageBatch
+    func scenarios(_ query: String, offset: Int) async throws -> PublicScenarioSearch
+}
+
+@MainActor
+final class SiteSearchEngine: NSObject, WKNavigationDelegate, SiteSearching {
     static let shared = SiteSearchEngine()
 
     enum Failure: LocalizedError {
@@ -258,7 +264,7 @@ final class SiteSearchEngine: NSObject, WKNavigationDelegate {
         components.queryItems = [URLQueryItem(name: "q", value: query), URLQueryItem(name: "offset", value: String(offset))]
         var request = URLRequest(url: components.url!, cachePolicy: .reloadIgnoringLocalCacheData)
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        let (data, response) = try await session.data(for: request)
+        let (data, response) = try await BoundedResponse.data(for: request, session: session)
         guard let http = response as? HTTPURLResponse, http.statusCode == 200,
               http.value(forHTTPHeaderField: "Content-Type")?.lowercased().contains("json") == true else {
             throw Failure.unavailable
@@ -266,8 +272,14 @@ final class SiteSearchEngine: NSObject, WKNavigationDelegate {
         return try JSONDecoder().decode(PublicScenarioSearch.self, from: data)
     }
 
-    func pages(_ query: String) async throws -> [SiteSearchPage] {
+    struct PageBatch: Decodable {
+        let pages: [SiteSearchPage]
+        let count: Int
+    }
+
+    func pages(_ query: String, offset: Int) async throws -> PageBatch {
         try await prepare()
+        try Task.checkCancellation()
         guard let webView else { throw Failure.unavailable }
         let script = """
         if (!window.__siteSearch) {
@@ -280,8 +292,8 @@ final class SiteSearchEngine: NSObject, WKNavigationDelegate {
         }
         const pagefind = await window.__siteSearch;
         const search = await pagefind.search(query);
-        const pages = await Promise.all(search.results.map((result) => result.data()));
-        return JSON.stringify(pages.map((page) => ({
+        const pages = await Promise.all(search.results.slice(offset, offset + pageSize).map((result) => result.data()));
+        return JSON.stringify({count: search.results.length, pages: pages.map((page) => ({
           url: String(page.url || ""),
           title: String((page.meta && page.meta.title) || ""),
           excerpt: String(page.excerpt || ""),
@@ -291,11 +303,13 @@ final class SiteSearchEngine: NSObject, WKNavigationDelegate {
             excerpt: String(section.excerpt || ""),
             anchor: Boolean(section.anchor) || String(section.url || "").includes("#")
           }))
-        })));
+        }))});
         """
-        let value = try await webView.callAsyncJavaScript(script, arguments: ["query": query], contentWorld: .page)
+        let value = try await webView.callAsyncJavaScript(script,
+            arguments: ["query": query, "offset": offset, "pageSize": SiteSearch.pageSize], contentWorld: .page)
+        try Task.checkCancellation()
         guard let json = value as? String, let data = json.data(using: .utf8) else { throw Failure.unavailable }
-        return try JSONDecoder().decode([SiteSearchPage].self, from: data)
+        return try JSONDecoder().decode(PageBatch.self, from: data)
     }
 
     private func prepare() async throws {
@@ -352,13 +366,15 @@ final class SiteSearchModel: ObservableObject {
     @Published private(set) var canLoadMore = false
     @Published private(set) var loadingMore = false
 
-    private let engine: SiteSearchEngine
+    private let engine: any SiteSearching
     private var pages: [SiteSearchResult] = []
+    private var nextPageOffset = 0
+    private var hasMorePages = false
     private var scenarioCount = 0
     private var nextOffset = 0
     private var task: Task<Void, Never>?
 
-    init(engine: SiteSearchEngine = .shared) { self.engine = engine }
+    init(engine: any SiteSearching = SiteSearchEngine.shared) { self.engine = engine }
 
     /// La recherche remplace le contenu de la barre latérale dès qu’un texte est saisi.
     var isActive: Bool { !query.isEmpty }
@@ -371,7 +387,7 @@ final class SiteSearchModel: ObservableObject {
         case let .done(count, partial):
             let partialNote = "Une partie de la recherche est indisponible ; les résultats disponibles sont affichés."
             if count == 0 { return partial ? partialNote : "Aucun résultat pour « \(trimmedQuery) »." }
-            let summary = count == 1 ? "1 résultat" : "\(count.formatted()) résultats"
+            let summary = (hasMorePages ? "Au moins " : "") + (count == 1 ? "1 résultat" : "\(count.formatted()) résultats")
             return partial ? summary + " — " + partialNote : summary
         }
     }
@@ -389,6 +405,8 @@ final class SiteSearchModel: ObservableObject {
         task?.cancel()
         results = []
         pages = []
+        nextPageOffset = 0
+        hasMorePages = false
         canLoadMore = false
         loadingMore = false
         let query = trimmedQuery, category = category
@@ -404,28 +422,47 @@ final class SiteSearchModel: ObservableObject {
     private func run(_ query: String, category: SiteSearchCategory, offset: Int) async {
         let engine = engine
         var partial = false
-        if offset == 0 && category.searchesPages {
+        if category.searchesPages && (offset == 0 || hasMorePages) {
             do {
-                pages = try await engine.pages(query)
-                    .compactMap { SiteSearch.filter($0, category: category) }
-                    .compactMap { SiteSearch.result($0, query: query) }
-            } catch { partial = true; pages = [] }
+                var foundPages: [SiteSearchResult] = []
+                var rawOffset = nextPageOffset
+                var more = true
+                while more && pages.count + foundPages.count < offset + SiteSearch.pageSize {
+                    let batch = try await engine.pages(query, offset: rawOffset)
+                    try Task.checkCancellation()
+                    foundPages += batch.pages.compactMap { SiteSearch.filter($0, category: category) }
+                        .compactMap { SiteSearch.result($0, query: query) }
+                    rawOffset += SiteSearch.pageSize
+                    more = rawOffset < batch.count
+                }
+                guard !Task.isCancelled else { return }
+                pages += foundPages
+                nextPageOffset = rawOffset
+                hasMorePages = more
+            } catch {
+                guard !Task.isCancelled else { return }
+                partial = true; hasMorePages = false
+            }
         }
         guard !Task.isCancelled else { return }
         var scenarios: [SiteSearchResult] = []
         if category.searchesScenarios {
             do {
                 let found = try await engine.scenarios(query, offset: offset)
+                guard !Task.isCancelled else { return }
                 scenarioCount = found.count
                 scenarios = found.results.compactMap { SiteSearch.result($0, query: query) }
-            } catch { partial = true; if offset == 0 { scenarioCount = 0 } }
+            } catch {
+                guard !Task.isCancelled else { return }
+                partial = true; if offset == 0 { scenarioCount = 0 }
+            }
         } else { scenarioCount = 0 }
         guard !Task.isCancelled else { return }
         let slice = pages.dropFirst(offset).prefix(SiteSearch.pageSize)
         results += scenarios + slice
         nextOffset = offset + SiteSearch.pageSize
-        canLoadMore = nextOffset < max(pages.count, scenarioCount)
+        canLoadMore = hasMorePages || nextOffset < max(pages.count, scenarioCount)
         loadingMore = false
-        if offset == 0 || partial { status = .done(count: pages.count + scenarioCount, partial: partial) }
+        status = .done(count: pages.count + scenarioCount, partial: partial)
     }
 }

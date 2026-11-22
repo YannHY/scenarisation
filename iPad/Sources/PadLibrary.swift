@@ -2,7 +2,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 /// Scénario de la bibliothèque : un fichier JSON du dossier Documents de l’app, visible dans Fichiers.
-struct PadLibraryItem: Identifiable, Hashable {
+struct PadLibraryItem: Identifiable, Hashable, Sendable {
     let url: URL
     let title: String
     let modified: Date
@@ -16,6 +16,39 @@ struct PadLibraryItem: Identifiable, Hashable {
     func hash(into hasher: inout Hasher) { hasher.combine(url) }
 }
 
+/// Disk reads and decoding stay off the UI executor. Unchanged files reuse their summaries.
+private actor PadLibraryIndex {
+    private struct Entry {
+        let modified: Date
+        let size: Int
+        let item: PadLibraryItem
+    }
+    private var cache: [URL: Entry] = [:]
+
+    func load(_ folder: URL) throws -> [PadLibraryItem] {
+        let urls = try FileManager.default.contentsOfDirectory(at: folder,
+            includingPropertiesForKeys: [.contentModificationDateKey, .fileSizeKey, .isRegularFileKey], options: [.skipsHiddenFiles])
+        var next: [URL: Entry] = [:]
+        for url in urls where url.pathExtension.lowercased() == "json" {
+            try Task.checkCancellation()
+            guard let info = try? url.resourceValues(forKeys: [.contentModificationDateKey, .fileSizeKey, .isRegularFileKey]),
+                  info.isRegularFile == true, let size = info.fileSize, size <= ScenarioImporter.limit else { continue }
+            let modified = info.contentModificationDate ?? .distantPast
+            if let entry = cache[url], entry.modified == modified, entry.size == size {
+                next[url] = entry; continue
+            }
+            guard var scenario = try? ScenarioImporter.read(url) else { continue }
+            let identity = ScenarioDocument.extractIdentity(from: &scenario)
+            let item = PadLibraryItem(url: url, title: scenario.name.isEmpty ? "Sans titre" : scenario.name,
+                modified: modified, minutes: scenario.duration, moments: scenario.moments.count,
+                activities: scenario.moments.flatMap(\.activities), linked: identity != nil)
+            next[url] = Entry(modified: modified, size: size, item: item)
+        }
+        cache = next
+        return next.values.map(\.item).sorted { $0.modified > $1.modified }
+    }
+}
+
 /// Bibliothèque de l’iPad : l’équivalent du dossier des scénarios du Mac.
 /// Les scénarios créés, importés ou tirés d’un modèle y deviennent aussitôt des fichiers JSON enregistrés en continu.
 @MainActor
@@ -25,35 +58,37 @@ final class PadLibrary: ObservableObject {
     /// Scénario ouvert dans l’éditeur.
     @Published private(set) var session: PadSession?
     @Published var message: String?
+    private let index = PadLibraryIndex()
+    private var reloadTask: Task<Void, Never>?
 
     var folder: URL? { ScenarioFolder.current }
 
     func reload() {
+        reloadTask?.cancel()
         guard let folder else { items = []; return }
-        let urls = (try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: [.contentModificationDateKey],
-                                                                  options: [.skipsHiddenFiles])) ?? []
-        items = urls.filter { $0.pathExtension.lowercased() == "json" }.compactMap { url in
-            guard let data = try? Data(contentsOf: url), var scenario = try? Scenario.decode(data) else { return nil }
-            let identity = ScenarioDocument.extractIdentity(from: &scenario)
-            let modified = (try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) ?? .distantPast
-            return PadLibraryItem(url: url, title: scenario.name.isEmpty ? "Sans titre" : scenario.name, modified: modified,
-                                  minutes: scenario.duration, moments: scenario.moments.count,
-                                  activities: scenario.moments.flatMap(\.activities), linked: identity != nil)
+        reloadTask = Task { [weak self, index] in
+            do {
+                let items = try await index.load(folder)
+                try Task.checkCancellation()
+                self?.items = items
+            } catch {
+                guard !Task.isCancelled else { return }
+                self?.message = error.localizedDescription
+            }
         }
-        .sorted { $0.modified > $1.modified }
     }
 
     // MARK: Ouverture
 
     func open(_ url: URL) {
         do {
-            session?.saveNow()
+            guard session?.saveNow() != false else { return }
             session = try PadSession(url: url)
         } catch { message = error.localizedDescription }
     }
 
     func close() {
-        session?.saveNow()
+        guard session?.saveNow() != false else { return }
         withAnimation(.snappy) { session = nil }
         reload()
     }
@@ -164,7 +199,8 @@ final class PadSession: ObservableObject, Identifiable {
         }
     }
 
-    func saveNow() {
+    @discardableResult
+    func saveNow() -> Bool {
         pending?.cancel(); pending = nil
         do {
             let data = try ScenarioDocument.data(document.scenario, identity: document.syncIdentity,
@@ -176,7 +212,8 @@ final class PadSession: ObservableObject, Identifiable {
             }
             if let error = coordinationError ?? writeError { throw error }
             saveError = nil
-        } catch { saveError = error.localizedDescription }
+            return true
+        } catch { saveError = error.localizedDescription; return false }
     }
 }
 

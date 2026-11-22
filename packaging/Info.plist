@@ -3,17 +3,28 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleIdentifier</key><string>eu.scenarisation.mac</string>
+    <key>UTExportedTypeDeclarations</key>
+    <array><dict>
+        <key>UTTypeIdentifier</key><string>eu.scenarisation.board-item</string>
+        <key>UTTypeConformsTo</key><array><string>public.data</string></array>
+        <key>UTTypeDescription</key><string>Élément du scénario</string>
+    </dict></array>
     <key>CFBundleName</key><string>Scénarisation</string>
     <key>CFBundleDisplayName</key><string>Scénarisation</string>
     <key>CFBundleExecutable</key><string>Scenarisation</string>
     <key>CFBundlePackageType</key><string>APPL</string>
     <key>CFBundleIconFile</key><string>AppIcon</string>
-    <key>CFBundleShortVersionString</key><string>0.2.2</string>
-    <key>CFBundleVersion</key><string>4</string>
+    <key>CFBundleShortVersionString</key><string>0.4.6</string>
+    <key>CFBundleVersion</key><string>16</string>
     <key>LSMinimumSystemVersion</key><string>15.0</string>
     <key>NSPrincipalClass</key><string>NSApplication</string>
     <key>NSHighResolutionCapable</key><true/>
     <key>NSHumanReadableCopyright</key><string>Scénarisation — Yann Houry, d’après François Jourde et UCL Learning Designer. CC BY-SA 4.0.</string>
+    <!-- Mises à jour Sparkle : flux publié par scripts/publish-update.sh, archives signées par la clé « scenarisation-mac » du trousseau. -->
+    <key>SUFeedURL</key><string>https://scenarisation.eu/mac/appcast.xml</string>
+    <key>SUPublicEDKey</key><string>mAYzEyrMWV6tAcfjhmESRuiTNCKTmUup59a7LMBg0HE=</string>
+    <key>SUEnableAutomaticChecks</key><true/>
+    <key>SUScheduledCheckInterval</key><integer>86400</integer>
     <key>CFBundleDevelopmentRegion</key><string>fr</string>
     <key>CFBundleLocalizations</key><array><string>fr</string></array>
     <key>CFBundleDocumentTypes</key>

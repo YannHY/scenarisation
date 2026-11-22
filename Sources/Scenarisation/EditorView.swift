@@ -10,7 +10,13 @@ final class DocumentUndo: ObservableObject {
         let previous = document.wrappedValue.scenario
         guard previous != value else { return }
         manager?.registerUndo(withTarget: self) { [weak manager] target in
-            MainActor.assumeIsolated { target.replace(previous, document: document, manager: manager) }
+            MainActor.assumeIsolated {
+                // Annuler ne revient que sur cette modification : ce qu’un collègue a changé depuis reste en place.
+                let current = document.wrappedValue.scenario
+                let reverted = current == value ? previous
+                    : ScenarioMerge.merge(base: value, local: current, remote: previous, keepLocalViewState: false).scenario
+                target.replace(reverted, document: document, manager: manager)
+            }
         }
         document.wrappedValue.scenario = value
     }
@@ -52,6 +58,11 @@ struct EditorView: View {
     @State private var showExport = false
     @State private var showImport = false
     @State private var showSync = false
+    @State private var showShare = false
+    /// Présence des collègues lorsque le scénario est partagé.
+    @State private var collaboration = CollaborationSession()
+    /// Scénario partagé avec ce compte en consultation : il se parcourt et s’exporte, sans modification.
+    @State private var readOnly = false
     @State private var message: String?
     @State private var pendingReplacement: Scenario?
     @State private var focusMoment: String?
@@ -80,8 +91,13 @@ struct EditorView: View {
         _showModels = State(initialValue: arguments.contains("--models"))
         _showExport = State(initialValue: arguments.contains("--export"))
     }
+    /// Toutes les modifications passent par ici. En consultation seule, seuls les réglages d’affichage
+    /// (disposition, intentions repliées…) changent ; le contenu reste celui du site.
     private var scenario: Binding<Scenario> {
-        Binding(get: { document.scenario }, set: { undo.replace($0, document: $document, manager: undoManager) })
+        Binding(get: { document.scenario }, set: { value in
+            guard !readOnly || ScenarioMerge.sameContent(value, document.scenario) else { return }
+            undo.replace(value, document: $document, manager: undoManager)
+        })
     }
     private var layout: String { document.scenario.meta["boardLayout"]?.string ?? "columns" }
     private var intentionsVisible: Bool { document.scenario.fields["intentionsCollapsed"] != .bool(true) }
@@ -119,6 +135,11 @@ struct EditorView: View {
                 ScenarioSyncSheet(document: $document, workspace: workspace, accountModel: siteAccount)
             }
         }
+        .sheet(isPresented: $showShare) {
+            if let workspace = siteAccount.workspace {
+                ScenarioShareSheet(document: $document, workspace: workspace, accountModel: siteAccount, session: collaboration)
+            }
+        }
         .fileImporter(isPresented: $showImport, allowedContentTypes: ScenarioImporter.contentTypes) { result in
             do {
                 let url = try result.get()
@@ -151,9 +172,19 @@ struct EditorView: View {
         }
         .background {
             if let workspace = siteAccount.workspace, document.syncIdentity?.accountKey == workspace.account.key {
-                DocumentSyncObserver(document: $document, checkpoint: $syncCheckpoint, workspace: workspace) { message = $0 }
+                DocumentSyncObserver(document: $document, checkpoint: $syncCheckpoint, workspace: workspace,
+                                     collaboration: collaboration, online: siteAccount.networkAvailable,
+                                     readOnly: $readOnly) { message = $0 }
             }
         }
+        .environment(collaboration)
+        .environment(\.scenarioReadOnly, readOnly)
+        .onChange(of: readOnly) { _, value in
+            guard value else { return }
+            showAssistant = false
+            if pane == .assistant { pane = .board }
+        }
+        .task { if CollaborationSession.demo { collaboration.showDemo(document.scenario) } }
     }
 
     // MARK: Fenêtre principale
@@ -163,6 +194,7 @@ struct EditorView: View {
             sidebar.navigationSplitViewColumnWidth(min: 210, ideal: 250, max: 340)
         } detail: {
             detail
+                .safeAreaInset(edge: .top, spacing: 0) { if readOnly { ReadOnlyBanner() } }
                 .background(StudioStyle.canvas)
                 .navigationSubtitle("\(document.scenario.duration.formatted()) min · \(document.scenario.activityCount) activités")
 #if !os(macOS)
@@ -214,7 +246,7 @@ struct EditorView: View {
         .safeAreaInset(edge: .bottom) {
             if !siteSearch.isActive {
                 Button(action: addMoment) { Label("Ajouter un moment", systemImage: "plus").frame(maxWidth: .infinity) }
-                    .studioButtons().controlSize(.large).padding(12)
+                    .studioButtons().controlSize(.large).padding(12).disabled(readOnly)
             }
         }
     }
@@ -225,7 +257,7 @@ struct EditorView: View {
             Label("Paramètres", systemImage: StudioStyle.symbols["settings"]!).tag(StudioPane.settings)
             Label("Analyse", systemImage: StudioStyle.symbols["analysis"]!).tag(StudioPane.analysis)
             Label("Chronologie", systemImage: StudioStyle.symbols["chronology"]!).tag(StudioPane.chronology)
-            Label("Assistant IA", systemImage: StudioStyle.symbols["wand"]!).tag(StudioPane.assistant)
+            Label("Assistant IA", systemImage: StudioStyle.symbols["wand"]!).tag(StudioPane.assistant).disabled(readOnly)
         }
         Section("Moments") {
             if document.scenario.moments.isEmpty {
@@ -237,7 +269,7 @@ struct EditorView: View {
                     .contextMenu {
                         Button("Afficher") { reveal(moment.id) }
                         Divider()
-                        Button("Supprimer le moment…", role: .destructive) { deleteMoment = moment.id }
+                        Button("Supprimer le moment…", role: .destructive) { deleteMoment = moment.id }.disabled(readOnly)
                     }
             }
         }
@@ -270,7 +302,7 @@ struct EditorView: View {
                 .onChange(of: focusMoment) { _, id in
                     guard let id else { return }
                     // Cartes et tableau restent montés ensemble : on vise la disposition affichée.
-                    withAnimation(.smooth) { proxy.scrollTo((boardLayout == "grid" ? "grid-moment-" : "moment-") + id, anchor: .top) }
+                    withAnimation(.smooth) { proxy.scrollTo(boardLayout + "-moment-" + id, anchor: .top) }
                     Task { @MainActor in try? await Task.sleep(for: .milliseconds(500)); focusMoment = nil }
                 }
             }
@@ -295,9 +327,14 @@ struct EditorView: View {
 
     private var boardHeader: some View {
         VStack(alignment: .leading, spacing: 10) {
-            TextField("Nouveau scénario", text: Binding(get: { document.scenario.name },
-                set: { scenario.meta["name"].wrappedValue = .string($0) }))
-                .textFieldStyle(.plain).font(.system(size: 30, weight: .bold)).lineLimit(1)
+            if readOnly {
+                Text(document.scenario.name.isEmpty ? "Sans titre" : document.scenario.name)
+                    .font(.system(size: 30, weight: .bold)).lineLimit(1).textSelection(.enabled)
+            } else {
+                TextField("Nouveau scénario", text: Binding(get: { document.scenario.name },
+                    set: { scenario.meta["name"].wrappedValue = .string($0) }))
+                    .textFieldStyle(.plain).font(.system(size: 30, weight: .bold)).lineLimit(1)
+            }
             HStack(spacing: 18) {
                 Label("\(document.scenario.duration.formatted()) min", systemImage: "clock")
                 Label("\(document.scenario.moments.count) moments", systemImage: "square.stack")
@@ -328,7 +365,18 @@ struct EditorView: View {
                     Label("Colonnes", systemImage: "rectangle.split.3x1").tag("columns").help("Moments en colonnes (⌘2)")
                     Label("Grille", systemImage: "tablecells").tag("grid").help("Scénario en tableau (⌘3)")
                 }.pickerStyle(.segmented).labelStyle(.iconOnly).help("Disposition des moments : liste (⌘1), colonnes (⌘2), grille (⌘3)")
+#if os(iOS)
+                // La barre d’outils de l’iPad réduit sinon le sélecteur à la taille d’un bouton rond.
+                .fixedSize()
+#endif
             }
+#if os(iOS)
+            // Le sélecteur a déjà son propre fond en verre : il ne partage pas la capsule du bouton voisin.
+            .sharedBackgroundVisibility(.hidden)
+#endif
+#if os(iOS)
+            ToolbarSpacer(.fixed, placement: .primaryAction)
+#endif
             ToolbarItem(placement: .primaryAction) {
                 Toggle(isOn: Binding(get: { intentionsVisible }, set: { scenario.fields["intentionsCollapsed"].wrappedValue = .bool(!$0) })) {
                     Label("Intentions", systemImage: "eye")
@@ -336,11 +384,12 @@ struct EditorView: View {
             }
             if #available(macOS 26, *) { ToolbarSpacer(.fixed, placement: .primaryAction) }
         }
+        // Les commandes qui remplacent le scénario ne servent à rien en consultation seule.
         ToolbarItemGroup(placement: .primaryAction) {
             Button { showModels = true } label: { Label("Modèles", systemImage: "square.stack.3d.up") }
-                .help("Importer un modèle (⇧⌘M)")
+                .help("Importer un modèle (⇧⌘M)").disabled(readOnly)
             Button { showImport = true } label: { Label("Importer", systemImage: "square.and.arrow.down") }
-                .help("Importer un scénario JSON, Markdown, CSV, Excel, HTML, Word ou LDJ")
+                .help("Importer un scénario JSON, Markdown, CSV, Excel, HTML, Word ou LDJ").disabled(readOnly)
         }
         if #available(macOS 26, *) { ToolbarSpacer(.fixed, placement: .primaryAction) }
         ToolbarItem(placement: .primaryAction) {
@@ -348,7 +397,7 @@ struct EditorView: View {
                 Button { pane = .board } label: { Label("Voir le scénario", systemImage: StudioStyle.symbols["board"]!) }
             } else {
                 Toggle(isOn: $showAssistant) { Label("Assistant IA", systemImage: "sparkles") }
-                    .help("Afficher l’assistant IA (⌥⌘I)")
+                    .help("Afficher l’assistant IA (⌥⌘I)").disabled(readOnly)
             }
         }
         ToolbarItem(placement: .primaryAction) {
@@ -370,6 +419,11 @@ struct EditorView: View {
                 }
             }.help("Compte et synchronisation du scénario")
         }
+        if CollaborationSession.demo || siteAccount.workspace.map({ document.syncIdentity?.accountKey == $0.account.key }) == true {
+            ToolbarItem(placement: .primaryAction) {
+                CollaborationToolbarButton(session: collaboration) { showShare = true }
+            }
+        }
     }
 
     // MARK: Actions
@@ -385,7 +439,7 @@ struct EditorView: View {
         }
     }
     private func addMoment() {
-        guard started else { return }
+        guard started, !readOnly else { return }
         let moment = Moment.blank(title: "Moment \(document.scenario.moments.count + 1)")
         scenario.wrappedValue.moments.append(moment)
         reveal(moment.id)
@@ -449,6 +503,10 @@ struct EditorView: View {
         } catch { message = error.localizedDescription }
     }
     private func replaceOrConfirm(_ next: Scenario) {
+        if readOnly {
+            message = "Ce scénario vous est partagé en consultation : il ne peut pas être remplacé. Importez-le plutôt dans un nouveau scénario."
+            return
+        }
         if document.scenario.moments.isEmpty && (!started || document.scenario == .blank()) {
             scenario.wrappedValue = next; document.enteredEditor = true; started = true; pane = .board
         } else { pendingReplacement = next }

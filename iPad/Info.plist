@@ -4,6 +4,12 @@
 <dict>
     <!-- La bibliothèque (dossier Documents de l’app) apparaît dans Fichiers › Sur mon iPad › Scénarisation. -->
     <key>UIFileSharingEnabled</key><true/>
+    <key>UTExportedTypeDeclarations</key>
+    <array><dict>
+        <key>UTTypeIdentifier</key><string>eu.scenarisation.board-item</string>
+        <key>UTTypeConformsTo</key><array><string>public.data</string></array>
+        <key>UTTypeDescription</key><string>Élément du scénario</string>
+    </dict></array>
     <key>LSSupportsOpeningDocumentsInPlace</key><true/>
     <key>CFBundleDocumentTypes</key>
     <array><dict>

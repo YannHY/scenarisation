@@ -24,8 +24,11 @@ enum ScenarioImporter {
         case "md", "markdown": scenario = try ScenarioTextReader.markdown(text(data))
         case "csv": scenario = try ScenarioTableReader.scenario(ScenarioTableReader.csv(text(data)))
         case "xlsx": scenario = try ScenarioTableReader.scenario(ScenarioOfficeReader.spreadsheet(data))
-        case "html", "htm": scenario = try ScenarioTextReader.markdown(ScenarioOfficeReader.html(text(data)))
-        case "docx": scenario = try ScenarioTextReader.markdown(ScenarioOfficeReader.word(data))
+        // Un export de l’app non retouché embarque le scénario exact ; sinon, le contenu affiché est relu.
+        case "html", "htm":
+            let source = try text(data)
+            scenario = try ExportPayload.html(source) ?? ScenarioTextReader.markdown(ScenarioOfficeReader.html(source))
+        case "docx": scenario = try ExportPayload.word(data) ?? ScenarioTextReader.markdown(ScenarioOfficeReader.word(data))
         default: throw ScenarioError.invalid("Format non pris en charge. Choisissez un fichier JSON, LDJ, Markdown, CSV, Excel (.xlsx), HTML ou Word (.docx).")
         }
         // The common validator also repairs missing or duplicated identifiers.

@@ -12,39 +12,74 @@ struct DocumentSyncLabel: View {
     }
 }
 
-/// Checkpoints every edit. Incoming data applies only when the open editor still matches the prior checkpoint.
+/// Rapproche la fenêtre et sa copie suivie : chaque saisie part dans la copie, puis sur le site quelques
+/// secondes plus tard ; une version reçue du site (ou d’un collègue) revient dans la fenêtre, fusionnée
+/// avec ce qui a été saisi entre-temps.
 struct DocumentSyncObserver: View {
     @Binding var document: ScenarioDocument
     @Binding var checkpoint: Scenario
     @ObservedObject var workspace: SiteSyncWorkspace
+    var collaboration: CollaborationSession? = nil
+    var online = false
+    /// Vrai lorsque le scénario est partagé avec ce compte en consultation seule.
+    var readOnly: Binding<Bool>? = nil
     let onError: (String) -> Void
+
+    private struct PresenceTarget: Hashable { let record: UUID?; let remote: Int?; let online: Bool }
+    private var identity: SyncDocumentIdentity? {
+        document.syncIdentity.flatMap { $0.accountKey == workspace.account.key ? $0 : nil }
+    }
+
     var body: some View {
         Color.clear.frame(width: 0, height: 0)
-            .onAppear { stage() }
-            .onChange(of: document.scenario) { _, _ in stage() }
-            // Chaque modification part sur le site quelques secondes après la dernière frappe ;
-            // à l’ouverture, le même envoi récupère d’abord les changements faits sur le site.
+            .onAppear { stage(); updateReadOnly() }
+            .onDisappear { readOnly?.wrappedValue = false }
+            .onChange(of: document.scenario) { _, _ in reconcile() }
+            .onChange(of: workspace.records) { _, _ in reconcile(); updateReadOnly() }
+            // Chaque modification part sur le site quelques secondes après la dernière frappe (une seconde
+            // pour un scénario partagé) ; à l’ouverture, le même envoi récupère d’abord les changements du site.
             .task(id: document.scenario) {
-                guard let identity = document.syncIdentity, identity.accountKey == workspace.account.key,
-                      workspace.record(identity.id) != nil else { return }
-                try? await Task.sleep(for: .seconds(3))
+                guard let identity, workspace.record(identity.id) != nil else { return }
+                try? await Task.sleep(for: .seconds(collaboration?.shared == true ? 1 : 3))
                 guard !Task.isCancelled, SiteAccountModel.shared.networkAvailable else { return }
                 // Un envoi n’est jamais interrompu à mi-chemin : il s’exécute hors de cette tâche annulable.
                 Task { await workspace.synchronizeAutomatically(identity.id) }
             }
-            .onChange(of: workspace.records) { previous, current in
-                guard let identity = document.syncIdentity, identity.accountKey == workspace.account.key,
-                      let before = previous.first(where: { $0.id == identity.id }),
-                      let after = current.first(where: { $0.id == identity.id }),
-                      before.local == document.scenario, after.local != document.scenario else { return }
-                checkpoint = after.local; document.scenario = after.local
+            .task(id: PresenceTarget(record: identity?.id, remote: identity.flatMap { workspace.record($0.id)?.remoteID },
+                                     online: online)) {
+                guard let collaboration, online, let id = identity?.id, workspace.record(id)?.remoteID != nil else { return }
+                await collaboration.run(workspace: workspace, recordID: id)
             }
     }
+
+    private func updateReadOnly() {
+        let value = identity.flatMap { workspace.record($0.id)?.isReadOnly } ?? false
+        if let readOnly, readOnly.wrappedValue != value { readOnly.wrappedValue = value }
+    }
+
+    /// À l’ouverture, la fenêtre doit correspondre à la copie suivie.
     private func stage() {
-        guard let identity = document.syncIdentity, identity.accountKey == workspace.account.key,
-              workspace.record(identity.id) != nil else { return }
+        guard let identity, workspace.record(identity.id) != nil else { return }
         do {
             try workspace.stage(identity, scenario: document.scenario, previous: checkpoint)
+            checkpoint = document.scenario
+        } catch { onError(error.localizedDescription) }
+    }
+
+    private func reconcile() {
+        guard let identity, let stored = workspace.record(identity.id)?.local else { return }
+        if stored == document.scenario { checkpoint = stored; return }
+        if stored != checkpoint {
+            // La copie a changé hors de cette fenêtre : modifications du site ou d’un collègue.
+            let next = document.scenario == checkpoint ? stored
+                : ScenarioMerge.merge(base: checkpoint, local: document.scenario, remote: stored).scenario
+            checkpoint = stored
+            document.scenario = next
+            return
+        }
+        do {
+            try workspace.stage(identity, scenario: document.scenario, previous: checkpoint)
+            collaboration?.noteLocalChange(from: checkpoint, to: document.scenario)
             checkpoint = document.scenario
         } catch { onError(error.localizedDescription) }
     }
@@ -216,18 +251,28 @@ private struct SiteLibraryView: View {
         .sheet(isPresented: Binding(get: { examining != nil }, set: { if !$0 { examining = nil } })) {
             if let id = examining { SiteConflictView(workspace: workspace, recordID: id) }
         }
-        .confirmationDialog("Supprimer ce scénario ?", isPresented: Binding(
-            get: { removing != nil }, set: { if !$0 { removing = nil } }), presenting: removing) { record in
-                Button("Supprimer", role: .destructive) { remove(record) }
+        .confirmationDialog(sharedWithMe(removing?.remoteID) ? "Quitter ce scénario partagé ?" : "Supprimer ce scénario ?",
+                            isPresented: Binding(get: { removing != nil }, set: { if !$0 { removing = nil } }),
+                            presenting: removing) { record in
+                Button(sharedWithMe(record.remoteID) ? "Quitter le partage" : "Supprimer", role: .destructive) { remove(record) }
             } message: { record in Text(removalWarning(record)) }
-        .confirmationDialog("Supprimer ce scénario ?", isPresented: Binding(
-            get: { removingRemote != nil }, set: { if !$0 { removingRemote = nil } }), presenting: removingRemote) { summary in
-                Button("Supprimer", role: .destructive) { removeRemote(summary) }
-            } message: { _ in Text("Il sera définitivement supprimé de votre compte scenarisation.eu.") }
+        .confirmationDialog(removingRemote?.sharedWithMe == true ? "Quitter ce scénario partagé ?" : "Supprimer ce scénario ?",
+                            isPresented: Binding(get: { removingRemote != nil }, set: { if !$0 { removingRemote = nil } }),
+                            presenting: removingRemote) { summary in
+                Button(summary.sharedWithMe ? "Quitter le partage" : "Supprimer", role: .destructive) { removeRemote(summary) }
+            } message: { summary in
+                Text(summary.sharedWithMe ? Self.leaveWarning : "Il sera définitivement supprimé de votre compte scenarisation.eu.")
+            }
     }
+
+    private static let leaveWarning = "Il disparaîtra de votre compte et de \(Platform.thisDevice). Son propriétaire le conserve et peut vous inviter à nouveau."
+    private func sharedWithMe(_ remoteID: Int?) -> Bool { workspace.summary(for: remoteID)?.sharedWithMe == true }
 
     private func removalWarning(_ record: SiteSyncRecord) -> String {
         if record.remoteID == nil || record.remoteMissing { return "Il sera définitivement supprimé de \(Platform.thisDevice)." }
+        if sharedWithMe(record.remoteID) {
+            return Self.leaveWarning + (record.status == .pending ? " Les modifications pas encore envoyées seront perdues." : "")
+        }
         return "Il sera définitivement supprimé de \(Platform.thisDevice) et de votre compte scenarisation.eu."
     }
     private func remove(_ record: SiteSyncRecord) {
@@ -236,6 +281,11 @@ private struct SiteLibraryView: View {
         Task {
             defer { deleting.remove(key) }
             do {
+                // Un scénario partagé par un collègue n’est pas supprimé : ce compte quitte le partage.
+                if let remoteID = record.remoteID, sharedWithMe(remoteID), let me = model.user?.id {
+                    try await workspace.leave(remoteID, userID: me)
+                    return
+                }
                 let url = try workspace.workingFileURL(record.id)
                 try await workspace.delete(record.id)
                 // Une fenêtre encore ouverte n’aurait plus de copie à tenir à jour ; le fichier lié du dossier
@@ -250,7 +300,10 @@ private struct SiteLibraryView: View {
         deleting.insert(key)
         Task {
             defer { deleting.remove(key) }
-            do { try await workspace.deleteRemote(summary) } catch { model.message = error.localizedDescription }
+            do {
+                if summary.sharedWithMe, let me = model.user?.id { try await workspace.leave(summary.id, userID: me) }
+                else { try await workspace.deleteRemote(summary) }
+            } catch { model.message = error.localizedDescription }
         }
     }
 
@@ -288,6 +341,11 @@ private struct SiteLibraryView: View {
                 HStack(spacing: 4) {
                     Image(systemName: record.status.symbol).foregroundStyle(tint(record.status)).accessibilityHidden(true)
                     Text(record.status.label)
+                    if let summary = workspace.summary(for: record.remoteID), summary.shared == true {
+                        Text("·")
+                        Image(systemName: "person.2.fill").accessibilityHidden(true)
+                        Text(SiteLibraryDate.sharing(summary))
+                    }
                 }.font(.caption).foregroundStyle(.secondary)
             }
             Spacer(minLength: 12)
@@ -306,8 +364,12 @@ private struct SiteLibraryView: View {
             }
             Button { open(record.id) } label: { Label("Ouvrir", systemImage: "arrow.up.forward.square") }
                 .labelStyle(.iconOnly).buttonStyle(.borderless).help("Ouvrir ce scénario")
-            Button(role: .destructive) { removing = record } label: { Label("Supprimer", systemImage: "trash") }
-                .labelStyle(.iconOnly).buttonStyle(.borderless).help("Supprimer ce scénario")
+            Button(role: .destructive) { removing = record } label: {
+                Label(sharedWithMe(record.remoteID) ? "Quitter le partage" : "Supprimer",
+                      systemImage: sharedWithMe(record.remoteID) ? "person.crop.circle.badge.minus" : "trash")
+            }
+                .labelStyle(.iconOnly).buttonStyle(.borderless)
+                .help(sharedWithMe(record.remoteID) ? "Quitter ce scénario partagé" : "Supprimer ce scénario")
                 .disabled(workspace.syncing.contains(record.id) || deleting.contains(record.id.uuidString)
                           || (record.remoteID != nil && !record.remoteMissing && !model.networkAvailable))
         }
@@ -316,25 +378,30 @@ private struct SiteLibraryView: View {
         .contextMenu {
             Button("Ouvrir") { open(record.id) }
             Divider()
-            Button("Supprimer…", role: .destructive) { removing = record }
+            Button(sharedWithMe(record.remoteID) ? "Quitter le partage…" : "Supprimer…", role: .destructive) { removing = record }
                 .disabled(workspace.syncing.contains(record.id) || (record.remoteID != nil && !record.remoteMissing && !model.networkAvailable))
         }
     }
 
     private func remoteRow(_ summary: SiteDesignSummary) -> some View {
         HStack(spacing: 12) {
-            SiteRowGlyph(symbol: "icloud", tint: Color.platformGray)
+            SiteRowGlyph(symbol: summary.sharedWithMe ? "person.2" : "icloud", tint: Color.platformGray)
             VStack(alignment: .leading, spacing: 2) {
                 Text(summary.title.isEmpty ? "Sans titre" : summary.title).fontWeight(.medium).lineLimit(1)
-                Text(SiteLibraryDate.caption(summary)).font(.caption).foregroundStyle(.secondary)
+                Text(summary.shared == true ? SiteLibraryDate.sharing(summary) + " · " + SiteLibraryDate.caption(summary)
+                     : SiteLibraryDate.caption(summary)).font(.caption).foregroundStyle(.secondary)
             }
             Spacer(minLength: 12)
             if opening == summary.id { ProgressView().controlSize(.small) }
             Button { download(summary.id) } label: { Label("Ouvrir", systemImage: "icloud.and.arrow.down") }
                 .labelStyle(.iconOnly).buttonStyle(.borderless).help("Ouvrir sur \(Platform.thisDevice)")
                 .disabled(opening != nil || !model.networkAvailable)
-            Button(role: .destructive) { removingRemote = summary } label: { Label("Supprimer", systemImage: "trash") }
-                .labelStyle(.iconOnly).buttonStyle(.borderless).help("Supprimer ce scénario de votre compte")
+            Button(role: .destructive) { removingRemote = summary } label: {
+                Label(summary.sharedWithMe ? "Quitter le partage" : "Supprimer",
+                      systemImage: summary.sharedWithMe ? "person.crop.circle.badge.minus" : "trash")
+            }
+                .labelStyle(.iconOnly).buttonStyle(.borderless)
+                .help(summary.sharedWithMe ? "Quitter ce scénario partagé" : "Supprimer ce scénario de votre compte")
                 .disabled(opening == summary.id || deleting.contains("remote-\(summary.id)") || !model.networkAvailable)
         }
         .padding(.vertical, 2).contentShape(Rectangle())
@@ -383,6 +450,13 @@ enum SiteLibraryDate {
         let plain = DateFormatter()
         plain.locale = Locale(identifier: "en_US_POSIX"); plain.dateFormat = "yyyy-MM-dd HH:mm:ss"
         return plain.date(from: text)
+    }
+    /// « Partagé par Marie » pour un scénario d’un collègue (« · consultation » s’il ne peut pas le modifier),
+    /// « Partagé » pour un scénario de ce compte.
+    static func sharing(_ summary: SiteDesignSummary) -> String {
+        guard summary.sharedWithMe else { return "Partagé" }
+        let label = summary.owner.flatMap { $0.isEmpty ? nil : "Partagé par \($0)" } ?? "Partagé avec vous"
+        return summary.readOnly ? label + " · consultation" : label
     }
     static func caption(_ summary: SiteDesignSummary) -> String {
         guard let date = parse(summary.updatedAt) else { return "Révision \(summary.revision)" }
@@ -492,7 +566,7 @@ struct ScenarioSyncSheet: View {
             }
             if let message { Text(message).font(.callout).foregroundStyle(.red).textSelection(.enabled) }
         }
-        .padding(28).desktopFrame(minWidth: 580, maxWidth: 900).disabled(busy)
+        .padding(28).desktopFrame(minWidth: 580, maxWidth: 900).disabled(busy).clearsInitialFocus()
     }
 
     private var syncButton: some View {
@@ -574,6 +648,6 @@ private struct SiteConflictView: View {
             if let record = workspace.record(recordID), record.remoteConflict != nil {
                 SiteConflictContent(record: record) { _ in dismiss() }.environmentObject(workspace)
             }
-        }.padding(28).desktopFrame(minWidth: 640, maxWidth: 900)
+        }.padding(28).desktopFrame(minWidth: 640, maxWidth: 900).clearsInitialFocus()
     }
 }

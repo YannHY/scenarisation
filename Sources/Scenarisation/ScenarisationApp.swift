@@ -44,6 +44,7 @@ struct ScenarisationApp: App {
         .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentSize)
         .defaultLaunchBehavior(.presented)
+        .commands { AppUpdateCommands() }
         DocumentGroup(newDocument: ScenarioDocument()) { file in
             EditorView(document: file.$document, fileURL: file.fileURL)
                 .frame(minWidth: 940, minHeight: 600)
@@ -74,5 +75,6 @@ final class StudioAppDelegate: NSObject, NSApplicationDelegate {
     func applicationShouldOpenUntitledFile(_ sender: NSApplication) -> Bool { false }
     func applicationDidFinishLaunching(_ notification: Notification) {
         SiteAccountModel.shared.startAutomaticRefresh()
+        AppUpdater.shared.start()
     }
 }

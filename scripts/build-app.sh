@@ -16,6 +16,10 @@ for resource in "$binary_dir"/*.bundle; do
     case "$(basename "$resource")" in *Tests.bundle) continue ;; esac
     ditto "$resource" "$app_dir/Contents/Resources/$(basename "$resource")"
 done
+# Sparkle (mises à jour) : framework dynamique chargé via le rpath @executable_path/../Frameworks.
+rm -rf "$app_dir/Contents/Frameworks"
+mkdir -p "$app_dir/Contents/Frameworks"
+ditto "$binary_dir/Sparkle.framework" "$app_dir/Contents/Frameworks/Sparkle.framework"
 cp packaging/Info.plist "$app_dir/Contents/Info.plist"
 cp LICENSE "$app_dir/Contents/Resources/LICENSE"
 swift packaging/CreateIcon.swift "$PWD/.build/AppIcon.iconset"

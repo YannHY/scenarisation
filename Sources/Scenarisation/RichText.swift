@@ -22,6 +22,10 @@ enum RichText {
     private static let bold = try! NSRegularExpression(pattern: #"\*\*([^*\n]+)\*\*"#)
     private static let italic = try! NSRegularExpression(pattern: #"(^|[^*])\*([^*\n]+)\*"#)
     private static let code = try! NSRegularExpression(pattern: #"`([^`\n]+)`"#)
+    private static let headingPattern = try! NSRegularExpression(pattern: #"^(#{1,6})\s+(.+)$"#)
+    private static let bulletPattern = try! NSRegularExpression(pattern: #"^[-*+]\s+(.+)$"#)
+    private static let numberPattern = try! NSRegularExpression(pattern: #"^\d+[.)]\s+(.+)$"#)
+    private static let quotePattern = try! NSRegularExpression(pattern: #"^>\s?(.*)$"#)
     private static let link = try! NSRegularExpression(pattern: #"\[([^\]\n]+)\]\(((?:https?://|mailto:)[^\s)<]+)\)"#, options: .caseInsensitive)
 
     private static func replace(_ regex: NSRegularExpression, in text: String, with template: String) -> String {
@@ -52,55 +56,171 @@ enum RichText {
         return html
     }
 
-    static func html(_ markdown: String) -> String {
-        var html: [String] = []
-        var listType = ""
+    /// Bloc d’un texte Markdown, tel que le site le découpe. Le HTML et l’aperçu natif partent de ce découpage.
+    enum Block: Equatable {
+        /// Lignes consécutives, séparées par de simples retours à la ligne.
+        case paragraph([String])
+        case heading(level: Int, text: String)
+        case list(ordered: Bool, items: [String])
+        case quote(String)
+        /// Formule `$$ … $$` sur ses propres lignes ; `closed` est faux si le `$$` final manque.
+        case math(String, closed: Bool)
+    }
+
+    static func blocks(_ markdown: String) -> [Block] {
+        var blocks: [Block] = []
         var paragraph: [String] = []
+        var list: (ordered: Bool, items: [String])?
         var mathBlock: [String]?
-        func closeParagraph() {
-            guard !paragraph.isEmpty else { return }
-            html.append("<p>" + paragraph.map(inline).joined(separator: "<br>") + "</p>")
-            paragraph = []
-        }
-        func closeList() { if !listType.isEmpty { html.append("</\(listType)>"); listType = "" } }
-        func openList(_ type: String) {
+        func closeParagraph() { if !paragraph.isEmpty { blocks.append(.paragraph(paragraph)); paragraph = [] } }
+        func closeList() { if let current = list { blocks.append(.list(ordered: current.ordered, items: current.items)); list = nil } }
+        func add(_ item: String, ordered: Bool) {
             closeParagraph()
-            if listType == type { return }
-            closeList(); html.append("<\(type)>"); listType = type
+            if list?.ordered != ordered { closeList(); list = (ordered, []) }
+            list!.items.append(item)
         }
-        func match(_ pattern: String, _ line: String) -> [String]? {
-            guard let regex = try? NSRegularExpression(pattern: pattern),
-                  let result = regex.firstMatch(in: line, range: NSRange(line.startIndex..., in: line)) else { return nil }
+        func match(_ regex: NSRegularExpression, _ line: String) -> [String]? {
+            guard let result = regex.firstMatch(in: line, range: NSRange(line.startIndex..., in: line)) else { return nil }
             return (0..<result.numberOfRanges).map { Range(result.range(at: $0), in: line).map { String(line[$0]) } ?? "" }
         }
         for line in markdown.replacingOccurrences(of: "\r\n", with: "\n").components(separatedBy: "\n") {
             let trimmed = line.trimmingCharacters(in: .whitespaces)
             if mathBlock != nil {
                 if trimmed == "$$" {
-                    html.append("<div class=\"math-block\">$$\n" + escape(mathBlock!.joined(separator: "\n")) + "\n$$</div>")
+                    blocks.append(.math(mathBlock!.joined(separator: "\n"), closed: true))
                     mathBlock = nil
                 } else { mathBlock!.append(line) }
                 continue
             }
             if trimmed == "$$" { closeParagraph(); closeList(); mathBlock = []; continue }
             if trimmed.isEmpty { closeParagraph(); closeList(); continue }
-            if let heading = match(#"^(#{1,6})\s+(.+)$"#, trimmed) {
+            if let heading = match(headingPattern, trimmed) {
                 closeParagraph(); closeList()
-                let level = max(2, min(4, heading[1].count))
-                html.append("<h\(level)>\(inline(heading[2]))</h\(level)>")
-            } else if let item = match(#"^[-*+]\s+(.+)$"#, trimmed) {
-                openList("ul"); html.append("<li>\(inline(item[1]))</li>")
-            } else if let item = match(#"^\d+[.)]\s+(.+)$"#, trimmed) {
-                openList("ol"); html.append("<li>\(inline(item[1]))</li>")
-            } else if let quote = match(#"^>\s?(.*)$"#, trimmed) {
-                closeParagraph(); closeList(); html.append("<blockquote>\(inline(quote[1]))</blockquote>")
+                blocks.append(.heading(level: max(2, min(4, heading[1].count)), text: heading[2]))
+            } else if let item = match(bulletPattern, trimmed) {
+                add(item[1], ordered: false)
+            } else if let item = match(numberPattern, trimmed) {
+                add(item[1], ordered: true)
+            } else if let quote = match(quotePattern, trimmed) {
+                closeParagraph(); closeList(); blocks.append(.quote(quote[1]))
             } else {
                 closeList(); paragraph.append(line)
             }
         }
         closeParagraph(); closeList()
-        if let mathBlock { html.append("<p>$$<br>" + escape(mathBlock.joined(separator: "\n")).replacingOccurrences(of: "\n", with: "<br>") + "</p>") }
+        if let mathBlock { blocks.append(.math(mathBlock.joined(separator: "\n"), closed: false)) }
+        return blocks
+    }
+
+    static func html(_ markdown: String) -> String {
+        var html: [String] = []
+        for block in blocks(markdown) {
+            switch block {
+            case .paragraph(let lines):
+                html.append("<p>" + lines.map(inline).joined(separator: "<br>") + "</p>")
+            case .heading(let level, let text):
+                html.append("<h\(level)>\(inline(text))</h\(level)>")
+            case .list(let ordered, let items):
+                let tag = ordered ? "ol" : "ul"
+                html.append("<\(tag)>")
+                html += items.map { "<li>\(inline($0))</li>" }
+                html.append("</\(tag)>")
+            case .quote(let text):
+                html.append("<blockquote>\(inline(text))</blockquote>")
+            case .math(let formula, closed: true):
+                html.append("<div class=\"math-block\">$$\n" + escape(formula) + "\n$$</div>")
+            case .math(let formula, closed: false):
+                html.append("<p>$$<br>" + escape(formula).replacingOccurrences(of: "\n", with: "<br>") + "</p>")
+            }
+        }
         return html.joined(separator: "\n")
+    }
+
+    /// Mise en forme d’une ligne sans formule, pour l’aperçu natif : mêmes règles que `inline`
+    /// (code, gras, italique, liens http, https ou mailto), sans HTML.
+    static func attributed(_ text: String) -> AttributedString {
+        let ns = text as NSString
+        let whole = NSRange(location: 0, length: ns.length)
+        // À position égale, le code l’emporte, puis le lien, le gras et l’italique.
+        let candidates: [(NSRegularExpression, Int)] = [(code, 0), (link, 1), (bold, 2), (italicSpan, 3)]
+        var best: (match: NSTextCheckingResult, kind: Int)?
+        for (regex, kind) in candidates {
+            guard let found = regex.firstMatch(in: text, range: whole) else { continue }
+            if best == nil || found.range.location < best!.match.range.location { best = (found, kind) }
+        }
+        guard let (found, kind) = best else { return AttributedString(text) }
+        var result = AttributedString(ns.substring(to: found.range.location))
+        let inner = ns.substring(with: found.range(at: 1))
+        switch kind {
+        case 0:
+            var part = AttributedString(inner); part.inlinePresentationIntent = .code; result += part
+        case 1:
+            var part = attributed(inner)
+            part.link = URL(string: ns.substring(with: found.range(at: 2)))
+            result += part
+        default:
+            var part = attributed(inner)
+            let intent: InlinePresentationIntent = kind == 2 ? .stronglyEmphasized : .emphasized
+            for run in part.runs {
+                part[run.range].inlinePresentationIntent = (run.inlinePresentationIntent ?? []).union(intent)
+            }
+            result += part
+        }
+        result += attributed(ns.substring(from: found.range.location + found.range.length))
+        return result
+    }
+    /// Italique sans le caractère qui précède (contrairement à `italic`, conçu pour un remplacement).
+    private static let italicSpan = try! NSRegularExpression(pattern: #"(?<!\*)\*([^*\n]+)\*"#)
+
+    /// Segment de texte mis en forme, pour les exports qui ne passent pas par le HTML (Word).
+    struct Span: Equatable {
+        var text: String
+        var bold = false
+        var italic = false
+        var code = false
+        /// Formule LaTeX, sans ses délimiteurs `$`.
+        var math = false
+        var link: String?
+    }
+
+    /// Découpe une ligne selon les mêmes règles que `inline` et `attributed`.
+    static func spans(_ text: String) -> [Span] {
+        let ns = text as NSString
+        var result: [Span] = []
+        var cursor = 0
+        for match in mathSpan.matches(in: text, range: NSRange(location: 0, length: ns.length)) {
+            result += styledSpans(ns.substring(with: NSRange(location: cursor, length: match.range.location - cursor)))
+            let formula = ns.substring(with: match.range)
+            let delimiter = formula.hasPrefix("$$") ? 2 : 1
+            result.append(Span(text: String(formula.dropFirst(delimiter).dropLast(delimiter)), math: true))
+            cursor = match.range.location + match.range.length
+        }
+        result += styledSpans(ns.substring(from: cursor))
+        return result.filter { !$0.text.isEmpty }
+    }
+
+    private static func styledSpans(_ text: String) -> [Span] {
+        guard !text.isEmpty else { return [] }
+        let ns = text as NSString
+        let whole = NSRange(location: 0, length: ns.length)
+        let candidates: [(NSRegularExpression, Int)] = [(code, 0), (link, 1), (bold, 2), (italicSpan, 3)]
+        var best: (match: NSTextCheckingResult, kind: Int)?
+        for (regex, kind) in candidates {
+            guard let found = regex.firstMatch(in: text, range: whole) else { continue }
+            if best == nil || found.range.location < best!.match.range.location { best = (found, kind) }
+        }
+        guard let (found, kind) = best else { return [Span(text: text)] }
+        var result = [Span(text: ns.substring(to: found.range.location))]
+        let inner = ns.substring(with: found.range(at: 1))
+        switch kind {
+        case 0: result.append(Span(text: inner, code: true))
+        case 1:
+            let url = ns.substring(with: found.range(at: 2))
+            result += styledSpans(inner).map { var span = $0; span.link = url; return span }
+        default:
+            result += styledSpans(inner).map { var span = $0; if kind == 2 { span.bold = true } else { span.italic = true }; return span }
+        }
+        return result + styledSpans(ns.substring(from: found.range.location + found.range.length))
     }
 }
 
@@ -206,7 +326,7 @@ struct RichWebView {
 
     @MainActor func makeCoordinator() -> Coordinator { Coordinator() }
 
-    @MainActor private func makeWebView(_ coordinator: Coordinator) -> WKWebView {
+    @MainActor func makeWebView(_ coordinator: Coordinator) -> WKWebView {
         let configuration = WKWebViewConfiguration()
         configuration.userContentController.add(WeakScriptHandler(coordinator), name: "size")
 #if os(macOS)
@@ -233,14 +353,14 @@ struct RichWebView {
         return view
     }
 
-    @MainActor private func updateWebView(_ view: WKWebView, coordinator: Coordinator) {
+    @MainActor func updateWebView(_ view: WKWebView, coordinator: Coordinator) {
         coordinator.parent = self
         if coordinator.loadedStyle != "\(fontSize)|\(padding)|\(extraStyle)|\(extraScript)"
             || (!coordinator.loadedMath && RichPage.needsMath(body)) {
             coordinator.load(into: view)
         } else if coordinator.shownBody != body {
-            coordinator.shownBody = body
             if coordinator.ready {
+                coordinator.shownBody = body
                 view.evaluateJavaScript("setContent(\(Coordinator.jsString(body)))")
             }
         }
@@ -344,15 +464,84 @@ private final class WeakScriptHandler: NSObject, WKScriptMessageHandler {
 }
 
 /// Aperçu Markdown/LaTeX qui prend la hauteur de son contenu.
+/// Seuls les textes avec formules passent par WebKit (KaTeX) : une vue web par champ rendait
+/// l’ouverture d’un grand scénario très lente (plusieurs centaines de vues pour 30 activités).
 struct MarkdownPreview: View {
     let text: String
     var fontSize: CGFloat = 13.5
     var placeholder = "Rien à afficher."
+    var body: some View {
+        if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            Text(placeholder).font(.system(size: fontSize)).foregroundStyle(.tertiary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        } else if RichText.containsMath(text) {
+            MathPreview(text: text, fontSize: fontSize)
+        } else {
+            NativeMarkdown(blocks: RichText.blocks(text), fontSize: fontSize)
+        }
+    }
+}
+
+private struct MathPreview: View {
+    let text: String
+    let fontSize: CGFloat
     @State private var height: CGFloat = 20
     var body: some View {
-        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        RichWebView(body: trimmed.isEmpty ? "<p class=\"empty\">\(RichText.escape(placeholder))</p>" : RichText.html(text),
-                    fontSize: fontSize, contentHeight: $height)
+        RichWebView(body: RichText.html(text), fontSize: fontSize, contentHeight: $height)
             .frame(height: max(20, height))
+    }
+}
+
+/// Rendu SwiftUI du Markdown du site, aligné sur la feuille de style des aperçus web (`RichPage.style`).
+struct NativeMarkdown: View {
+    let blocks: [RichText.Block]
+    var fontSize: CGFloat = 13.5
+    var body: some View {
+        VStack(alignment: .leading, spacing: fontSize * 0.7) {
+            ForEach(Array(blocks.enumerated()), id: \.offset) { _, block in view(block) }
+        }
+        .font(.system(size: fontSize))
+        .lineSpacing(fontSize * 0.3)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .fixedSize(horizontal: false, vertical: true)
+    }
+
+    @ViewBuilder private func view(_ block: RichText.Block) -> some View {
+        switch block {
+        case .paragraph(let lines):
+            Text(lines.map(RichText.attributed).joined(separator: "\n"))
+        case .heading(let level, let text):
+            Text(RichText.attributed(text))
+                .font(.system(size: fontSize * (level == 2 ? 1.35 : level == 3 ? 1.15 : 1), weight: .semibold))
+                .padding(.top, fontSize * 0.3)
+        case .list(let ordered, let items):
+            VStack(alignment: .leading, spacing: fontSize * 0.25) {
+                ForEach(Array(items.enumerated()), id: \.offset) { index, item in
+                    HStack(alignment: .firstTextBaseline, spacing: 6) {
+                        Text(ordered ? "\(index + 1)." : "•").monospacedDigit().foregroundStyle(.secondary)
+                            .frame(minWidth: fontSize * 0.9, alignment: .trailing)
+                        Text(RichText.attributed(item))
+                    }
+                }
+            }
+        case .quote(let text):
+            Text(RichText.attributed(text)).foregroundStyle(.secondary)
+                .padding(.leading, 11)
+                .overlay(alignment: .leading) { Capsule().fill(.quaternary).frame(width: 3) }
+        case .math(let formula, _):
+            // Jamais atteint en pratique : un texte avec formule passe par la vue web.
+            Text("$$\n\(formula)\n$$").font(.system(size: fontSize, design: .monospaced))
+        }
+    }
+}
+
+private extension Array where Element == AttributedString {
+    func joined(separator: String) -> AttributedString {
+        var result = AttributedString()
+        for (index, part) in enumerated() {
+            if index > 0 { result += AttributedString(separator) }
+            result += part
+        }
+        return result
     }
 }

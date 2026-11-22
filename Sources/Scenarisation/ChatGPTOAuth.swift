@@ -190,7 +190,7 @@ struct ChatGPTOAuthClient {
         request.timeoutInterval = 30
         let session = URLSession(configuration: sessionConfiguration, delegate: NoRedirect(), delegateQueue: nil)
         defer { session.invalidateAndCancel() }
-        let (data, response) = try await session.data(for: request)
+        let (data, response) = try await BoundedResponse.data(for: request, session: session)
         try Task.checkCancellation()
         guard let response = response as? HTTPURLResponse else { throw ScenarioError.invalid("Réponse ChatGPT invalide.") }
         guard (200..<300).contains(response.statusCode) else {

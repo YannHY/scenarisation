@@ -7,6 +7,10 @@ actor FakeSiteService: SiteSyncService {
         var designs: [SiteDesign]
         var creations: [String: Int] = [:]
         var deleted: Set<Int> = []
+        /// Scénarios d’un autre enseignant partagés avec le compte de test (identifiant 7).
+        var sharedWithCaller: Set<Int> = []
+        /// Parmi eux, ceux que le compte de test peut seulement consulter.
+        var viewOnly: Set<Int> = []
     }
     private var state = State(designs: ["Découvrir et s’entraîner", "Préparer un débat"].enumerated().map { index, name in
         var document = Scenario.template()
@@ -22,11 +26,12 @@ actor FakeSiteService: SiteSyncService {
     }
     func list() async throws -> [SiteDesignSummary] {
         try checkConnection()
-        return state.designs.map(Self.summary)
+        return state.designs.map(summary)
     }
     func download(_ id: Int) async throws -> SiteDesign {
         try checkConnection()
-        guard let design = state.designs.first(where: { $0.id == id }) else { throw SiteSyncError.missing }
+        guard var design = state.designs.first(where: { $0.id == id }) else { throw SiteSyncError.missing }
+        if state.viewOnly.contains(id) { design.role = SiteShareRole.viewer.rawValue }
         return design
     }
     func save(_ request: SiteSaveRequest) async throws -> SiteDesignSummary {
@@ -36,6 +41,7 @@ actor FakeSiteService: SiteSyncService {
         let revision: Int
         if let remoteID = request.design_id {
             guard let existing = state.designs.first(where: { $0.id == remoteID }) else { throw SiteSyncError.missing }
+            guard !state.viewOnly.contains(remoteID) else { throw SiteSyncError.forbidden }
             guard request.expected_revision == existing.revision else { throw SiteSyncError.conflict }
             id = remoteID; revision = existing.revision + 1
         } else {
@@ -70,6 +76,35 @@ actor FakeSiteService: SiteSyncService {
         next.designs.append(SiteDesign(id: id, title: existing.title, revision: existing.revision + 1,
                                       updatedAt: ISO8601DateFormatter().string(from: Date()), document: document))
         state = next
+    }
+    func shareWithCaller(_ id: Int, role: SiteShareRole = .editor) {
+        state.sharedWithCaller.insert(id)
+        if role == .viewer { state.viewOnly.insert(id) } else { state.viewOnly.remove(id) }
+    }
+    /// Enregistrement d’un autre enseignant, que le compte de test ne voit qu’à sa prochaine lecture.
+    func saveAsOwner(_ id: Int, document: Scenario) throws {
+        guard let existing = state.designs.first(where: { $0.id == id }) else { throw SiteSyncError.missing }
+        state.designs.removeAll { $0.id == id }
+        state.designs.append(SiteDesign(id: id, title: document.name, revision: existing.revision + 1,
+                                        updatedAt: ISO8601DateFormatter().string(from: Date()), document: document))
+    }
+    func presence(_ request: SitePresenceRequest) async throws -> SitePresence {
+        try checkConnection()
+        guard let design = state.designs.first(where: { $0.id == request.design_id }) else { throw SiteSyncError.missing }
+        return SitePresence(revision: design.revision, shared: state.sharedWithCaller.contains(design.id), participants: [])
+    }
+    func unshare(_ id: Int, userID: Int) async throws -> SiteSharing? {
+        try checkConnection()
+        guard state.sharedWithCaller.contains(id), userID == 7 else { throw SiteSyncError.forbidden }
+        state.sharedWithCaller.remove(id); state.designs.removeAll { $0.id == id }
+        return nil
+    }
+    private func summary(_ design: SiteDesign) -> SiteDesignSummary {
+        var summary = Self.summary(design)
+        if state.sharedWithCaller.contains(design.id) {
+            summary.role = state.viewOnly.contains(design.id) ? "viewer" : "editor"; summary.owner = "Collègue"; summary.shared = true
+        }
+        return summary
     }
     private static func summary(_ design: SiteDesign) -> SiteDesignSummary {
         SiteDesignSummary(id: design.id, title: design.title, revision: design.revision, updatedAt: design.updatedAt)

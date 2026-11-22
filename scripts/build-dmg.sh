@@ -22,23 +22,32 @@ if [ -z "$identity" ]; then
 fi
 
 bash scripts/build-app.sh release >/dev/null
-app="dist/Scénarisation.app"
+name="Scénarisation"
+prefix="Scenarisation"
+app="dist/$name.app"
 version="$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$app/Contents/Info.plist")"
-dmg="dist/Scenarisation-$version-AppleSilicon.dmg"
+dmg="dist/$prefix-$version-AppleSilicon.dmg"
 
 # Remplace la signature locale de build-app.sh : runtime renforcé et horodatage sont exigés par la notarisation.
 for bundle in "$app"/Contents/Resources/*.bundle; do
     [ -d "$bundle" ] && codesign --force --timestamp --sign "$identity" "$bundle"
 done
+# Sparkle : ses services et outils d’installation doivent être signés de l’intérieur vers l’extérieur.
+sparkle="$app/Contents/Frameworks/Sparkle.framework/Versions/B"
+codesign --force --options runtime --timestamp --sign "$identity" "$sparkle/XPCServices/Installer.xpc"
+codesign --force --options runtime --timestamp --sign "$identity" --preserve-metadata=entitlements "$sparkle/XPCServices/Downloader.xpc"
+codesign --force --options runtime --timestamp --sign "$identity" "$sparkle/Autoupdate"
+codesign --force --options runtime --timestamp --sign "$identity" "$sparkle/Updater.app"
+codesign --force --options runtime --timestamp --sign "$identity" "$app/Contents/Frameworks/Sparkle.framework"
 codesign --force --options runtime --timestamp --sign "$identity" "$app/Contents/MacOS/Scenarisation"
 codesign --force --options runtime --timestamp --sign "$identity" "$app"
 codesign --verify --deep --strict "$app"
 
 stage="$(mktemp -d)"
 trap 'rm -rf "$stage"' EXIT
-ditto "$app" "$stage/Scénarisation.app"
+ditto "$app" "$stage/$name.app"
 ln -s /Applications "$stage/Applications"
-hdiutil create -volname "Scénarisation" -srcfolder "$stage" -fs HFS+ -format UDZO \
+hdiutil create -volname "$name" -srcfolder "$stage" -fs HFS+ -format UDZO \
     -imagekey zlib-level=9 -ov "$dmg" >/dev/null
 codesign --force --timestamp --sign "$identity" "$dmg"
 

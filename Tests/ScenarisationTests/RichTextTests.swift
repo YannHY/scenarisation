@@ -1,7 +1,25 @@
 import Testing
+import Foundation
+import SwiftUI
+import WebKit
 @testable import Scenarisation
 
 @Suite struct RichTextTests {
+    @MainActor @Test(.timeLimit(.minutes(1))) func editsDuringInitialLoadReachTheDOM() async throws {
+        var page = RichWebView(body: "<p>Ancien texte</p>", contentHeight: .constant(20))
+        let coordinator = page.makeCoordinator()
+        let view = page.makeWebView(coordinator)
+        page.body = "<p>Nouveau texte</p>"
+        page.updateWebView(view, coordinator: coordinator)
+        for _ in 0..<1000 {
+            if coordinator.ready { break }
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        #expect(coordinator.ready)
+        let text = try await view.evaluateJavaScript("document.getElementById('content').textContent")
+        #expect(text as? String == "Nouveau texte")
+    }
+
     @Test func rendersSiteMarkdown() {
         let html = RichText.html("## Étapes\n- **lire** le *texte*\n- voir [doc](https://exemple.fr)\n\n1. un\n2. deux\n> à retenir")
         #expect(html.contains("<h2>Étapes</h2>"))
@@ -9,6 +27,35 @@ import Testing
         #expect(html.contains("<a href=\"https://exemple.fr\">doc</a>"))
         #expect(html.contains("<ol>\n<li>un</li>\n<li>deux</li>\n</ol>"))
         #expect(html.contains("<blockquote>à retenir</blockquote>"))
+    }
+
+    @Test func nativePreviewUsesTheSameBlocksAsTheSite() {
+        let blocks = RichText.blocks("Intro\nsuite\n## Étapes\n- un\n- deux\n1. premier\n> à retenir\n\nFin")
+        #expect(blocks == [
+            .paragraph(["Intro", "suite"]), .heading(level: 2, text: "Étapes"),
+            .list(ordered: false, items: ["un", "deux"]), .list(ordered: true, items: ["premier"]),
+            .quote("à retenir"), .paragraph(["Fin"]),
+        ])
+        #expect(RichText.blocks("# Titre")[0] == .heading(level: 2, text: "Titre"))
+        #expect(RichText.blocks("$$\nx\n$$") == [.math("x", closed: true)])
+    }
+
+    @Test func nativeInlineFormattingFollowsTheSiteRules() {
+        let text = RichText.attributed("Lire **le texte** et *vite*, `code *x*`, [**doc**](https://exemple.fr) ou [piège](javascript:alert(1))")
+        #expect(String(text.characters) == "Lire le texte et vite, code *x*, doc ou [piège](javascript:alert(1))")
+        func intent(of word: String) -> InlinePresentationIntent? {
+            text.runs.first { String(text[$0.range].characters) == word }?.inlinePresentationIntent
+        }
+        #expect(intent(of: "le texte") == .stronglyEmphasized)
+        #expect(intent(of: "vite") == .emphasized)
+        #expect(intent(of: "code *x*") == .code)
+        #expect(text.runs.contains { $0.link == URL(string: "https://exemple.fr") && $0.inlinePresentationIntent == .stronglyEmphasized })
+        #expect(!text.runs.contains { $0.link?.scheme == "javascript" })
+        // Comme sur le site : une étoile seule reste telle quelle, le gras ne contient pas d’étoile.
+        #expect(String(RichText.attributed("3 * 4 = 12").characters) == "3 * 4 = 12")
+        #expect(RichText.html("**le *grand* texte**") == "<p>**le <em>grand</em> texte**</p>")
+        let nested = RichText.attributed("**le *grand* texte**")
+        #expect(String(nested.characters) == "**le grand texte**")
     }
 
     @Test func escapesHTMLAndRejectsUnsafeLinks() {

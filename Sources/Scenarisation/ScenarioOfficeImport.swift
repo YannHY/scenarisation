@@ -35,6 +35,8 @@ enum ScenarioOfficeReader {
         if let data = files["xl/sharedStrings.xml"] {
             shared = descendants(try xml(data), "si").map(textRuns)
         } else { shared = [] }
+        var materializedCells = 0
+        var visitedRows = 0
         for sheet in descendants(workbook, "sheet") {
             let id = attribute(sheet, "id")
             guard let relation = descendants(relationships, "Relationship").first(where: { attribute($0, "Id") == id }),
@@ -45,7 +47,8 @@ enum ScenarioOfficeReader {
             let document = try xml(sheetData)
             var rows: [[String]] = []
             for row in descendants(document, "sheetData").flatMap({ children($0, "row") }) {
-                guard rows.count < 100_000 else { throw ScenarioError.invalid("Le classeur contient trop de lignes.") }
+                visitedRows += 1
+                guard visitedRows <= 100_000 else { throw ScenarioError.invalid("Le classeur contient trop de lignes.") }
                 var values: [String] = []
                 for cell in children(row, "c") {
                     let reference = attribute(cell, "r")
@@ -57,6 +60,10 @@ enum ScenarioOfficeReader {
                         column = letters.uppercased().utf8.reduce(0) { $0 * 26 + Int($1) - 64 } - 1
                     }
                     guard column >= values.count, column < 4096 else { throw ScenarioError.invalid("Colonnes Excel invalides ou trop nombreuses.") }
+                    materializedCells += column + 1 - values.count
+                    guard materializedCells <= 1_000_000 else {
+                        throw ScenarioError.invalid("Le classeur contient trop de cellules, y compris les cellules vides intermédiaires.")
+                    }
                     while values.count <= column { values.append("") }
                     let type = attribute(cell, "t")
                     let raw = children(cell, "v").first?.stringValue ?? ""
@@ -117,6 +124,8 @@ enum ScenarioOfficeReader {
                 }
                 lines.append(""); return
             }
+            // Titres internes d’un champ (exports de l’app) : ils restent du Markdown.
+            if name == "h5" || name == "h6" { lines.append("#### " + ImportValues.clean(content(node))); return }
             if name == "p" || name == "li" || (name == "div" && attribute(node, "class") == "instructions") {
                 // Structural list items contain headings; visit those individually.
                 if ["h2", "h3", "h4", "p", "div"].contains(where: { !descendants(node, $0).isEmpty }) {
@@ -163,10 +172,23 @@ enum ScenarioOfficeReader {
             }
             return content(node)
         }
-        for child in body.children ?? [] {
+        // Intitulés des fiches d’activité des exports de l’app (ligne d’intitulés, puis ligne de valeurs).
+        let ficheLabels: Set<String> = ["", "duree", "groupe", "enseignement", "rythme", "modalite", "evaluation", "aias", "competences"]
+        func cellText(_ cell: XMLNode) -> String {
+            ImportValues.clean(descendants(cell, "p").map { p in (!descendants(p, "numPr").isEmpty ? "- " : "") + paragraph(p) }.joined(separator: "\n"))
+        }
+        func field(_ label: String, _ value: String) {
+            guard !label.isEmpty else { return }
+            if inMoment && !inActivity {
+                lines.append("> \(label):"); lines.append(contentsOf: value.components(separatedBy: "\n").map { "> " + $0 })
+            } else { lines.append("- \(label): \(value)") }
+            lines.append("")
+        }
+        func handle(_ child: XMLNode) {
             if child.localName == "p" {
                 let value = paragraph(child)
                 let style = descendants(child, "pStyle").first.map { attribute($0, "val") } ?? ""
+                if style == "FieldLabel" { lines.append("- \(ImportValues.clean(value)):"); return }
                 let size = descendants(child, "sz").first.map { attribute($0, "val") } ?? ""
                 let heading: Int?
                 switch style {
@@ -185,20 +207,30 @@ enum ScenarioOfficeReader {
                     lines.append((list ? "- " : "") + value)
                 }
             } else if child.localName == "tbl" {
-                for row in children(child, "tr") {
-                    let cells = children(row, "tc")
-                    guard cells.count == 2 else { continue }
-                    let label = ImportValues.clean(descendants(cells[0], "p").map(paragraph).joined(separator: "\n"))
-                    let value = descendants(cells[1], "p").map { p in
-                        (!descendants(p, "numPr").isEmpty ? "- " : "") + paragraph(p)
-                    }.joined(separator: "\n")
-                    if inMoment && !inActivity {
-                        lines.append("> \(label):"); lines.append(contentsOf: value.components(separatedBy: "\n").map { "> " + $0 })
-                    } else { lines.append("- \(label): \(value)") }
-                    lines.append("")
+                let rows = children(child, "tr").map { children($0, "tc") }
+                // Encadré d’une seule cellule (consignes) : son contenu se lit comme le corps du document.
+                if !rows.isEmpty, rows.allSatisfy({ $0.count == 1 }) {
+                    for cell in rows.flatMap({ $0 }) {
+                        for node in cell.children ?? [] where node.localName == "p" || node.localName == "tbl" { handle(node) }
+                    }
+                    return
+                }
+                // Fiche : une ligne d’intitulés connus, puis la ligne de leurs valeurs.
+                if rows.count % 2 == 0, stride(from: 0, to: rows.count, by: 2).allSatisfy({ index in
+                    rows[index].allSatisfy { ficheLabels.contains(ImportValues.token(cellText($0))) }
+                }) {
+                    for index in stride(from: 0, to: rows.count, by: 2) {
+                        for (label, value) in zip(rows[index], rows[index + 1]) { field(cellText(label), cellText(value)) }
+                    }
+                    return
+                }
+                // Paires intitulé / valeur, sur deux ou quatre colonnes.
+                for cells in rows where cells.count % 2 == 0 {
+                    for index in stride(from: 0, to: cells.count, by: 2) { field(cellText(cells[index]), cellText(cells[index + 1])) }
                 }
             }
         }
+        for child in body.children ?? [] { handle(child) }
         return lines.joined(separator: "\n")
     }
 }

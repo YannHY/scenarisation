@@ -123,15 +123,18 @@ final class OAuthMockProtocol: URLProtocol, @unchecked Sendable {
     override class func canInit(with request: URLRequest) -> Bool { true }
     override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
     override func startLoading() {
+        // Le protocole est @unchecked Sendable : la tâche principale peut le reprendre sans copie.
+        nonisolated(unsafe) let loader = self
+        let request = request
         Task { @MainActor in
         do {
             let (status, type, data) = try Self.handler!(request)
             let response = HTTPURLResponse(url: request.url!, statusCode: status, httpVersion: "HTTP/1.1",
                 headerFields: type.map { ["Content-Type": $0] })!
-            client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-            client?.urlProtocol(self, didLoad: data)
-            client?.urlProtocolDidFinishLoading(self)
-        } catch { client?.urlProtocol(self, didFailWithError: error) }
+            loader.client?.urlProtocol(loader, didReceive: response, cacheStoragePolicy: .notAllowed)
+            loader.client?.urlProtocol(loader, didLoad: data)
+            loader.client?.urlProtocolDidFinishLoading(loader)
+        } catch { loader.client?.urlProtocol(loader, didFailWithError: error) }
         }
     }
     override func stopLoading() {}

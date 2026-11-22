@@ -100,7 +100,9 @@ enum AuthBrowser {
             MainActor.assumeIsolated {
                 let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
                 let active = scenes.first { $0.activationState == .foregroundActive } ?? scenes.first
-                return active?.keyWindow ?? active?.windows.first ?? ASPresentationAnchor()
+                // La connexion part toujours d’une fenêtre de l’app : une scène existe forcément.
+                guard let active else { preconditionFailure("Aucune scène pour présenter la connexion au site") }
+                return active.keyWindow ?? active.windows.first ?? ASPresentationAnchor(windowScene: active)
             }
         }
     }

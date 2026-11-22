@@ -7,7 +7,7 @@ import AppKit
 
 enum HelpTopic: String, CaseIterable, Identifiable, Hashable {
     case start = "demarrer", learningDesign = "learning-design", moments, formatting = "mise-en-forme", latex,
-         types, outcomes = "acquis", analysis = "analyse", files = "fichiers", assistant, shortcuts = "raccourcis", license = "licence",
+         types, outcomes = "acquis", analysis = "analyse", files = "fichiers", sharing = "partager", assistant, shortcuts = "raccourcis", license = "licence",
          terms = "conditions-utilisation", privacy = "politique-confidentialite",
          learningDesignReference = "definition-learning-design", bloom, conversation = "cadre-conversationnel",
          saveShare = "sauvegarde-partage", importExport = "import-export", markdownImport = "markdown",
@@ -18,6 +18,7 @@ enum HelpTopic: String, CaseIterable, Identifiable, Hashable {
         case .start: "Démarrer"; case .learningDesign: "Comprendre le learning design"; case .moments: "Moments et activités"
         case .formatting: "Mise en forme Markdown"; case .latex: "Formules LaTeX"; case .types: "Types d’apprentissage"
         case .outcomes: "Acquis et compétences"; case .analysis: "Analyse et chronologie"; case .files: "Enregistrer, importer, exporter"
+        case .sharing: "Partager avec des collègues"
         case .assistant: "Assistant IA"; case .shortcuts: "Raccourcis clavier"; case .license: "Licence et crédits"
         case .terms: "Conditions d’utilisation"; case .privacy: "Politique de confidentialité"
         case .learningDesignReference: "Qu’est-ce que le learning design ?"; case .bloom: "Taxonomie de Bloom"
@@ -28,7 +29,7 @@ enum HelpTopic: String, CaseIterable, Identifiable, Hashable {
     }
     /// Pages juridiques du site, affichées comme des documents séparés de l’aide.
     var isLegal: Bool { self == .terms || self == .privacy }
-    static let mac: [HelpTopic] = [.start, .formatting, .latex, .files, .assistant, .shortcuts, .license]
+    static let mac: [HelpTopic] = [.start, .formatting, .latex, .files, .sharing, .assistant, .shortcuts, .license]
     static let guide: [HelpTopic] = [.learningDesign, .moments, .types, .outcomes, .analysis, .saveShare, .importExport, .markdownImport, .createWithAI, .improveWithAI]
     static let references: [HelpTopic] = [.learningDesignReference, .bloom, .conversation]
     static var legal: [HelpTopic] { allCases.filter(\.isLegal) }
@@ -55,7 +56,7 @@ enum HelpTopic: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .start: "play.circle"; case .learningDesign: "lightbulb"; case .moments: "square.stack"; case .formatting: "textformat"
         case .latex: "sum"; case .types: "circle.hexagongrid"; case .outcomes: "target"; case .analysis: "chart.pie"
-        case .files: "doc.on.doc"; case .assistant: "sparkles"; case .shortcuts: "command"; case .license: "c.circle"
+        case .files: "doc.on.doc"; case .sharing: "person.2"; case .assistant: "sparkles"; case .shortcuts: "command"; case .license: "c.circle"
         case .terms: "doc.text"; case .privacy: "hand.raised"
         case .learningDesignReference: "lightbulb"; case .bloom: "square.grid.3x2"; case .conversation: "bubble.left.and.bubble.right"
         case .saveShare: "square.and.arrow.up"; case .importExport: "arrow.left.arrow.right"; case .markdownImport: "text.document"
@@ -224,6 +225,9 @@ struct LicenseWindow: View {
                     Text("Ces éléments conservent leurs propres licences, qui ne sont pas modifiées par la licence CC BY-SA.")
                     VStack(alignment: .leading, spacing: 6) {
                         Text("• **KaTeX 0.16** — composition des formules, © Khan Academy et contributeurs, licence MIT.")
+#if os(macOS)
+                        Text("• **Sparkle 2** — mises à jour de l’app Mac, © Andy Matuschak et les contributeurs du projet Sparkle, licence MIT.")
+#endif
                         Text("• **Font Awesome Free 6.5.2** — icônes de l’aide, © Fonticons, Inc. : fontes sous SIL OFL 1.1, code sous MIT et icônes sous CC BY 4.0. Les licences sont embarquées avec les ressources de l’aide.")
                         Text("• **Référentiels de compétences** (Florimont, Socle commun, GreenComp, DigComp, CRCN, Pix, Pix IA, PER romand) — conditions et attributions de leurs éditeurs ; les liens source figurent dans les catalogues.")
                         Text("• **AI Assessment Scale 2.1** — échelle AIAS de Perkins, Furze, Roe et MacVaugh.")
@@ -256,11 +260,6 @@ struct LicenseWindow: View {
 struct HelpCommands: Commands {
     @Environment(\.openWindow) private var openWindow
     var body: some Commands {
-#if os(macOS)
-        CommandGroup(replacing: .appInfo) {
-            Button("À propos de Scénarisation") { AboutPanel.show() }
-        }
-#endif
         CommandGroup(replacing: .help) {
             Button("Aide de Scénarisation") { HelpCenter.shared.show(.start, openWindow) }
                 .keyboardShortcut("?", modifiers: .command)

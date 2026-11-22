@@ -213,7 +213,7 @@ struct SiteOAuthClient: Sendable {
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.cachePolicy = .reloadIgnoringLocalCacheData
-        let (data, raw) = try await session.data(for: request)
+        let (data, raw) = try await BoundedResponse.data(for: request, session: session, limit: 65_536)
         guard let response = raw as? HTTPURLResponse, response.mimeType == "application/json", data.count <= 65_536 else {
             throw SiteAuthError.invalidResponse
         }

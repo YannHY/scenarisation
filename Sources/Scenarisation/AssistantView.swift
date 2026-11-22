@@ -193,13 +193,14 @@ struct AssistantView: View {
         }
         .sheet(isPresented: $showReview) {
             if let proposal = model.proposal {
-                ProposalReview(current: scenario, proposed: proposal, stale: model.baseline != scenario) {
-                    guard model.baseline == scenario else {
-                        model.error = "Le scénario a changé. Relancez une demande depuis sa version actuelle."
-                        showReview = false
-                        return
-                    }
-                    scenario = proposal; model.applied(); showReview = false; onApplied()
+                ProposalReview(current: scenario, proposed: proposal, stale: model.baseline.map { $0 != scenario } ?? false) {
+                    if let baseline = model.baseline, baseline != scenario {
+                        // Le scénario a changé depuis la demande (chez un collègue, par exemple) : seules les
+                        // modifications proposées s’appliquent, sans effacer celles faites entre-temps.
+                        scenario = ScenarioMerge.merge(base: baseline, local: proposal, remote: scenario,
+                                                       keepLocalViewState: false).scenario
+                    } else { scenario = proposal }
+                    model.applied(); showReview = false; onApplied()
                 }
             }
         }
@@ -478,13 +479,13 @@ struct ProposalReview: View {
                 ScenarioSummary(title: "Proposition", scenario: proposed).padding(.leading, 8)
             }
             if stale {
-                Label("Le document a été modifié depuis la demande. Écartez la proposition et relancez l’assistant.",
-                      systemImage: "exclamationmark.triangle.fill").foregroundStyle(.red)
+                Label("Le scénario a été modifié depuis la demande. Seules les modifications proposées seront appliquées\u{00A0}; les changements faits entre-temps sont conservés.",
+                      systemImage: "arrow.triangle.merge").foregroundStyle(.orange)
             }
             HStack {
                 Spacer()
                 Button("Fermer") { dismiss() }.keyboardShortcut(.cancelAction).studioButtons()
-                Button("Appliquer", action: apply).disabled(stale).keyboardShortcut(.defaultAction).studioButtons(prominent: true)
+                Button("Appliquer", action: apply).keyboardShortcut(.defaultAction).studioButtons(prominent: true)
             }
         }.padding(24).desktopFrame(minWidth: 860, idealWidth: 1000, minHeight: 650)
     }

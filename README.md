@@ -62,12 +62,27 @@ Un scénario supprimé sur le site disparaît aussi de ce Mac : l’app relit vo
 **Compte → Se déconnecter** désactive les jetons locaux et tente de révoquer la session distante. Les copies locales et leurs changements restent accessibles hors ligne ; reconnectez le même compte pour reprendre leur synchronisation. Un avertissement indique si la révocation distante n’a pas pu être confirmée. En cas de session expirée ou révoquée, l’app demande une reconnexion et conserve les documents.
 
 - Hors connexion, les changements restent en attente et repartent à la modification suivante, ou avec **Synchroniser**.
-- Si un scénario a changé à la fois sur le Mac et sur le site, **Synchroniser** signale un conflit. **Examiner les versions** affiche les deux documents ; **Conserver les deux versions** garde le scénario distant et crée une copie Mac indépendante, dont l’envoi reste explicite.
+- Si un scénario a changé à la fois sur le Mac et sur le site (ou chez un collègue), les deux versions sont fusionnées champ par champ, puis envoyées (voir **Collaboration**). Un conflit à examiner ne subsiste que sans version commune connue, par exemple après une création dont la réponse s’est perdue : **Examiner les versions** affiche alors les deux documents et **Conserver les deux versions** garde le scénario distant en créant une copie Mac indépendante, dont l’envoi reste explicite.
 - Les copies et leurs versions de référence sont conservées dans `~/Library/Application Support/Scenarisation/SiteSync/`, séparées par compte.
 - Une modification pendant un envoi reste en attente après la confirmation de cet envoi. Une création réessayée conserve son UUID pour éviter les doublons. Un document supprimé sur le serveur n’est jamais recréé automatiquement.
 - Un fichier suivi reçoit un champ technique `_scenarisationMac` contenant uniquement son identité locale et sa partition de compte. Ce champ est retiré du scénario à l’ouverture et exclu des exports et des envois API. Les autres champs JSON sont conservés.
 
-Le [contrat de l’API native](docs/site-sync-api.md) décrit les routes OAuth et les échanges de scénarios implémentés dans l’app et sur le site. La synchronisation automatique et les actions de publication ne sont pas proposées dans l’app.
+Le [contrat de l’API native](docs/site-sync-api.md) décrit les routes OAuth et les échanges de scénarios implémentés dans l’app et sur le site. Les actions de publication ne sont pas proposées dans l’app.
+
+## Collaboration
+
+Plusieurs enseignants ayant un compte vérifié sur scenarisation.eu peuvent travailler en même temps sur un même scénario, depuis l’app Mac ou iPad. Le site web proposera cette collaboration plus tard.
+
+- **Partager** (barre d’outils du concepteur, à côté de la synchronisation) ouvre la liste des enseignants du scénario. Le propriétaire invite un collègue par l’adresse e-mail de son compte, et peut le retirer. Le scénario doit d’abord avoir rejoint le compte.
+- L’enseignant invité retrouve le scénario dans **Mon compte et mes scénarios**, avec la mention « Partagé par… », puis l’ouvre comme ses propres scénarios. Il peut tout modifier, mais pas supprimer : la corbeille devient **Quitter le partage**. Le propriétaire est seul à inviter, retirer ou supprimer.
+- Chaque modification part sur le site une seconde après la dernière frappe. Chaque fenêtre ouverte se signale au site toutes les deux secondes ; une révision plus récente déclenche aussitôt la synchronisation. Les modifications des collègues apparaissent ainsi en deux à quatre secondes, sans connexion permanente, ce que l’hébergement mutualisé du site ne permet pas.
+- Les versions sont fusionnées champ par champ. Les moments et les activités sont suivis par leur identifiant, y compris quand une activité change de moment. Un élément supprimé d’un côté et modifié de l’autre est conservé. Un même texte modifié des deux côtés est fusionné par ligne, puis par mot. Si deux personnes changent la même phrase, la version enregistrée en dernier l’emporte : la présence sert à l’éviter.
+- La disposition (liste, colonnes, grille), l’affichage des intentions et des notes restent propres à chacun.
+- **Annuler** ne revient que sur ses propres modifications : ce qu’un collègue a changé depuis reste en place. Une proposition de l’assistant IA préparée pendant que le scénario changeait n’applique que ses propres modifications.
+- La barre d’outils affiche les initiales des collègues présents ; l’infobulle indique où chacun travaille. Une carte d’activité ou de moment modifiée par un collègue prend sa couleur et son nom. L’éditeur agrandi signale un collègue qui écrit dans le même texte, et le curseur ne bouge pas quand son texte arrive.
+- Hors connexion, les modifications restent en attente et sont fusionnées au retour du réseau. Un collègue retiré du partage perd l’accès au scénario ; sa copie disparaît de ses appareils, sauf s’il a des modifications non envoyées, qu’il peut alors garder dans une copie indépendante.
+
+La collaboration nécessite la mise à jour du site (schéma 11, routes `collaborators.php`, `share_design.php`, `unshare_design.php` et `presence.php`). Tant que le site n’est pas à jour, le partage affiche un message et l’app fonctionne comme avant.
 
 ## Intelligence artificielle
 
@@ -121,7 +136,7 @@ L’assistant peut poser des questions, expliquer un choix pédagogique ou prép
 
 Des outils internes lui permettent de consulter les catalogues de compétences, de systèmes scolaires et de Bloom, d’analyser les durées, d’ajouter un moment ou un acquis et de modifier une activité par son identifiant. Ils réutilisent les fonctions de l’app, sans installation du CLI ni accès au terminal. Les modifications sont préparées sur une copie temporaire et les résultats des outils sont retournés au modèle. Une demande peut nécessiter plusieurs appels au modèle, avec une limite de six appels d’outils. La validation porte sur la structure et les identifiants ; elle ne garantit pas la qualité pédagogique.
 
-La structure, les durées, les identifiants, les nouveaux codes de compétences et niveaux scolaires et les acquis Bloom ajoutés ou modifiés sont validés avant de proposer l’application du scénario. **Aperçu** affiche côte à côte les versions actuelle et proposée, avec leur JSON complet. Une nouvelle demande peut préciser la proposition en attente. **Appliquer** remplace le scénario et reste annulable ; **Écarter** laisse le document intact. Si le document a changé depuis la demande, l’application de la proposition est bloquée.
+La structure, les durées, les identifiants, les nouveaux codes de compétences et niveaux scolaires et les acquis Bloom ajoutés ou modifiés sont validés avant de proposer l’application du scénario. **Aperçu** affiche côte à côte les versions actuelle et proposée, avec leur JSON complet. Une nouvelle demande peut préciser la proposition en attente. **Appliquer** remplace le scénario et reste annulable ; **Écarter** laisse le document intact. Si le document a changé depuis la demande (par exemple chez un collègue), seules les modifications proposées s’appliquent et les changements faits entre-temps sont conservés.
 
 Pour rédiger un seul champ, l’icône **Aide IA** (étincelles) est disponible dans l’éditeur agrandi des descriptions d’activités, des consignes, des objectifs du moment et de la formation et des acquis de Bloom. Le service configuré reçoit uniquement le texte et le contexte pédagogique utile. Une demande libre ou les actions **Reformuler**, **Raccourcir** et **Préciser** produisent une proposition modifiable ; **Insérer** ou **Remplacer** ne change que le champ ciblé et reste annulable avec ⌘Z. Une proposition n’est pas insérée si le champ a changé pendant la génération.
 
@@ -145,6 +160,19 @@ Pour un iPad réel, ouvrez le projet dans Xcode et choisissez votre équipe de s
 - **IA** : ChatGPT, OpenAI, Mistral et les services compatibles. Claude via Claude Code, Gemini / Antigravity, Grok et les modèles locaux (Ollama, LM Studio) dépendent de programmes installés sur Mac et ne sont pas proposés.
 - L’import Word, Excel et HTML utilise libxml2 à la place du DOM XML de macOS (`iPad/Sources/XMLDocument+iPad.swift`), sans entités externes ni accès réseau.
 
+## Mises à jour (Mac)
+
+L’app Mac se met à jour avec [Sparkle](https://sparkle-project.org) 2 (licence MIT). Elle vérifie une fois par jour le flux `https://scenarisation.eu/mac/appcast.xml` ; **Scénarisation › Rechercher les mises à jour…** lance la vérification à la demande. La fenêtre de Sparkle propose d’installer la nouvelle version et de relancer l’app, ou de l’installer automatiquement à l’avenir. Chaque archive est vérifiée avec la clé publique EdDSA de `packaging/Info.plist` en plus de la signature Developer ID. La version iPad est mise à jour par l’App Store ou TestFlight.
+
+Publier une version :
+
+1. augmenter `CFBundleShortVersionString` **et** `CFBundleVersion` dans `packaging/Info.plist` (Sparkle compare `CFBundleVersion`) ;
+2. `bash scripts/build-dmg.sh` (signature, notarisation) ;
+3. `bash scripts/publish-update.sh` : copie le DMG dans `dist/mac/` et régénère `appcast.xml` ; des notes de version facultatives se placent à côté du DMG sous le même nom en `.html` ;
+4. déposer le contenu de `dist/mac/` dans `https://scenarisation.eu/mac/`.
+
+La clé privée de signature est dans le trousseau de session (compte `scenarisation-mac`). Sans elle, aucune mise à jour ne peut plus être publiée pour les apps déjà installées : exportez-la une fois avec `.build/artifacts/sparkle/Sparkle/bin/generate_keys --account scenarisation-mac -x <fichier>` et conservez ce fichier en lieu sûr.
+
 ## Vérifier
 
 ```sh
@@ -159,7 +187,13 @@ Les tests d’import utilisent aussi des exports enseignant et élève généré
 
 Les tests de l’aide chargent les documents dans WebKit et vérifient les cartes, la numérotation, l’ouverture des chapitres par ancre, les destinations locales et l’absence de débordement dans une fenêtre étroite. Les instantanés du guide et des trois pages pédagogiques peuvent être actualisés avec `python3 scripts/sync-help.py` (accès Internet requis uniquement pour cette actualisation). Les styles d’adaptation Mac restent dans `Web/help.css` et les interactions dans `Web/help.js`.
 
-Les tests de synchronisation utilisent un serveur local simulé et des réponses HTTP interceptées, sans connexion au site. Ils couvrent les reprises après coupure et redémarrage, les créations réessayées sans doublon, les modifications pendant un envoi, les conflits de révision, les suppressions, les partitions de compte et les erreurs d’écriture du suivi local. Les tests OAuth vérifient PKCE, le retour du navigateur, le renouvellement partagé des jetons, leur conservation après annulation, les échecs du Trousseau, la révocation et l’isolation des comptes. Le navigateur et le Trousseau sont remplacés par des services de test ; la connexion avec un compte réel reste à vérifier manuellement.
+Les tests de synchronisation utilisent un serveur local simulé et des réponses HTTP interceptées, sans connexion au site. Ils couvrent les reprises après coupure et redémarrage, les créations réessayées sans doublon, les modifications pendant un envoi, la fusion des modifications simultanées de deux enseignants (y compris lorsqu’un enregistrement s’intercale entre la lecture et l’envoi), la présence et le départ d’un scénario partagé, les suppressions, les partitions de compte et les erreurs d’écriture du suivi local. Les tests OAuth vérifient PKCE, le retour du navigateur, le renouvellement partagé des jetons, leur conservation après annulation, les échecs du Trousseau, la révocation et l’isolation des comptes. Le navigateur et le Trousseau sont remplacés par des services de test ; la connexion avec un compte réel reste à vérifier manuellement.
+
+Un test de bout en bout de la collaboration, désactivé par défaut, fait dialoguer le vrai client de l’app (trois comptes) avec le vrai code PHP du site, servi par `php -S` sur ce Mac : invitation, présence, modifications simultanées, droits, départ du partage et suppression. Il utilise une base SQLite jetable, ou une base MySQL/MariaDB de test vide désignée par `SCENARISATION_SITE_DSN`, `SCENARISATION_SITE_DB_USER` et `SCENARISATION_SITE_DB_PASS`. Aucune requête ne part vers scenarisation.eu.
+
+```sh
+SCENARISATION_SITE_DIR=/chemin/vers/learning-designer swift test --filter LiveSiteTests
+```
 
 ## Sources et licence
 
