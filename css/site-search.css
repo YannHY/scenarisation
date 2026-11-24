@@ -28,7 +28,7 @@
   background: var(--panel, #fff);
   color: var(--text-body, #314255);
   font: inherit;
-  font-size: 13px;
+  font-size: 0.8125rem;
   cursor: pointer;
 }
 .site-search-filter[aria-pressed="true"] {

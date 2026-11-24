@@ -506,10 +506,12 @@ PROMPT;
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="css/interface.css?v=20260910-help-toc">
-    <link rel="stylesheet" href="css/account-ui.css?v=20260906-highlight">
-    <link rel="stylesheet" href="css/account-pages.css?v=20260904-content-rhythm">
-    <link rel="stylesheet" href="css/help-terminal.css?v=20260927-terminal-illustration">
+    <link rel="stylesheet" href="css/interface.css?v=20261124-rem">
+    <link rel="stylesheet" href="css/account-ui.css?v=20261124-rem">
+    <link rel="stylesheet" href="css/account-pages.css?v=20261124-rem">
+    <link rel="stylesheet" href="css/help-terminal.css?v=20261124-rem">
+<?php render_refined_styles(); ?>
+    <link rel="stylesheet" href="css/help-page.css?v=<?= substr((string)hash_file('sha256', __DIR__ . '/css/help-page.css'), 0, 16) ?>">
 </head>
 <body class="help-page">
 <?php render_site_nav('help'); ?>
@@ -568,7 +570,7 @@ PROMPT;
 
                 <h3 id="creer-premier-design">Créer un premier scénario, étape par étape</h3>
                 <ol>
-                    <li><strong>Décrire le contexte.</strong> Renseignez le titre, la description, la commande institutionnelle, les objectifs d’enseignement, les concepteurs, les enseignants, la taille du groupe, la modalité et la durée prévue. Pour le niveau, choisissez d’abord un système ou une classification, puis la classe correspondante. Le catalogue couvre la France, la Suisse, les États-Unis, les trois communautés belges, les quatre systèmes du Royaume-Uni et les systèmes transnationaux des Écoles européennes et du Baccalauréat international (IB). ISCED 2011 est proposé séparément comme classification internationale de comparaison. La durée peut être exprimée en jours, heures et minutes ; le nombre d’heures correspondant à une journée est configurable.</li>
+                    <li><strong>Décrire le contexte.</strong> Renseignez le titre, la description, la commande institutionnelle, les objectifs d’enseignement, les concepteurs, les enseignants, le matériel enseignant (outils, équipements, logiciels et services en ligne nécessaires), la taille du groupe, la modalité et la durée prévue. Pour le niveau, choisissez d’abord un système ou une classification, puis la classe correspondante. Le catalogue couvre la France, la Suisse, les États-Unis, les trois communautés belges, les quatre systèmes du Royaume-Uni et les systèmes transnationaux des Écoles européennes et du Baccalauréat international (IB). ISCED 2011 est proposé séparément comme classification internationale de comparaison. La durée peut être exprimée en jours, heures et minutes&nbsp;; le nombre d’heures correspondant à une journée est configurable.</li>
                     <li><strong>Formuler les acquis attendus.</strong> Indiquez ce que les apprenants devront être capables de faire à la fin. Reliez si nécessaire chaque acquis à un niveau de la taxonomie révisée de Bloom et choisissez un verbe d’action observable.</li>
                     <li><strong>Structurer le parcours en moments.</strong> Un moment correspond à une phase cohérente de la séance ou de la séquence : lancement, exploration, entraînement, mise en commun, production ou évaluation.</li>
                     <li><strong>Ajouter les activités.</strong> Pour chacune, précisez le type d’apprentissage, la durée, l’organisation du groupe, le mode d’enseignement, le rythme, la modalité, l’évaluation, les consignes et les ressources.</li>
@@ -600,6 +602,18 @@ PROMPT;
                     <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
                     <p><strong>En vue Grille,</strong> les mêmes icônes sont disponibles dans la colonne d’actions. La copie apparaît brièvement en surbrillance afin de la repérer et peut être modifiée immédiatement.</p>
                 </div>
+                <h3 id="annuler-retablir">Annuler et rétablir une modification</h3>
+                <p>Les deux flèches de la barre d’outils située au-dessus du scénario annulent ou rétablissent vos dernières modifications&nbsp;: texte saisi, activité ajoutée, déplacée ou supprimée, réglage modifié.</p>
+                <div class="help-table-wrap">
+                    <table class="help-table">
+                        <thead><tr><th>Action</th><th>macOS</th><th>Windows et Linux</th></tr></thead>
+                        <tbody>
+                            <tr><td>Annuler</td><td><code>Cmd + Z</code></td><td><code>Ctrl + Z</code></td></tr>
+                            <tr><td>Rétablir</td><td><code>Cmd + Shift + Z</code></td><td><code>Ctrl + Shift + Z</code> ou <code>Ctrl + Y</code></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>Dans un scénario partagé, seules vos propres modifications sont annulées&nbsp;: celles de vos collègues restent en place. Dans les fenêtres et la recherche du site, ces raccourcis conservent leur comportement habituel.</p>
                 <h3>Paramètres disponibles pour une activité</h3>
                 <div class="help-table-wrap">
                     <table class="help-table">
@@ -716,10 +730,26 @@ PROMPT;
                     <li>les formes d’évaluation.</li>
                 </ul>
                 <p>Les avertissements affichés dans cette vue signalent les données manquantes ou incohérentes — par exemple une activité sans durée ou sans type — qui pourraient fausser les graphiques.</p>
+                <h3 id="exporter-analyse">Exporter l’analyse</h3>
+                <p>Le bouton <strong>Exporter</strong> de la vue d’analyse propose trois familles de formats&nbsp;:</p>
+                <ul>
+                    <li><strong>Texte et données</strong>&nbsp;: TXT, Markdown, HTML, CSV et Excel, pour reprendre les répartitions dans un document ou un tableur&nbsp;;</li>
+                    <li><strong>Documents</strong>&nbsp;: Word et PDF, pour joindre l’analyse à un dossier ou l’imprimer&nbsp;;</li>
+                    <li><strong>Images</strong>&nbsp;: PNG, JPEG et SVG, pour insérer les graphiques dans une présentation.</li>
+                </ul>
                 <h3>Consulter la chronologie des activités</h3>
                 <p>Dans ce même panneau supérieur, cliquez sur l’onglet <strong>Chronologie</strong>. Chaque activité y est positionnée selon sa durée et son ordre afin de donner une autre lecture de la séquence.</p>
                 <h3>Choisir l’affichage du scénario</h3>
                 <p>Plus bas dans l’éditeur, la barre d’outils située au-dessus du scénario permet de choisir <strong>Liste</strong> pour une lecture linéaire, <strong>Colonnes</strong> pour comparer les moments ou <strong>Grille</strong> pour obtenir une vue plus compacte. Ces trois boutons modifient uniquement la présentation des moments et des activités.</p>
+                <h3 id="reglages-affichage">Adapter l’affichage du site</h3>
+                <p>Le menu du compte, ouvert par l’icône de profil en haut à droite, contient une section <strong>Affichage</strong>, disponible avec ou sans connexion&nbsp;:</p>
+                <ul>
+                    <li><strong>Mode</strong>&nbsp;: clair, chaud ou sombre&nbsp;;</li>
+                    <li><strong>Taille du texte</strong>&nbsp;: cinq tailles, à réduire ou agrandir avec les deux boutons <strong>A</strong> placés de part et d’autre du pourcentage&nbsp;;</li>
+                    <li><strong>Espacement</strong>&nbsp;: standard, aéré ou large&nbsp;;</li>
+                    <li><strong>Réduire les animations</strong>&nbsp;: limite les transitions et les effets de mouvement.</li>
+                </ul>
+                <p>Ces réglages s’appliquent dès l’ouverture de chaque page et sont conservés sur l’appareil utilisé&nbsp;: ils ne suivent pas votre compte d’un ordinateur à l’autre. Juste au-dessus, la section <strong>Préférences</strong> permet de choisir la langue de l’interface.</p>
             </article>
 
             <article class="help-section" id="sauvegarde-partage">
@@ -729,6 +759,9 @@ PROMPT;
                 <p>Vous pouvez concevoir et exporter un scénario sans vous connecter. Les modifications restent disponibles dans la page tant qu’elle est ouverte. Aucune donnée n’est envoyée au serveur sans action explicite de votre part.</p>
                 <h3 id="sauvegarde-avec-compte">Avec un compte</h3>
                 <p>Le bouton <strong>Enregistrer</strong> associe le scénario à votre compte. Vous pouvez ensuite le retrouver, le rouvrir, le renommer ou le supprimer depuis la page de vos scénarios.</p>
+                <p>Lorsque vous êtes connecté, vos modifications sont aussi sauvegardées automatiquement quelques dizaines de secondes après la dernière saisie, et presque immédiatement dans un scénario partagé. Si la version enregistrée a changé ailleurs entre-temps, les deux versions sont fusionnées&nbsp;: voir <a href="#fusion-modifications">Fusion automatique des modifications</a>.</p>
+                <h3 id="app-mac">Retrouver ses scénarios dans l’app pour Mac</h3>
+                <p><a href="app.php">Scénarisation pour Mac</a> est une app native qui fonctionne hors ligne. Connectez-vous avec votre compte Scénarisation pour retrouver les mêmes scénarios dans l’app et sur le site&nbsp;: la synchronisation est automatique et les modifications faites hors connexion sont envoyées dès le retour du réseau. Les scénarios partagés avec vous y apparaissent également.</p>
                 <h3 id="publier-lien">Publier un lien consultable</h3>
                 <p>Un scénario enregistré peut être publié pour générer une page de lecture partageable. Cette page présente les paramètres, les moments, les activités, les durées, les liens et les compétences numériques, mais ne permet pas aux visiteurs de modifier l’original.</p>
                 <ul>
@@ -762,6 +795,40 @@ PROMPT;
                 </div>
             </article>
 
+            <article class="help-section" id="collaboration">
+                <h2>Travailler à plusieurs</h2>
+                <p>Invitez des collègues à concevoir un scénario avec vous ou simplement à le consulter. Chacun travaille sur son propre appareil, sur le site ou dans l’app pour Mac.</p>
+                <h3 id="inviter-collegues">Inviter des collègues</h3>
+                <ol>
+                    <li>Enregistrez d’abord le scénario dans votre compte.</li>
+                    <li>Cliquez sur <strong>Collaborer</strong>, dans la barre d’outils de l’éditeur.</li>
+                    <li>Saisissez l’adresse e-mail du compte de votre collègue, choisissez ses droits, puis cliquez sur <strong>Inviter</strong>.</li>
+                </ol>
+                <div class="help-table-wrap">
+                    <table class="help-table">
+                        <thead><tr><th>Droits</th><th>Ce que l’enseignant peut faire</th></tr></thead>
+                        <tbody>
+                            <tr><td>Peut modifier</td><td>Modifier le scénario avec vous et l’exporter.</td></tr>
+                            <tr><td>Peut consulter</td><td>Parcourir et exporter le scénario, sans le modifier. L’éditeur affiche alors la mention <strong>Consultation seule</strong>.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>Les enseignants invités doivent disposer d’un compte vérifié. Ils retrouvent le scénario dans la rubrique <strong>Partagés avec moi</strong> de leurs scénarios, sur le site comme dans l’app. Dans votre liste, la mention <strong>Partagé avec…</strong> indique le nombre de collègues associés.</p>
+                <div class="help-callout">
+                    <i class="fa-solid fa-user-shield" aria-hidden="true"></i>
+                    <p><strong>Le propriétaire garde la main.</strong> Lui seul peut inviter, changer les droits, retirer un enseignant du partage ou supprimer le scénario. Un enseignant invité peut à tout moment <strong>Quitter le partage</strong>&nbsp;; le propriétaire conserve alors le scénario.</p>
+                </div>
+                <h3 id="presence-collegues">Voir qui travaille sur le scénario</h3>
+                <ul>
+                    <li>Les initiales des collègues présents remplacent le libellé du bouton <strong>Collaborer</strong>&nbsp;; survolez-le pour savoir ce que chacun modifie.</li>
+                    <li>La carte, le moment ou le champ sur lequel travaille un collègue est souligné de sa couleur et porte son nom.</li>
+                    <li>Si quelqu’un modifie le même texte que vous, une note l’indique sous le champ.</li>
+                </ul>
+                <h3 id="fusion-modifications">Fusion automatique des modifications</h3>
+                <p>Les modifications de chacun apparaissent chez les autres en quelques secondes. Lorsque deux personnes ont modifié le scénario en même temps, les deux versions sont fusionnées champ par champ, sans vous demander d’enregistrer une copie&nbsp;: le texte en cours de saisie et le curseur restent en place. Sur une même phrase, la dernière modification enregistrée l’emporte.</p>
+                <p>La commande <a href="#annuler-retablir">Annuler</a> ne revient que sur vos propres modifications, jamais sur celles de vos collègues.</p>
+            </article>
+
             <article class="help-section" id="import-export">
                 <h2>Importer et exporter dans plusieurs formats</h2>
                 <p>Choisissez le bon format pour relire, partager, modifier ou réimporter votre scénario.</p>
@@ -780,8 +847,10 @@ PROMPT;
                 </div>
                 <p>Les exports JSON et Markdown d’un scénario dérivé, ainsi que les sauvegardes ZIP, conservent le suivi de son origine afin que l’attribution accompagne le contenu hors de l’application.</p>
                 <p>Pour exporter, cliquez sur <strong>Exporter</strong>, choisissez le format et le nom du fichier, puis prévisualisez le contenu lorsqu’il s’agit d’un format textuel. Vous pouvez le copier ou le télécharger.</p>
+                <p>La même fenêtre permet de choisir le contenu exporté&nbsp;: l’<strong>Export enseignant</strong> reprend toutes les informations du scénario, tandis que l’<strong>Export élève</strong> ne conserve que les séances, les activités et les consignes adressées aux élèves. Vous pouvez aussi limiter l’export à certains moments.</p>
                 <h3 id="modeles">Partir d’un modèle</h3>
-                <p class="help-spaced">Le bouton <strong>Importer</strong> ouvre une fenêtre qui propose d’abord une bibliothèque de scénarios génériques et préremplis : introduire un chapitre, étude de documents, débat argumenté, exposé, tâche complexe, séance avec IA encadrée… Les moments, les durées, les types d’apprentissage, les modalités, les acquis Bloom et les niveaux AIAS sont déjà posés ; il reste à remplacer les jalons entre crochets, comme <code>[MATIÈRE]</code> ou <code>[NOTION 1]</code>, par le contenu de votre discipline. La page <a href="models.php">Modèles de scénarios</a> présente l’ensemble de la bibliothèque et permet de télécharger chaque modèle au format JSON.</p>
+                <p class="help-spaced">Le bouton <strong>Importer</strong> ouvre une fenêtre qui propose d’abord une bibliothèque de scénarios génériques et préremplis&nbsp;: introduire un chapitre, étude de documents, débat argumenté, exposé, tâche complexe, séance avec IA encadrée… Les moments, les durées, les types d’apprentissage, les modalités, les acquis Bloom et les niveaux AIAS sont déjà posés&nbsp;; il reste à remplacer les jalons entre crochets, comme <code>[MATIÈRE]</code> ou <code>[NOTION 1]</code>, par le contenu de votre discipline. La page <a href="models.php">Modèles de scénarios</a> présente l’ensemble de la bibliothèque et permet de télécharger chaque modèle au format JSON.</p>
+                <p>Depuis la page <a href="new-design.php">Nouveau scénario</a>, la bibliothèque de modèles et celle des scénarios partagés se filtrent par recherche, famille, durée, nombre de moments, mode de diffusion et type d’apprentissage. Les scénarios partagés se filtrent en plus par système scolaire, cycle, niveau et compétence.</p>
                 <h3 id="formats-import">Formats d’import</h3>
                 <p>La même fenêtre permet de charger un fichier depuis votre ordinateur, dans les formats suivants :</p>
                 <ul>
@@ -1390,6 +1459,13 @@ document.addEventListener('DOMContentLoaded', function () {
             chapterToggle.addEventListener('click', function () {
                 setSectionExpanded(section, chapterToggle.getAttribute('aria-expanded') !== 'true');
             });
+
+            // Le titre du chapitre ouvre ou referme aussi le chapitre, comme le bouton.
+            if (sectionHeading) {
+                sectionHeading.addEventListener('click', function () {
+                    chapterToggle.click();
+                });
+            }
 
             sectionBody.hidden = true;
             section.appendChild(chapterToggle);

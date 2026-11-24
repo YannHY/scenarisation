@@ -1,0 +1,1706 @@
+/*
+ * Finitions visuelles, inspirées de l’app Scénarisation pour Mac et iPad.
+ *
+ * Feuille chargée en dernier sur toutes les pages : elle affine les composants existants sans
+ * changer la structure. Le header noir, l’icône et les palettes de couleur restent ceux du site.
+ * Principes repris de l’app (DesignSystem.swift) : cartes blanches au bord à peine visible et à
+ * l’ombre douce, champs teintés sans bordure avec un anneau au focus, boutons en capsule, icônes
+ * sans cadre qui se teintent au survol, titres à l’encre plutôt qu’en couleur.
+ *
+ * Les sélecteurs commencent par :root pour l’emporter sur les règles du thème sombre
+ * ([data-theme="dark"] .x), à spécificité égale : cette feuille étant chargée en dernier, elle gagne.
+ */
+
+:root {
+  --r-canvas: #fcfcfb;
+  --r-surface: #ffffff;
+  --r-field: #fbfbfa;
+  --r-field-hover: #f6f6f4;
+  --r-field-border: rgba(31, 31, 29, 0.07);
+  --r-fill: rgba(31, 31, 29, 0.025);
+  --r-fill-hover: rgba(31, 31, 29, 0.05);
+  --r-fill-active: rgba(31, 31, 29, 0.08);
+  --r-line: rgba(31, 31, 29, 0.08);
+  --r-line-strong: rgba(31, 31, 29, 0.14);
+  --r-ink: #1f1f1d;
+  --r-ink-hover: #3a3a36;
+  --r-ink-text: #ffffff;
+  --r-focus-border: rgba(31, 31, 29, 0.42);
+  --r-focus-ring: rgba(31, 31, 29, 0.1);
+  --r-shadow-card: 0 1px 2px rgba(31, 31, 29, 0.04), 0 8px 24px -12px rgba(31, 31, 29, 0.14);
+  --r-shadow-lift: 0 2px 6px rgba(31, 31, 29, 0.05), 0 18px 40px -18px rgba(31, 31, 29, 0.26);
+  --r-shadow-control: 0 1px 2px rgba(31, 31, 29, 0.1), 0 1px 1px rgba(31, 31, 29, 0.04);
+  --r-shadow-modal: 0 2px 8px rgba(31, 31, 29, 0.06), 0 32px 80px -24px rgba(31, 31, 29, 0.32);
+  --r-radius-card: 18px;
+  --r-radius-inner: 14px;
+  --r-radius-control: 10px;
+  --r-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+:root[data-theme="dark"] {
+  --r-field-border: transparent;
+  --r-canvas: #141412;
+  --r-surface: #1f1e1b;
+  --r-field: #2a2925;
+  --r-field-hover: #312f2b;
+  --r-fill: rgba(255, 255, 255, 0.07);
+  --r-fill-hover: rgba(255, 255, 255, 0.11);
+  --r-fill-active: rgba(255, 255, 255, 0.15);
+  --r-line: rgba(255, 255, 255, 0.08);
+  --r-line-strong: rgba(255, 255, 255, 0.15);
+  --r-ink: #f1efe9;
+  --r-ink-hover: #ffffff;
+  --r-ink-text: #1a1a18;
+  --r-focus-border: rgba(255, 255, 255, 0.45);
+  --r-focus-ring: rgba(255, 255, 255, 0.1);
+  --r-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 28px -14px rgba(0, 0, 0, 0.6);
+  --r-shadow-lift: 0 2px 6px rgba(0, 0, 0, 0.35), 0 20px 44px -18px rgba(0, 0, 0, 0.7);
+  --r-shadow-control: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --r-shadow-modal: 0 2px 8px rgba(0, 0, 0, 0.4), 0 32px 80px -24px rgba(0, 0, 0, 0.8);
+}
+
+/* ── Typographie : titres à l’encre, couleur réservée aux liens et aux actions ── */
+
+:root body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+:root body:not(.home-page) :is(h2, h3) {
+  color: var(--heading-ink);
+  letter-spacing: -0.015em;
+}
+
+:root body:not(.home-page) h1 {
+  letter-spacing: -0.035em;
+}
+
+/* ── Lisibilité : petites tailles relevées d’un cran (section générée) ─────── */
+/* Générée à partir des règles de premier niveau (hors @media) des autres feuilles de css/ : 10→11, 11→12, 12→13 et 13→14 px.
+   Icônes, compteurs, graduations de graphiques et commandes compactes du concepteur sont laissés tels quels.
+   Les réglages manuels placés plus loin dans ce fichier l’emportent. */
+
+:root .expand-btn {
+  font-size: 0.8125rem;
+}
+
+:root .learning-outcomes-menu-heading span,
+:root .learning-outcomes-empty {
+  font-size: 0.8125rem;
+}
+
+:root .learning-outcome-create-trigger {
+  font-size: 0.875rem;
+}
+
+:root .learning-outcome-create-form p {
+  font-size: 0.8125rem;
+}
+
+:root .learning-outcome-level-select,
+:root .learning-outcome-verb-select,
+:root .learning-outcome-new-text {
+  font-size: 0.8125rem;
+}
+
+:root .learning-outcome-create-cancel,
+:root .learning-outcome-create-confirm {
+  font-size: 0.8125rem;
+}
+
+:root .learning-outcome-option-tag {
+  font-size: 0.75rem;
+}
+
+:root .learning-outcome-option-text {
+  font-size: 0.875rem;
+}
+
+:root .math-assistant-heading span,
+:root .math-assistant-label-text {
+  font-size: 0.8125rem;
+}
+
+:root .math-mode-option {
+  font-size: 0.8125rem;
+}
+
+:root .math-assistant-label {
+  font-size: 0.8125rem;
+}
+
+:root .math-assistant-preview {
+  font-size: 0.875rem;
+}
+
+:root .math-palette-category {
+  font-size: 0.75rem;
+}
+
+:root .math-assistant-cancel,
+:root .math-assistant-insert {
+  font-size: 0.8125rem;
+}
+
+:root .time-inline .panel-input {
+  font-size: 0.875rem;
+}
+
+:root .time-unit {
+  font-size: 0.75rem;
+}
+
+:root .legend-item {
+  font-size: 0.8125rem;
+}
+
+:root .analysis-export-button {
+  font-size: 0.8125rem;
+}
+
+:root .analysis-export-description {
+  font-size: 0.75rem;
+}
+
+html:root body:not(.home-page) h3.analysis-export-group-title {
+  font-size: 0.75rem;
+}
+
+:root .analysis-export-option > span {
+  font-size: 0.8125rem;
+}
+
+:root .analysis-export-status {
+  font-size: 0.75rem;
+}
+
+:root .analysis-alert {
+  font-size: 0.8125rem;
+}
+
+:root .analysis-legend {
+  font-size: 0.75rem;
+}
+
+:root .partition-controls {
+  font-size: 0.875rem;
+}
+
+:root .partition-config-btn {
+  font-size: 0.875rem;
+}
+
+:root .partition-session-title {
+  font-size: 0.875rem;
+}
+
+:root .partition-session-total {
+  font-size: 0.8125rem;
+}
+
+:root .partition-line-label {
+  font-size: 0.8125rem;
+}
+
+:root .partition-config-row-label {
+  font-size: 0.875rem;
+}
+
+:root .partition-config-row-type {
+  font-size: 0.75rem;
+}
+
+:root .partition-config-row-btns button {
+  font-size: 0.875rem;
+}
+
+:root .partition-config-modal-desc {
+  font-size: 0.875rem;
+}
+
+:root .partition-add-section-label {
+  font-size: 0.8125rem;
+}
+
+:root .modal-inline-error {
+  font-size: 0.875rem;
+}
+
+:root .export-scope-option-description {
+  font-size: 0.875rem;
+}
+
+:root .export-moments-summary {
+  font-size: 0.8125rem;
+}
+
+:root .modal .export-moment-option {
+  font-size: 0.875rem;
+}
+
+:root .outcomes-header label {
+  font-size: 0.875rem;
+}
+
+:root .outcomes-description {
+  font-size: 0.875rem;
+}
+
+:root .outcome-verb-btn {
+  font-size: 0.8125rem;
+}
+
+:root .outcome-verb-edit {
+  font-size: 0.75rem;
+}
+
+:root .outcome-summary-btn {
+  font-size: 0.875rem;
+}
+
+:root .bloom-selected-tag {
+  font-size: 0.8125rem;
+}
+
+:root .bloom-modal-subtitle {
+  font-size: 0.875rem;
+}
+
+:root .bloom-verb-item {
+  font-size: 0.875rem;
+}
+
+:root .toolbar .btn {
+  font-size: 0.875rem;
+}
+
+:root .btn {
+  font-size: 0.875rem;
+}
+
+:root .session-title,
+:root .session-objectives,
+:root .session-intentions,
+:root .activity-description,
+:root .activity-instructions,
+:root .session-notes-input {
+  font-size: 0.875rem;
+}
+
+:root .activity-field-label {
+  font-size: 0.75rem;
+}
+
+:root .aias-modal-intro {
+  font-size: 0.8125rem;
+}
+
+:root .aias-status-btn {
+  font-size: 0.75rem;
+}
+
+:root .aias-level-number {
+  font-size: 0.8125rem;
+}
+
+:root .aias-level-title {
+  font-size: 0.8125rem;
+}
+
+:root .aias-level-description {
+  font-size: 0.75rem;
+}
+
+:root .choice-menu-title {
+  font-size: 0.8125rem;
+}
+
+:root .choice-menu-item-description {
+  font-size: 0.8125rem;
+}
+
+:root .tool-picker-framework-label {
+  font-size: 0.8125rem;
+}
+
+:root .tool-picker-framework-select {
+  font-size: 0.875rem;
+}
+
+:root .tool-picker-source-link {
+  font-size: 0.75rem;
+}
+
+:root .tool-picker-search-input {
+  font-size: 0.875rem;
+}
+
+:root .tool-picker-tab {
+  font-size: 0.8125rem;
+}
+
+:root .tool-picker-section-title {
+  font-size: 0.875rem;
+}
+
+:root .tool-picker-item {
+  font-size: 0.875rem;
+}
+
+:root .tool-picker-item-name {
+  font-size: 0.875rem;
+}
+
+:root .tool-picker-item-desc {
+  font-size: 0.75rem;
+}
+
+:root .session-card .btn {
+  font-size: 0.875rem;
+}
+
+:root .site-footer {
+  font-size: 0.8125rem;
+}
+
+:root .site-footer-link {
+  font-size: 0.8125rem;
+}
+
+:root .site-footer-link-row:last-child .site-footer-link,
+:root .site-footer-link-row:last-child .site-footer-separator,
+:root .site-footer-license {
+  font-size: 0.75rem;
+}
+
+:root .help-kicker {
+  font-size: 0.8125rem;
+}
+
+:root .help-quick-link {
+  font-size: 0.875rem;
+}
+
+:root .help-sidebar-title {
+  font-size: 0.875rem;
+}
+
+:root .help-toc-link {
+  font-size: 0.8125rem;
+}
+
+:root .help-toc-sublink {
+  font-size: 0.78125rem;
+}
+
+:root .help-eyebrow {
+  font-size: 0.8125rem;
+}
+
+:root .help-card span,
+:root .help-card p {
+  font-size: 0.875rem;
+}
+
+:root .help-type strong {
+  font-size: 0.875rem;
+}
+
+:root .help-type span {
+  font-size: 0.8125rem;
+}
+
+:root .help-table th {
+  font-size: 0.8125rem;
+}
+
+:root .help-code,
+:root .help-prompt {
+  font-size: 0.84375rem;
+}
+
+:root .about-version {
+  font-size: 0.875rem;
+}
+
+:root .about-meta {
+  font-size: 0.875rem;
+}
+
+html:root body .import-section-title {
+  font-size: 0.875rem;
+}
+
+:root .import-drop-hint {
+  font-size: 0.84375rem;
+}
+
+:root .import-models-link {
+  font-size: 0.84375rem;
+}
+
+:root .import-models-status {
+  font-size: 0.84375rem;
+}
+
+:root .import-model-chip {
+  font-size: 0.75rem;
+}
+
+:root .import-model-summary {
+  font-size: 0.84375rem;
+}
+
+:root .import-model-todo {
+  font-size: 0.75rem;
+}
+
+:root .import-model-action.btn {
+  font-size: 0.8125rem;
+}
+
+:root .modal .import-model-preview-eyebrow {
+  font-size: 0.8125rem;
+}
+
+:root .import-model-preview-moment-number {
+  font-size: 0.8125rem;
+}
+
+:root .import-model-preview-text > strong {
+  font-size: 0.75rem;
+}
+
+:root .modal .import-model-preview-text > p {
+  font-size: 0.84375rem;
+}
+
+:root .import-model-preview-activity-header > strong {
+  font-size: 0.84375rem;
+}
+
+:root .import-model-preview-activity-meta {
+  font-size: 0.78125rem;
+}
+
+:root .import-model-preview-actions .btn {
+  font-size: 0.84375rem;
+}
+
+:root .feedback-kicker {
+  font-size: 0.75rem;
+}
+
+:root .feedback-comment-label {
+  font-size: 0.875rem;
+}
+
+:root .feedback-comment-label small {
+  font-size: 0.75rem;
+}
+
+:root .feedback-status {
+  font-size: 0.8125rem;
+}
+
+:root .feedback-actions a {
+  font-size: 0.75rem;
+}
+
+:root .admin-feedback-total {
+  font-size: 0.8125rem;
+}
+
+:root .admin-statistics-period {
+  font-size: 0.8125rem;
+}
+
+:root .admin-stat-card-head {
+  font-size: 0.875rem;
+}
+
+:root .admin-stat-card p {
+  font-size: 0.8125rem;
+}
+
+:root .admin-stat-progress-row > div:first-child {
+  font-size: 0.875rem;
+}
+
+:root .admin-stat-progress-row strong {
+  font-size: 0.875rem;
+}
+
+:root .admin-stat-progress-row > small {
+  font-size: 0.75rem;
+}
+
+:root .admin-statistics-ranking-head p {
+  font-size: 0.875rem;
+}
+
+:root .admin-statistics-ranking-head > span {
+  font-size: 0.8125rem;
+}
+
+:root .admin-statistics-rank {
+  font-size: 0.8125rem;
+}
+
+:root .admin-statistics-creator strong {
+  font-size: 0.875rem;
+}
+
+:root .admin-statistics-creator small {
+  font-size: 0.75rem;
+}
+
+:root .admin-feedback-stat span {
+  font-size: 0.875rem;
+}
+
+:root .admin-filter-result {
+  font-size: 0.8125rem;
+}
+
+:root .admin-manager-permission-options legend {
+  font-size: 0.875rem;
+}
+
+:root .admin-manager-permission-options label {
+  font-size: 0.875rem;
+}
+
+:root .profile-publications-table th {
+  font-size: 0.8125rem;
+}
+
+:root .profile-publication-date {
+  font-size: 0.8125rem;
+}
+
+:root .profile-publication-main a {
+  font-size: 0.8125rem;
+}
+
+:root .profile-publication-main p {
+  font-size: 0.8125rem;
+}
+
+:root .profile-cli .profile-publication-main p {
+  font-size: 0.75rem;
+}
+
+:root .models-kicker {
+  font-size: 0.8125rem;
+}
+
+:root .models-stat {
+  font-size: 0.875rem;
+}
+
+:root .model-chip {
+  font-size: 0.8125rem;
+}
+
+:root .model-outline-moment {
+  font-size: 0.875rem;
+}
+
+:root .model-act {
+  font-size: 0.75rem;
+}
+
+:root .model-todo {
+  font-size: 0.84375rem;
+}
+
+:root .model-card-actions .btn {
+  font-size: 0.8125rem;
+}
+
+:root .model-library-preview-actions .btn {
+  font-size: 0.84375rem;
+}
+
+:root .site-search-status {
+  font-size: 0.875rem;
+}
+
+:root .site-search-result-category {
+  font-size: 0.75rem;
+}
+
+:root .site-search-result-excerpt {
+  font-size: 0.875rem;
+}
+
+:root .publish-option-heading p {
+  font-size: 0.875rem;
+}
+
+:root .publish-link-status {
+  font-size: 0.875rem;
+}
+
+:root .publish-url-input {
+  font-size: 0.875rem;
+}
+
+:root .publish-license-help,
+:root .publish-license-warning {
+  font-size: 0.8125rem;
+}
+
+:root .publish-listing-choice small {
+  font-size: 0.875rem;
+}
+
+:root .publish-catalog-link {
+  font-size: 0.875rem;
+}
+
+:root .new-design-filter-field {
+  font-size: 0.8125rem;
+}
+
+:root .new-design-import .shared-pill {
+  font-size: 0.8125rem;
+}
+
+:root .new-design-import .shared-preview .meta-card-label {
+  font-size: 0.8125rem;
+}
+
+:root .new-design-import a.shared-pill,
+:root .new-design-import a.activity-link-public {
+  font-size: 0.8125rem;
+}
+
+:root .competencies-framework-source {
+  font-size: 0.75rem;
+}
+
+:root .cf-kicker {
+  font-size: 0.8125rem;
+}
+
+:root .cf-schema figcaption {
+  font-size: 0.6875rem;
+}
+
+:root .cf-toc > p {
+  font-size: 0.6875rem;
+}
+
+:root .cf-toc a {
+  font-size: 0.75rem;
+}
+
+:root .cf-table-wrap table {
+  font-size: 0.8125rem;
+}
+
+:root .cf-table-wrap thead th {
+  font-size: 0.6875rem;
+}
+
+:root .saved-table .saved-card-meta {
+  font-size: 0.8125rem;
+}
+
+:root .saved-status {
+  font-size: 0.875rem;
+}
+
+:root .saved-action-btn {
+  font-size: 0.875rem;
+}
+
+:root .saved-card-team {
+  font-size: 0.875rem;
+}
+
+:root .design-provenance-copy,
+:root .design-provenance-meta,
+:root .public-provenance-copy,
+:root .public-provenance-meta,
+:root .saved-card-provenance,
+:root .shared-card-provenance {
+  font-size: 0.875rem;
+}
+
+:root .design-provenance-meta,
+:root .public-provenance-meta {
+  font-size: 0.8125rem;
+}
+
+:root .shared-license-note {
+  font-size: 0.8125rem;
+}
+
+:root .site-search-filter,
+:root .site-search-more {
+  font-size: 0.875rem;
+}
+
+:root #app-tooltip {
+  font-size: 0.8125rem;
+}
+
+/* ── Fin de la section générée ── */
+
+/* ── Boutons : capsules teintées, action principale à l’encre ─────────────── */
+
+:root .btn,
+:root .btn-light {
+  min-height: 34px;
+  padding: 6px 14px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: var(--r-fill);
+  color: var(--text-strong);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  box-shadow: none;
+  transition: background 160ms var(--r-ease), color 160ms var(--r-ease), transform 160ms var(--r-ease);
+}
+
+:root .btn:hover,
+:root .btn-light:hover {
+  background: var(--r-fill-hover);
+  border-color: transparent;
+  color: var(--text-strong);
+}
+
+:root .btn:active,
+:root .btn-light:active {
+  background: var(--r-fill-active);
+}
+
+:root .btn-primary,
+:root .btn-primary:focus-visible {
+  border-color: transparent;
+  background: var(--r-ink);
+  color: var(--r-ink-text);
+  box-shadow: var(--r-shadow-control);
+}
+
+:root .btn-primary:hover,
+:root .btn-primary:active {
+  border-color: transparent;
+  background: var(--r-ink-hover);
+  color: var(--r-ink-text);
+}
+
+:root .btn-primary .btn-label,
+:root .btn-primary .btn-icon-inline {
+  color: inherit;
+}
+
+:root .btn:focus-visible,
+:root .btn-light:focus-visible {
+  outline: 2px solid var(--r-focus-border);
+  outline-offset: 2px;
+}
+
+:root .btn .btn-icon-inline {
+  opacity: 0.85;
+}
+
+/* Petits boutons d’icône (cartes, fenêtres) : sans cadre, teintés au survol comme dans l’app. */
+:root .icon-btn {
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-subtle);
+  box-shadow: none;
+}
+
+:root .icon-btn:hover {
+  border-color: transparent;
+  background: var(--r-fill-hover);
+  color: var(--text-strong);
+  transform: none;
+}
+
+:root .icon-btn:focus-visible {
+  outline: 2px solid var(--r-focus-border);
+  outline-offset: 1px;
+}
+
+:root .delete-btn:hover {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+/* ── Contrôles segmentés (disposition, historique) ───────────────────────── */
+
+:root .layout-toggle {
+  gap: 2px;
+  padding: 2px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--r-fill);
+}
+
+:root .layout-toggle-btn {
+  width: 34px;
+  height: 30px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-subtle);
+}
+
+:root .layout-toggle-btn:hover {
+  background: var(--r-fill-hover);
+}
+
+:root .layout-toggle-btn[aria-pressed="true"],
+:root .layout-toggle-btn[aria-pressed="true"]:hover {
+  background: var(--r-surface);
+  color: var(--text-strong);
+  box-shadow: var(--r-shadow-control);
+}
+
+:root .layout-toggle-btn:active {
+  transform: scale(0.92);
+}
+
+/* ── Champs : teintés, sans bordure, anneau au focus ─────────────────────── */
+
+:root :is(
+  .session-title, .session-objectives, .session-intentions,
+  .activity-description, .activity-instructions, .session-notes-input,
+  .panel-input, .panel-select, .panel-textarea,
+  .account-form input:not([type="checkbox"]):not([type="radio"]), .account-form select,
+  .expandable-field.preview-active:not(.fullscreen):not(.is-editing) .markdown-preview
+) {
+  border: 1px solid var(--r-field-border);
+  border-radius: var(--r-radius-control);
+  background-color: var(--r-field);
+  box-shadow: none;
+  transition: background-color 160ms var(--r-ease), border-color 160ms var(--r-ease), box-shadow 160ms var(--r-ease);
+}
+
+:root :is(
+  .session-title, .session-objectives, .session-intentions,
+  .activity-description, .activity-instructions, .session-notes-input,
+  .panel-input, .panel-select, .panel-textarea,
+  .account-form input:not([type="checkbox"]):not([type="radio"]), .account-form select,
+  .expandable-field.preview-active:not(.fullscreen):not(.is-editing) .markdown-preview
+):hover {
+  background-color: var(--r-field-hover);
+}
+
+:root :is(
+  .session-title, .session-objectives, .session-intentions,
+  .activity-description, .activity-instructions, .session-notes-input,
+  .panel-input, .panel-select, .panel-textarea,
+  .account-form input:not([type="checkbox"]):not([type="radio"]), .account-form select
+):focus {
+  border-color: var(--r-focus-border);
+  background-color: var(--r-surface);
+  box-shadow: 0 0 0 3px var(--r-focus-ring);
+  outline: none;
+}
+
+:root .account-form input:-webkit-autofill,
+:root .account-form input:-webkit-autofill:hover {
+  -webkit-box-shadow: 0 0 0 100px var(--r-field) inset;
+  box-shadow: 0 0 0 100px var(--r-field) inset;
+}
+
+:root .account-form input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 100px var(--r-surface) inset, 0 0 0 3px var(--r-focus-ring);
+  box-shadow: 0 0 0 100px var(--r-surface) inset, 0 0 0 3px var(--r-focus-ring);
+}
+
+/* Bouton d’agrandissement des champs longs : discret, visible au survol du champ. */
+:root .expand-btn {
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-subtle);
+  opacity: 0.55;
+  transition: opacity 160ms var(--r-ease), background 160ms var(--r-ease);
+}
+
+:root .expandable-field:hover > .expand-btn,
+:root .expandable-field:focus-within > .expand-btn,
+:root .expand-btn:focus-visible {
+  opacity: 1;
+}
+
+:root .expand-btn:hover {
+  background: var(--r-fill-hover);
+}
+
+/* ── Modales ─────────────────────────────────────────────────────────────── */
+
+:root .modal,
+:root .modal-card {
+  border: 1px solid var(--r-line);
+  border-radius: 20px;
+  background: var(--r-surface);
+  box-shadow: var(--r-shadow-modal);
+}
+
+:root .modal-backdrop {
+  background: rgba(20, 20, 18, 0.32);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+:root[data-theme="dark"] .modal-backdrop {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+:root dialog.modal::backdrop,
+:root .account-confirm-dialog::backdrop {
+  background: rgba(20, 20, 18, 0.32);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+/* ── Formulaires de compte (connexion, inscription, profil) ──────────────── */
+
+:root .account-form label,
+:root .field label {
+  color: var(--text-strong);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+:root .account-form input:not([type="checkbox"]):not([type="radio"]),
+:root .account-form select {
+  padding: 11px 14px;
+}
+
+:root .account-form button,
+:root .profile-primary-link {
+  min-height: 44px;
+  padding: 10px 22px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: var(--r-ink);
+  color: var(--r-ink-text);
+  font-weight: 600;
+  box-shadow: var(--r-shadow-control);
+  transition: background 160ms var(--r-ease), transform 160ms var(--r-ease);
+}
+
+:root .account-form button:hover,
+:root .account-form button:focus-visible,
+:root .profile-primary-link:hover,
+:root .profile-primary-link:focus-visible {
+  border-color: transparent;
+  background: var(--r-ink-hover);
+  color: var(--r-ink-text);
+  box-shadow: var(--r-shadow-control);
+}
+
+:root .account-form button:active,
+:root .profile-primary-link:active {
+  transform: scale(0.985);
+}
+
+/* Dans le profil, l’action n’occupe plus toute la largeur de la colonne. */
+:root .profile-page .account-form button {
+  align-self: flex-start;
+}
+
+:root .account-secondary-button {
+  min-height: 44px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: var(--r-fill);
+  color: var(--text-strong);
+  font-weight: 600;
+}
+
+:root .account-secondary-button:hover,
+:root .account-secondary-button:focus-visible {
+  border-color: transparent;
+  background: var(--r-fill-hover);
+  color: var(--text-strong);
+}
+
+:root .account-form-link {
+  font-weight: 600;
+}
+
+/* ── Encarts et cartes de contenu ────────────────────────────────────────── */
+
+:root .models-howto {
+  border: 0;
+  border-radius: var(--r-radius-card);
+  background: var(--r-fill);
+}
+
+/* ── Concepteur : zone de travail, barre d’outils, moments et activités ──── */
+
+:root body.designer-page {
+  background: var(--r-canvas);
+}
+
+:root .designer-page .toolbar {
+  border: 1px solid var(--r-line);
+  border-radius: var(--r-radius-card);
+  background: color-mix(in srgb, var(--r-surface) 86%, transparent);
+  box-shadow: var(--r-shadow-card);
+  -webkit-backdrop-filter: blur(18px) saturate(1.6);
+  backdrop-filter: blur(18px) saturate(1.6);
+}
+
+:root .session-card {
+  border: 1px solid var(--r-line);
+  border-radius: var(--r-radius-card);
+  background: var(--r-surface);
+  box-shadow: var(--r-shadow-card);
+}
+
+:root .session-card:hover {
+  border-color: var(--r-line-strong);
+  box-shadow: var(--r-shadow-lift);
+}
+
+:root .session-header {
+  border-bottom: 0;
+  background: transparent;
+}
+
+:root .session-strip {
+  height: 5px;
+  border-bottom: 0;
+}
+
+:root .session-footer {
+  border-top: 1px solid var(--r-line);
+  background: transparent;
+}
+
+:root .activity-card {
+  /* Comme dans l’app : pas de liseré latéral, un contour fin dans la couleur du type. */
+  border: 0;
+  border-radius: var(--r-radius-inner);
+  background: var(--r-surface);
+  box-shadow: 0 1px 2px rgba(31, 31, 29, 0.04);
+  overflow: hidden;
+}
+
+:root .activity-card:hover {
+  box-shadow: 0 8px 20px -12px rgba(31, 31, 29, 0.22);
+}
+
+:root .activity-card::before {
+  display: none;
+}
+
+/* Contour posé au-dessus du bandeau, pour qu’il entoure toute la carte. */
+:root .activity-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border: 1px solid color-mix(in srgb, var(--card-type-color, var(--r-line-strong)) 60%, transparent);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+:root .activity-toolbar {
+  border-bottom: 0;
+  border-radius: 0;
+  background: color-mix(in srgb, var(--card-type-color, transparent) 21%, var(--r-surface));
+}
+
+/* Pastille du type d’apprentissage : couleur pleine et icône blanche, comme le TypeBadge de l’app. */
+:root .activity-toolbar .activity-type-btn,
+:root .activity-toolbar .activity-type-btn:hover,
+:root .activity-toolbar .activity-type-btn.open {
+  min-width: 30px;
+  width: 30px;
+  min-height: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 9px;
+  background: linear-gradient(180deg, var(--card-type-color, #c4c9d1), color-mix(in srgb, var(--card-type-color, #c4c9d1) 78%, transparent));
+  color: #fff;
+}
+
+:root .activity-toolbar .activity-type-btn:hover {
+  filter: brightness(1.04);
+}
+
+:root .choice-btn {
+  min-width: 32px;
+  min-height: 32px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-body);
+}
+
+:root .choice-btn:hover {
+  border-color: transparent;
+  background: var(--r-fill-hover);
+}
+
+:root .choice-btn.open {
+  border-color: transparent;
+  background: var(--r-fill-active);
+  color: var(--text-strong);
+}
+
+:root .activity-toolbar .mini-label {
+  border-color: transparent;
+  background: var(--r-fill);
+}
+
+:root .duration-pill {
+  border-color: transparent;
+  background: var(--r-fill);
+}
+
+:root .add-session-card {
+  border-radius: var(--r-radius-card);
+}
+
+/* ── Panneau supérieur et onglets ────────────────────────────────────────── */
+
+:root .top-tab {
+  border-radius: 999px;
+}
+
+/* Unités des durées (jours, heures, minutes) : simple libellé, sans cadre. */
+:root .time-unit {
+  padding: 0 2px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+/* ── Fenêtres du concepteur ──────────────────────────────────────────────── */
+
+/* Option d’export choisie : repère neutre, jamais de fond bleuté. */
+:root .modal .export-scope-option {
+  border-color: var(--r-line-strong);
+  border-radius: var(--r-radius-inner);
+}
+
+:root .modal .export-scope-option:hover,
+:root .modal .export-scope-option:focus-within {
+  border-color: var(--r-focus-border);
+  background: var(--r-surface);
+  box-shadow: none;
+}
+
+:root .modal .export-scope-option:has(input:checked) {
+  border-color: var(--r-ink);
+  background: var(--r-surface);
+  box-shadow: inset 0 0 0 1px var(--r-ink);
+}
+
+/* Import : les deux sources ne sont plus des cadres dans la fenêtre, un séparateur suffit. */
+:root .import-source {
+  margin-top: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+:root .import-source + .import-source {
+  margin-top: 6px;
+  padding-top: 20px;
+  border-top: 1px solid var(--r-line);
+}
+
+:root body .modal .import-section-title {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+:root .import-drop-zone {
+  border-color: var(--r-line-strong);
+  border-radius: var(--r-radius-inner);
+  background: var(--r-fill);
+}
+
+/* ── Aide et bibliothèque de modèles ─────────────────────────────────────── */
+
+:root .help-quick-link {
+  min-height: 36px;
+  padding: 7px 14px;
+  border: 1px solid transparent;
+  background: var(--r-fill);
+  color: var(--text-strong);
+  font-weight: 600;
+}
+
+:root .help-quick-link:hover,
+:root .help-quick-link:focus-visible {
+  border-color: transparent;
+  background: var(--r-fill-hover);
+}
+
+:root .help-quick-link i {
+  color: var(--text-subtle);
+}
+
+:root .help-mobile-menu {
+  border: 0;
+  border-radius: 999px;
+  background: var(--r-fill);
+  font-weight: 600;
+}
+
+:root .help-section,
+:root .model-card {
+  border-color: var(--r-line);
+  border-radius: var(--r-radius-card);
+  box-shadow: var(--r-shadow-card);
+}
+
+:root .models-stat,
+:root .model-chip {
+  border: 0;
+  background: var(--r-fill);
+  color: var(--text-strong);
+  font-weight: 600;
+}
+
+:root .models-howto {
+  background: var(--r-canvas);
+}
+
+/* Petits écrans : historique et disposition restent sur une rangée, avec des segments resserrés. */
+@media (max-width: 520px) {
+  :root .toolbar-left .layout-toggle {
+    padding: 2px;
+    gap: 0;
+  }
+
+  :root .toolbar-left .layout-toggle-btn {
+    width: 40px;
+    height: 34px;
+    flex: 0 0 40px;
+  }
+
+  :root .toolbar-left > .toolbar-cluster > .btn,
+  :root .toolbar-right > .toolbar-cluster > .btn {
+    height: 38px;
+    min-height: 38px;
+  }
+}
+
+/* ── Fil d’Ariane : barre de chemin d’un seul tenant ─────────────────────── */
+/* Une capsule teintée contient tout le chemin, comme un contrôle segmenté de macOS ; la page
+   courante y ressort sur un segment clair. Le bord gauche reste aligné sur le contenu. */
+
+:root .site-breadcrumb {
+  color: var(--muted);
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+:root .site-breadcrumb ol {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  gap: 0;
+  padding: 5px 6px 5px 4px;
+  border-radius: 999px;
+  background: var(--r-fill);
+}
+
+:root .site-breadcrumb a,
+:root .site-breadcrumb li > span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  color: var(--text-subtle);
+  text-decoration: none;
+  transition: background 160ms var(--r-ease), color 160ms var(--r-ease);
+}
+
+:root .site-breadcrumb a:hover,
+:root .site-breadcrumb a:focus-visible {
+  background: var(--r-fill);
+  color: var(--text-strong);
+  text-decoration: none;
+}
+
+:root .site-breadcrumb a:focus-visible {
+  outline: 2px solid var(--r-focus-border);
+  outline-offset: 1px;
+}
+
+:root .site-breadcrumb .site-breadcrumb-home {
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  min-height: 34px;
+  padding: 0;
+  color: var(--text-strong);
+  font-size: 0.875rem;
+}
+
+:root .site-breadcrumb [aria-current="page"] {
+  min-height: 30px;
+  margin-left: 2px;
+  padding: 4px 12px;
+  background: var(--r-surface);
+  color: var(--text-strong);
+  font-weight: 600;
+  box-shadow: var(--r-shadow-control);
+}
+
+/* Le « / » devient un chevron fin. */
+:root .site-breadcrumb-separator {
+  position: relative;
+  width: 12px;
+  height: 34px;
+  font-size: 0;
+  color: transparent;
+}
+
+:root .site-breadcrumb-separator::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 2px;
+  width: 6px;
+  height: 6px;
+  border-top: 1.5px solid var(--muted);
+  border-right: 1.5px solid var(--muted);
+  opacity: 0.6;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+:root[data-theme="dark"] .site-breadcrumb [aria-current="page"] {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* ── Fenêtre des compétences : plus large, aux finitions des autres fenêtres ── */
+
+:root .tool-picker {
+  width: min(1160px, 94vw);
+  max-height: min(900px, 90vh);
+  border: 1px solid var(--r-line);
+  border-radius: 20px;
+  background: var(--r-surface);
+  box-shadow: var(--r-shadow-modal);
+}
+
+:root .tool-picker-backdrop {
+  background: rgba(20, 20, 18, 0.32);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+:root[data-theme="dark"] .tool-picker-backdrop {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+:root .tool-picker-header {
+  padding: 18px 22px 12px;
+  border-bottom: 0;
+}
+
+:root .tool-picker-framework {
+  padding: 4px 22px 14px;
+  border-bottom: 1px solid var(--r-line);
+  background: transparent;
+}
+
+:root .tool-picker-framework-select,
+:root .tool-picker-search-input {
+  border: 1px solid var(--r-field-border);
+  border-radius: var(--r-radius-control);
+  background-color: var(--r-field);
+  box-shadow: none;
+}
+
+:root .tool-picker-search-input {
+  padding: 9px 12px;
+  font-size: 0.875rem;
+}
+
+:root .tool-picker-framework-select:focus,
+:root .tool-picker-search-input:focus {
+  border-color: var(--r-focus-border);
+  background-color: var(--r-surface);
+  box-shadow: 0 0 0 3px var(--r-focus-ring);
+}
+
+:root .tool-picker-search {
+  padding: 10px 22px;
+  border-bottom: 0;
+}
+
+:root .tool-picker-tab {
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 0.8125rem;
+}
+
+:root .tool-picker-body {
+  padding: 4px 14px 14px;
+}
+
+:root .tool-picker-tabs {
+  padding: 12px 22px 2px;
+  border-bottom: 0;
+}
+
+/* ── Lisibilité : texte de lecture relevé davantage ──────────────────────── */
+
+/* Champs des cartes du concepteur et leur aperçu Markdown. */
+:root :is(.session-objectives, .session-intentions, .activity-description, .activity-instructions, .session-notes-input),
+:root .expandable-field.preview-active:not(.fullscreen):not(.is-editing) .markdown-preview {
+  font-size: 0.90625rem;
+}
+
+:root .session-title {
+  font-size: 0.9375rem;
+}
+
+:root .activity-field-label {
+  font-size: 0.78125rem;
+  font-weight: 600;
+}
+
+:root .activities::before {
+  font-size: 0.6875rem;
+}
+
+/* Liste des compétences. */
+:root .tool-picker-item,
+:root .tool-picker-item-name {
+  font-size: 0.90625rem;
+}
+
+:root .tool-picker-item-desc {
+  font-size: 0.78125rem;
+  line-height: 1.5;
+}
+
+:root .tool-picker-section-title {
+  font-size: 0.875rem;
+}
+
+/* Aide. */
+:root .help-card p {
+  font-size: 0.9375rem;
+}
+
+:root .help-toc-link {
+  font-size: 0.84375rem;
+}
+
+:root .help-toc-sublink {
+  font-size: 0.8125rem;
+}
+
+/* Pied de page. */
+:root .site-footer,
+:root .site-footer-link {
+  font-size: 0.84375rem;
+}
+
+:root .site-footer-license {
+  font-size: 0.78125rem;
+}
+
+:root .collab-dialog .collab-hint {
+  font-size: 0.875rem;
+}
+
+:root .collab-dialog .collab-footnote {
+  font-size: 0.8125rem;
+}
+
+/* ── Harmonisation des pages de contenu ──────────────────────────────────── */
+/* Mêmes principes que la page d’aide : gris secondaire neutre, sur-titres à l’encre plutôt qu’en
+   bleu, sous-sections sans cadre imbriqué, en-têtes de tableau sobres et aucun fond bleuté. */
+
+:root {
+  --r-quiet: color-mix(in srgb, var(--r-ink) 60%, transparent);
+}
+
+/* Sur-titres des pages : gris neutre, la couleur reste réservée aux liens et aux actions. */
+:root .help-kicker,
+:root .help-eyebrow,
+:root .account-kicker,
+:root .models-kicker,
+:root .competencies-kicker,
+:root .cf-kicker,
+:root .bloom-kicker,
+:root .import-model-preview-eyebrow {
+  color: var(--r-quiet);
+}
+
+/* Aide et prompts : cartes, encadrés et tableaux en aplats neutres plutôt qu’en cadres imbriqués. */
+
+:root .help-card,
+:root .help-type {
+  border: 0;
+  border-radius: var(--r-radius-inner);
+  background: var(--r-fill);
+}
+
+:root .help-card-icon {
+  border-radius: 9px;
+  background: #ffffff;
+  box-shadow: var(--r-shadow-control);
+  color: #111111;
+}
+
+:root .help-callout {
+  max-width: none;
+  padding: 18px 20px;
+  border: 0;
+  border-radius: var(--r-radius-inner);
+  background: var(--r-fill);
+}
+
+:root .help-callout i {
+  color: var(--r-ink);
+}
+
+:root .help-callout.warning {
+  border: 0;
+  background: #fbf3dc;
+}
+
+:root .help-callout.warning i {
+  color: #8a6400;
+}
+
+:root .help-table-wrap {
+  border-color: var(--r-line-strong);
+  border-radius: var(--r-radius-inner);
+}
+
+:root .help-table th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  border-bottom-color: var(--r-line-strong);
+  background: var(--r-fill);
+  color: var(--r-quiet);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+:root .help-table td {
+  border-bottom-color: var(--r-line);
+}
+
+:root .help-table code,
+:root .help-section code:not(.help-code) {
+  border: 0;
+  background: var(--r-fill-hover);
+}
+
+:root .help-format-badge {
+  background: var(--r-fill-hover);
+  color: var(--r-ink);
+}
+
+:root .help-code,
+:root .help-prompt {
+  border-color: transparent;
+  border-radius: var(--r-radius-inner);
+}
+
+
+:root[data-theme="dark"] .help-card-icon {
+  background: #000000;
+  box-shadow: none;
+  color: #ffffff;
+}
+
+:root[data-theme="dark"] .help-callout.warning {
+  background: rgba(138, 100, 0, .18);
+}
+
+:root[data-theme="dark"] .help-callout.warning i {
+  color: #e8c76a;
+}
+
+/* Panneaux génériques : fond neutre au lieu du blanc bleuté. */
+:root .panel {
+  border-color: var(--r-line);
+  background: var(--r-surface);
+}
+
+/* Administration : les panneaux internes ne forment plus un cadre dans le cadre de la page. */
+:root body.admin-page .account-card .panel {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+:root body.admin-page .account-card .panel + .panel {
+  padding-top: var(--page-section-gap, 28px);
+  border-top: 1px solid var(--r-line);
+}
+
+:root body.admin-page .admin-account-filters {
+  border: 0;
+  border-radius: var(--r-radius-inner);
+  background: var(--r-fill);
+}
+
+:root body.admin-page .admin-stat-card {
+  background: var(--r-fill);
+}
+
+/* En-têtes de tableau : casse normale, gris neutre, bordures neutres. */
+:root th {
+  color: var(--r-quiet);
+  font-weight: 600;
+}
+
+:root .competencies-table th,
+:root .competencies-table td {
+  border-color: var(--r-line-strong);
+}
+
+:root .competencies-column-row th,
+:root .cf-table-wrap thead th {
+  background: var(--r-fill);
+  color: var(--r-quiet);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+:root .competencies-section-row:not(.domain-colored) td {
+  background: var(--r-fill);
+}
+
+/* Prompts : signe d’ouverture à l’encre, survol neutre. */
+:root .prompt-card-heading::after {
+  color: var(--r-ink);
+}
+
+:root .prompt-card-heading:hover,
+:root .prompt-card-heading:focus-visible {
+  background: var(--r-fill);
+}

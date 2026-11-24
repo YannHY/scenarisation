@@ -28,14 +28,14 @@
   width: 30px;
   height: 30px;
   border-radius: 8px;
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 
 .design-provenance-title,
 .public-provenance-title {
   margin: 0;
   color: var(--text-strong, var(--text-1, #171717));
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 700;
   line-height: 1.35;
 }
@@ -43,7 +43,7 @@
 html body.designer-page .design-provenance-title {
   color: var(--text-strong, var(--text-1, #171717));
   font-family: var(--font-family, sans-serif);
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 0;
   line-height: 1.35;
@@ -57,13 +57,13 @@ html body.designer-page .design-provenance-title {
 .shared-card-provenance {
   margin: 5px 0 0;
   color: var(--muted, var(--text-2, #666));
-  font-size: 13px;
+  font-size: 0.8125rem;
   line-height: 1.55;
 }
 
 .design-provenance-meta,
 .public-provenance-meta {
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 
 .design-provenance-copy,
@@ -106,7 +106,7 @@ html body.designer-page .design-provenance-title {
   display: block;
   margin: 0;
   color: var(--muted, #666);
-  font-size: 12px;
+  font-size: 0.75rem;
   line-height: 1.45;
 }
 

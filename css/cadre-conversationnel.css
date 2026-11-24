@@ -33,7 +33,7 @@ body.cf-page {
 .cf-kicker {
     margin: 0 0 8px;
     color: var(--primary);
-    font-size: 12px;
+    font-size: 0.75rem;
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -59,7 +59,7 @@ body.cf-page {
     border-top: 1px solid var(--cf-line);
     background: var(--cf-paper);
     color: #747e89;
-    font-size: 10px;
+    font-size: 0.625rem;
     font-weight: 700;
     line-height: 1.4;
 }
@@ -81,7 +81,7 @@ body.cf-page {
 .cf-toc > p {
     margin: 0 0 17px;
     color: var(--cf-ink);
-    font-size: 10px;
+    font-size: 0.625rem;
     font-weight: 800;
     letter-spacing: .1em;
     text-transform: uppercase;
@@ -97,7 +97,7 @@ body.cf-page {
 
 .cf-toc a {
     color: var(--cf-copy);
-    font-size: 11px;
+    font-size: 0.6875rem;
     line-height: 1.35;
     text-decoration: none;
 }
@@ -126,7 +126,7 @@ body.cf-page {
 }
 
 .cf-toc-source i {
-    width: 15px;
+    width: 0.9375rem;
     text-align: center;
 }
 
@@ -150,7 +150,7 @@ body.cf-page {
     max-width: 790px;
     margin: 0 0 21px;
     color: var(--cf-copy);
-    font-size: 16px;
+    font-size: 1rem;
     line-height: 1.83;
 }
 
@@ -184,7 +184,7 @@ body.cf-page {
     border-radius: 12px;
     background: var(--cf-paper);
     color: var(--cf-copy);
-    font-size: 14px;
+    font-size: 0.875rem;
     line-height: 1.6;
 }
 
@@ -244,7 +244,7 @@ body.cf-page {
 
 .cf-type-section h3 {
     margin: 0 0 23px;
-    font-size: 34px;
+    font-size: 2.125rem;
     font-weight: 600;
     letter-spacing: -.03em;
     line-height: 1.08;
@@ -252,7 +252,7 @@ body.cf-page {
 
 .cf-type-copy > p {
     max-width: 790px;
-    font-size: 16px;
+    font-size: 1rem;
     line-height: 1.83;
 }
 
@@ -288,7 +288,7 @@ body.cf-page {
     width: 100%;
     border-collapse: collapse;
     color: var(--cf-copy);
-    font-size: 12px;
+    font-size: 0.75rem;
 }
 
 .cf-table-wrap th,
@@ -313,7 +313,7 @@ body.cf-page {
 .cf-table-wrap thead th {
     background: var(--cf-soft);
     color: var(--cf-ink);
-    font-size: 10px;
+    font-size: 0.625rem;
     font-weight: 800;
 }
 
@@ -382,7 +382,7 @@ body.cf-page {
     }
 
     .cf-section > p {
-        font-size: 15px;
+        font-size: 0.9375rem;
         line-height: 1.77;
     }
 
@@ -395,7 +395,7 @@ body.cf-page {
     }
 
     .cf-type-section h3 {
-        font-size: 30px;
+        font-size: 1.875rem;
     }
 
     .cf-table-wrap th,

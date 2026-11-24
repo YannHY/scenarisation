@@ -1,0 +1,289 @@
+/*
+ * Page d’aide : finitions plus actuelles.
+ * Chargée après refined.css. Les sélecteurs commencent par « :root body.help-page » pour
+ * l’emporter sur interface.css et sur ses variantes du thème sombre.
+ * Principes : en-tête ouvert sans cadre, chapitres en cartes douces et rapprochées, sous-éléments
+ * sans bordure (aplats neutres), titres à l’encre et aucun fond bleuté.
+ */
+
+/* Gris secondaire neutre, dérivé de l’encre, pour éviter le gris bleuté de --muted en mode sombre. */
+:root body.help-page {
+  --help-quiet: var(--r-quiet);
+}
+
+/* ── En-tête ─────────────────────────────────────────────────────────────── */
+
+:root body.help-page .help-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: clamp(24px, 5vw, 64px);
+  overflow: visible;
+  padding: clamp(8px, 2vw, 20px) 0 clamp(12px, 2vw, 20px);
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+
+/* Anneau des six types d’apprentissage, entier et discret, à la place du grand disque rogné. */
+:root body.help-page .help-hero::after {
+  position: static;
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  width: clamp(132px, 15vw, 184px);
+  height: clamp(132px, 15vw, 184px);
+  border-radius: 50%;
+  opacity: .9;
+  filter: saturate(.9);
+  -webkit-mask: radial-gradient(circle, transparent 54%, #000 55%);
+  mask: radial-gradient(circle, transparent 54%, #000 55%);
+}
+
+:root body.help-page .help-title,
+:root body.help-page .help-lead,
+:root body.help-page .help-quick-links {
+  grid-column: 1;
+}
+
+:root body.help-page .help-title {
+  color: var(--r-ink);
+  font-size: clamp(2rem, 4.4vw, 3rem);
+  line-height: 1.08;
+  letter-spacing: -.025em;
+  text-wrap: balance;
+}
+
+:root body.help-page .help-lead {
+  margin-top: 16px;
+  color: var(--help-quiet);
+}
+
+:root body.help-page .help-quick-links {
+  gap: 8px;
+  margin-top: 26px;
+}
+
+:root body.help-page .help-quick-link {
+  transition: background 160ms var(--r-ease), transform 160ms var(--r-ease);
+}
+
+:root body.help-page .help-quick-link:hover,
+:root body.help-page .help-quick-link:focus-visible {
+  transform: translateY(-1px);
+}
+
+:root body.help-page .help-quick-link i {
+  color: var(--r-ink);
+  opacity: .62;
+}
+
+/* ── Mise en page : sommaire latéral dès 1100 px ─────────────────────────── */
+
+:root body.help-page .help-layout {
+  margin-top: clamp(28px, 4vw, 44px);
+}
+
+@media (min-width: 1101px) {
+  :root body.help-page .help-layout {
+    grid-template-columns: 232px minmax(0, 1fr);
+    gap: 40px;
+  }
+
+  :root body.help-page .help-mobile-menu {
+    display: none;
+  }
+
+  :root body.help-page .help-sidebar {
+    position: sticky;
+    display: block;
+    max-height: calc(100vh - 110px);
+    margin-top: 0;
+  }
+
+  :root body.help-page .help-content {
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 1100px) {
+  :root body.help-page .help-content {
+    margin-top: 20px;
+  }
+}
+
+/* ── Sommaire ────────────────────────────────────────────────────────────── */
+
+:root body.help-page .help-sidebar {
+  padding: 4px 6px 12px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+:root body.help-page .help-sidebar-title {
+  padding-left: 9px;
+  color: var(--help-quiet);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+:root body.help-page .help-progress-bar {
+  background: var(--r-ink);
+}
+
+:root body.help-page .help-toc-link,
+:root body.help-page .help-toc-sublink,
+:root body.help-page .help-toc-toggle {
+  color: var(--help-quiet);
+}
+
+:root body.help-page .help-toc-row:hover,
+:root body.help-page .help-toc-row:focus-within,
+:root body.help-page .help-toc-link:hover,
+:root body.help-page .help-toc-link:focus-visible,
+:root body.help-page .help-toc-sublink:hover,
+:root body.help-page .help-toc-sublink:focus-visible,
+:root body.help-page .help-toc-toggle:hover,
+:root body.help-page .help-toc-toggle:focus-visible {
+  background: var(--r-fill);
+  color: var(--r-ink);
+}
+
+:root body.help-page .help-toc-row:has(.help-toc-link.is-active) {
+  background: var(--r-fill-hover);
+}
+
+:root body.help-page .help-toc-link.is-active,
+:root body.help-page .help-toc-sublink.is-active {
+  color: var(--r-ink);
+  font-weight: 700;
+}
+
+:root body.help-page .help-toc-submenu {
+  border-left-color: var(--r-line-strong);
+}
+
+/* ── Chapitres ───────────────────────────────────────────────────────────── */
+
+:root body.help-page .help-content {
+  gap: 14px;
+}
+
+:root body.help-page .help-section {
+  padding: clamp(24px, 3vw, 34px) clamp(24px, 3.2vw, 38px);
+  border-color: var(--r-line);
+  background: var(--r-surface);
+  transition: box-shadow 200ms var(--r-ease), border-color 200ms var(--r-ease);
+}
+
+:root body.help-page .help-section:has(> .help-section-toggle):not(.is-expanded):hover {
+  border-color: var(--r-line-strong);
+  box-shadow: var(--r-shadow-lift);
+}
+
+:root body.help-page .help-section.is-expanded {
+  border-color: var(--r-line-strong);
+  box-shadow: var(--r-shadow-card);
+}
+
+:root body.help-page .help-section h2 {
+  gap: 14px;
+  margin-bottom: 10px;
+  color: var(--r-ink);
+  font-size: clamp(1.25rem, 2vw, 1.4375rem);
+  letter-spacing: -.012em;
+}
+
+:root body.help-page .help-section:has(> .help-section-toggle) > h2 {
+  cursor: pointer;
+}
+
+/* Numéro de chapitre en pastille neutre. */
+:root body.help-page .help-heading-index {
+  display: inline-grid;
+  place-items: center;
+  min-width: 34px;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--r-fill-hover);
+  color: var(--r-ink);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+
+:root body.help-page .help-section > p:not(.help-spaced) {
+  color: var(--help-quiet);
+}
+
+:root body.help-page .help-section > p:last-of-type {
+  margin-bottom: 0;
+}
+
+:root body.help-page .help-section-body p {
+  color: var(--text-body);
+}
+
+:root body.help-page .help-section-toggle {
+  border: 0;
+  background: var(--r-fill);
+  color: var(--r-ink);
+  transition: background 160ms var(--r-ease);
+}
+
+:root body.help-page .help-section-toggle:hover,
+:root body.help-page .help-section-toggle:focus-visible {
+  border: 0;
+  background: var(--r-fill-active);
+  color: var(--r-ink);
+}
+
+:root body.help-page .help-section-toggle i {
+  transition: transform 220ms var(--r-ease);
+}
+
+:root body.help-page .help-section-body {
+  margin-top: 26px;
+  padding-top: 30px;
+  border-top-color: var(--r-line);
+}
+
+:root body.help-page .help-section h3 {
+  color: var(--r-ink);
+  letter-spacing: -.006em;
+}
+
+:root body.help-page .help-subheading-index {
+  color: var(--help-quiet);
+  font-weight: 600;
+}
+
+/* ── Petits écrans ───────────────────────────────────────────────────────── */
+
+@media (max-width: 720px) {
+  :root body.help-page .help-hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  :root body.help-page .help-hero::after {
+    display: none;
+  }
+
+  :root body.help-page .help-section {
+    padding: 22px 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root body.help-page .help-quick-link,
+  :root body.help-page .help-section,
+  :root body.help-page .help-section-toggle i {
+    transition: none;
+  }
+
+  :root body.help-page .help-quick-link:hover,
+  :root body.help-page .help-quick-link:focus-visible {
+    transform: none;
+  }
+}

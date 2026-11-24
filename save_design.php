@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/lib/bootstrap.php';
+require_once __DIR__ . '/lib/native-collaboration.php';
 
 require_same_origin_post(true);
 $user = require_login_json();
@@ -26,7 +27,19 @@ if (!is_string($payload)) {
     app_json_response(['success' => false, 'error' => 'Impossible de serialiser le document.'], 500);
 }
 
-$result = app_save_design_document($db, (int)$user['id'], $designId,
+// Un enseignant invité en modification enregistre le scénario de son propriétaire ;
+// une création appartient toujours à son auteur. Sans accès, l’écriture vise le compte et répond 404.
+$ownerId = (int)$user['id'];
+if ($designId > 0) {
+    $access = native_design_access($db, (int)$user['id'], $designId);
+    if (($access['role'] ?? null) === 'viewer') {
+        app_json_response(['success' => false, 'code' => 'forbidden',
+            'error' => 'Ce scénario vous est partagé en consultation : vous ne pouvez pas le modifier.'], 403);
+    }
+    $ownerId = $access['owner_user_id'] ?? $ownerId;
+}
+
+$result = app_save_design_document($db, $ownerId, $designId,
     $expectedRevision === false ? null : $expectedRevision, $title, $payload);
 $status = $result['status'];
 unset($result['status'], $result['share_token']);

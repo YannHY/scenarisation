@@ -11,77 +11,63 @@ app_start_session();
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" href="assets/favicon.svg?v=20260906-scenarisation" type="image/svg+xml" sizes="any">
-    <title>À propos | Scénarisation</title>
+    <title data-site-i18n-en="About | Scénarisation" data-site-i18n-fr="À propos | Scénarisation">À propos | Scénarisation</title>
     <?php render_theme_boot_script(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="css/interface.css?v=20260905-subtle-focus">
-    <link rel="stylesheet" href="css/account-ui.css?v=20260906-highlight">
-    <link rel="stylesheet" href="css/account-pages.css?v=20260904-content-rhythm">
+    <link rel="stylesheet" href="css/interface.css?v=20261124-rem">
+    <link rel="stylesheet" href="css/account-ui.css?v=20261124-rem">
+    <link rel="stylesheet" href="css/account-pages.css?v=20261124-rem">
+    <link rel="stylesheet" href="css/about.css?v=<?= hash_file('sha256', __DIR__ . '/css/about.css') ?>">
+<?php render_refined_styles(); ?>
 </head>
 <body class="about-page">
 <?php render_site_nav('about'); ?>
 <main class="about-shell with-nav">
-    <div class="about-card">
-        <h1 id="about-title" class="about-title">À propos</h1>
-        <p class="about-version">Version <?= h(APP_VERSION) ?></p>
-        <p id="about-intro" class="about-intro">Scénarisation est un outil de scénarisation pédagogique. <a href="help.php">Consultez la page d’aide</a> pour découvrir ses fonctionnalités et apprendre à l’utiliser.</p>
+    <header class="about-hero">
+        <img class="about-mark" src="assets/favicon.svg?v=20260906-scenarisation" alt="" width="112" height="112">
+        <p class="about-kicker" data-site-i18n-en="About" data-site-i18n-fr="À propos">À propos</p>
+        <h1 class="about-name">Scénarisation</h1>
+        <p class="about-version-pill"><span data-site-i18n-en="Version" data-site-i18n-fr="Version">Version</span> <?= h(APP_VERSION) ?></p>
+        <p class="about-lead" data-site-i18n-en="A tool for designing, analysing and sharing learning scenarios, centred on what students actually do."
+           data-site-i18n-fr="Un outil pour concevoir, analyser et partager des scénarios pédagogiques centrés sur l’activité des élèves.">Un outil pour concevoir, analyser et partager des scénarios pédagogiques centrés sur l’activité des élèves.</p>
+        <div class="about-actions">
+            <a class="btn btn-primary about-action" href="help.php"><i class="fa-regular fa-life-ring btn-icon-inline" aria-hidden="true"></i><span data-site-i18n-en="Help" data-site-i18n-fr="Aide">Aide</span></a>
+            <a class="btn about-action" href="news.php"><i class="fa-regular fa-star btn-icon-inline" aria-hidden="true"></i><span data-site-i18n-en="What’s new" data-site-i18n-fr="Nouveautés">Nouveautés</span></a>
+        </div>
+    </header>
 
-        <hr class="about-divider">
-
-        <p id="about-meta" class="about-meta">
-            Inspiré de l'<a href="https://www.ucl.ac.uk/learning-designer/" target="_blank" rel="noopener noreferrer">UCL Learning Designer</a> (UCL Knowledge Lab, UCL Institute of Education, 2013–2026).<br>
-            Conçu et développé par Yann Houry &amp; François Jourde (2026) · <abbr title="Creative Commons Attribution - Partage dans les mêmes conditions">CC BY-SA</abbr><br>
-            Code source&nbsp;: <a href="https://github.com/YannHY/scenarisation" target="_blank" rel="noopener noreferrer">github.com/YannHY/scenarisation</a> (basé sur <a href="https://github.com/jourde" target="_blank" rel="noopener noreferrer">github.com/jourde</a>)
-        </p>
-    </div>
+    <section class="about-credits" aria-labelledby="about-credits-title">
+        <h2 id="about-credits-title" class="about-credits-title" data-site-i18n-en="Credits" data-site-i18n-fr="Crédits">Crédits</h2>
+        <div class="about-grid">
+            <article class="about-item">
+                <span class="about-icon" aria-hidden="true"><i class="fa-regular fa-lightbulb"></i></span>
+                <h3 data-site-i18n-en="Inspiration" data-site-i18n-fr="Inspiration">Inspiration</h3>
+                <p><a href="https://www.ucl.ac.uk/learning-designer/" target="_blank" rel="noopener noreferrer">UCL Learning Designer</a></p>
+                <p class="about-item-detail">UCL Knowledge Lab, UCL Institute of Education, 2013–2026</p>
+            </article>
+            <article class="about-item">
+                <span class="about-icon" aria-hidden="true"><i class="fa-solid fa-pen-nib"></i></span>
+                <h3 data-site-i18n-en="Design and development" data-site-i18n-fr="Conception et développement">Conception et développement</h3>
+                <p>Yann Houry &amp; François Jourde</p>
+                <p class="about-item-detail">2026</p>
+            </article>
+            <article class="about-item">
+                <span class="about-icon" aria-hidden="true"><i class="fa-solid fa-code-branch"></i></span>
+                <h3 data-site-i18n-en="Source code" data-site-i18n-fr="Code source">Code source</h3>
+                <p><a href="https://github.com/YannHY/scenarisation" target="_blank" rel="noopener noreferrer">github.com/YannHY/scenarisation</a></p>
+                <p class="about-item-detail"><span data-site-i18n-en="Based on" data-site-i18n-fr="Basé sur">Basé sur</span> <a href="https://github.com/jourde" target="_blank" rel="noopener noreferrer">github.com/jourde</a></p>
+            </article>
+            <article class="about-item">
+                <span class="about-icon" aria-hidden="true"><i class="fa-brands fa-creative-commons"></i></span>
+                <h3 data-site-i18n-en="Licence" data-site-i18n-fr="Licence">Licence</h3>
+                <p><a href="conditions-utilisation.php#licences-reutilisation">CC BY-SA 4.0</a></p>
+                <p class="about-item-detail" data-site-i18n-en="Attribution, ShareAlike" data-site-i18n-fr="Attribution, partage dans les mêmes conditions">Attribution, partage dans les mêmes conditions</p>
+            </article>
+        </div>
+    </section>
 </main>
 <?php render_site_footer(); ?>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    var translations = {
-        fr: {
-            title: 'À propos',
-            intro: 'Scénarisation est un outil de scénarisation pédagogique. <a href="help.php">Consultez la page d’aide</a> pour découvrir ses fonctionnalités et apprendre à l’utiliser.',
-            meta: 'Inspiré de l\'<a href="https://www.ucl.ac.uk/learning-designer/" target="_blank" rel="noopener noreferrer">UCL Learning Designer</a> (UCL Knowledge Lab, UCL Institute of Education, 2013–2026).<br>Conçu et développé par Yann Houry &amp; François Jourde (2026) · <abbr title="Creative Commons Attribution - Partage dans les mêmes conditions">CC BY-SA</abbr><br>Code source&nbsp;: <a href="https://github.com/YannHY/scenarisation" target="_blank" rel="noopener noreferrer">github.com/YannHY/scenarisation</a> (basé sur <a href="https://github.com/jourde" target="_blank" rel="noopener noreferrer">github.com/jourde</a>)'
-        },
-        en: {
-            title: 'About',
-            intro: 'Scénarisation is a learning design tool. <a href="help.php">Visit the help page</a> to discover its features and learn how to use it.',
-            meta: 'Inspired by the <a href="https://www.ucl.ac.uk/learning-designer/" target="_blank" rel="noopener noreferrer">UCL Learning Designer</a> (UCL Knowledge Lab, UCL Institute of Education, 2013–2026).<br>Designed and developed by Yann Houry &amp; François Jourde (2026) · <abbr title="Creative Commons Attribution - ShareAlike">CC BY-SA</abbr><br>Source code: <a href="https://github.com/YannHY/scenarisation" target="_blank" rel="noopener noreferrer">github.com/YannHY/scenarisation</a> (based on <a href="https://github.com/jourde" target="_blank" rel="noopener noreferrer">github.com/jourde</a>)'
-        }
-    };
-
-    function applyAboutLanguage(lang) {
-        var selected = lang === 'en' ? 'en' : 'fr';
-        var content = translations[selected];
-        document.documentElement.lang = selected;
-        document.title = content.title + ' | Scénarisation';
-        document.getElementById('about-title').textContent = content.title;
-        document.getElementById('about-intro').innerHTML = content.intro;
-        document.getElementById('about-meta').innerHTML = content.meta;
-    }
-
-    var lang = 'fr';
-    try {
-        lang = localStorage.getItem('learningDesignerLang') || 'fr';
-    } catch (error) {
-        lang = 'fr';
-    }
-    applyAboutLanguage(lang);
-
-    var langSelect = document.getElementById('lang-select');
-    if (langSelect) {
-        langSelect.addEventListener('change', function () {
-            applyAboutLanguage(langSelect.value);
-            try {
-                localStorage.setItem('learningDesignerLang', langSelect.value);
-            } catch (error) {
-            }
-        });
-    }
-});
-</script>
 </body>
 </html>

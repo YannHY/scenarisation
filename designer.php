@@ -19,6 +19,8 @@ app_start_session();
     <link rel="stylesheet" href="assets/vendor/katex/katex.min.css?v=0.16.27" />
     <link rel="stylesheet" href="css/interface.css?v=<?= hash_file('sha256', __DIR__ . '/css/interface.css') ?>" />
     <link rel="stylesheet" href="css/provenance.css?v=<?= hash_file('sha256', __DIR__ . '/css/provenance.css') ?>" />
+    <link rel="stylesheet" href="css/collaboration.css?v=<?= hash_file('sha256', __DIR__ . '/css/collaboration.css') ?>" />
+      <?php render_refined_styles(); ?>
   </head>
   <body class="designer-page">
     <a id="skip-link" class="skip-link" href="#board">Aller au contenu principal</a>
@@ -274,6 +276,10 @@ app_start_session();
     <header class="toolbar" role="region" aria-label="Actions du scénario">
       <div class="toolbar-left">
         <div class="toolbar-cluster">
+          <div id="history-toggle" class="layout-toggle history-toggle" role="group" aria-label="Historique">
+            <button id="undo-btn" class="layout-toggle-btn" type="button" disabled aria-label="Annuler" title="Annuler"><i class="fa-solid fa-rotate-left" aria-hidden="true"></i></button>
+            <button id="redo-btn" class="layout-toggle-btn" type="button" disabled aria-label="Rétablir" title="Rétablir"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i></button>
+          </div>
           <button id="toggle-intentions-btn" class="btn btn-light" type="button"><span class="btn-label"><i class="fa-solid fa-eye btn-icon-inline" aria-hidden="true"></i>Intentions</span></button>
           <div id="board-layout-toggle" class="layout-toggle" role="group" aria-label="Mode d'affichage des séances">
           <button
@@ -321,6 +327,7 @@ app_start_session();
       <div class="toolbar-right">
         <div class="toolbar-cluster">
           <button id="save-btn" class="btn btn-light" type="button" hidden aria-live="polite" aria-atomic="true"><span class="btn-label"><i class="fa-regular fa-floppy-disk btn-icon-inline" aria-hidden="true"></i>Enregistrer</span></button>
+          <button id="collab-btn" class="btn btn-light collab-btn" type="button" hidden><span class="btn-label"><i class="fa-solid fa-user-plus btn-icon-inline" aria-hidden="true"></i>Collaborer</span></button>
           <button id="publish-btn" class="btn btn-light" type="button" hidden><span class="btn-label"><i class="fa-solid fa-share-nodes btn-icon-inline" aria-hidden="true"></i>Partager</span></button>
           <button id="export-design-btn" class="btn" type="button"><span class="btn-label"><i class="fa-solid fa-file-export btn-icon-inline" aria-hidden="true"></i>Exporter</span></button>
         </div>
@@ -665,7 +672,9 @@ app_start_session();
     <script src="js/editor/analysis.js?v=<?= hash_file('sha256', __DIR__ . '/js/editor/analysis.js') ?>"></script>
     <script src="js/editor/fields.js?v=<?= hash_file('sha256', __DIR__ . '/js/editor/fields.js') ?>"></script>
     <script src="js/scenario-file-transfer.js?v=<?= hash_file('sha256', __DIR__ . '/js/scenario-file-transfer.js') ?>"></script>
+    <script src="js/scenario-merge.js?v=<?= hash_file('sha256', __DIR__ . '/js/scenario-merge.js') ?>"></script>
     <script src="js/interface.js?v=<?= hash_file('sha256', __DIR__ . '/js/interface.js') ?>"></script>
     <script src="js/account-ui.js?v=<?= hash_file('sha256', __DIR__ . '/js/account-ui.js') ?>"></script>
+    <script src="js/collaboration.js?v=<?= hash_file('sha256', __DIR__ . '/js/collaboration.js') ?>"></script>
   </body>
 </html>

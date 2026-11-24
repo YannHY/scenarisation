@@ -1,0 +1,421 @@
+/* Collaboration sur un scénario partagé : présence des collègues, fenêtre de partage et consultation seule. */
+
+/* Couleur de chaque collègue, attribuée selon son compte (mêmes teintes chaudes en clair et en sombre). */
+.presence-color-0 { --presence-color: #d9480f; }
+.presence-color-1 { --presence-color: #c2255c; }
+.presence-color-2 { --presence-color: #2b8a3e; }
+.presence-color-3 { --presence-color: #9c36b5; }
+.presence-color-4 { --presence-color: #b7791f; }
+.presence-color-5 { --presence-color: #c92a2a; }
+.presence-color-6 { --presence-color: #5c940d; }
+.presence-color-7 { --presence-color: #862e9c; }
+
+/* ── Bouton de la barre d’outils ─────────────────────────────── */
+
+/* `.btn` impose son affichage : l’attribut hidden doit être relayé explicitement. */
+.collab-btn[hidden],
+.is-read-only-scenario #save-btn,
+.is-read-only-scenario .history-toggle,
+.is-invited-scenario #publish-btn {
+  display: none;
+}
+
+.collab-btn .btn-label {
+  display: inline-flex;
+  align-items: center;
+}
+
+.collab-avatar-stack {
+  display: inline-flex;
+  align-items: center;
+}
+
+.collab-avatar {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--presence-color);
+  color: #fff;
+  font-weight: 650;
+  line-height: 1;
+}
+
+.collab-avatar-small {
+  width: 22px;
+  height: 22px;
+  font-size: 0.6875rem;
+  box-shadow: 0 0 0 2px var(--panel);
+}
+
+.collab-avatar-small + .collab-avatar-small {
+  margin-left: -6px;
+}
+
+.collab-avatar-large {
+  width: 32px;
+  height: 32px;
+  font-size: 0.875rem;
+}
+
+.collab-avatar-more {
+  margin-left: 6px;
+  color: var(--text-body);
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+/* ── Présence sur les cartes ─────────────────────────────────── */
+
+.session-card.has-presence,
+.activity-card.has-presence {
+  position: relative;
+  outline: 2px solid var(--presence-color);
+  outline-offset: 2px;
+}
+
+tr.has-presence > td:first-child,
+input.has-presence,
+textarea.has-presence,
+select.has-presence {
+  box-shadow: inset 3px 0 0 var(--presence-color);
+}
+
+.presence-badge {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  z-index: 3;
+  display: flex;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.activity-card .presence-badge {
+  top: -10px;
+}
+
+.presence-name {
+  max-width: 140px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--presence-color);
+  color: #fff;
+  font-size: 0.6875rem;
+  font-weight: 650;
+  line-height: 1.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.presence-field-note {
+  margin: 8px 0 0;
+  padding-left: 10px;
+  border-left: 3px solid var(--presence-color);
+  color: var(--text-body);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+/* ── Consultation seule ──────────────────────────────────────── */
+
+.read-only-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  /* Aligné sur la barre d’outils et les cartes du scénario. */
+  margin: 0 22px;
+  padding: 0 0 14px;
+  border-bottom: 1px solid var(--line);
+  color: var(--text-body);
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+.read-only-banner i {
+  margin-top: 3px;
+  color: var(--text-strong);
+}
+
+.read-only-banner p {
+  margin: 0;
+}
+
+.is-read-only-scenario .session-card,
+.is-read-only-scenario .activity-card {
+  cursor: auto;
+}
+
+.is-read-only-scenario #board .add-session-card,
+.is-read-only-scenario #board .add-activity-btn,
+.is-read-only-scenario #board .delete-btn,
+.is-read-only-scenario #board .duplicate-session-btn,
+.is-read-only-scenario #board .duplicate-activity-btn,
+.is-read-only-scenario #board .markdown-toolbar {
+  display: none;
+}
+
+/* ── Fenêtre de partage ──────────────────────────────────────── */
+
+.collab-dialog {
+  width: min(600px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 28px;
+  overflow-y: auto;
+  color: var(--text);
+  gap: 0;
+}
+
+.collab-dialog:not([open]) {
+  display: none;
+}
+
+.collab-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.38);
+}
+
+[data-theme="dark"] .collab-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.65);
+}
+
+.collab-dialog.is-busy {
+  cursor: progress;
+}
+
+.collab-dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.collab-dialog .modal-title {
+  color: var(--text-strong);
+  font-size: 1.375rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.collab-dialog .collab-dialog-subtitle {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+.collab-dialog-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: var(--panel);
+}
+
+.collab-section + .collab-section {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+
+[data-theme="dark"] .collab-dialog .collab-section-title {
+  color: var(--text-strong);
+}
+
+.collab-section[hidden] {
+  display: none;
+}
+
+.collab-dialog .collab-section-title {
+  margin: 0 0 12px;
+  font-family: inherit;
+  letter-spacing: 0;
+  line-height: 1.4;
+  color: var(--text-strong);
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+
+.collab-members {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.collab-member {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.collab-member-identity {
+  min-width: 0;
+}
+
+.collab-dialog .collab-member-name,
+.collab-dialog .collab-member-email {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.collab-dialog .collab-member-name {
+  color: var(--text-strong);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.collab-dialog .collab-member-email {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.collab-member-present {
+  margin-left: 8px;
+  color: #2b8a3e;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.collab-member-present::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  vertical-align: 1px;
+}
+
+.collab-member-rights {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.collab-member-role {
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+
+.collab-member-remove {
+  width: 30px;
+  height: 30px;
+  background: var(--panel);
+}
+
+.collab-members-empty {
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+
+.collab-role-select,
+.collab-invite-email {
+  min-height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background-color: var(--surface-input);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.8125rem;
+}
+
+.collab-invite-email {
+  min-width: 0;
+  padding: 8px 12px;
+}
+
+.collab-role-select {
+  -webkit-appearance: none;
+  appearance: none;
+  padding: 7px 34px 7px 11px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='m1 1 5 5 5-5' fill='none' stroke='%23334155' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 10px 7px;
+  cursor: pointer;
+}
+
+[data-theme="dark"] .collab-role-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='m1 1 5 5 5-5' fill='none' stroke='%23d6d1c7' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.collab-role-select:focus-visible,
+.collab-invite-email:focus-visible {
+  outline: 2px solid var(--text-strong);
+  outline-offset: 1px;
+}
+
+.collab-invite-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px;
+}
+
+.collab-dialog .collab-hint {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  line-height: 1.55;
+}
+
+.collab-leave-section,
+.collab-save-first {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.collab-dialog .collab-leave-section .collab-hint,
+.collab-dialog .collab-save-first .collab-hint {
+  margin: 0;
+}
+
+.collab-leave-btn {
+  color: var(--danger);
+}
+
+.collab-dialog .collab-message {
+  margin: 16px 0 0;
+  color: var(--danger);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.collab-message[hidden] {
+  display: none;
+}
+
+.collab-dialog .collab-footnote {
+  margin: 24px 0 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.55;
+}
+
+@media (max-width: 600px) {
+  .collab-dialog {
+    padding: 20px;
+  }
+
+  .collab-invite-form {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .collab-invite-email {
+    grid-column: 1 / -1;
+  }
+
+  .collab-leave-section,
+  .collab-save-first {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

@@ -132,11 +132,12 @@ try {
     <title data-site-i18n-fr="Connecter le Mac | Scénarisation" data-site-i18n-en="Connect your Mac | Scénarisation">Connecter le Mac | Scénarisation</title>
     <?php render_theme_boot_script(); ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
-    <link rel="stylesheet" href="css/interface.css?v=20260905-subtle-focus">
-    <link rel="stylesheet" href="css/account-ui.css?v=20260906-highlight">
-    <link rel="stylesheet" href="css/account-pages.css?v=20260926-login-colour-rhythm">
-    <link rel="stylesheet" href="css/native-app.css?v=20261116-consent-return">
+    <link rel="stylesheet" href="css/interface.css?v=20261124-rem">
+    <link rel="stylesheet" href="css/account-ui.css?v=20261124-rem">
+    <link rel="stylesheet" href="css/account-pages.css?v=20261124-rem">
+    <link rel="stylesheet" href="css/native-app.css?v=20261124-rem">
     <script src="js/native-consent.js?v=20261116-consent-return" defer></script>
+<?php render_refined_styles(); ?>
 </head>
 <body class="native-consent-page">
 <?php render_site_nav(); ?>

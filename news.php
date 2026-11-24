@@ -16,15 +16,17 @@ app_start_session();
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="css/interface.css?v=20260905-subtle-focus">
-    <link rel="stylesheet" href="css/account-ui.css?v=20260906-highlight">
-    <link rel="stylesheet" href="css/account-pages.css?v=20260912-breadcrumb-alignment">
+    <link rel="stylesheet" href="css/interface.css?v=20261124-rem">
+    <link rel="stylesheet" href="css/account-ui.css?v=20261124-rem">
+    <link rel="stylesheet" href="css/account-pages.css?v=20261124-rem">
     <link rel="stylesheet" href="css/nouveautes.css?v=<?= hash_file('sha256', __DIR__ . '/css/nouveautes.css') ?>">
+<?php render_refined_styles(); ?>
 </head>
 <body class="updates-page">
 <?php render_site_nav('updates'); ?>
 <main class="updates-shell">
     <header class="updates-hero">
+        <span class="updates-mark" aria-hidden="true"><img src="assets/favicon.svg?v=20260906-scenarisation" alt="" width="96" height="96"></span>
         <p class="updates-kicker" data-site-i18n-en="Product updates" data-site-i18n-fr="Évolutions du site">Évolutions du site</p>
         <h1 data-site-i18n-en="What’s new" data-site-i18n-fr="Nouveautés">Nouveautés</h1>
         <p class="updates-intro"
@@ -32,6 +34,69 @@ app_start_session();
            data-site-i18n-fr="Suivez les nouvelles fonctionnalités, les améliorations et les corrections apportées à Scénarisation.">Suivez les nouvelles fonctionnalités, les améliorations et les corrections apportées à Scénarisation.</p>
     </header>
 
+    <section class="updates-entry" aria-labelledby="updates-2026-11-24">
+        <div class="updates-date">
+            <time datetime="2026-11-24" data-site-i18n-en="24 November 2026" data-site-i18n-fr="24 novembre 2026">24 novembre 2026</time>
+        </div>
+        <div class="updates-content">
+            <h2 id="updates-2026-11-24"
+                data-site-i18n-en="The Mac app, collaboration and a new look"
+                data-site-i18n-fr="L’app Mac, la collaboration et une nouvelle apparence">L’app Mac, la collaboration et une nouvelle apparence</h2>
+            <p class="updates-summary"
+               data-site-i18n-en="Scénarisation now has a Mac app, and several teachers can work on the same scenario at the same time. The site also gets undo, automatic merging of changes, adjustable display settings and a lighter design."
+               data-site-i18n-fr="Scénarisation dispose désormais d’une app pour Mac, et plusieurs enseignants peuvent travailler en même temps sur un même scénario. Le site gagne aussi l’annulation, la fusion automatique des modifications, des réglages d’affichage et une apparence plus légère.">Scénarisation dispose désormais d’une app pour Mac, et plusieurs enseignants peuvent travailler en même temps sur un même scénario. Le site gagne aussi l’annulation, la fusion automatique des modifications, des réglages d’affichage et une apparence plus légère.</p>
+            <div class="updates-list">
+                <article class="updates-item">
+                    <span class="updates-icon" aria-hidden="true"><i class="fa-brands fa-apple"></i></span>
+                    <div>
+                        <h3 data-site-i18n-en="Scénarisation for Mac" data-site-i18n-fr="Scénarisation pour Mac">Scénarisation pour Mac</h3>
+                        <p data-site-i18n-en="A native Mac app is now available from the new Mac app page. It works offline, syncs with your account, supports collaboration and lets you use the AI assistant of your choice."
+                           data-site-i18n-fr="Une app native pour Mac est désormais disponible depuis la nouvelle page App Mac. Elle fonctionne hors ligne, se synchronise avec votre compte, permet la collaboration et vous laisse choisir votre assistant IA.">Une app native pour Mac est désormais disponible depuis la nouvelle page App Mac. Elle fonctionne hors ligne, se synchronise avec votre compte, permet la collaboration et vous laisse choisir votre assistant IA.</p>
+                    </div>
+                </article>
+                <article class="updates-item">
+                    <span class="updates-icon" aria-hidden="true"><i class="fa-solid fa-user-group"></i></span>
+                    <div>
+                        <h3 data-site-i18n-en="Real-time collaboration" data-site-i18n-fr="Collaboration en temps réel">Collaboration en temps réel</h3>
+                        <p data-site-i18n-en="The Collaborate button invites colleagues to edit or view a scenario. Present colleagues and the card each one is working on are shown, and everyone’s changes appear within seconds, on the site as in the Mac app. My scenarios now lists the scenarios shared with you."
+                           data-site-i18n-fr="Le bouton Collaborer invite des collègues à modifier ou à consulter un scénario. Les collègues présents et la carte sur laquelle chacun travaille sont signalés, et les modifications de chacun apparaissent en quelques secondes, sur le site comme dans l’app Mac. Mes scénarios liste aussi les scénarios partagés avec vous.">Le bouton Collaborer invite des collègues à modifier ou à consulter un scénario. Les collègues présents et la carte sur laquelle chacun travaille sont signalés, et les modifications de chacun apparaissent en quelques secondes, sur le site comme dans l’app Mac. Mes scénarios liste aussi les scénarios partagés avec vous.</p>
+                    </div>
+                </article>
+                <article class="updates-item">
+                    <span class="updates-icon" aria-hidden="true"><i class="fa-solid fa-code-merge"></i></span>
+                    <div>
+                        <h3 data-site-i18n-en="Automatic merging of changes" data-site-i18n-fr="Fusion automatique des modifications">Fusion automatique des modifications</h3>
+                        <p data-site-i18n-en="When a scenario has changed elsewhere in the meantime, both versions are merged field by field instead of asking you to save a copy. The text being typed and the cursor stay in place."
+                           data-site-i18n-fr="Lorsqu’un scénario a changé ailleurs entre-temps, les deux versions sont fusionnées champ par champ au lieu de vous proposer d’enregistrer une copie. Le texte en cours de saisie et le curseur restent en place.">Lorsqu’un scénario a changé ailleurs entre-temps, les deux versions sont fusionnées champ par champ au lieu de vous proposer d’enregistrer une copie. Le texte en cours de saisie et le curseur restent en place.</p>
+                    </div>
+                </article>
+                <article class="updates-item">
+                    <span class="updates-icon" aria-hidden="true"><i class="fa-solid fa-rotate-left"></i></span>
+                    <div>
+                        <h3 data-site-i18n-en="Undo and redo" data-site-i18n-fr="Annuler et rétablir">Annuler et rétablir</h3>
+                        <p data-site-i18n-en="Two buttons in the toolbar, and the usual keyboard shortcuts, undo or redo your changes. In a shared scenario, only your own changes are undone."
+                           data-site-i18n-fr="Deux boutons de la barre d’outils, ainsi que les raccourcis clavier habituels, annulent ou rétablissent vos modifications. Dans un scénario partagé, seules vos propres modifications sont annulées.">Deux boutons de la barre d’outils, ainsi que les raccourcis clavier habituels, annulent ou rétablissent vos modifications. Dans un scénario partagé, seules vos propres modifications sont annulées.</p>
+                    </div>
+                </article>
+                <article class="updates-item">
+                    <span class="updates-icon" aria-hidden="true"><i class="fa-solid fa-eye"></i></span>
+                    <div>
+                        <h3 data-site-i18n-en="Display settings" data-site-i18n-fr="Réglages d’affichage">Réglages d’affichage</h3>
+                        <p data-site-i18n-en="The new Display section of the account menu offers a light, warm or dark mode, five text sizes, three spacing levels and an option to reduce motion. These settings apply as soon as a page opens and are kept on your device."
+                           data-site-i18n-fr="La nouvelle section Affichage du menu du compte propose un mode clair, chaud ou sombre, cinq tailles de texte, trois niveaux d’espacement et une option pour réduire les animations. Ces réglages s’appliquent dès l’ouverture des pages et sont conservés sur votre appareil.">La nouvelle section Affichage du menu du compte propose un mode clair, chaud ou sombre, cinq tailles de texte, trois niveaux d’espacement et une option pour réduire les animations. Ces réglages s’appliquent dès l’ouverture des pages et sont conservés sur votre appareil.</p>
+                    </div>
+                </article>
+                <article class="updates-item">
+                    <span class="updates-icon" aria-hidden="true"><i class="fa-solid fa-palette"></i></span>
+                    <div>
+                        <h3 data-site-i18n-en="A lighter, more refined look" data-site-i18n-fr="Une apparence plus légère et plus soignée">Une apparence plus légère et plus soignée</h3>
+                        <p data-site-i18n-en="Inspired by the Mac app: capsule buttons, borderless fields, softer cards, activity cards outlined in the colour of their learning type, a clearer breadcrumb and a wider competency window. The home page gains discreet animations, and the About page now shows the version, quick links to help and what’s new, and the credits."
+                           data-site-i18n-fr="Inspirée de l’app Mac&nbsp;: boutons en capsule, champs sans cadre, cartes adoucies, activités entourées de la couleur de leur type d’apprentissage, fil d’Ariane plus lisible et fenêtre des compétences plus large. L’accueil s’anime discrètement, et la page À propos présente désormais la version, des accès directs à l’aide et aux nouveautés, ainsi que les crédits.">Inspirée de l’app Mac&nbsp;: boutons en capsule, champs sans cadre, cartes adoucies, activités entourées de la couleur de leur type d’apprentissage, fil d’Ariane plus lisible et fenêtre des compétences plus large. L’accueil s’anime discrètement, et la page À propos présente désormais la version, des accès directs à l’aide et aux nouveautés, ainsi que les crédits.</p>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
     <section class="updates-entry" aria-labelledby="updates-2026-11-01">
         <div class="updates-date">
             <time datetime="2026-11-01" data-site-i18n-en="1 November 2026" data-site-i18n-fr="1er novembre 2026">1er novembre 2026</time>

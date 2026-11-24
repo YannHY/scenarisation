@@ -1,0 +1,134 @@
+/*
+ * Effets des préférences d’affichage, appliqués à tout le site.
+ *
+ * js/display-preferences.js pose les attributs sur <html> avant le premier rendu ; cette feuille les
+ * traduit en styles. Les commandes du menu sont stylées dans css/account-preferences.css.
+ */
+
+/* ── Taille du texte ─────────────────────────────────────────────
+   Les tailles de texte du site sont exprimées en rem : elles suivent la taille de base de <html>,
+   elle-même relative à la taille choisie dans le navigateur. Les marges, bordures et ombres restent
+   en px pour que seule la lecture change d’échelle. */
+
+:root[data-text-size="small"] {
+  font-size: 90%;
+}
+
+:root[data-text-size="large"] {
+  font-size: 110%;
+}
+
+:root[data-text-size="larger"] {
+  font-size: 120%;
+}
+
+:root[data-text-size="largest"] {
+  font-size: 130%;
+}
+
+/* Agrandis, les titres à mots longs ne doivent pas élargir leur colonne au-delà de l’écran. */
+:root:is([data-text-size="large"], [data-text-size="larger"], [data-text-size="largest"]) :is(h1, h2, h3) {
+  hyphens: auto;
+  hyphenate-limit-chars: 12 5 5;
+  overflow-wrap: break-word;
+}
+
+/* ── Mode chaud ──────────────────────────────────────────────────
+   Thème clair recouvert d’un voile ambré en mode produit : chaque couleur perd du bleu, comme avec
+   True Tone ou Night Shift. Le voile ne capte aucun clic. */
+
+:root[data-tone="warm"] {
+  --warm-tint: #fff2de;
+}
+
+:root[data-tone="warm"]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  background: var(--warm-tint);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  animation: display-warm-in 0.4s ease both;
+}
+
+@keyframes display-warm-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Les fenêtres <dialog> s’affichent au-dessus du voile : elles reçoivent la même teinte par un
+   filtre équivalent, défini à côté du menu de préférences. */
+:root[data-tone="warm"] dialog {
+  filter: url("#display-warm-filter");
+}
+
+.display-filters {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+@media print {
+  :root[data-tone="warm"]::after {
+    display: none;
+  }
+
+  :root[data-tone="warm"] dialog {
+    filter: none;
+  }
+}
+
+/* ── Espacement du texte ─────────────────────────────────────────
+   Interligne, lettres et mots plus aérés dans les textes courants. La barre de navigation garde
+   son rythme d’origine pour rester stable. */
+
+:root[data-text-spacing="relaxed"] {
+  --text-leading: 1.85;
+  --text-tracking: 0.015em;
+  --text-word-gap: 0.06em;
+  --content-leading: 1.85;
+}
+
+:root[data-text-spacing="wide"] {
+  --text-leading: 2.05;
+  --text-tracking: 0.06em;
+  --text-word-gap: 0.16em;
+  --content-leading: 2.05;
+}
+
+:root[data-text-spacing] body,
+:root[data-text-spacing] :is(input, textarea) {
+  letter-spacing: var(--text-tracking);
+  word-spacing: var(--text-word-gap);
+}
+
+:root[data-text-spacing] :is(p, li, dd, dt, blockquote, figcaption, td, th, textarea):not(.site-nav *) {
+  line-height: var(--text-leading) !important;
+}
+
+:root[data-text-spacing] :is(.site-nav, i[class*="fa-"]) {
+  letter-spacing: normal;
+  word-spacing: normal;
+}
+
+/* ── Animations réduites ─────────────────────────────────────── */
+
+:root[data-motion="reduced"] {
+  scroll-behavior: auto !important;
+}
+
+:root[data-motion="reduced"] *,
+:root[data-motion="reduced"] *::before,
+:root[data-motion="reduced"] *::after,
+:root[data-motion="reduced"]::after {
+  animation-duration: 0.01ms !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  transition-delay: 0s !important;
+  scroll-behavior: auto !important;
+}

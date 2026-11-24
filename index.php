@@ -35,10 +35,11 @@ $homeOgImageUrl = rtrim(app_base_url(), '/') . '/assets/og-home.png?v=20260906-s
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="css/interface.css?v=20260905-subtle-focus">
-    <link rel="stylesheet" href="css/account-ui.css?v=20260906-highlight">
-    <link rel="stylesheet" href="css/account-pages.css?v=20260904-content-rhythm">
-    <link rel="stylesheet" href="css/home.css?v=20260826-action-palette">
+    <link rel="stylesheet" href="css/interface.css?v=20261124-rem">
+    <link rel="stylesheet" href="css/account-ui.css?v=20261124-rem">
+    <link rel="stylesheet" href="css/account-pages.css?v=20261124-rem">
+    <link rel="stylesheet" href="css/home.css?v=20261124-motion">
+<?php render_refined_styles(); ?>
 </head>
 <body class="home-page">
 <a class="skip-link" href="#main-content"
@@ -63,39 +64,41 @@ $homeOgImageUrl = rtrim(app_base_url(), '/') . '/assets/og-home.png?v=20260906-s
                     <span data-site-i18n-en="Create a scenario" data-site-i18n-fr="Créer un scénario">Créer un scénario</span>
                     <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
                 </a>
-                <a class="home-text-action" href="#features"
+                <a class="home-text-action" href="help.php"
                    data-site-i18n-en="Explore the main features"
                    data-site-i18n-fr="Découvrir les fonctionnalités">Découvrir les fonctionnalités</a>
             </div>
         </div>
 
         <div class="home-wheel-stage" aria-hidden="true">
-            <div class="home-wheel"></div>
-            <div class="home-wheel-labels">
-                <span class="home-wheel-label home-wheel-label-read">
-                    <strong data-site-i18n-en="Acquire" data-site-i18n-fr="Acquérir">Acquérir</strong>
-                    <small>27 %</small>
-                </span>
-                <span class="home-wheel-label home-wheel-label-investigate">
-                    <strong data-site-i18n-en="Investigate" data-site-i18n-fr="Investiguer">Investiguer</strong>
-                    <small>16 %</small>
-                </span>
-                <span class="home-wheel-label home-wheel-label-practice">
-                    <strong data-site-i18n-en="Practise" data-site-i18n-fr="Pratiquer">Pratiquer</strong>
-                    <small>21 %</small>
-                </span>
-                <span class="home-wheel-label home-wheel-label-produce">
-                    <strong data-site-i18n-en="Produce" data-site-i18n-fr="Produire">Produire</strong>
-                    <small>12 %</small>
-                </span>
-                <span class="home-wheel-label home-wheel-label-discuss">
-                    <strong data-site-i18n-en="Discuss" data-site-i18n-fr="Discuter">Discuter</strong>
-                    <small>15 %</small>
-                </span>
-                <span class="home-wheel-label home-wheel-label-collaborate">
-                    <strong data-site-i18n-en="Collaborate" data-site-i18n-fr="Collaborer">Collaborer</strong>
-                    <small>9 %</small>
-                </span>
+            <div class="home-wheel-tilt">
+                <div class="home-wheel"></div>
+                <div class="home-wheel-labels">
+                    <span class="home-wheel-label home-wheel-label-read">
+                        <strong data-site-i18n-en="Acquire" data-site-i18n-fr="Acquérir">Acquérir</strong>
+                        <small>27 %</small>
+                    </span>
+                    <span class="home-wheel-label home-wheel-label-investigate">
+                        <strong data-site-i18n-en="Investigate" data-site-i18n-fr="Investiguer">Investiguer</strong>
+                        <small>16 %</small>
+                    </span>
+                    <span class="home-wheel-label home-wheel-label-practice">
+                        <strong data-site-i18n-en="Practise" data-site-i18n-fr="Pratiquer">Pratiquer</strong>
+                        <small>21 %</small>
+                    </span>
+                    <span class="home-wheel-label home-wheel-label-produce">
+                        <strong data-site-i18n-en="Produce" data-site-i18n-fr="Produire">Produire</strong>
+                        <small>12 %</small>
+                    </span>
+                    <span class="home-wheel-label home-wheel-label-discuss">
+                        <strong data-site-i18n-en="Discuss" data-site-i18n-fr="Discuter">Discuter</strong>
+                        <small>15 %</small>
+                    </span>
+                    <span class="home-wheel-label home-wheel-label-collaborate">
+                        <strong data-site-i18n-en="Collaborate" data-site-i18n-fr="Collaborer">Collaborer</strong>
+                        <small>9 %</small>
+                    </span>
+                </div>
             </div>
         </div>
     </section>
@@ -107,7 +110,7 @@ $homeOgImageUrl = rtrim(app_base_url(), '/') . '/assets/og-home.png?v=20260906-s
                    data-site-i18n-en="Design"
                    data-site-i18n-fr="Concevoir">Concevoir</p>
                 <div class="home-feature-heading">
-                    <p class="home-feature-number">01</p>
+                    <span class="home-feature-number">01</span>
                     <h2 id="feature-design-title"
                         data-site-i18n-en="Structure every step"
                         data-site-i18n-fr="Structurez chaque étape">Structurez chaque étape</h2>
@@ -126,17 +129,17 @@ $homeOgImageUrl = rtrim(app_base_url(), '/') . '/assets/og-home.png?v=20260906-s
                         <strong data-site-i18n-en="Discover and question" data-site-i18n-fr="Découvrir et questionner">Découvrir et questionner</strong>
                         <small>35 min</small>
                     </div>
-                    <div class="home-activity-row" style="--activity-color: var(--read)">
+                    <div class="home-activity-row home-activity-read">
                         <span class="home-activity-dot"></span>
                         <span data-site-i18n-en="Read · Observe" data-site-i18n-fr="Lire · Observer">Lire · Observer</span>
                         <small>10 min</small>
                     </div>
-                    <div class="home-activity-row" style="--activity-color: var(--investigate)">
+                    <div class="home-activity-row home-activity-investigate">
                         <span class="home-activity-dot"></span>
                         <span data-site-i18n-en="Investigate · Compare" data-site-i18n-fr="Investiguer · Comparer">Investiguer · Comparer</span>
                         <small>15 min</small>
                     </div>
-                    <div class="home-activity-row" style="--activity-color: var(--discuss)">
+                    <div class="home-activity-row home-activity-discuss">
                         <span class="home-activity-dot"></span>
                         <span data-site-i18n-en="Discuss · Formulate" data-site-i18n-fr="Discuter · Formuler">Discuter · Formuler</span>
                         <small>10 min</small>
@@ -151,7 +154,7 @@ $homeOgImageUrl = rtrim(app_base_url(), '/') . '/assets/og-home.png?v=20260906-s
                    data-site-i18n-en="Analyse"
                    data-site-i18n-fr="Analyser">Analyser</p>
                 <div class="home-feature-heading">
-                    <p class="home-feature-number">02</p>
+                    <span class="home-feature-number">02</span>
                     <h2 id="feature-analyse-title"
                         data-site-i18n-en="See the balance"
                         data-site-i18n-fr="Voyez l’équilibre">Voyez l’équilibre</h2>
@@ -167,9 +170,9 @@ $homeOgImageUrl = rtrim(app_base_url(), '/') . '/assets/og-home.png?v=20260906-s
                 <div class="home-analysis-card">
                     <div class="home-mini-wheel"></div>
                     <div class="home-analysis-summary">
-                        <span><i style="--metric-color: var(--read)"></i><b>28 %</b><small data-site-i18n-en="Acquire" data-site-i18n-fr="Acquérir">Acquérir</small></span>
-                        <span><i style="--metric-color: var(--practice)"></i><b>22 %</b><small data-site-i18n-en="Practise" data-site-i18n-fr="Pratiquer">Pratiquer</small></span>
-                        <span><i style="--metric-color: var(--produce)"></i><b>18 %</b><small data-site-i18n-en="Produce" data-site-i18n-fr="Produire">Produire</small></span>
+                        <span class="home-metric-read"><i></i><b data-home-count="28">28 %</b><small data-site-i18n-en="Acquire" data-site-i18n-fr="Acquérir">Acquérir</small></span>
+                        <span class="home-metric-practice"><i></i><b data-home-count="22">22 %</b><small data-site-i18n-en="Practise" data-site-i18n-fr="Pratiquer">Pratiquer</small></span>
+                        <span class="home-metric-produce"><i></i><b data-home-count="18">18 %</b><small data-site-i18n-en="Produce" data-site-i18n-fr="Produire">Produire</small></span>
                     </div>
                 </div>
                 <div class="home-analysis-note">
@@ -185,7 +188,7 @@ $homeOgImageUrl = rtrim(app_base_url(), '/') . '/assets/og-home.png?v=20260906-s
                    data-site-i18n-en="Share"
                    data-site-i18n-fr="Partager">Partager</p>
                 <div class="home-feature-heading">
-                    <p class="home-feature-number">03</p>
+                    <span class="home-feature-number">03</span>
                     <h2 id="feature-share-title"
                         data-site-i18n-en="Share it your way"
                         data-site-i18n-fr="Diffusez simplement">Diffusez simplement</h2>
@@ -208,7 +211,7 @@ $homeOgImageUrl = rtrim(app_base_url(), '/') . '/assets/og-home.png?v=20260906-s
                     </div>
                     <div class="home-share-link-row">
                         <i class="fa-solid fa-link"></i>
-                        <span>scenarisation/view/atelier-lecture</span>
+                        <span class="home-share-url">scenarisation/view/atelier-lecture</span>
                         <strong data-site-i18n-en="Active link" data-site-i18n-fr="Lien actif">Lien actif</strong>
                     </div>
                     <div class="home-share-options">
@@ -238,7 +241,7 @@ $homeOgImageUrl = rtrim(app_base_url(), '/') . '/assets/og-home.png?v=20260906-s
                    data-site-i18n-en="AI & CLI"
                    data-site-i18n-fr="IA & CLI">IA &amp; CLI</p>
                 <div class="home-feature-heading">
-                    <p class="home-feature-number">04</p>
+                    <span class="home-feature-number">04</span>
                     <h2 id="feature-ai-title"
                         data-site-i18n-en="Design with AI"
                         data-site-i18n-fr="Concevez avec l’IA">Concevez avec l’IA</h2>
@@ -257,11 +260,11 @@ $homeOgImageUrl = rtrim(app_base_url(), '/') . '/assets/og-home.png?v=20260906-s
                         <small>learning</small>
                     </div>
                     <div class="home-terminal-body">
-                        <p><span class="home-prompt">$</span> scenarisation init design.json</p>
-                        <p class="home-terminal-result"><i class="fa-solid fa-check"></i> <span data-site-i18n-en="4 moments · 9 activities" data-site-i18n-fr="4 moments · 9 activités">4 moments · 9 activités</span></p>
-                        <p><span class="home-prompt">$</span> scenarisation validate design.json</p>
-                        <p class="home-terminal-result"><i class="fa-solid fa-check"></i> <span data-site-i18n-en="Valid scenario, ready to publish" data-site-i18n-fr="Scénario valide, prêt à publier">Scénario valide, prêt à publier</span></p>
-                        <p class="home-terminal-cursor"><span class="home-prompt">$</span> <i></i></p>
+                        <p class="home-terminal-line home-terminal-line-1"><span class="home-prompt">$</span> <span class="home-terminal-cmd">scenarisation init design.json</span></p>
+                        <p class="home-terminal-result home-terminal-line-2"><i class="fa-solid fa-check"></i> <span data-site-i18n-en="4 moments · 9 activities" data-site-i18n-fr="4 moments · 9 activités">4 moments · 9 activités</span></p>
+                        <p class="home-terminal-line home-terminal-line-3"><span class="home-prompt">$</span> <span class="home-terminal-cmd">scenarisation validate design.json</span></p>
+                        <p class="home-terminal-result home-terminal-line-4"><i class="fa-solid fa-check"></i> <span data-site-i18n-en="Valid scenario, ready to publish" data-site-i18n-fr="Scénario valide, prêt à publier">Scénario valide, prêt à publier</span></p>
+                        <p class="home-terminal-cursor home-terminal-line-5"><span class="home-prompt">$</span> <i></i></p>
                     </div>
                 </div>
             </div>
@@ -300,6 +303,6 @@ $homeOgImageUrl = rtrim(app_base_url(), '/') . '/assets/og-home.png?v=20260906-s
 </main>
 
 <?php require __DIR__ . '/partials/site-footer.php'; ?>
-<script src="js/home.js?v=20260729-2"></script>
+<script src="js/home.js?v=20261124-motion"></script>
 </body>
 </html>

@@ -7,6 +7,8 @@
                 <span class="site-footer-separator" aria-hidden="true">|</span>
                 <a class="site-footer-link" id="footer-updates-btn" href="news.php" data-site-i18n-en="What’s new" data-site-i18n-fr="Nouveautés">Nouveautés</a>
                 <span class="site-footer-separator" aria-hidden="true">|</span>
+                <a class="site-footer-link" id="footer-mac-app-btn" href="app.php" data-site-i18n-en="App" data-site-i18n-fr="App">App</a>
+                <span class="site-footer-separator" aria-hidden="true">|</span>
                 <a class="site-footer-link" id="footer-prompts-btn" href="prompts.php" data-site-i18n-en="Prompts" data-site-i18n-fr="Prompts">Prompts</a>
                 <span class="site-footer-separator" aria-hidden="true">|</span>
                 <a class="site-footer-link" id="footer-cli-btn" href="help.php#cli" data-site-i18n-en="Skill and CLI" data-site-i18n-fr="Skill et CLI">Skill et CLI</a>

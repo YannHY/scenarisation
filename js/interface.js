@@ -202,6 +202,14 @@ function preferredInterfaceLanguage(fallback = "fr") {
 
 let state = defaultState();
 let documentGeneration = 0;
+// Historique Annuler / Rétablir du document ouvert (voir « Annuler / Rétablir » plus bas).
+const HISTORY_LIMIT = 100;
+const HISTORY_PAUSE_MS = 700;
+let undoStack = [];
+let redoStack = [];
+let historySnapshot = null;
+let historyGeneration = -1;
+let historyTimer = 0;
 state.meta.uiLanguage = preferredInterfaceLanguage(state.meta.uiLanguage);
 let dragState = null;
 let activeModalBackdrop = null;
@@ -737,11 +745,21 @@ function updateResponsiveButtonLabels() {
   // d'un moment est désormais proposée directement à la fin du design.
 }
 
+function withoutKeys(value, keys) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const copy = { ...value };
+  keys.forEach((key) => delete copy[key]);
+  return copy;
+}
+
 function hydrateState(parsed, fallback = defaultState()) {
   if (!parsed || !Array.isArray(parsed.sessions)) return fallback;
   const parsedMeta = parsed.meta || {};
 
+  // Les champs que le site n’affiche pas (ajoutés par l’app ou une version future) sont conservés :
+  // dans un scénario partagé, un enregistrement depuis le site ne doit pas les retirer aux autres.
   const hydrated = {
+    ...withoutKeys(parsed, ["meta", "sessions", "partitionLineConfig"]),
     allNotesExpanded: Boolean(parsed.allNotesExpanded),
     intentionsCollapsed: Boolean(parsed.intentionsCollapsed),
     topPanelCollapsed: Object.prototype.hasOwnProperty.call(parsed, "topPanelCollapsed")
@@ -767,6 +785,7 @@ function hydrateState(parsed, fallback = defaultState()) {
       ? normalizePartitionLineConfig(parsed.partitionLineConfig)
       : defaultPartitionLineConfig(),
     sessions: parsed.sessions.map((session) => ({
+      ...withoutKeys(session, ["activities"]),
       id: session?.id || nextId(),
       title: toPlainTextareaValue(session?.title).trim(),
       objectives: toPlainTextareaValue(session?.objectives),
@@ -776,6 +795,7 @@ function hydrateState(parsed, fallback = defaultState()) {
       activities: Array.isArray(session?.activities)
         ? session.activities.map((activity) => {
             const normalized = {
+              ...withoutKeys(activity, []),
               id: activity?.id || nextId(),
               type: activity?.type || "undefined",
               duration: Math.max(1, Number(activity?.duration) || 1),
@@ -921,7 +941,10 @@ function initializeStorageScope(userId = null) {
 }
 
 function saveState({ markDirty = true } = {}) {
-  if (markDirty) state.meta.remoteDirty = true;
+  if (markDirty) {
+    state.meta.remoteDirty = true;
+    scheduleHistoryCheckpoint();
+  }
   localStateSavePending = true;
   window.clearTimeout(localStateSaveTimer);
   localStateSaveTimer = window.setTimeout(persistStateNow, 300);
@@ -3751,6 +3774,11 @@ function renderGridView() {
 // ─── End grid view ──────────────────────────────────────────────────────────
 
 function render() {
+  // Signalé une fois l’affichage reconstruit : la collaboration y replace la présence des collègues.
+  queueMicrotask(() => window.dispatchEvent(new CustomEvent("ld:render")));
+  // Un autre document vient d’être chargé : son historique repart de zéro.
+  if (historyGeneration !== documentGeneration) resetHistory();
+  renderHistoryButtons();
   restoreAllFullscreenExpandableFields();
   closeChoiceMenu();
   closeToolPicker();
@@ -4939,7 +4967,200 @@ partitionConfigModalBackdrop?.addEventListener("click", (e) => {
 setupExpandableFields();
 setupFormAccessibility();
 bindTopPanelEvents();
+// ── Collaboration : application des modifications des collègues ─────────
+
+const EDITABLE_FIELD_CLASSES = [
+  "activity-description", "activity-instructions", "activity-duration",
+  "session-title", "session-objectives", "session-intentions", "session-notes-input"
+];
+
+/* Champ en cours de saisie, repéré par son élément (moment, activité ou paramètre) et sa classe,
+   pour le retrouver après un nouvel affichage. */
+function captureEditingContext() {
+  const element = document.activeElement;
+  if (!element || !(element instanceof HTMLTextAreaElement || element instanceof HTMLInputElement)) return null;
+  const wrapper = element.closest(".expandable-field");
+  const fullscreen = Boolean(wrapper?.classList.contains("fullscreen"));
+  // En plein écran, le champ est déplacé dans <body> ; son emplacement d’origine reste dans la carte.
+  const anchor = fullscreen
+    ? document.getElementById(wrapper.dataset.fullscreenPlaceholderId || "") || element
+    : element;
+  const activity = anchor.closest("[data-activity-id], [data-act-id]");
+  const session = anchor.closest("[data-session-id]");
+  const fieldClass = EDITABLE_FIELD_CLASSES.find((name) => element.classList.contains(name)) || "";
+  if (!element.id && !fieldClass) return null;
+  return {
+    id: element.id,
+    fieldClass,
+    activityId: activity?.dataset.activityId || activity?.dataset.actId || "",
+    sessionId: session?.dataset.sessionId || "",
+    fullscreen,
+    value: element.value,
+    selectionStart: typeof element.selectionStart === "number" ? element.selectionStart : null,
+    selectionEnd: typeof element.selectionEnd === "number" ? element.selectionEnd : null
+  };
+}
+
+function findEditingElement(context) {
+  if (context.id) return document.getElementById(context.id);
+  const scope = context.activityId
+    ? [...document.querySelectorAll("[data-activity-id], [data-act-id]")]
+      .find((element) => (element.dataset.activityId || element.dataset.actId) === context.activityId)
+    : [...document.querySelectorAll("[data-session-id]")]
+      .find((element) => element.dataset.sessionId === context.sessionId);
+  return scope?.querySelector(`.${context.fieldClass}`) || null;
+}
+
+function restoreEditingContext(context) {
+  if (!context) return;
+  const element = findEditingElement(context);
+  if (!element) return;
+  if (context.fullscreen) element.closest(".expandable-field")?.querySelector(".expand-btn")?.click();
+  element.focus({ preventScroll: true });
+  if (context.selectionStart === null || typeof element.setSelectionRange !== "function") return;
+  const { start, end } = window.LearningDesignerMerge.adjustSelection(
+    context.selectionStart, context.selectionEnd ?? context.selectionStart, context.value, element.value
+  );
+  try {
+    element.setSelectionRange(start, end);
+  } catch (_) {}
+}
+
+/* Une modale, un menu ou un déplacement en cours serait interrompu par un nouvel affichage :
+   la version fusionnée attend alors qu’ils se terminent. */
+function isInterfaceBusy() {
+  return Boolean(activeModalBackdrop || activeChoiceMenu || activeToolPicker || dragState
+    || activeAiasActivity || document.querySelector("dialog[open]"));
+}
+
+/* Remplace le contenu par une version fusionnée, dans le même document : le champ en cours de
+   saisie, son curseur et l’éditeur plein écran sont conservés. */
+function replaceDocumentContent(documentState, { markDirty }) {
+  const context = captureEditingContext();
+  const scrollX = window.scrollX;
+  const scrollY = window.scrollY;
+  const boardScroll = board.scrollLeft;
+  state = hydrateState(documentState, state);
+  saveState({ markDirty });
+  render();
+  restoreEditingContext(context);
+  board.scrollLeft = boardScroll;
+  window.scrollTo(scrollX, scrollY);
+}
+
+function applyMergedDocument(documentState) {
+  if (isInterfaceBusy()) return false;
+  // Les saisies en attente forment une étape à part : l’annuler ne retirera pas ce qui arrive des collègues.
+  recordHistoryCheckpoint();
+  replaceDocumentContent(documentState, { markDirty: false });
+  historySnapshot = contentSnapshot();
+  return true;
+}
+
+// ── Annuler / Rétablir ──────────────────────────────────────────────
+// Chaque pause dans la saisie forme une étape. Annuler applique la fusion à trois voies à l’envers :
+// seule l’étape annulée est retirée, et ce qu’un collègue a modifié depuis reste en place.
+
+function contentSnapshot() {
+  return window.LearningDesignerMerge.withoutViewState(JSON.parse(JSON.stringify(state)));
+}
+
+function resetHistory() {
+  window.clearTimeout(historyTimer);
+  historyTimer = 0;
+  undoStack = [];
+  redoStack = [];
+  historyGeneration = documentGeneration;
+  historySnapshot = contentSnapshot();
+}
+
+function recordHistoryCheckpoint() {
+  window.clearTimeout(historyTimer);
+  historyTimer = 0;
+  if (!historySnapshot || historyGeneration !== documentGeneration) return;
+  const current = contentSnapshot();
+  if (window.LearningDesignerMerge.sameContent(historySnapshot, current)) return;
+  undoStack.push({ before: historySnapshot, after: current });
+  if (undoStack.length > HISTORY_LIMIT) undoStack.shift();
+  redoStack = [];
+  historySnapshot = current;
+  renderHistoryButtons();
+}
+
+function scheduleHistoryCheckpoint() {
+  if (!window.LearningDesignerMerge) return;
+  const wasPending = historyTimer !== 0;
+  window.clearTimeout(historyTimer);
+  historyTimer = window.setTimeout(recordHistoryCheckpoint, HISTORY_PAUSE_MS);
+  if (!wasPending) renderHistoryButtons();
+}
+
+function isReadOnlyScenario() {
+  return document.body.classList.contains("is-read-only-scenario");
+}
+
+function stepHistory(direction) {
+  if (isInterfaceBusy() || isReadOnlyScenario() || !window.LearningDesignerMerge) return false;
+  recordHistoryCheckpoint();
+  const undo = direction === "undo";
+  const entry = (undo ? undoStack : redoStack).pop();
+  if (!entry) return false;
+  const [base, target] = undo ? [entry.after, entry.before] : [entry.before, entry.after];
+  const { scenario } = window.LearningDesignerMerge.merge(base, JSON.parse(JSON.stringify(state)), target);
+  (undo ? redoStack : undoStack).push(entry);
+  replaceDocumentContent(scenario, { markDirty: true });
+  window.clearTimeout(historyTimer);
+  historyTimer = 0;
+  historySnapshot = contentSnapshot();
+  renderHistoryButtons();
+  announce(undo
+    ? (currentLang() === "en" ? "Change undone" : "Modification annulée")
+    : (currentLang() === "en" ? "Change redone" : "Modification rétablie"));
+  return true;
+}
+
+function historyShortcut(redo) {
+  const mac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || "");
+  if (mac) return redo ? "⇧⌘Z" : "⌘Z";
+  return redo ? "Ctrl+Y" : "Ctrl+Z";
+}
+
+function renderHistoryButtons() {
+  const english = currentLang() === "en";
+  [["undo-btn", false, undoStack.length], ["redo-btn", true, redoStack.length]].forEach(([id, redo, count]) => {
+    const button = document.getElementById(id);
+    if (!button) return;
+    const label = redo ? (english ? "Redo" : "Rétablir") : (english ? "Undo" : "Annuler");
+    // Une saisie en attente est déjà annulable, même avant la fin de la pause.
+    const pending = !redo && historyTimer !== 0;
+    button.disabled = !(count > 0 || pending);
+    button.setAttribute("aria-label", label);
+    button.setAttribute("aria-keyshortcuts", redo ? "Meta+Shift+Z Control+Shift+Z Control+Y" : "Meta+Z Control+Z");
+    button.title = `${label} (${historyShortcut(redo)})`;
+  });
+  const group = document.getElementById("history-toggle");
+  if (group) group.setAttribute("aria-label", english ? "History" : "Historique");
+}
+
+document.getElementById("undo-btn")?.addEventListener("click", () => stepHistory("undo"));
+document.getElementById("redo-btn")?.addEventListener("click", () => stepHistory("redo"));
+
+document.addEventListener("keydown", (event) => {
+  if (event.defaultPrevented || event.isComposing || event.altKey || !(event.metaKey || event.ctrlKey)) return;
+  const key = event.key.toLowerCase();
+  const redo = (key === "z" && event.shiftKey) || (key === "y" && event.ctrlKey && !event.metaKey && !event.shiftKey);
+  if (!redo && !(key === "z" && !event.shiftKey)) return;
+  const target = event.target instanceof Element ? event.target : null;
+  // Les champs hors du scénario (recherche, fenêtres) gardent l’annulation native du navigateur.
+  if (target?.closest("dialog, .modal-backdrop, .site-search-overlay, .site-search-dialog")) return;
+  if (target?.matches("input, textarea, select, [contenteditable]")
+    && !target.closest("#board, #top-panel, .expandable-field")) return;
+  if (stepHistory(redo ? "redo" : "undo")) event.preventDefault();
+});
+
 window.learningDesignerApp = {
+  applyMergedDocument,
+  isInterfaceBusy,
   getDocumentGeneration() {
     return documentGeneration;
   },

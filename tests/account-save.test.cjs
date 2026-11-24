@@ -11,7 +11,7 @@ const success = (id = 1, updatedAt = 'v2') => ({ success: true, design: { id, up
 
 // Isolate the account controller with a fake clock, storage and transport.
 // Requests, state changes and saved snapshots remain observable to the tests.
-function harness(initial = initialState()) {
+function harness(initial = initialState(), { merge = false } = {}) {
   let state = clone(initial), generation = 0, timerId = 0, stored;
   const timers = new Map(), requests = [], notices = [], confirmations = [];
   const button = {
@@ -27,17 +27,22 @@ function harness(initial = initialState()) {
     getCurrentLang: () => 'fr',
     updateMeta(patch, { markDirty = true } = {}) { Object.assign(state.meta, patch); if (markDirty) state.meta.remoteDirty = true; stored = clone(state); onStateChange(); },
     loadDocument(doc, meta) { state = clone(doc); Object.assign(state.meta, meta); generation++; onStateChange(); },
+    applyMergedDocument(doc) { state = clone(doc); onStateChange(); return true; },
     showNotice: message => notices.push(message), announce: () => {}
   };
   const context = {
     URL, URLSearchParams,
+    localStorage: (() => { const items = new Map(); return { getItem: key => items.get(key) ?? null, setItem: (key, value) => items.set(key, String(value)) }; })(),
+    CustomEvent: class { constructor(type, init = {}) { this.type = type; this.detail = init.detail; } },
     setTimeout(fn, ms) { timers.set(++timerId, { fn, ms }); return timerId; },
     clearTimeout(id) { timers.delete(id); },
     document: { getElementById: id => id === 'save-btn' ? button : null, addEventListener: () => {} },
     window: {
       learningDesignerApp: app,
+      LearningDesignerMerge: merge ? require('../js/scenario-merge.js') : undefined,
       location: { href: 'http://localhost/designer.php', search: '' },
       history: { replaceState: () => {} },
+      dispatchEvent: () => true,
       confirm: message => { confirmations.push(message); return context.confirmResult; }
     },
     confirmResult: false,
@@ -341,6 +346,7 @@ test('the editor persists dirty state and a clean acknowledgement before closing
   let stored;
   const ctx = {state:initialState(),localStateSavePending:false,localStateSaveTimer:0,activeStorageKey:'test',
     localStorage:{setItem:(key,value)=>{stored=JSON.parse(value);}},
+    scheduleHistoryCheckpoint: () => {},
     CustomEvent: class {},window:{clearTimeout:()=>{},setTimeout:()=>1,dispatchEvent:()=>{}}};
   vm.createContext(ctx); vm.runInContext(persist + save,ctx);
   ctx.state.meta.name = 'Last words';
@@ -405,4 +411,38 @@ test('different revisions conflict even when timestamps are identical', async ()
   await h.syncRemoteDesignFromServer(1);
   assert.equal(h.state.meta.remoteSaveConflict, 1);
   assert.equal(h.state.meta.remoteRevision, 1);
+});
+
+// Collaboration : un enregistrement refusé parce qu’un collègue a enregistré entre-temps
+// récupère sa version, fusionne les deux et renvoie le résultat, sans créer de copie.
+test('a conflict on a shared scenario merges the colleague version and saves again', async () => {
+  const h = harness(initialState(), { merge: true });
+  const base = { meta: { name: 'Local draft' }, sessions: [] };
+  h.context.localStorage.setItem('ld_remote_base_v1_1_1', JSON.stringify({ revision: 1, document: base }));
+  h.edit('Titre local');
+  const remote = { meta: { name: 'Local draft', description: 'Description du collègue' }, sessions: [] };
+  const replies = [
+    { success: false, status: 409, design: { id: 1, revision: 2 } },
+    { success: true, design: { id: 1, title: 'Local draft', updatedAt: 'v2', revision: 2, role: 'editor', owner: 'Alice', shared: true, document: remote } },
+    { success: true, design: { id: 1, updatedAt: 'v3', revision: 3 } }
+  ];
+  h.context.transport = async () => replies.shift();
+  await h.autoSaveRemote();
+  assert.deepEqual(h.requests.map(request => request.url.split('?')[0]), ['save_design.php', 'get_design.php', 'save_design.php']);
+  assert.equal(h.requests[2].body.expected_revision, 2);
+  assert.equal(h.requests[2].body.document.meta.name, 'Titre local');
+  assert.equal(h.requests[2].body.document.meta.description, 'Description du collègue');
+  assert.equal(h.state.meta.remoteRevision, 3);
+  assert.equal(h.state.meta.remoteSaveConflict, null);
+  assert.equal(h.confirmations.length, 0);
+});
+
+test('without a known common version a conflict still keeps the draft and offers a copy', async () => {
+  const h = harness(initialState(), { merge: true });
+  h.edit('Titre local');
+  h.context.transport = async () => ({ success: false, status: 409, design: { id: 1, revision: 2 } });
+  await h.autoSaveRemote();
+  assert.equal(h.requests.length, 1);
+  assert.equal(h.state.meta.remoteSaveConflict, 1);
+  assert.equal(h.state.meta.name, 'Titre local');
 });

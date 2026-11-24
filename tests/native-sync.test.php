@@ -51,7 +51,7 @@ try {
         (1,'Designer','designer@example.test','test','admin','active',CURRENT_TIMESTAMP),
         (2,'Other','other@example.test','test','designer','active',CURRENT_TIMESTAMP),
         (3,'Unverified','unverified@example.test','test','designer','active',NULL)");
-    check((int)$db->query('SELECT schema_version FROM app_schema_meta')->fetchColumn() === 10, 'Migration reaches schema 10');
+    check((int)$db->query('SELECT schema_version FROM app_schema_meta')->fetchColumn() === 11, 'Migration reaches schema 11');
     ensure_native_app_schema($db); ensure_app_schema($db);
     check((int)$db->query('SELECT COUNT(*) FROM users')->fetchColumn() === 3, 'Idempotent migration preserves users');
     $legacy = app_save_design_document($db, 1, 0, null, 'Existing', '{"meta":{},"sessions":[]}');

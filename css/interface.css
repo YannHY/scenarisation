@@ -144,7 +144,7 @@ html body:not(.home-page) :is(h1, h2, h3, h4, h5, h6) {
 
 html body:not(.home-page) h1 {
   color: var(--heading-ink);
-  font-size: 42px;
+  font-size: 2.625rem;
   font-weight: 600;
   letter-spacing: -0.03em;
   line-height: 1.08;
@@ -152,7 +152,7 @@ html body:not(.home-page) h1 {
 
 html body:not(.home-page) h2 {
   color: var(--primary);
-  font-size: 23px;
+  font-size: 1.4375rem;
   font-weight: 600;
   letter-spacing: -0.015em;
   line-height: 1.2;
@@ -161,7 +161,7 @@ html body:not(.home-page) h2 {
 
 html body:not(.home-page) h3 {
   color: var(--primary);
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 600;
   letter-spacing: -0.01em;
   line-height: 1.3;
@@ -349,7 +349,7 @@ select:focus-visible,
     var(--collaborate) 310deg  360deg
   );
   color: #fff;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 800;
   letter-spacing: 0.03em;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
@@ -364,7 +364,7 @@ select:focus-visible,
 
 .site-nav-title {
   margin: 0;
-  font-size: 22px;
+  font-size: 1.375rem;
   font-weight: 700;
   letter-spacing: 0.03em;
   color: #f1f5f9;
@@ -402,7 +402,7 @@ select:focus-visible,
 html body.designer-page h1.brand-title {
   margin: 0;
   font-family: var(--font-family);
-  font-size: 18px;
+  font-size: 1.125rem;
   line-height: 1.25;
 }
 
@@ -491,7 +491,7 @@ html body.designer-page h1.brand-title {
   border-radius: 999px;
   background: transparent;
   padding: 8px 14px;
-  font-size: 15px;
+  font-size: 0.9375rem;
   color: var(--text-subtle);
   cursor: pointer;
   transition:
@@ -528,7 +528,7 @@ html body.designer-page h1.brand-title {
 
 .form-row label {
   font-weight: 700;
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--text-strong);
   padding-top: 11px;
   line-height: 1.3;
@@ -560,7 +560,7 @@ html body.designer-page h1.brand-title {
   border: 1px solid rgba(203, 213, 225, 0.72);
   border-radius: 10px;
   font-family: var(--font-family);
-  font-size: 14px;
+  font-size: 0.875rem;
   padding: 10px 12px;
   background: #fff;
   color: var(--text);
@@ -623,7 +623,7 @@ select.panel-select:disabled {
   border-radius: 4px;
   background: var(--surface-input);
   color: var(--text-body);
-  font: 600 12px/1 "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font: 600 0.75rem/1 "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   cursor: pointer;
   padding: 0 8px;
 }
@@ -641,7 +641,7 @@ select.panel-select:disabled {
   border: 1px solid var(--line);
   border-radius: 4px;
   background: var(--surface-input);
-  font-size: 12px;
+  font-size: 0.75rem;
   line-height: 1;
   cursor: pointer;
   z-index: 2;
@@ -671,7 +671,7 @@ select.panel-select:disabled {
   border-radius: 10px;
   background: #fff;
   color: var(--text);
-  font-size: 14px;
+  font-size: 0.875rem;
   /* Matches the textarea underneath: the preview replaces it when the field
      loses focus, so a different line-height would make the field jump height
      between reading and editing. */
@@ -783,14 +783,14 @@ select.panel-select:disabled {
 }
 
 .learning-outcomes-menu-heading strong {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--text-strong);
 }
 
 .learning-outcomes-menu-heading span,
 .learning-outcomes-empty {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 0.75rem;
   line-height: 1.45;
 }
 
@@ -806,7 +806,7 @@ select.panel-select:disabled {
   background: transparent;
   color: var(--text-strong);
   font: inherit;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 700;
   text-align: left;
   cursor: pointer;
@@ -836,7 +836,7 @@ select.panel-select:disabled {
 .learning-outcome-create-form p {
   margin: 0 0 2px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 0.75rem;
   line-height: 1.45;
 }
 
@@ -850,7 +850,7 @@ select.panel-select:disabled {
   background: #fff;
   color: var(--text-body);
   font: inherit;
-  font-size: 12px;
+  font-size: 0.75rem;
   padding: 0 9px;
 }
 
@@ -890,7 +890,7 @@ select.panel-select:disabled {
   background: #fff;
   color: var(--text-body);
   font: inherit;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
   padding: 5px 10px;
   cursor: pointer;
@@ -953,7 +953,7 @@ select.panel-select:disabled {
   border-radius: 999px;
   background: var(--bloom-bg, #ececea);
   color: var(--bloom-ink, #222);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 700;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -961,7 +961,7 @@ select.panel-select:disabled {
 }
 
 .learning-outcome-option-text {
-  font-size: 13px;
+  font-size: 0.8125rem;
   line-height: 1.4;
 }
 
@@ -985,7 +985,7 @@ select.panel-select:disabled {
 }
 
 .learning-outcome-option-delete i {
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 
 .expandable-field.fullscreen textarea {
@@ -1009,7 +1009,7 @@ body.fullscreen-editor-open {
   align-items: center;
   justify-content: center;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 
 .math-assistant-menu {
@@ -1038,13 +1038,13 @@ body.fullscreen-editor-open {
 
 .math-assistant-heading strong {
   color: var(--text-strong);
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 
 .math-assistant-heading span,
 .math-assistant-label-text {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 0.75rem;
   line-height: 1.45;
 }
 
@@ -1063,7 +1063,7 @@ body.fullscreen-editor-open {
   background: transparent;
   color: var(--muted);
   font: inherit;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
   cursor: pointer;
 }
@@ -1078,7 +1078,7 @@ body.fullscreen-editor-open {
   display: grid;
   gap: 5px;
   color: var(--text-strong);
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -1091,7 +1091,7 @@ body.fullscreen-editor-open {
   border-radius: 7px;
   background: #fff;
   color: var(--text-body);
-  font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font: 0.8125rem/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   resize: vertical;
   overflow: auto;
 }
@@ -1104,7 +1104,7 @@ body.fullscreen-editor-open {
   border-radius: 7px;
   background: #f5f5f3;
   color: var(--text-body);
-  font-size: 13px;
+  font-size: 0.8125rem;
   overflow-x: auto;
 }
 
@@ -1130,7 +1130,7 @@ body.fullscreen-editor-open {
   background: #fff;
   color: var(--muted);
   font: inherit;
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 700;
   cursor: pointer;
 }
@@ -1149,7 +1149,7 @@ body.fullscreen-editor-open {
   border-radius: 6px;
   background: #fff;
   color: var(--text-body);
-  font: 600 13px/1 Georgia, "Times New Roman", serif;
+  font: 600 0.8125rem/1 Georgia, "Times New Roman", serif;
   cursor: pointer;
 }
 
@@ -1177,7 +1177,7 @@ body.fullscreen-editor-open {
   border: 1px solid var(--line);
   border-radius: 6px;
   font: inherit;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
   cursor: pointer;
 }
@@ -1273,7 +1273,7 @@ body.fullscreen-editor-open {
   appearance: textfield;
   text-align: center;
   padding: 6px 4px;
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 @supports (field-sizing: content) {
@@ -1293,7 +1293,7 @@ body.fullscreen-editor-open {
   border: 1px solid var(--line);
   border-radius: 7px;
   background: var(--surface-input);
-  font-size: 11px;
+  font-size: 0.6875rem;
   padding: 6px 6px;
   color: var(--muted);
   white-space: nowrap;
@@ -1322,7 +1322,7 @@ body.fullscreen-editor-open {
   border: 0;
   background: transparent;
   color: #2f2f2f;
-  font-size: 12px;
+  font-size: 0.75rem;
   line-height: 1;
   padding: 0;
   min-width: 0;
@@ -1365,7 +1365,7 @@ body.fullscreen-editor-open {
 
 .pie-tooltip-name {
   display: block;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
   line-height: 1.18;
   text-wrap: balance;
@@ -1374,7 +1374,7 @@ body.fullscreen-editor-open {
 .pie-tooltip-pct {
   display: block;
   margin-top: 2px;
-  font-size: 12px;
+  font-size: 0.75rem;
   line-height: 1;
 }
 
@@ -1382,7 +1382,7 @@ body.fullscreen-editor-open {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 
 .legend-dot {
@@ -1457,7 +1457,7 @@ body.fullscreen-editor-open {
   background: var(--panel);
   color: var(--text-strong);
   padding: 8px 11px;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
   line-height: 1;
   cursor: pointer;
@@ -1476,7 +1476,7 @@ body.fullscreen-editor-open {
 }
 
 .analysis-export-chevron {
-  font-size: 9px;
+  font-size: 0.5625rem;
   transition: transform 160ms ease;
 }
 
@@ -1499,14 +1499,14 @@ body.fullscreen-editor-open {
 .analysis-export-title {
   margin: 0;
   color: var(--text-strong);
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 750;
 }
 
 .analysis-export-description {
   margin: 4px 0 13px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 0.6875rem;
   line-height: 1.4;
 }
 
@@ -1528,7 +1528,7 @@ body.fullscreen-editor-open {
 html body:not(.home-page) h3.analysis-export-group-title {
   margin: 0;
   color: var(--text-strong);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   line-height: 1.3;
@@ -1568,7 +1568,7 @@ html body:not(.home-page) h3.analysis-export-group-title {
 }
 
 .analysis-export-option > span {
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.04em;
 }
@@ -1576,7 +1576,7 @@ html body:not(.home-page) h3.analysis-export-group-title {
 .analysis-export-option > small {
   overflow: hidden;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 0.625rem;
   line-height: 1.25;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1586,7 +1586,7 @@ html body:not(.home-page) h3.analysis-export-group-title {
   min-height: 15px;
   margin: 10px 0 0;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 0.6875rem;
   line-height: 1.35;
 }
 
@@ -1606,7 +1606,7 @@ html body:not(.home-page) h3.analysis-export-group-title {
   color: var(--warning-text);
   border-radius: 8px;
   padding: 7px 12px;
-  font-size: 12px;
+  font-size: 0.75rem;
   line-height: 1.3;
 }
 
@@ -1732,7 +1732,7 @@ html body:not(.home-page) h3.analysis-export-group-title {
   flex-wrap: wrap;
   gap: 4px 8px;
   justify-content: center;
-  font-size: 11px;
+  font-size: 0.6875rem;
   line-height: 1.2;
 }
 
@@ -1780,7 +1780,7 @@ html body:not(.home-page) h3.analysis-chart-title,
 html body:not(.home-page) h3.analysis-section-title {
   margin: 0;
   color: var(--text-strong);
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 700;
   letter-spacing: 0;
   line-height: 1.3;
@@ -1800,7 +1800,7 @@ html body:not(.home-page) h3.analysis-section-title {
   padding: 8px 12px;
   background: var(--surface-light);
   border-radius: 6px;
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .partition-controls-label {
@@ -1813,7 +1813,7 @@ html body:not(.home-page) h3.analysis-section-title {
   border: 1px solid var(--line);
   padding: 8px 14px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 600;
   color: var(--text-body);
   cursor: pointer;
@@ -1854,12 +1854,12 @@ html body:not(.home-page) h3.analysis-section-title {
 .partition-session-title {
   font-weight: 600;
   color: var(--text-body);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .partition-session-total {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 
 .partition-line {
@@ -1876,7 +1876,7 @@ html body:not(.home-page) h3.analysis-section-title {
   align-items: center;
   justify-content: flex-end;
   padding-right: 12px;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 500;
   color: var(--text-body);
   text-align: right;
@@ -1918,7 +1918,7 @@ html body:not(.home-page) h3.analysis-section-title {
 }
 
 .partition-block-label {
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.95);
   white-space: nowrap;
@@ -1926,7 +1926,7 @@ html body:not(.home-page) h3.analysis-section-title {
 }
 
 .partition-block-duration {
-  font-size: 10px;
+  font-size: 0.625rem;
   color: rgba(255, 255, 255, 0.82);
   white-space: nowrap;
 }
@@ -1937,7 +1937,7 @@ html body:not(.home-page) h3.analysis-section-title {
   margin-left: 128px;
   margin-top: 4px;
   padding: 0 8px;
-  font-size: 10px;
+  font-size: 0.625rem;
   color: var(--muted);
   justify-content: space-between;
 }
@@ -1952,7 +1952,7 @@ html body:not(.home-page) h3.analysis-section-title {
 @media (max-width: 900px) {
   .partition-line-label {
     width: 100px;
-    font-size: 11px;
+    font-size: 0.6875rem;
     padding-right: 8px;
   }
   .partition-session-header {
@@ -1963,14 +1963,14 @@ html body:not(.home-page) h3.analysis-section-title {
     margin-left: 108px;
   }
   .partition-block-label {
-    font-size: 10px;
+    font-size: 0.625rem;
   }
 }
 
 @media (max-width: 720px) {
   .partition-line-label {
     width: 80px;
-    font-size: 10px;
+    font-size: 0.625rem;
     padding-right: 4px;
   }
   .partition-session-header {
@@ -1985,7 +1985,7 @@ html body:not(.home-page) h3.analysis-section-title {
     border-radius: 3px;
   }
   .partition-block-label {
-    font-size: 9px;
+    font-size: 0.5625rem;
   }
   .partition-block-duration {
     display: none;
@@ -2005,13 +2005,13 @@ html body:not(.home-page) h3.analysis-section-title {
 
 .partition-config-row-label {
   flex: 1;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 500;
   color: var(--text-body);
 }
 
 .partition-config-row-type {
-  font-size: 11px;
+  font-size: 0.6875rem;
   color: var(--muted);
   background: var(--hover-bg-mid);
   padding: 2px 6px;
@@ -2032,7 +2032,7 @@ html body:not(.home-page) h3.analysis-section-title {
   border-radius: 4px;
   background: var(--panel);
   cursor: pointer;
-  font-size: 13px;
+  font-size: 0.8125rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2115,7 +2115,7 @@ html body:not(.home-page) h3.analysis-section-title {
 .account-confirm-message {
   margin: 0;
   color: var(--text-body);
-  font-size: 15px;
+  font-size: 0.9375rem;
   line-height: 1.6;
 }
 
@@ -2170,7 +2170,7 @@ html body:not(.home-page) h3.analysis-section-title {
 }
 
 .partition-config-modal-desc {
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--muted);
   margin: 0 0 4px;
 }
@@ -2188,7 +2188,7 @@ html body:not(.home-page) h3.analysis-section-title {
 }
 
 .partition-add-section-label {
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--muted);
   margin: 0 0 8px;
@@ -2218,14 +2218,14 @@ html body:not(.home-page) h3.analysis-section-title {
 
 .modal p {
   margin: 0;
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.5;
 }
 
 .modal label {
   display: block;
   margin-top: 2px;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 700;
   line-height: 1.2;
   color: var(--text-body);
@@ -2246,7 +2246,7 @@ html body:not(.home-page) h3.analysis-section-title {
 .modal-inline-error {
   margin: 0;
   color: #b91c1c;
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .modal-inline-error.hidden {
@@ -2270,7 +2270,7 @@ html body:not(.home-page) h3.analysis-section-title {
 .export-scope-fieldset legend {
   margin-bottom: 9px;
   color: var(--text-body);
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 700;
 }
 
@@ -2321,13 +2321,13 @@ html body:not(.home-page) h3.analysis-section-title {
 }
 
 .export-scope-option-title {
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 750;
 }
 
 .export-scope-option-description {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 0.8125rem;
   line-height: 1.4;
 }
 
@@ -2347,7 +2347,7 @@ html body:not(.home-page) h3.analysis-section-title {
   justify-content: space-between;
   gap: 12px;
   color: var(--text-body);
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 700;
   cursor: pointer;
 }
@@ -2419,7 +2419,7 @@ html body:not(.home-page) h3.analysis-section-title {
   justify-content: space-between;
   gap: 12px;
   color: var(--text-body);
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 700;
   cursor: pointer;
 }
@@ -2485,7 +2485,7 @@ html body:not(.home-page) h3.analysis-section-title {
 
 .export-moments-summary {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 0.75rem;
   white-space: nowrap;
 }
 
@@ -2505,7 +2505,7 @@ html body:not(.home-page) h3.analysis-section-title {
   min-width: 0;
   padding: 5px 7px;
   border-radius: 7px;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 500;
   line-height: 1.25;
 }
@@ -2559,7 +2559,7 @@ html body:not(.home-page) h3.analysis-section-title {
 
 .outcomes-header label {
   padding-top: 0;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 700;
   color: var(--text-label);
 }
@@ -2572,7 +2572,7 @@ html body:not(.home-page) h3.analysis-section-title {
   border: 1px solid var(--line);
   background: var(--panel);
   color: var(--text-body);
-  font-size: 18px;
+  font-size: 1.125rem;
   line-height: 1;
   cursor: pointer;
   display: flex;
@@ -2583,7 +2583,7 @@ html body:not(.home-page) h3.analysis-section-title {
 }
 
 .outcomes-add-btn .fa-plus {
-  font-size: 12px;
+  font-size: 0.75rem;
   line-height: 1;
 }
 
@@ -2595,7 +2595,7 @@ html body:not(.home-page) h3.analysis-section-title {
 .outcomes-description {
   margin: 0;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 0.8125rem;
   line-height: 1.5;
 }
 
@@ -2644,7 +2644,7 @@ html body:not(.home-page) h3.analysis-section-title {
   cursor: pointer;
   padding: 4px 9px;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--text-body);
   text-align: left;
@@ -2663,7 +2663,7 @@ html body:not(.home-page) h3.analysis-section-title {
 
 .outcome-verb-edit {
   opacity: 0.45;
-  font-size: 11px;
+  font-size: 0.6875rem;
   flex-shrink: 0;
 }
 
@@ -2690,7 +2690,7 @@ html body:not(.home-page) h3.analysis-section-title {
   background: transparent;
   color: var(--text-body);
   font: inherit;
-  font-size: 13px;
+  font-size: 0.8125rem;
   line-height: 1.5;
   padding: 4px;
   text-align: left;
@@ -2722,7 +2722,7 @@ html body:not(.home-page) h3.analysis-section-title {
   background: var(--panel);
   border: 1px solid var(--line);
   color: var(--text-body);
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
@@ -2730,7 +2730,7 @@ html body:not(.home-page) h3.analysis-section-title {
   border: 0;
   background: transparent;
   color: inherit;
-  font-size: 18px;
+  font-size: 1.125rem;
   cursor: pointer;
 }
 
@@ -2745,7 +2745,7 @@ html body:not(.home-page) h3.analysis-section-title {
 }
 
 .bloom-modal-subtitle {
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--muted);
   margin: 0;
 }
@@ -2771,7 +2771,7 @@ html body:not(.home-page) h3.analysis-section-title {
   align-items: center;
   gap: 6px;
   padding: 8px 10px;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   border-radius: 6px;
@@ -2786,7 +2786,7 @@ html body:not(.home-page) h3.analysis-section-title {
 
 .bloom-category-summary::before {
   content: "▶";
-  font-size: 10px;
+  font-size: 0.625rem;
   color: var(--muted);
   flex-shrink: 0;
   transition: transform 0.15s;
@@ -2816,7 +2816,7 @@ html body:not(.home-page) h3.analysis-section-title {
   background: var(--panel);
   padding: 6px 10px 6px 28px;
   font: inherit;
-  font-size: 13px;
+  font-size: 0.8125rem;
   cursor: pointer;
   border-radius: 4px;
   color: var(--text-body);
@@ -2895,7 +2895,7 @@ html body:not(.home-page) h3.analysis-section-title {
   background: transparent;
   color: #ffffff;
   font-family: var(--font-family);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 700;
   line-height: 1;
   letter-spacing: 0.06em;
@@ -2974,7 +2974,7 @@ html body:not(.home-page) h3.analysis-section-title {
 .toolbar .btn {
   min-height: 36px;
   padding: 7px 9px;
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .toolbar .btn-label {
@@ -2982,8 +2982,8 @@ html body:not(.home-page) h3.analysis-section-title {
 }
 
 .toolbar .btn-icon-inline {
-  width: 14px;
-  font-size: 13px;
+  width: 0.875rem;
+  font-size: 0.8125rem;
 }
 
 .layout-toggle {
@@ -3012,6 +3012,13 @@ html body:not(.home-page) h3.analysis-section-title {
   border-right: 0;
 }
 
+/* Annuler / Rétablir : inactifs tant qu’il n’y a rien à annuler ou à rétablir. */
+.history-toggle .layout-toggle-btn:disabled {
+  color: var(--muted);
+  opacity: 0.45;
+  pointer-events: none;
+}
+
 .layout-toggle-btn[aria-pressed="true"] {
   background: #fff;
   color: #1d4f91;
@@ -3037,7 +3044,7 @@ html body:not(.home-page) h3.analysis-section-title {
   border-radius: 10px;
   background: var(--panel);
   color: var(--text-body);
-  font-size: 13px;
+  font-size: 0.8125rem;
   padding: 7px 11px;
   cursor: pointer;
   white-space: nowrap;
@@ -3083,7 +3090,7 @@ html body:not(.home-page) h3.analysis-section-title {
 }
 
 .btn-icon-inline {
-  width: 16px;
+  width: 1rem;
   text-align: center;
 }
 
@@ -3171,7 +3178,7 @@ main {
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 .grid-table thead th {
   position: sticky;
@@ -3182,7 +3189,7 @@ main {
   border-bottom: 1px solid var(--line);
   font-weight: 600;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 0.6875rem;
   text-transform: uppercase;
   letter-spacing: .04em;
   white-space: nowrap;
@@ -3208,7 +3215,7 @@ main {
 .grid-activity-row:hover td { background: var(--hover-bg); }
 .grid-activity-row td:first-child {
   border-left: 3px solid transparent;
-  font-size: 11px;
+  font-size: 0.6875rem;
   color: var(--muted);
   font-weight: 600;
   text-align: center;
@@ -3221,7 +3228,7 @@ main {
 }
 .grid-session-label {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .05em;
@@ -3231,7 +3238,7 @@ main {
 .grid-session-title-input {
   border: none;
   background: transparent;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 600;
   color: var(--text-body);
   width: 240px;
@@ -3248,7 +3255,7 @@ main {
 }
 .grid-session-total {
   display: inline-block;
-  font-size: 11px;
+  font-size: 0.6875rem;
   color: var(--muted);
   font-weight: 400;
   margin-left: 10px;
@@ -3263,13 +3270,13 @@ main {
   vertical-align: middle;
 }
 .duplicate-session-btn.grid-duplicate-session-btn .fa-copy {
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 .grid-select {
   width: 100%;
   border: 1px solid transparent;
   background: transparent;
-  font-size: 12px;
+  font-size: 0.75rem;
   color: var(--text-body);
   padding: 3px 2px;
   border-radius: 4px;
@@ -3280,7 +3287,7 @@ main {
 }
 .grid-select:hover  { background: var(--hover-bg-mid); border-color: var(--line); }
 .grid-select:focus  { outline: 2px solid var(--primary); outline-offset: 0; }
-.grid-aias-select { font-size: 11px; }
+.grid-aias-select { font-size: 0.6875rem; }
 .grid-aias-select.aias-level {
   border-color: color-mix(in srgb, var(--aias-color) 65%, #111827);
   background: var(--aias-color);
@@ -3297,7 +3304,7 @@ main {
   width: 44px;
   border: 1px solid transparent;
   background: transparent;
-  font-size: 12px;
+  font-size: 0.75rem;
   color: var(--text-body);
   padding: 3px 4px;
   border-radius: 4px;
@@ -3307,14 +3314,14 @@ main {
 }
 .grid-dur-input:hover { background: var(--hover-bg-mid); border-color: var(--line); }
 .grid-dur-input:focus { outline: 2px solid var(--primary); outline-offset: 0; }
-.grid-dur-unit { font-size: 11px; color: var(--muted); white-space: nowrap; }
+.grid-dur-unit { font-size: 0.6875rem; color: var(--muted); white-space: nowrap; }
 .grid-type-cell { display: flex; align-items: center; gap: 5px; }
 .grid-type-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .grid-type-select {
   flex: 1;
   border: 1px solid transparent;
   background: transparent;
-  font-size: 12px;
+  font-size: 0.75rem;
   color: var(--text-body);
   padding: 3px 2px;
   border-radius: 4px;
@@ -3330,7 +3337,7 @@ main {
   width: 100%;
   border: 1px solid transparent;
   background: transparent;
-  font-size: 12px;
+  font-size: 0.75rem;
   color: var(--text-body);
   padding: 3px 6px;
   border-radius: 4px;
@@ -3349,11 +3356,11 @@ main {
   width: 20px; height: 20px;
   border: none; background: transparent;
   color: var(--muted); cursor: pointer;
-  border-radius: 3px; font-size: 12px; line-height: 1; padding: 0;
+  border-radius: 3px; font-size: 0.75rem; line-height: 1; padding: 0;
   display: flex; align-items: center; justify-content: center;
 }
 .grid-duplicate-activity-btn .fa-copy {
-  font-size: 11px;
+  font-size: 0.6875rem;
   line-height: 1;
 }
 .grid-action-btn:hover { background: var(--hover-bg-mid); color: var(--text-body); }
@@ -3363,7 +3370,7 @@ main {
   background: none;
   border: 1px dashed var(--line);
   color: var(--muted);
-  font-size: 11px;
+  font-size: 0.6875rem;
   padding: 3px 10px;
   border-radius: 4px;
   cursor: pointer;
@@ -3377,7 +3384,7 @@ main {
   background: none;
   border: 1px dashed var(--line);
   color: var(--muted);
-  font-size: 12px;
+  font-size: 0.75rem;
   padding: 6px 14px;
   border-radius: 6px;
   cursor: pointer;
@@ -3420,7 +3427,7 @@ main {
   color: var(--muted);
   display: grid;
   place-items: center;
-  font-size: 34px;
+  font-size: 2.125rem;
   font-weight: 400;
   line-height: 1;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
@@ -3433,12 +3440,12 @@ main {
 
 .add-session-card-icon .fa-plus {
   display: block;
-  font-size: 28px;
+  font-size: 1.75rem;
   line-height: 1;
 }
 
 .add-session-card-label {
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 700;
   letter-spacing: -0.01em;
 }
@@ -3536,7 +3543,7 @@ main {
   resize: none;
   overflow: hidden;
   font: inherit;
-  font-size: 13px;
+  font-size: 0.8125rem;
   background: #fff;
   min-height: 44px;
   line-height: 1.6;
@@ -3571,12 +3578,12 @@ main {
 
 .activity-field-label {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 700;
 }
 
 .session-title {
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
 }
 
@@ -3600,7 +3607,7 @@ main {
 .activities::before {
   content: attr(data-label);
   display: block;
-  font-size: 10px;
+  font-size: 0.625rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -3740,7 +3747,7 @@ main {
 .aias-modal-intro {
   margin: 0 0 10px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 0.75rem;
   line-height: 1.45;
 }
 
@@ -3760,7 +3767,7 @@ main {
   color: var(--text-body);
   cursor: pointer;
   font: inherit;
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 
 .aias-status-btn:hover,
@@ -3811,7 +3818,7 @@ main {
 
 .aias-level-number {
   color: var(--primary);
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
   line-height: 1.3;
   display: flex;
@@ -3822,7 +3829,7 @@ main {
 }
 
 .aias-level-title {
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
   line-height: 1.3;
   display: flex;
@@ -3833,7 +3840,7 @@ main {
 
 .aias-level-description {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 0.6875rem;
   line-height: 1.35;
   display: flex;
   align-items: center;
@@ -3868,7 +3875,7 @@ main {
   flex-wrap: wrap;
   gap: 3px 6px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 0.625rem;
   line-height: 1.3;
 }
 
@@ -3952,8 +3959,8 @@ main {
 .choice-btn .fa-regular,
 .choice-menu-item .fa-solid,
 .choice-menu-item .fa-regular {
-  width: 18px;
-  font-size: 16px;
+  width: 1.125rem;
+  font-size: 1rem;
   color: currentColor;
   text-align: center;
 }
@@ -3967,7 +3974,7 @@ main {
 
 .duration-symbol .fa-solid,
 .duration-symbol .fa-regular {
-  font-size: 15px;
+  font-size: 0.9375rem;
   color: currentColor;
 }
 
@@ -3990,7 +3997,7 @@ main {
 }
 
 .choice-menu-title {
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--muted);
   padding: 8px 10px 6px;
@@ -4010,7 +4017,7 @@ main {
   text-align: left;
   cursor: pointer;
   color: var(--text-body);
-  font-size: 14px;
+  font-size: 0.875rem;
   transition: background var(--transition-fast);
 }
 
@@ -4053,7 +4060,7 @@ main {
 
 .choice-menu-item-description {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 400;
   line-height: 1.4;
 }
@@ -4079,7 +4086,7 @@ main {
   right: -4px;
   background: var(--indigo);
   color: #fff;
-  font-size: 9px;
+  font-size: 0.5625rem;
   font-weight: 700;
   min-width: 14px;
   height: 14px;
@@ -4127,7 +4134,7 @@ main {
   border: 1px solid var(--competency-border, var(--indigo-border));
   border-radius: 999px;
   padding: 2px 6px 2px 8px;
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 600;
   color: var(--competency-text, var(--indigo-dark));
   line-height: 1.4;
@@ -4153,7 +4160,7 @@ main {
   opacity: 0.55;
   display: inline-flex;
   align-items: center;
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1;
   flex: 0 0 auto;
   transition: opacity var(--transition-fast);
@@ -4209,7 +4216,7 @@ main {
 
 .tool-picker-framework-label {
   color: var(--text-body);
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -4221,7 +4228,7 @@ main {
   color: var(--text);
   background: #fff;
   font: inherit;
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .tool-picker-framework-select:focus {
@@ -4240,7 +4247,7 @@ main {
   background: transparent;
   color: #595959;
   padding: 3px 6px;
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 400;
   line-height: 1.4;
   text-decoration: none;
@@ -4283,7 +4290,7 @@ main {
   border: none;
   background: none;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 1rem;
   line-height: 1;
   color: #6b7280;
   padding: 2px 5px;
@@ -4318,7 +4325,7 @@ main {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 5px 10px;
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--text);
   background: #fff;
   outline: none;
@@ -4339,7 +4346,7 @@ main {
   border-radius: 6px;
   background: transparent;
   padding: 4px 12px;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
   color: #6b7280;
@@ -4378,7 +4385,7 @@ main {
 }
 
 .tool-picker-section-title {
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 600;
   color: var(--competency-text, #4b5563);
   padding: 12px 10px 6px;
@@ -4398,7 +4405,7 @@ main {
   padding: 6px 10px;
   text-align: left;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 0.8125rem;
   transition: background var(--transition-base);
 }
 
@@ -4419,14 +4426,14 @@ main {
 }
 
 .tool-picker-item-name {
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 500;
   color: var(--text);
   line-height: 1.3;
 }
 
 .tool-picker-item-desc {
-  font-size: 11px;
+  font-size: 0.6875rem;
   color: var(--muted);
   font-weight: 400;
   line-height: 1.3;
@@ -4452,7 +4459,7 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 9px;
+  font-size: 0.5625rem;
   color: transparent;
   font-weight: 900;
   line-height: 1;
@@ -4481,7 +4488,7 @@ main {
   border: 1px solid var(--line);
   border-radius: 7px;
   background: var(--panel);
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--text-body);
   flex-shrink: 0;
@@ -4539,7 +4546,7 @@ main {
 
 .duplicate-session-btn .fa-copy,
 .duplicate-activity-btn .fa-copy {
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .delete-btn {
@@ -4584,7 +4591,7 @@ main {
 }
 
 .session-card .btn {
-  font-size: 13px;
+  font-size: 0.8125rem;
   padding: 6px 9px;
 }
 
@@ -4616,7 +4623,7 @@ main {
   background: #fff;
   min-width: 70px;
   padding: 7px 10px;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 600;
 }
 
@@ -4710,12 +4717,12 @@ main {
   }
 
   html body.designer-page h1.brand-title {
-    font-size: 16px;
+    font-size: 1rem;
     line-height: 1.3;
   }
 
   .top-tab {
-    font-size: 14px;
+    font-size: 0.875rem;
   }
 
   .form-row label,
@@ -4723,7 +4730,7 @@ main {
   .panel-select,
   .panel-textarea,
   .time-unit {
-    font-size: 14px;
+    font-size: 0.875rem;
   }
 
   .pie-with-labels {
@@ -4731,7 +4738,7 @@ main {
   }
 
   .pie-outer-label {
-    font-size: 11px;
+    font-size: 0.6875rem;
   }
 
   .analysis-big-pie {
@@ -4745,7 +4752,7 @@ main {
   }
 
   .legend-item {
-    font-size: 12px;
+    font-size: 0.75rem;
   }
 
   .toolbar {
@@ -4876,7 +4883,7 @@ main {
   .toolbar .btn {
     min-height: 36px;
     padding: 7px 9px;
-    font-size: 13px;
+    font-size: 0.8125rem;
   }
 
   .btn-label {
@@ -4884,8 +4891,8 @@ main {
   }
 
   .btn-icon-inline {
-    width: 14px;
-    font-size: 13px;
+    width: 0.875rem;
+    font-size: 0.8125rem;
   }
 
   .layout-toggle-btn {
@@ -4923,7 +4930,7 @@ main {
   .toolbar .btn {
     padding-right: clamp(4px, 1.2vw, 7px);
     padding-left: clamp(4px, 1.2vw, 7px);
-    font-size: clamp(12px, 2.15vw, 13px);
+    font-size: clamp(0.75rem, 2.15vw, 0.8125rem);
   }
 
   .toolbar .btn-label {
@@ -4931,8 +4938,8 @@ main {
   }
 
   .toolbar .btn-icon-inline {
-    width: clamp(12px, 2.15vw, 14px);
-    font-size: clamp(12px, 2.15vw, 13px);
+    width: clamp(0.75rem, 2.15vw, 0.875rem);
+    font-size: clamp(0.75rem, 2.15vw, 0.8125rem);
   }
 }
 
@@ -4987,8 +4994,8 @@ main {
   }
 
   .toolbar .btn .btn-icon-inline {
-    width: 16px;
-    font-size: 15px;
+    width: 1rem;
+    font-size: 0.9375rem;
   }
 
   .toolbar-left .layout-toggle-btn {
@@ -5146,7 +5153,7 @@ body:has(#board:not(:empty)) .toolbar {
   }
 
   .site-nav-title {
-    font-size: 18px;
+    font-size: 1.125rem;
     letter-spacing: .015em;
   }
 }
@@ -5161,7 +5168,7 @@ body:has(#board:not(:empty)) .toolbar {
   padding: 28px;
   border-top: 0;
   margin-top: auto;
-  font-size: 12px;
+  font-size: 0.75rem;
   text-align: center;
   line-height: 1.6;
   color: var(--muted);
@@ -5224,7 +5231,7 @@ body:has(#board:not(:empty)) .toolbar {
   border: none;
   padding: 0;
   font-family: var(--font-family);
-  font-size: 12px;
+  font-size: 0.75rem;
   color: var(--muted);
   cursor: pointer;
   font-weight: 400;
@@ -5242,7 +5249,7 @@ body:has(#board:not(:empty)) .toolbar {
 .site-footer-link-row:last-child .site-footer-link,
 .site-footer-link-row:last-child .site-footer-separator,
 .site-footer-license {
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 
 .site-footer-link-row + .site-footer-link-row {
@@ -5341,7 +5348,7 @@ body.designs-page .saved-shell {
   background: rgba(255, 255, 255, 0.98);
   color: var(--text-strong);
   box-shadow: 0 16px 36px rgba(19, 39, 68, 0.16);
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.45;
 }
 
@@ -5410,7 +5417,7 @@ body.designs-page .saved-shell {
   min-width: 30px;
   min-height: 30px;
   padding: 0 5px;
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 
 .activity-toolbar .choice-btn svg {
@@ -5421,12 +5428,12 @@ body.designs-page .saved-shell {
 .activity-toolbar .mini-label {
   min-height: 30px;
   padding: 0 4px;
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 
 .activity-toolbar .activity-duration {
   width: 36px;
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 
 .activity-toolbar .icon-btn,
@@ -5444,8 +5451,8 @@ body.designs-page .saved-shell {
 }
 
 .activity-toolbar .activity-aias-btn .fa-solid {
-  width: 18px;
-  font-size: 15px;
+  width: 1.125rem;
+  font-size: 0.9375rem;
 }
 
 .activity-toolbar .activity-aias-btn.aias-level {
@@ -5455,7 +5462,7 @@ body.designs-page .saved-shell {
 }
 
 .activity-toolbar .aias-trigger-number {
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 750;
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -6478,7 +6485,7 @@ body.help-page {
     z-index: 1;
     margin: 0 0 10px;
     color: var(--help-accent);
-    font-size: 12px;
+    font-size: 0.75rem;
     font-weight: 800;
     letter-spacing: .12em;
     text-transform: uppercase;
@@ -6497,7 +6504,7 @@ body.help-page {
     max-width: none;
     margin: 20px 0 0;
     color: var(--text-body);
-    font-size: clamp(16px, 2vw, 19px);
+    font-size: clamp(1rem, 2vw, 1.1875rem);
     line-height: 1.7;
 }
 .help-quick-links {
@@ -6518,7 +6525,7 @@ body.help-page {
     border-radius: 999px;
     background: rgba(255, 255, 255, .84);
     color: var(--help-accent);
-    font-size: 13px;
+    font-size: 0.8125rem;
     font-weight: 700;
     text-decoration: none;
 }
@@ -6552,7 +6559,7 @@ body.help-page {
     gap: 8px;
     margin: 0 0 12px;
     color: var(--text-strong);
-    font-size: 13px;
+    font-size: 0.8125rem;
     font-weight: 800;
     letter-spacing: .08em;
     text-transform: uppercase;
@@ -6598,7 +6605,7 @@ body.help-page {
     padding: 8px 9px;
     border-radius: 8px;
     color: var(--muted);
-    font-size: 12px;
+    font-size: 0.75rem;
     font-weight: 600;
     line-height: 1.35;
     text-decoration: none;
@@ -6640,7 +6647,7 @@ body.help-page {
     color: var(--text-strong);
 }
 .help-toc-toggle i {
-    font-size: 10px;
+    font-size: 0.625rem;
     transition: transform 160ms ease;
 }
 .help-toc-toggle[aria-expanded="true"] i {
@@ -6661,7 +6668,7 @@ body.help-page {
     padding: 6px 8px;
     border-radius: 7px;
     color: var(--muted);
-    font-size: 11.5px;
+    font-size: 0.71875rem;
     font-weight: 600;
     line-height: 1.35;
     text-decoration: none;
@@ -6686,7 +6693,7 @@ body.help-page {
     background: var(--panel);
     color: var(--text-strong);
     font: inherit;
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 700;
 }
 .help-content {
@@ -6708,7 +6715,7 @@ body.help-page {
 .prompt-library > p {
     margin: 0 0 14px;
     color: var(--text-body);
-    font-size: 15px;
+    font-size: 0.9375rem;
     line-height: 1.76;
 }
 .prompt-library-content #prompts-intro,
@@ -6749,7 +6756,7 @@ body.help-page {
     top: 50%;
     right: 8px;
     color: var(--help-accent);
-    font-size: 24px;
+    font-size: 1.5rem;
     font-weight: 700;
     line-height: 1;
     transform: translateY(-50%);
@@ -6819,7 +6826,7 @@ body.help-page {
     gap: 8px;
     margin: 0 0 10px;
     color: var(--help-accent);
-    font-size: 12px;
+    font-size: 0.75rem;
     font-weight: 800;
     letter-spacing: .08em;
     text-transform: uppercase;
@@ -6843,7 +6850,7 @@ body.help-page {
     width: 100%;
     max-width: none;
     margin: var(--page-subsection-gap) 0 var(--page-heading-gap);
-    font-size: 18px;
+    font-size: 1.125rem;
     line-height: 1.35;
 }
 .help-subheading-index {
@@ -6855,14 +6862,14 @@ body.help-page {
     width: 100%;
     max-width: none;
     margin: 32px 0 10px;
-    font-size: 15px;
+    font-size: 0.9375rem;
 }
 .help-section p,
 .help-section li,
 .help-table th,
 .help-table td {
     color: var(--text-body);
-    font-size: 15px;
+    font-size: 0.9375rem;
     line-height: 1.76;
 }
 .help-section p {
@@ -6918,7 +6925,7 @@ body.help-page {
     color: var(--help-accent);
 }
 .help-section-toggle i {
-    font-size: 13px;
+    font-size: 0.8125rem;
     transition: transform 160ms ease;
 }
 .help-section-toggle[aria-expanded="true"] i {
@@ -6958,7 +6965,7 @@ body.help-page {
     display: block;
     margin-bottom: 8px;
     color: var(--text-strong);
-    font-size: 14px;
+    font-size: 0.875rem;
 }
 .help-card strong:has(.help-card-icon) {
     display: flex;
@@ -6969,7 +6976,7 @@ body.help-page {
 .help-card p {
     margin: 0;
     color: var(--muted);
-    font-size: 13px;
+    font-size: 0.8125rem;
     line-height: 1.65;
 }
 .help-types {
@@ -6999,14 +7006,14 @@ body.help-page {
 .help-type strong {
     display: block;
     color: var(--text-strong);
-    font-size: 13px;
+    font-size: 0.8125rem;
     line-height: 1.35;
 }
 .help-type span {
     display: block;
     margin-top: 3px;
     color: var(--muted);
-    font-size: 12px;
+    font-size: 0.75rem;
     line-height: 1.45;
 }
 .help-callout {
@@ -7057,7 +7064,7 @@ body.help-page {
 .help-table th {
     background: var(--surface-light);
     color: var(--text-strong);
-    font-size: 12px;
+    font-size: 0.75rem;
     font-weight: 800;
     letter-spacing: .04em;
     text-transform: uppercase;
@@ -7095,7 +7102,7 @@ body.help-page {
     border-radius: 10px;
     background: var(--help-code);
     color: #e5edf8;
-    font-size: 12.5px;
+    font-size: 0.78125rem;
     line-height: 1.65;
     white-space: pre;
     tab-size: 2;
@@ -7105,7 +7112,7 @@ body.help-page {
 }
 .help-prompt {
     font-family: var(--font-prompt);
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 400;
     line-height: 1.7;
     letter-spacing: -.01em;
@@ -7152,7 +7159,7 @@ body.help-page {
 }
 .help-details-grid > div > strong {
     color: var(--text-strong);
-    font-size: 14px;
+    font-size: 0.875rem;
 }
 .help-details-grid > div > p {
     margin-top: 8px;
@@ -7164,7 +7171,7 @@ body.help-page {
     border-radius: 999px;
     background: var(--help-accent-soft);
     color: var(--help-accent);
-    font-size: 11px;
+    font-size: 0.6875rem;
     font-weight: 800;
 }
 [data-theme="dark"] html:has(body.help-page),
@@ -7329,13 +7336,13 @@ body.about-page {
 .about-version {
     margin: 0 0 14px;
     color: var(--muted);
-    font-size: 13px;
+    font-size: 0.8125rem;
     font-weight: 700;
 }
 .about-intro {
     margin: 0;
     color: var(--muted);
-    font-size: 15px;
+    font-size: 0.9375rem;
     line-height: 1.7;
 }
 .about-intro a,
@@ -7352,7 +7359,7 @@ body.about-page {
 .about-meta {
     margin: 0;
     color: var(--muted);
-    font-size: 13px;
+    font-size: 0.8125rem;
     line-height: 2.15;
 }
 .about-meta abbr {
@@ -7423,7 +7430,7 @@ body.legal-page {
 .legal-card li,
 .legal-card address {
     color: var(--text-body);
-    font-size: 15px;
+    font-size: 0.9375rem;
     line-height: 1.75;
 }
 .legal-card p {
@@ -7450,11 +7457,11 @@ body.legal-page {
     color: var(--muted) !important;
 }
 .legal-updated {
-    font-size: 13px !important;
+    font-size: 0.8125rem !important;
 }
 .legal-lead {
     margin-top: 20px !important;
-    font-size: 16px !important;
+    font-size: 1rem !important;
 }
 .legal-note {
     margin: 22px 0 !important;
@@ -7532,7 +7539,7 @@ body.legal-page {
    uppercase labels rather than page headings. */
 html body .import-section-title {
   margin: 0 0 8px;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -7565,7 +7572,7 @@ html body .import-section-title {
   border-radius: 999px;
   background: var(--panel);
   color: var(--heading-ink);
-  font-size: 17px;
+  font-size: 1.0625rem;
   box-shadow: inset 0 0 0 1px var(--line);
 }
 
@@ -7580,14 +7587,14 @@ html body .import-section-title {
 
 .import-drop-title {
   color: var(--text-strong);
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 700;
 }
 
 .import-drop-hint {
   margin-top: 3px;
   color: var(--muted);
-  font-size: 12.5px;
+  font-size: 0.78125rem;
 }
 
 .import-drop-zone.is-dragover {
@@ -7613,7 +7620,7 @@ html body .import-section-title {
 
 #import-modal-backdrop .import-file-formats {
   margin: 8px 0 0;
-  font-size: 10px;
+  font-size: 0.625rem;
   line-height: 1.2;
   color: var(--muted);
   opacity: 0.72;
@@ -7641,7 +7648,7 @@ html body .import-models-head .import-section-title {
 
 .import-models-link {
   color: var(--muted);
-  font-size: 12.5px;
+  font-size: 0.78125rem;
   font-weight: 650;
   text-decoration-color: currentColor;
   text-underline-offset: 2px;
@@ -7670,7 +7677,7 @@ html body .import-models-head .import-section-title {
 
 .import-models-status {
   margin: 0;
-  font-size: 12.5px;
+  font-size: 0.78125rem;
   color: var(--muted);
 }
 
@@ -7718,11 +7725,11 @@ html body .import-models-head .import-section-title {
 
 .import-model-icon {
   color: var(--primary);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 html body .import-model-title {
-  font-size: 14.5px;
+  font-size: 0.90625rem;
   font-weight: 750;
   line-height: 1.3;
 }
@@ -7737,13 +7744,13 @@ html body .import-model-title {
   border: 1px solid var(--line);
   border-radius: 999px;
   padding: 1px 8px;
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 650;
   color: var(--muted);
 }
 
 .import-model-summary {
-  font-size: 12.5px;
+  font-size: 0.78125rem;
   line-height: 1.5;
   color: var(--text-body);
 }
@@ -7769,7 +7776,7 @@ html body .import-model-title {
 .import-model-dot.type-collaborate { background: var(--collaborate); }
 
 .import-model-todo {
-  font-size: 11px;
+  font-size: 0.6875rem;
   line-height: 1.45;
   color: var(--muted);
 }
@@ -7786,7 +7793,7 @@ html body .import-model-title {
   flex: 0 1 auto;
   min-height: 34px;
   padding: 7px 10px;
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 
 .import-modal.is-previewing-model > :not(.import-model-preview) {
@@ -7812,7 +7819,7 @@ html body .import-model-title {
 
 .modal .import-model-preview-eyebrow {
   color: var(--primary);
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -7870,14 +7877,14 @@ html body .import-model-title {
   border-radius: 999px;
   background: var(--primary);
   color: #fff;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 800;
 }
 
 html body .import-model-preview-moment h3 {
   margin: 0;
   color: var(--heading-ink);
-  font-size: 15px;
+  font-size: 0.9375rem;
   line-height: 1.35;
 }
 
@@ -7888,14 +7895,14 @@ html body .import-model-preview-moment h3 {
 
 .import-model-preview-text > strong {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 0.6875rem;
   letter-spacing: 0.035em;
   text-transform: uppercase;
 }
 
 .modal .import-model-preview-text > p {
   color: var(--text-body);
-  font-size: 12.5px;
+  font-size: 0.78125rem;
   line-height: 1.6;
 }
 
@@ -7930,7 +7937,7 @@ html body .import-model-preview-moment h3 {
 }
 
 .import-model-preview-activity-header > strong {
-  font-size: 12.5px;
+  font-size: 0.78125rem;
 }
 
 .import-model-preview-activity-meta {
@@ -7938,7 +7945,7 @@ html body .import-model-preview-moment h3 {
   gap: 7px;
   align-items: center;
   color: var(--muted);
-  font-size: 11.5px;
+  font-size: 0.71875rem;
   font-weight: 650;
 }
 
@@ -7965,7 +7972,7 @@ html body .import-model-preview-moment h3 {
 .import-model-preview-actions .btn {
   min-height: 36px;
   padding: 7px 11px;
-  font-size: 12.5px;
+  font-size: 0.78125rem;
 }
 
 @media (max-width: 640px) {
@@ -8021,7 +8028,7 @@ html body .import-model-preview-moment h3 {
   color: #1f1f1d;
   box-shadow: none;
   cursor: pointer;
-  font-size: 18px;
+  font-size: 1.125rem;
   animation: feedback-trigger-pulse 4.8s ease-in-out infinite;
   transition:
     background var(--transition-fast, 120ms ease),
@@ -8104,7 +8111,7 @@ html body .import-model-preview-moment h3 {
 .feedback-kicker {
   margin: 0 0 5px;
   color: var(--primary, #245a8f);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 800;
   letter-spacing: 0.09em;
   line-height: 1.2;
@@ -8115,7 +8122,7 @@ html body .feedback-panel h2 {
   margin: 0;
   color: var(--text-strong, #253245);
   font-family: var(--font-family, "Inter", sans-serif);
-  font-size: 17px;
+  font-size: 1.0625rem;
   font-weight: 700;
   letter-spacing: 0;
   line-height: 1.35;
@@ -8132,7 +8139,7 @@ html body .feedback-panel h2 {
   background: transparent;
   color: var(--text-subtle, #415067);
   cursor: pointer;
-  font-size: 16px;
+  font-size: 1rem;
 }
 
 .feedback-close:hover {
@@ -8165,7 +8172,7 @@ html body .feedback-panel h2 {
   background: var(--surface-light, #fafafa);
   color: var(--text-subtle, #415067);
   cursor: pointer;
-  font-size: 27px;
+  font-size: 1.6875rem;
   transition: transform var(--transition-fast, 120ms ease), border-color var(--transition-fast, 120ms ease), background var(--transition-fast, 120ms ease);
 }
 
@@ -8231,13 +8238,13 @@ html body .feedback-panel h2 {
   gap: 12px;
   margin-bottom: 7px;
   color: var(--text-strong, #253245);
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 700;
 }
 
 .feedback-comment-label small {
   color: var(--muted, #5e6b7c);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 500;
 }
 
@@ -8250,7 +8257,7 @@ html body .feedback-panel h2 {
   background: var(--surface-input, #f7f7f7);
   color: var(--text-strong, #253245);
   padding: 10px 11px;
-  font: 400 13px/1.5 var(--font-family, "Inter", sans-serif);
+  font: 400 0.8125rem/1.5 var(--font-family, "Inter", sans-serif);
 }
 
 .feedback-panel textarea::placeholder {
@@ -8270,7 +8277,7 @@ html body .feedback-panel h2 {
   min-height: 18px;
   margin: 7px 0 2px;
   color: var(--danger, #c0303b);
-  font-size: 12px;
+  font-size: 0.75rem;
   line-height: 1.4;
 }
 
@@ -8283,7 +8290,7 @@ html body .feedback-panel h2 {
 
 .feedback-actions a {
   color: var(--muted, #5e6b7c);
-  font-size: 11px;
+  font-size: 0.6875rem;
   text-underline-offset: 2px;
 }
 
@@ -8295,7 +8302,7 @@ html body .feedback-panel h2 {
   color: #fff;
   padding: 8px 16px;
   cursor: pointer;
-  font: 700 13px/1 var(--font-family, "Inter", sans-serif);
+  font: 700 0.8125rem/1 var(--font-family, "Inter", sans-serif);
 }
 
 .feedback-submit:hover:not(:disabled) {
@@ -8325,7 +8332,7 @@ html body .feedback-panel h2 {
 }
 
 .feedback-success i {
-  font-size: 34px;
+  font-size: 2.125rem;
 }
 
 .feedback-success p {
@@ -8440,7 +8447,7 @@ html body .feedback-panel h2 {
 .tool-picker-objective-title {
   margin: 6px 8px 14px;
   color: var(--text);
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
   line-height: 1.5;
 }

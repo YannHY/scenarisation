@@ -50,7 +50,7 @@
     margin-left: 16px;
     color: #aaa9ad;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-    font-size: 13px;
+    font-size: 0.8125rem;
     font-weight: 700;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -69,7 +69,7 @@
     background: #1d1d1e;
     color: #f2f0f0;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-    font-size: clamp(9px, 1.15vw, 12px);
+    font-size: clamp(0.5625rem, 1.15vw, 0.75rem);
     font-weight: 650;
     line-height: 1.3;
     scrollbar-color: #59595d #252527;
@@ -97,7 +97,7 @@
 .help-terminal-pixel-logo pre {
     margin: 0;
     font: inherit;
-    font-size: clamp(8px, 1.25vw, 13px);
+    font-size: clamp(0.5rem, 1.25vw, 0.8125rem);
     font-weight: 900;
     line-height: 1.06;
     letter-spacing: .04em;
@@ -214,7 +214,7 @@
 
     .help-terminal-title {
         margin-left: 12px;
-        font-size: 11px;
+        font-size: 0.6875rem;
     }
 
     .help-terminal-screen {

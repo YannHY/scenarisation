@@ -1,0 +1,1934 @@
+/* App Mac : présentation de Scénarisation pour Mac, dans l’esprit des pages À propos et Nouveautés.
+   La fenêtre et les illustrations sont reconstituées en HTML et CSS : elles suivent le thème clair ou sombre. */
+
+body.mac-app-page {
+  --mac-gradient: linear-gradient(100deg, #1fa397 0%, #9a63d8 52%, #e0605c 100%);
+  --mac-card: #f6f6f4;
+  --mac-line: rgba(31, 31, 29, 0.09);
+  --mac-text: #3d3d39;
+  --mac-muted: #6d6d67;
+  --mac-window: #ffffff;
+  --mac-sidebar: #eeeeec;
+  --mac-canvas: #fafaf9;
+  --mac-fill: rgba(31, 31, 29, 0.06);
+  --mac-fill-strong: rgba(31, 31, 29, 0.1);
+  --mac-field: rgba(31, 31, 29, 0.04);
+  --mac-control: #ffffff;
+  /* Couleur d’accentuation de macOS, telle qu’elle apparaît dans l’app. */
+  --mac-accent: #0a7aff;
+  --mac-icon-box: #f1f1ef;
+  --mac-icon-ink: #1f1f1d;
+  --mac-band: #1f1f1d;
+  --mac-coral: #e0605c;
+  --mac-teal: #1fa397;
+  background: #fff;
+}
+
+[data-theme="dark"] body.mac-app-page {
+  --mac-gradient: linear-gradient(100deg, #5bddd3 0%, #c498ec 52%, #f19492 100%);
+  --mac-card: #1f1e1b;
+  --mac-line: rgba(255, 255, 255, 0.1);
+  --mac-text: #d6d1c7;
+  --mac-muted: #aaa59a;
+  --mac-window: #24231f;
+  --mac-sidebar: #201f1c;
+  --mac-canvas: #1b1a18;
+  --mac-fill: rgba(255, 255, 255, 0.07);
+  --mac-fill-strong: rgba(255, 255, 255, 0.13);
+  --mac-field: rgba(255, 255, 255, 0.05);
+  --mac-control: #34332e;
+  --mac-accent: #0a84ff;
+  --mac-icon-box: #050505;
+  --mac-icon-ink: #ffffff;
+  --mac-band: #24231f;
+  --mac-coral: #f19492;
+  --mac-teal: #5bddd3;
+  background: #141412;
+}
+
+body.mac-app-page .site-breadcrumb,
+.mac-shell {
+  width: min(1200px, calc(100vw - var(--content-shell-gutter, 36px)));
+}
+
+.mac-shell {
+  margin: 0 auto;
+  padding: 32px 0 96px;
+}
+
+/* Couleurs des types d’apprentissage, partagées par la fenêtre, l’analyse et la chronologie. */
+.type-read { --type-color: var(--read); }
+.type-investigate { --type-color: var(--investigate); }
+.type-practice { --type-color: var(--practice); }
+.type-produce { --type-color: var(--produce); }
+.type-discuss { --type-color: var(--discuss); }
+.type-collaborate { --type-color: var(--collaborate); }
+
+/* Largeurs proportionnelles aux durées (en minutes). */
+.mac-dur-10 { flex: 10 1 0; }
+.mac-dur-15 { flex: 15 1 0; }
+.mac-dur-20 { flex: 20 1 0; }
+.mac-dur-30 { flex: 30 1 0; }
+
+/* ── En-tête ── */
+
+.mac-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: clamp(8px, 2vw, 24px) 0 clamp(44px, 6vw, 64px);
+  text-align: center;
+}
+
+.mac-icon {
+  width: 132px;
+  height: 132px;
+  margin-bottom: 20px;
+  filter: drop-shadow(0 18px 30px rgba(31, 31, 29, 0.18));
+}
+
+[data-theme="dark"] .mac-icon {
+  filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.6));
+}
+
+.mac-kicker {
+  margin: 0 0 12px;
+  color: var(--heading-ink);
+  font-size: 1.0625rem;
+  font-weight: 500;
+}
+
+:root body.mac-app-page .mac-title {
+  margin: 0 0 22px;
+  color: var(--heading-ink);
+  font-size: clamp(2.5rem, 6.6vw, 4.75rem);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.048em;
+}
+
+.mac-title span {
+  display: block;
+}
+
+/* Le dégradé reprend les couleurs de l’icône, comme le titre de la page À propos. */
+.mac-title .mac-title-accent {
+  padding-bottom: 0.12em;
+  background: var(--mac-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.mac-lead {
+  max-width: 680px;
+  margin: 0 0 32px;
+  color: var(--mac-muted);
+  font-size: 1.1875rem;
+  line-height: 1.6;
+}
+
+.mac-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 14px 26px;
+}
+
+:root .mac-actions .mac-download {
+  gap: 10px;
+  min-height: 50px;
+  padding: 12px 28px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.mac-download .fa-apple {
+  font-size: 1.125rem;
+}
+
+.mac-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--heading-ink);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.mac-more:hover,
+.mac-more:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.mac-more i {
+  font-size: 0.75rem;
+}
+
+.mac-requirements {
+  margin: 20px 0 0;
+  color: var(--mac-muted);
+  font-size: 0.8125rem;
+}
+
+/* ── Fenêtre de l’app ──
+   Toutes les dimensions sont en em : la fenêtre se réduit avec sa largeur, comme une capture d’écran,
+   sans descendre sous une taille de texte lisible. En dessous, le contenu est simplement rogné. */
+
+.mac-window {
+  container-type: inline-size;
+  overflow: hidden;
+  border: 1px solid var(--mac-line);
+  border-radius: 18px;
+  background: var(--mac-window);
+  box-shadow: 0 2px 6px rgba(31, 31, 29, 0.05), 0 50px 100px -40px rgba(31, 31, 29, 0.5);
+  color: var(--heading-ink);
+  line-height: 1.35;
+  text-align: left;
+  cursor: default;
+  user-select: none;
+}
+
+[data-theme="dark"] .mac-window {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4), 0 50px 100px -40px rgba(0, 0, 0, 0.95);
+}
+
+.mac-window-scale {
+  display: grid;
+  grid-template-columns: 16.5em minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  height: 70em;
+  font-size: 10px;
+  font-size: clamp(9.6px, calc(100cqw / 123), 12px);
+}
+
+.mac-window i:not(.mac-math) {
+  font-style: normal;
+}
+
+.mac-window p {
+  margin: 0;
+}
+
+.mac-sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+.mac-svg {
+  width: 1.2em;
+  height: 1.2em;
+  fill: currentColor;
+}
+
+/* Barre latérale */
+
+.mac-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15em;
+  min-width: 0;
+  padding: 1em 0.8em 1.1em;
+  border-right: 1px solid var(--mac-line);
+  background: var(--mac-sidebar);
+}
+
+.mac-sidebar-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 2.9em;
+  margin-bottom: 1em;
+  padding-left: 0.5em;
+}
+
+.mac-lights {
+  display: flex;
+  gap: 0.7em;
+}
+
+.mac-lights i {
+  width: 1.05em;
+  height: 1.05em;
+  border-radius: 50%;
+  background: #ff5f57;
+}
+
+.mac-lights i:nth-child(2) { background: #febc2e; }
+.mac-lights i:nth-child(3) { background: #28c840; }
+
+/* Bouton rond « en verre » de la barre d’outils. */
+.mac-round {
+  display: grid;
+  flex: none;
+  width: 2.9em;
+  height: 2.9em;
+  border-radius: 50%;
+  background: var(--mac-control);
+  box-shadow: 0 0 0 1px var(--mac-line), 0 0.2em 0.6em rgba(31, 31, 29, 0.08);
+  place-items: center;
+}
+
+.mac-round .fa-house {
+  font-size: 1.15em;
+}
+
+.mac-sidebar-glyph {
+  position: relative;
+  width: 1.5em;
+  height: 1.15em;
+  border: 0.14em solid currentColor;
+  border-radius: 0.3em;
+}
+
+.mac-sidebar-glyph::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0.32em;
+  border-left: 0.14em solid currentColor;
+}
+
+.mac-search {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.5em 0.8em;
+  border-radius: 0.75em;
+  background: var(--mac-fill);
+  color: var(--mac-muted);
+}
+
+.mac-search i {
+  font-size: 0.9em;
+}
+
+.mac-nav-heading {
+  margin: 0.9em 0 0.2em;
+  padding: 0 0.4em;
+  color: var(--mac-muted);
+  font-size: 0.82em;
+  font-weight: 500;
+}
+
+.mac-nav-item,
+.mac-nav-moment {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  padding: 0.62em 0.7em;
+  border-radius: 0.75em;
+  white-space: nowrap;
+}
+
+.mac-nav-item > i,
+.mac-nav-item > svg {
+  flex: none;
+  width: 1.5em;
+  color: var(--mac-accent);
+  font-size: 1.1em;
+  text-align: center;
+}
+
+.mac-nav-item.is-active {
+  background: var(--mac-fill-strong);
+  font-weight: 650;
+}
+
+.mac-nav-moment {
+  gap: 0.7em;
+  padding: 0.45em 0.5em;
+}
+
+.mac-nav-moment b {
+  display: grid;
+  flex: none;
+  width: 1.75em;
+  height: 1.75em;
+  border-radius: 0.5em;
+  background: var(--type-color);
+  color: #fff;
+  font-size: 0.82em;
+  font-weight: 700;
+  place-items: center;
+}
+
+.mac-nav-moment span {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+}
+
+.mac-nav-moment em {
+  margin-left: auto;
+  color: var(--mac-muted);
+  font-size: 0.8em;
+  font-style: normal;
+}
+
+.mac-add-moment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7em;
+  margin-top: auto;
+  padding: 0.6em;
+  border-radius: 999px;
+  background: var(--mac-control);
+  box-shadow: 0 0 0 1px var(--mac-line);
+  font-size: 0.92em;
+  font-weight: 600;
+}
+
+/* Barre d’outils */
+
+.mac-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  min-width: 0;
+}
+
+.mac-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1.1em;
+  height: 4.9em;
+  padding: 0 1em;
+  border-bottom: 1px solid var(--mac-line);
+}
+
+/* Sans barre latérale (petits écrans), les boutons de fenêtre passent dans la barre d’outils. */
+.mac-toolbar .mac-lights {
+  display: none;
+  margin: 0 0.4em 0 0.3em;
+}
+
+.mac-doc {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.mac-doc strong,
+.mac-doc span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mac-doc strong {
+  font-size: 1em;
+  font-weight: 650;
+}
+
+.mac-doc span {
+  color: var(--mac-muted);
+  font-size: 0.82em;
+}
+
+.mac-tool-group {
+  display: flex;
+  flex: none;
+  gap: 0.15em;
+  padding: 0.3em;
+  border-radius: 999px;
+  background: var(--mac-control);
+  box-shadow: 0 0 0 1px var(--mac-line), 0 0.2em 0.6em rgba(31, 31, 29, 0.08);
+}
+
+.mac-tool-group > i {
+  display: grid;
+  width: 2.5em;
+  height: 2.25em;
+  border-radius: 999px;
+  font-size: 1.05em;
+  place-items: center;
+}
+
+.mac-tool-group > i.is-selected {
+  background: var(--mac-fill-strong);
+}
+
+.mac-tool-group > i.is-on {
+  background: var(--mac-accent);
+  color: #fff;
+}
+
+/* Zone de conception */
+
+.mac-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 22em;
+  grid-template-rows: minmax(0, 1fr);
+  min-height: 0;
+}
+
+.mac-canvas {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+  padding: 1.7em 0 0 2em;
+  background: var(--mac-canvas);
+}
+
+/* La fenêtre a une hauteur fixe : le contenu garde sa taille et dépasse, au lieu de se tasser. */
+.mac-canvas > * {
+  flex: none;
+}
+
+.mac-scenario-title {
+  overflow: hidden;
+  font-size: 1.95em;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mac-scenario-meta {
+  display: flex;
+  gap: 1.6em;
+  margin-top: 0.7em;
+  color: var(--mac-muted);
+  font-size: 0.9em;
+}
+
+.mac-scenario-meta i {
+  margin-right: 0.4em;
+}
+
+/* Bande de proportions des types d’activité. */
+.mac-strip {
+  display: flex;
+  flex: none;
+  gap: 0.2em;
+  height: 0.5em;
+}
+
+.mac-strip i {
+  border-radius: 999px;
+  background: var(--type-color);
+}
+
+.mac-strip-scenario {
+  width: 26em;
+  margin-top: 0.9em;
+}
+
+.mac-board {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.4em;
+  margin-top: 2.1em;
+}
+
+.mac-moment {
+  display: flex;
+  flex: 0 0 25em;
+  flex-direction: column;
+  gap: 0.85em;
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 1.1em;
+  border-radius: 1.6em;
+  background: var(--mac-window);
+  box-shadow: 0 0 0 1px var(--mac-line), 0 0.8em 2em -1.2em rgba(31, 31, 29, 0.3);
+}
+
+.mac-moment-label {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  margin-top: 0.5em;
+  color: var(--mac-muted);
+  font-size: 0.74em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mac-moment-label .fa-ellipsis {
+  margin-left: auto;
+  color: var(--heading-ink);
+  font-size: 1.4em;
+}
+
+.mac-moment-title {
+  margin-top: -0.3em;
+  font-size: 1.1em;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.mac-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.4em;
+  color: var(--mac-muted);
+  font-size: 0.88em;
+}
+
+.mac-label > i {
+  font-size: 0.72em;
+}
+
+.mac-label em {
+  font-size: 0.92em;
+  font-style: normal;
+}
+
+.mac-field {
+  padding: 0.85em 1em;
+  border-radius: 0.9em;
+  background: var(--mac-field);
+  line-height: 1.5;
+}
+
+.mac-field p + p,
+.mac-field p + ol {
+  margin-top: 0.55em;
+}
+
+.mac-field ol {
+  display: grid;
+  gap: 0.2em;
+  margin: 0;
+  padding-left: 1.7em;
+}
+
+.mac-field code {
+  padding: 0.1em 0.35em;
+  border-radius: 0.3em;
+  background: var(--mac-fill);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.92em;
+}
+
+.mac-math {
+  font-family: "STIX Two Text", "Latin Modern Roman", "Cambria Math", "Times New Roman", serif;
+  font-size: 1.12em;
+  font-style: italic;
+}
+
+.mac-formula {
+  text-align: center;
+}
+
+.mac-link {
+  color: var(--mac-accent);
+}
+
+/* Carte d’activité : bord et bandeau à la couleur du type d’apprentissage. */
+.mac-act {
+  position: relative;
+  border-radius: 1.3em;
+  background: var(--mac-window);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--type-color) 60%, transparent);
+}
+
+.mac-act-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+  overflow: hidden;
+  padding: 0.6em 0.75em;
+  border-radius: 1.3em 1.3em 0 0;
+  background: color-mix(in srgb, var(--type-color) 21%, transparent);
+  color: color-mix(in srgb, var(--heading-ink) 82%, transparent);
+  font-size: 0.94em;
+  white-space: nowrap;
+}
+
+.mac-act-bar > i {
+  flex: none;
+  width: 1.3em;
+  text-align: center;
+}
+
+.mac-act-bar > b {
+  width: 1em;
+  font-weight: 700;
+  text-align: center;
+}
+
+.mac-act-bar .mac-grip {
+  color: var(--mac-muted);
+}
+
+.mac-dur {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  margin: 0 0.25em;
+  padding: 0.38em 0.6em;
+  border-radius: 0.7em;
+  background: var(--mac-fill);
+  color: var(--mac-muted);
+}
+
+.mac-dur i {
+  font-size: 0.9em;
+}
+
+.mac-dur b {
+  margin-left: 0.3em;
+  color: var(--heading-ink);
+  font-weight: 600;
+}
+
+.mac-cap {
+  display: grid;
+  flex: none;
+  width: 1.9em;
+  height: 1.9em;
+  border-radius: 0.6em;
+  background: color-mix(in srgb, var(--type-color) 26%, transparent);
+  place-items: center;
+}
+
+.mac-act-bar .mac-menu {
+  margin-left: auto;
+}
+
+.mac-act-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75em;
+  padding: 0.9em;
+}
+
+.mac-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+}
+
+.mac-tags > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0.28em 0.75em;
+  border-radius: 999px;
+  background: var(--mac-field);
+  font-size: 0.88em;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.mac-tags i {
+  color: var(--mac-muted);
+  font-size: 0.82em;
+}
+
+/* Dans la fenêtre, le nom de la collègue n’apparaît qu’avec les animations (voir plus bas). */
+.mac-act-live > .mac-act-author {
+  display: none;
+}
+
+.mac-motion .mac-act-live > .mac-act-author {
+  display: block;
+}
+
+/* Carte modifiée par un collègue : elle prend sa couleur et son nom. */
+.mac-act.is-remote {
+  box-shadow: 0 0 0 2px var(--mac-coral);
+}
+
+.mac-act-author {
+  position: absolute;
+  top: -0.85em;
+  right: 1em;
+  padding: 0.15em 0.75em;
+  border-radius: 999px;
+  background: var(--mac-coral);
+  color: #fff;
+  font-size: 0.92em;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+[data-theme="dark"] .mac-act-author {
+  color: #141412;
+}
+
+/* Assistant */
+
+.mac-inspector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7em;
+  min-width: 0;
+  padding: 0 1.1em 0.9em;
+  border-left: 1px solid var(--mac-line);
+  background: var(--mac-sidebar);
+}
+
+.mac-inspector-head {
+  display: flex;
+  align-items: center;
+  gap: 0.9em;
+  margin: 0 -1.1em 1.1em;
+  padding: 1em 1.1em;
+  border-bottom: 1px solid var(--mac-line);
+  color: var(--mac-muted);
+}
+
+.mac-inspector-head .mac-doc strong {
+  color: var(--heading-ink);
+}
+
+.mac-inspector-head .mac-doc i {
+  font-size: 0.8em;
+}
+
+.mac-assistant-icon {
+  display: grid;
+  flex: none;
+  width: 2.5em;
+  height: 2.5em;
+  border-radius: 0.7em;
+  background: var(--mac-accent);
+  color: #fff;
+  place-items: center;
+}
+
+.mac-inspector-title {
+  font-size: 1.15em;
+  font-weight: 700;
+}
+
+.mac-inspector-intro {
+  margin-bottom: 0.4em;
+  color: var(--mac-muted);
+  font-size: 0.94em;
+  line-height: 1.4;
+}
+
+.mac-suggestion {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  padding: 0.7em 0.8em;
+  border-radius: 0.85em;
+  background: var(--mac-fill);
+  font-size: 0.95em;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.mac-suggestion > i,
+.mac-suggestion > svg {
+  flex: none;
+  width: 1.1em;
+  color: var(--mac-accent);
+}
+
+.mac-context-link {
+  display: flex;
+  gap: 0.8em;
+  margin-top: 0.3em;
+  color: var(--mac-accent);
+  font-size: 0.92em;
+  line-height: 1.35;
+}
+
+.mac-context-link i {
+  margin-top: 0.15em;
+}
+
+.mac-composer {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  margin-top: auto;
+  padding: 0.55em 0.6em 0.55em 1em;
+  border-radius: 999px;
+  background: var(--mac-control);
+  box-shadow: 0 0 0 1px var(--mac-line), 0 0.2em 0.6em rgba(31, 31, 29, 0.06);
+  color: var(--mac-muted);
+}
+
+.mac-composer span {
+  flex: 1 1 auto;
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mac-send {
+  display: grid;
+  width: 2em;
+  height: 2em;
+  border-radius: 50%;
+  background: var(--mac-fill-strong);
+  color: var(--mac-window);
+  font-size: 0.9em;
+  place-items: center;
+}
+
+.mac-inspector-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 1em;
+  color: var(--mac-muted);
+  font-size: 0.72em;
+}
+
+.mac-inspector-foot b {
+  color: var(--mac-accent);
+  font-weight: 600;
+}
+
+/* ── Sections ── */
+
+.mac-section {
+  margin-top: clamp(72px, 10vw, 128px);
+}
+
+:root body.mac-app-page .mac-section-title {
+  margin: 0 0 clamp(28px, 4vw, 44px);
+  color: var(--heading-ink);
+  font-size: clamp(1.875rem, 4.2vw, 2.875rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+}
+
+/* ── Ce que l’app embarque ── */
+
+.mac-builtin {
+  margin-top: clamp(56px, 8vw, 88px);
+  text-align: center;
+}
+
+:root body.mac-app-page .mac-builtin-title {
+  margin: 0 0 28px;
+  color: var(--mac-muted);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.mac-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+}
+
+.mac-stat {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 4px 16px;
+}
+
+.mac-stat + .mac-stat {
+  border-left: 1px solid var(--mac-line);
+}
+
+.mac-stat dd {
+  margin: 0;
+  color: var(--heading-ink);
+  font-size: clamp(2.375rem, 5.4vw, 4rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.045em;
+  font-variant-numeric: tabular-nums;
+}
+
+.mac-stat dt {
+  color: var(--mac-muted);
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.mac-builtin-note {
+  margin: 30px 0 0;
+  color: var(--mac-muted);
+  font-size: 0.9375rem;
+  line-height: 1.65;
+}
+
+/* ── Fonctionnalités illustrées ── */
+
+.mac-showcase {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  align-items: center;
+  gap: clamp(32px, 6vw, 88px);
+}
+
+.mac-showcase + .mac-showcase {
+  margin-top: clamp(64px, 9vw, 112px);
+}
+
+.mac-showcase.is-reversed .mac-showcase-text {
+  order: 2;
+}
+
+.mac-eyebrow {
+  margin: 0 0 12px;
+  color: var(--mac-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+:root body.mac-app-page .mac-showcase h3 {
+  margin: 0 0 16px;
+  color: var(--heading-ink);
+  font-size: clamp(1.5625rem, 3vw, 2.125rem);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+}
+
+.mac-showcase-text > p:not(.mac-eyebrow) {
+  margin: 0;
+  color: var(--mac-text);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+.mac-points {
+  display: grid;
+  gap: 12px;
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mac-points li {
+  position: relative;
+  padding-left: 28px;
+  color: var(--mac-text);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+.mac-points li::before {
+  content: "\f00c";
+  position: absolute;
+  top: 0.32em;
+  left: 0;
+  display: grid;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: var(--heading-ink);
+  color: var(--mac-window);
+  font-family: "Font Awesome 6 Free";
+  font-size: 0.53125rem;
+  font-weight: 900;
+  line-height: 1;
+  place-items: center;
+}
+
+/* Illustration : une seule surface neutre, sans cadre intérieur. */
+.mac-visual {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: clamp(22px, 3.2vw, 36px);
+  border-radius: 26px;
+  background: var(--mac-card);
+  color: var(--heading-ink);
+  cursor: default;
+  user-select: none;
+}
+
+.mac-visual-label {
+  color: var(--mac-muted);
+  font-size: 0.78125rem;
+  font-weight: 600;
+}
+
+.mac-analysis {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(20px, 3.4vw, 40px);
+  margin-bottom: 14px;
+}
+
+.mac-donut {
+  width: clamp(124px, 15vw, 172px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--practice) 0deg 114.5deg,
+    var(--investigate) 114.5deg 196.4deg,
+    var(--read) 196.4deg 245.5deg,
+    var(--discuss) 245.5deg 294.5deg,
+    var(--collaborate) 294.5deg 343.6deg,
+    var(--produce) 343.6deg 360deg
+  );
+  -webkit-mask: radial-gradient(closest-side, transparent 57%, #000 58%);
+  mask: radial-gradient(closest-side, transparent 57%, #000 58%);
+}
+
+.mac-legend {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mac-legend li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.mac-legend li::before {
+  content: "";
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--type-color);
+}
+
+.mac-legend em {
+  margin-left: auto;
+  color: var(--mac-muted);
+  font-size: 0.8125rem;
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Chronologie : une ligne par moment, des blocs proportionnels aux durées. */
+.mac-timeline {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px 16px;
+  color: var(--mac-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.mac-timeline-bar {
+  display: flex;
+  gap: 2px;
+}
+
+.mac-timeline-bar i {
+  overflow: hidden;
+  min-width: 0;
+  height: 28px;
+  border-radius: 7px;
+  background: var(--type-color);
+  color: rgba(0, 0, 0, 0.75);
+  font-size: 0.625rem;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 1.75rem;
+  text-align: center;
+}
+
+.mac-avatar {
+  display: grid;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--mac-coral);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  place-items: center;
+}
+
+[data-theme="dark"] .mac-avatar {
+  color: #141412;
+}
+
+.mac-avatar.is-teal { background: var(--mac-teal); }
+
+.mac-avatar.is-ink {
+  background: var(--heading-ink);
+  color: var(--mac-card);
+}
+
+.mac-people {
+  display: grid;
+  gap: 16px;
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.mac-people li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mac-person {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.mac-person strong {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.mac-person span {
+  color: var(--mac-muted);
+  font-size: 0.8125rem;
+}
+
+.mac-person .is-live::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: #2fa84f;
+  vertical-align: 1px;
+}
+
+.mac-people em {
+  margin-left: auto;
+  color: var(--mac-muted);
+  font-size: 0.8125rem;
+  font-style: normal;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.mac-visual .mac-act {
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+.mac-visual .mac-act i {
+  font-style: normal;
+}
+
+.mac-visual .mac-field {
+  margin: 0;
+  font-size: 14px;
+}
+
+.mac-sync-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--mac-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.mac-sync-line i {
+  color: #2fa84f;
+}
+
+.mac-proposal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.mac-pill {
+  border-radius: 999px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.mac-pill.is-strong {
+  color: var(--mac-card);
+}
+
+.mac-provider-group {
+  display: grid;
+  gap: 10px;
+}
+
+.mac-providers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mac-providers span {
+  padding: 8px 15px;
+  border-radius: 999px;
+  background: var(--mac-window);
+  box-shadow: 0 1px 2px rgba(31, 31, 29, 0.08);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.mac-field-help {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 22px;
+  border-top: 1px solid var(--mac-line);
+}
+
+.mac-field-help-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--mac-muted);
+  font-size: 0.78125rem;
+  font-weight: 600;
+}
+
+.mac-field-help-text {
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+.mac-field-help .mac-pill {
+  padding: 7px 14px;
+  background: var(--mac-fill-strong);
+  font-size: 0.8125rem;
+}
+
+.mac-field-help .mac-pill.is-strong {
+  margin-left: auto;
+  background: var(--heading-ink);
+}
+
+/* ── Autres fonctionnalités : une grille aérée, sans cartes ── */
+
+.mac-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(36px, 5vw, 56px) clamp(28px, 4vw, 56px);
+}
+
+.mac-feature-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--mac-icon-box);
+  color: var(--mac-icon-ink);
+  font-size: 1rem;
+}
+
+:root body.mac-app-page .mac-feature h3,
+:root body.mac-app-page .mac-privacy h3,
+:root body.mac-app-page .mac-steps h3 {
+  margin: 18px 0 8px;
+  color: var(--heading-ink);
+  font-size: 1.125rem;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+}
+
+.mac-feature p,
+.mac-privacy p,
+.mac-steps p {
+  margin: 0;
+  color: var(--mac-text);
+  font-size: 0.9375rem;
+  line-height: 1.65;
+}
+
+/* ── Données : une seule surface, sans cadre imbriqué ── */
+
+.mac-privacy {
+  padding: clamp(28px, 5vw, 56px);
+  border-radius: 28px;
+  background: var(--mac-card);
+}
+
+.mac-privacy-points {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(28px, 4vw, 56px);
+}
+
+.mac-privacy .mac-feature-icon {
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--mac-line);
+}
+
+[data-theme="dark"] .mac-privacy .mac-feature-icon {
+  background: #050505;
+  box-shadow: none;
+}
+
+/* ── Installation ── */
+
+.mac-steps {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(28px, 4vw, 56px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Fil reliant les trois étapes. */
+.mac-steps::before {
+  content: "";
+  position: absolute;
+  top: 18px;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: var(--mac-line);
+}
+
+.mac-step-number {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--heading-ink);
+  box-shadow: 0 0 0 10px #fff;
+  color: #fff;
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+[data-theme="dark"] .mac-step-number {
+  box-shadow: 0 0 0 10px #141412;
+  color: #141412;
+}
+
+/* ── Appel final ── */
+
+.mac-final {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(20px, 3vw, 32px);
+  margin-top: clamp(64px, 9vw, 104px);
+  padding: clamp(28px, 4vw, 44px) clamp(28px, 5vw, 56px);
+  border-radius: 28px;
+  background: var(--mac-band);
+}
+
+.mac-final-icon {
+  width: 84px;
+  height: 84px;
+}
+
+:root body.mac-app-page .mac-final h2 {
+  margin: 0 0 8px;
+  color: #fff;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.mac-final p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.9375rem;
+}
+
+.mac-final-actions {
+  justify-content: flex-end;
+}
+
+/* Sur le bandeau sombre, le bouton principal s’inverse dans les deux thèmes. */
+:root .mac-final .mac-download,
+:root .mac-final .mac-download:focus-visible {
+  background: #fff;
+  color: #1f1f1d;
+}
+
+:root .mac-final .mac-download:hover,
+:root .mac-final .mac-download:active {
+  background: #e9e9e6;
+  color: #1f1f1d;
+}
+
+.mac-final .mac-more {
+  color: #fff;
+}
+
+/* ── Écrans intermédiaires ── */
+
+@media (max-width: 1080px) {
+  .mac-content {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mac-inspector {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .mac-showcase {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+  }
+
+  .mac-showcase.is-reversed .mac-showcase-text {
+    order: 0;
+  }
+
+  .mac-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mac-final {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .mac-final-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 760px) {
+  .mac-window-scale {
+    grid-template-columns: minmax(0, 1fr);
+    height: 62em;
+  }
+
+  .mac-sidebar,
+  .mac-tool-layout {
+    display: none;
+  }
+
+  .mac-toolbar .mac-lights {
+    display: flex;
+  }
+
+  .mac-canvas {
+    padding-left: 1.4em;
+  }
+
+  .mac-privacy-points,
+  .mac-steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mac-steps {
+    gap: 28px;
+  }
+
+  .mac-steps::before {
+    display: none;
+  }
+
+  .mac-step-number {
+    box-shadow: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .mac-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 32px;
+  }
+
+  .mac-stat:nth-child(odd) {
+    border-left: 0;
+  }
+
+  .mac-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mac-tool-group > i:nth-child(n + 5) {
+    display: none;
+  }
+
+  .mac-analysis {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+  }
+
+  .mac-timeline {
+    column-gap: 12px;
+  }
+
+  .mac-timeline-bar i {
+    font-size: 0.5625rem;
+    letter-spacing: -0.02em;
+  }
+
+  .mac-legend {
+    width: 100%;
+  }
+
+  .mac-people em {
+    display: none;
+  }
+
+  .mac-field-help .mac-pill.is-strong {
+    margin-left: 0;
+  }
+
+  .mac-final {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    text-align: center;
+  }
+
+  .mac-final-actions {
+    justify-content: center;
+  }
+}
+
+/* ── Animations ──
+   Actives seulement avec la classe mac-motion, posée par js/app-mac.js lorsque l’utilisateur n’a pas
+   demandé à réduire les animations. Sans elle, la page reste statique et tout est visible. */
+
+@property --mac-sweep {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 360deg;
+}
+
+@keyframes mac-rise {
+  from { opacity: 0; translate: 0 22px; }
+}
+
+@keyframes mac-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-7px) rotate(-1.5deg); }
+}
+
+@keyframes mac-gradient-flow {
+  to { background-position: -200% 0; }
+}
+
+@keyframes mac-caret {
+  50% { opacity: 0; }
+}
+
+@keyframes mac-presence {
+  0% { box-shadow: 0 0 0 0 rgba(47, 168, 79, 0.5); }
+  100% { box-shadow: 0 0 0 6px rgba(47, 168, 79, 0); }
+}
+
+@keyframes mac-live {
+  0%, 6% { opacity: 0; }
+  12%, 70% { opacity: 1; }
+  78%, 100% { opacity: 0; }
+}
+
+@keyframes mac-bob {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -2px; }
+}
+
+@keyframes mac-thinking {
+  from { background-position: 150% 0; }
+  to { background-position: -50% 0; }
+}
+
+@keyframes mac-send {
+  50% { scale: 1.25; }
+}
+
+.mac-motion body.mac-app-page {
+  --mac-ease: cubic-bezier(0.2, 0.75, 0.2, 1);
+  --mac-gradient-loop: linear-gradient(100deg, #1fa397 0%, #9a63d8 25%, #e0605c 50%, #9a63d8 75%, #1fa397 100%);
+}
+
+.mac-motion[data-theme="dark"] body.mac-app-page {
+  --mac-gradient-loop: linear-gradient(100deg, #5bddd3 0%, #c498ec 25%, #f19492 50%, #c498ec 75%, #5bddd3 100%);
+}
+
+/* En-tête : entrée échelonnée, icône qui flotte, dégradé qui circule lentement. */
+.mac-motion .mac-hero > * {
+  animation: mac-rise 0.9s var(--mac-ease) both;
+}
+
+.mac-motion .mac-hero > :nth-child(2) { animation-delay: 0.08s; }
+.mac-motion .mac-hero > :nth-child(3) { animation-delay: 0.16s; }
+.mac-motion .mac-hero > :nth-child(4) { animation-delay: 0.26s; }
+.mac-motion .mac-hero > :nth-child(5) { animation-delay: 0.36s; }
+.mac-motion .mac-hero > :nth-child(6) { animation-delay: 0.44s; }
+
+.mac-motion .mac-icon {
+  animation: mac-rise 0.9s var(--mac-ease) both, mac-float 7s ease-in-out 1.2s infinite;
+}
+
+.mac-motion .mac-title .mac-title-accent {
+  background-image: var(--mac-gradient-loop);
+  background-size: 200% 100%;
+  animation: mac-gradient-flow 14s linear infinite;
+}
+
+.mac-motion .mac-download .fa-apple,
+.mac-motion .mac-more i {
+  transition: transform 0.25s var(--mac-ease);
+}
+
+.mac-motion .mac-download:hover .fa-apple {
+  transform: translateY(-2px) scale(1.08);
+}
+
+.mac-motion .mac-more:hover .fa-arrow-down {
+  transform: translateY(3px);
+}
+
+.mac-motion .mac-more:hover .fa-arrow-right {
+  transform: translateX(4px);
+}
+
+/* Fenêtre : elle arrive inclinée et se redresse au défilement (--mac-tilt, de 1 à 0). */
+.mac-motion .mac-window {
+  transform: perspective(1800px) rotateX(calc(var(--mac-tilt, 0) * 16deg)) scale(calc(1 - var(--mac-tilt, 0) * 0.04));
+  transform-origin: 50% 100%;
+  animation: mac-rise 1.1s var(--mac-ease) 0.5s both;
+  will-change: transform;
+}
+
+/* Contenu de la fenêtre : barre latérale, moments et assistant se remplissent l’un après l’autre. */
+.mac-motion .mac-window :is(.mac-sidebar > *, .mac-scenario-title, .mac-scenario-meta, .mac-board > *, .mac-inspector > *) {
+  opacity: 0;
+  translate: 0 1.4em;
+  transition: opacity 0.7s var(--mac-ease), translate 0.8s var(--mac-ease);
+  transition-delay: calc(0.7s + var(--mac-i, 0) * 0.1s);
+}
+
+.mac-motion .mac-window .mac-sidebar > * {
+  translate: -1.2em 0;
+  transition-delay: calc(0.6s + var(--mac-i, 0) * 0.04s);
+}
+
+.mac-motion .mac-window .mac-inspector > * {
+  translate: 1.2em 0;
+  transition-delay: calc(1.1s + var(--mac-i, 0) * 0.08s);
+}
+
+.mac-motion .mac-window.is-visible :is(.mac-sidebar > *, .mac-scenario-title, .mac-scenario-meta, .mac-board > *, .mac-inspector > *) {
+  opacity: 1;
+  translate: 0 0;
+}
+
+/* Bandes de durées et chronologie : chaque segment se déploie depuis la gauche. */
+.mac-motion :is(.mac-strip, .mac-timeline-bar) > i {
+  scale: 0 1;
+  transform-origin: 0 50%;
+  transition: scale 0.7s var(--mac-ease);
+  transition-delay: calc(0.9s + var(--mac-i, 0) * 0.06s);
+}
+
+/* Les blocs de la chronologie portent du texte : ils se dévoilent sans être déformés. */
+.mac-motion .mac-timeline-bar > i {
+  scale: 1 1;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.7s var(--mac-ease);
+  transition-delay: calc(0.35s + var(--mac-i, 0) * 0.12s);
+}
+
+.mac-motion .mac-visual.is-visible .mac-timeline-bar > i {
+  clip-path: inset(0 0 0 0);
+}
+
+.mac-motion :is(.mac-window, .mac-visual).is-visible :is(.mac-strip, .mac-timeline-bar) > i {
+  scale: 1 1;
+}
+
+/* Une collègue modifie une activité de la séance 3 : son nom et son contour apparaissent par moments. */
+.mac-motion .mac-act-live::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 0 2px var(--mac-coral);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mac-motion .mac-act-live > .mac-act-author {
+  z-index: 1;
+  opacity: 0;
+}
+
+/* Les textes réécrits en direct gardent leur hauteur pour ne pas faire sauter la mise en page. */
+.mac-motion .mac-act.is-remote .mac-field {
+  box-sizing: border-box;
+  min-height: calc(3em + 1.7em);
+}
+
+.mac-motion .mac-field-help-text {
+  min-height: 3.1em;
+}
+
+.mac-motion .mac-window.is-visible .mac-act-live::after,
+.mac-motion .mac-window.is-visible .mac-act-live > .mac-act-author {
+  animation: mac-live 9s ease-in-out 3s infinite;
+}
+
+/* Champ de l’assistant : saisie simulée, curseur et envoi. */
+.mac-motion .mac-composer span {
+  transition: color 0.2s;
+}
+
+.mac-motion .mac-composer.has-text span {
+  color: var(--heading-ink);
+}
+
+.mac-motion .mac-send {
+  transition: background-color 0.25s, color 0.25s;
+}
+
+.mac-motion .mac-composer.has-text .mac-send {
+  background: var(--mac-accent);
+  color: #fff;
+}
+
+.mac-motion .mac-composer.is-sent .mac-send {
+  animation: mac-send 0.4s var(--mac-ease);
+}
+
+.mac-motion .is-typing::after {
+  content: "";
+  display: inline-block;
+  width: 1.5px;
+  height: 1.1em;
+  margin-left: 1px;
+  background: currentColor;
+  vertical-align: -0.15em;
+  animation: mac-caret 0.9s steps(1) infinite;
+}
+
+.mac-motion .mac-act.is-remote .is-typing::after {
+  width: 2px;
+  background: var(--mac-coral);
+}
+
+/* Apparitions au défilement. */
+.mac-motion :is(.mac-section-title, .mac-builtin-title, .mac-builtin-note, .mac-showcase-text, .mac-visual, .mac-privacy, .mac-final),
+.mac-motion :is(.mac-stats, .mac-grid, .mac-steps, .mac-privacy-points) > * {
+  opacity: 0;
+  translate: 0 30px;
+  transition: opacity 0.8s var(--mac-ease), translate 0.9s var(--mac-ease);
+}
+
+.mac-motion :is(.mac-stats, .mac-grid, .mac-steps, .mac-privacy-points) > * {
+  transition-delay: calc(var(--mac-i, 0) * 0.09s);
+}
+
+.mac-motion .mac-showcase .mac-visual {
+  translate: 0 44px;
+  transition-delay: 0.12s;
+}
+
+.mac-motion :is(.mac-section-title, .mac-builtin-title, .mac-builtin-note, .mac-showcase-text, .mac-visual, .mac-privacy, .mac-final).is-visible,
+.mac-motion :is(.mac-stats, .mac-grid, .mac-steps, .mac-privacy-points).is-visible > * {
+  opacity: 1;
+  translate: 0 0;
+}
+
+/* Analyse : l’anneau se dessine, la légende suit. */
+.mac-motion .mac-donut {
+  --mac-sweep: 0deg;
+  -webkit-mask: radial-gradient(closest-side, transparent 57%, #000 58%), conic-gradient(#000 var(--mac-sweep), transparent 0);
+  -webkit-mask-composite: source-in;
+  mask: radial-gradient(closest-side, transparent 57%, #000 58%), conic-gradient(#000 var(--mac-sweep), transparent 0);
+  mask-composite: intersect;
+  transition: --mac-sweep 1.6s var(--mac-ease) 0.3s;
+}
+
+.mac-motion .mac-visual.is-visible .mac-donut {
+  --mac-sweep: 360deg;
+}
+
+.mac-motion :is(.mac-legend, .mac-people, .mac-providers) > * {
+  opacity: 0;
+  translate: 0 10px;
+  transition: opacity 0.6s var(--mac-ease), translate 0.6s var(--mac-ease);
+  transition-delay: calc(0.4s + var(--mac-i, 0) * 0.09s);
+}
+
+.mac-motion .mac-legend > * {
+  translate: 12px 0;
+}
+
+.mac-motion .mac-visual.is-visible :is(.mac-legend, .mac-people, .mac-providers) > * {
+  opacity: 1;
+  translate: 0 0;
+}
+
+/* Collaboration : présence qui pulse, badge qui flotte. */
+.mac-motion .mac-person .is-live::before {
+  animation: mac-presence 1.8s ease-out infinite;
+}
+
+.mac-motion .mac-act.is-remote .mac-act-author {
+  animation: mac-bob 2.4s ease-in-out infinite;
+}
+
+/* Aide IA : l’action essayée s’allume et le texte « réfléchit » avant d’être remplacé. */
+.mac-motion .mac-field-help .mac-pill {
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.mac-motion .mac-field-help .mac-pill.is-active {
+  background: var(--heading-ink);
+  color: var(--mac-card);
+}
+
+.mac-motion .mac-field-help-text.is-thinking {
+  background: linear-gradient(90deg, var(--heading-ink) 0 35%, var(--mac-muted) 50%, var(--heading-ink) 65% 100%);
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: mac-thinking 1.1s linear infinite;
+}
+
+/* Survols : icônes et étapes réagissent légèrement. */
+.mac-motion .mac-feature-icon {
+  transition: transform 0.35s var(--mac-ease);
+}
+
+.mac-motion .mac-feature:hover .mac-feature-icon,
+.mac-motion .mac-privacy-points > div:hover .mac-feature-icon {
+  transform: translateY(-3px) rotate(-6deg);
+}
+
+/* Installation : le fil se trace d’une étape à l’autre. */
+.mac-motion .mac-steps::before {
+  scale: 0 1;
+  transform-origin: 0 50%;
+  transition: scale 1.4s var(--mac-ease) 0.2s;
+}
+
+.mac-motion .mac-steps.is-visible::before {
+  scale: 1 1;
+}
+
+@media (max-width: 760px) {
+  .mac-motion .mac-window {
+    transform: perspective(1200px) rotateX(calc(var(--mac-tilt, 0) * 8deg));
+  }
+}

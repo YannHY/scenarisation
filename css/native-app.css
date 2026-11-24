@@ -62,7 +62,7 @@ html body.native-consent-page .native-consent h1 {
     border-radius: 10px;
     background: #f1f1f1;
     color: #111;
-    font-size: 19px;
+    font-size: 1.1875rem;
 }
 
 .native-consent-intro {
@@ -84,9 +84,9 @@ html body.native-consent-page .native-consent h1 {
 }
 
 .native-account > i {
-    flex: 0 0 24px;
-    width: 24px;
-    font-size: 24px;
+    flex: 0 0 1.5rem;
+    width: 1.5rem;
+    font-size: 1.5rem;
     color: inherit;
 }
 
@@ -119,8 +119,8 @@ html body.native-consent-page .native-consent h1 {
 }
 
 .native-permissions i {
-    flex: 0 0 24px;
-    width: 24px;
+    flex: 0 0 1.5rem;
+    width: 1.5rem;
     text-align: center;
     color: var(--text-strong, #222);
 }

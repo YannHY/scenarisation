@@ -3,7 +3,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/native-schema.php';
 
 const APP_VERSION = '1.0.0';
-const APP_SCHEMA_VERSION = 10;
+const APP_SCHEMA_VERSION = 11;
 const TERMS_VERSION = '2026-09-26';
 const EMAIL_VERIFICATION_TTL_SECONDS = 86400;
 const EMAIL_VERIFICATION_RESEND_DELAY_SECONDS = 60;
@@ -242,6 +242,7 @@ function ensure_app_schema(PDO $db): void
     ensure_manager_role($db);
     ensure_manager_permission_columns($db);
     ensure_native_app_schema($db);
+    ensure_native_collaboration_schema($db);
     ensure_app_schema_meta_table($db);
 
     $stmt = $db->prepare("SELECT schema_version FROM app_schema_meta WHERE id = 1");
@@ -1352,18 +1353,57 @@ function app_competency_greencomp_detail_source(): string
  * <head>, avant les feuilles de style. Le pendant statique de cette fonction
  * est également utilisé par designer.php.
  */
+/**
+ * Dernière version publiée de l’app Mac, lue dans le flux Sparkle du site (mac/appcast.xml).
+ * Sans flux lisible, la page reste utilisable avec la dernière version connue.
+ * @return array{version:string, url:string, minimumSystem:string}
+ */
+function app_mac_latest_release(): array
+{
+    $release = [
+        'version' => '0.4.6',
+        'url' => 'https://scenarisation.eu/mac/Scenarisation-0.4.6-AppleSilicon.dmg',
+        'minimumSystem' => '15.0',
+    ];
+    $feed = dirname(__DIR__) . '/mac/appcast.xml';
+    if (!is_file($feed)) return $release;
+    $previous = libxml_use_internal_errors(true);
+    $xml = simplexml_load_file($feed);
+    libxml_use_internal_errors($previous);
+    if ($xml === false || !isset($xml->channel->item)) return $release;
+    $sparkle = 'http://www.andymatuschak.org/xml-namespaces/sparkle';
+    $best = null;
+    foreach ($xml->channel->item as $item) {
+        $meta = $item->children($sparkle);
+        $version = trim((string)($meta->shortVersionString ?? ''));
+        $url = trim((string)($item->enclosure['url'] ?? ''));
+        if ($version === '' || !str_starts_with($url, 'https://')) continue;
+        if ($best === null || version_compare($version, $best['version'], '>')) {
+            $minimum = trim((string)($meta->minimumSystemVersion ?? ''));
+            $best = ['version' => $version, 'url' => $url, 'minimumSystem' => $minimum !== '' ? $minimum : $release['minimumSystem']];
+        }
+    }
+    return $best ?? $release;
+}
+
+/** Finitions visuelles communes (css/refined.css), chargées après les feuilles propres à chaque page. */
+function render_refined_styles(): void
+{
+    $path = dirname(__DIR__) . '/css/refined.css';
+    $version = is_file($path) ? substr((string)hash_file('sha256', $path), 0, 16) : APP_VERSION;
+    echo '<link rel="stylesheet" href="css/refined.css?v=' . htmlspecialchars($version, ENT_QUOTES, 'UTF-8') . '" />' . "\n";
+}
+
 function render_theme_boot_script(): void
 {
-    ?>
-    <script>
-        try {
-            if (localStorage.getItem('learningDesignerTheme') === 'dark') {
-                document.documentElement.setAttribute('data-theme', 'dark');
-            }
-        } catch (error) {
-        }
-    </script>
-    <?php
+    $root = dirname(__DIR__);
+    $script = $root . '/js/display-preferences.js';
+    $style = $root . '/css/display-preferences.css';
+    $scriptVersion = is_file($script) ? substr((string)hash_file('sha256', $script), 0, 16) : APP_VERSION;
+    $styleVersion = is_file($style) ? substr((string)hash_file('sha256', $style), 0, 16) : APP_VERSION;
+    // Chargé sans defer : le mode, la taille et l’espacement s’appliquent avant le premier rendu.
+    echo '<script src="js/display-preferences.js?v=' . h($scriptVersion) . '"></script>' . "\n";
+    echo '<link rel="stylesheet" href="css/display-preferences.css?v=' . h($styleVersion) . '" />' . "\n";
 }
 
 function render_site_nav(string $active = '', bool $accountAvailable = true): void
@@ -1429,30 +1469,133 @@ function render_site_nav(string $active = '', bool $accountAvailable = true): vo
                                 <i class="account-menu-icon fa-solid fa-sliders" aria-hidden="true"></i>
                                 <span data-site-i18n-en="Preferences" data-site-i18n-fr="Préférences">Préférences</span>
                             </h2>
-                            <div class="account-preference-row">
-                                <label id="account-language-label" for="lang-select" data-site-i18n-en="Language" data-site-i18n-fr="Langue">Langue</label>
+                            <div class="display-row">
+                                <label id="account-language-label" class="display-row-label" for="lang-select" data-site-i18n-en="Language" data-site-i18n-fr="Langue">Langue</label>
                                 <select id="lang-select" hidden aria-hidden="true" tabindex="-1">
                                     <option value="fr" lang="fr">Français</option>
                                     <option value="en" lang="en">English</option>
                                 </select>
                                 <div class="account-preference-options" role="group" aria-labelledby="account-language-label">
-                                    <button type="button" class="account-preference-option" data-account-language="fr" aria-pressed="true" lang="fr">Français</button>
-                                    <button type="button" class="account-preference-option" data-account-language="en" aria-pressed="false" lang="en">English</button>
+                                    <button type="button" class="account-preference-option" data-account-language="fr" aria-pressed="true" lang="fr" aria-label="Français" title="Français">FR</button>
+                                    <button type="button" class="account-preference-option" data-account-language="en" aria-pressed="false" lang="en" aria-label="English" title="English">EN</button>
                                 </div>
                             </div>
-                            <div class="account-preference-row">
-                                <span id="account-appearance-label" class="account-preference-label" data-site-i18n-en="Appearance" data-site-i18n-fr="Apparence">Apparence</span>
-                                <div class="account-preference-options" role="group" aria-labelledby="account-appearance-label">
-                                    <button type="button" class="account-preference-option" data-account-theme="light" aria-pressed="true">
-                                        <svg class="account-theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.4 1.4m11.2 11.2L19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></svg>
-                                        <span data-site-i18n-en="Light" data-site-i18n-fr="Clair">Clair</span>
+                        </section>
+                        <section class="account-preferences display-preferences" aria-labelledby="display-preferences-title">
+                            <h2 id="display-preferences-title">
+                                <i class="account-menu-icon fa-solid fa-eye" aria-hidden="true"></i>
+                                <span data-site-i18n-en="Display" data-site-i18n-fr="Affichage">Affichage</span>
+                            </h2>
+                            <div class="display-row mode-toggle-wrap">
+                                <span id="display-mode-label" class="display-row-label" data-site-i18n-en="Mode" data-site-i18n-fr="Mode">Mode</span>
+                                <div class="mode-toggle" role="radiogroup" aria-labelledby="display-mode-label">
+                                    <span class="mode-toggle-knob" aria-hidden="true">
+                                        <span class="mode-toggle-face">
+                                            <svg class="mode-glyph mode-glyph-sun" viewBox="0 0 48 48" focusable="false">
+                                                <defs>
+                                                    <radialGradient id="mode-sun-core" cx="40%" cy="35%" r="70%">
+                                                        <stop offset="0" stop-color="#FFE9B8"/>
+                                                        <stop offset="1" stop-color="#E2A06E"/>
+                                                    </radialGradient>
+                                                </defs>
+                                                <g class="mode-sun-rays">
+                                                    <g transform="rotate(0 24 24)"><line class="mode-ray mode-n0" x1="24" y1="4" x2="24" y2="9.5"/></g>
+                                                    <g transform="rotate(45 24 24)"><line class="mode-ray mode-n1" x1="24" y1="4" x2="24" y2="9.5"/></g>
+                                                    <g transform="rotate(90 24 24)"><line class="mode-ray mode-n2" x1="24" y1="4" x2="24" y2="9.5"/></g>
+                                                    <g transform="rotate(135 24 24)"><line class="mode-ray mode-n3" x1="24" y1="4" x2="24" y2="9.5"/></g>
+                                                    <g transform="rotate(180 24 24)"><line class="mode-ray mode-n4" x1="24" y1="4" x2="24" y2="9.5"/></g>
+                                                    <g transform="rotate(225 24 24)"><line class="mode-ray mode-n5" x1="24" y1="4" x2="24" y2="9.5"/></g>
+                                                    <g transform="rotate(270 24 24)"><line class="mode-ray mode-n6" x1="24" y1="4" x2="24" y2="9.5"/></g>
+                                                    <g transform="rotate(315 24 24)"><line class="mode-ray mode-n7" x1="24" y1="4" x2="24" y2="9.5"/></g>
+                                                </g>
+                                                <circle class="mode-sun-core" cx="24" cy="24" r="9.5" fill="url(#mode-sun-core)"/>
+                                            </svg>
+                                            <svg class="mode-glyph mode-glyph-sunset" viewBox="0 0 48 48" focusable="false">
+                                                <defs>
+                                                    <radialGradient id="mode-sunset-glow" cx="50%" cy="50%" r="50%">
+                                                        <stop offset="0" stop-color="#F3C98A" stop-opacity="0.95"/>
+                                                        <stop offset="0.45" stop-color="#E66A63" stop-opacity="0.5"/>
+                                                        <stop offset="1" stop-color="#B4607E" stop-opacity="0"/>
+                                                    </radialGradient>
+                                                    <linearGradient id="mode-sunset-sun" x1="0" y1="0" x2="0" y2="1">
+                                                        <stop offset="0" stop-color="#F6D898"/>
+                                                        <stop offset="1" stop-color="#E66A63"/>
+                                                    </linearGradient>
+                                                    <clipPath id="mode-sunset-sky"><rect x="0" y="0" width="48" height="30"/></clipPath>
+                                                </defs>
+                                                <circle class="mode-sunset-glow" cx="24" cy="30" r="21" fill="url(#mode-sunset-glow)"/>
+                                                <g clip-path="url(#mode-sunset-sky)"><circle class="mode-sunset-sun" cx="24" cy="30" r="10" fill="url(#mode-sunset-sun)"/></g>
+                                                <line class="mode-sunset-line" x1="7" y1="30" x2="41" y2="30"/>
+                                                <line class="mode-sunset-ripple mode-n0" x1="14" y1="35" x2="34" y2="35"/>
+                                                <line class="mode-sunset-ripple mode-n1" x1="19" y1="39.5" x2="29" y2="39.5"/>
+                                            </svg>
+                                            <svg class="mode-glyph mode-glyph-moon" viewBox="0 0 48 48" focusable="false">
+                                                <defs>
+                                                    <linearGradient id="mode-moon-fill" x1="0" y1="0" x2="1" y2="1">
+                                                        <stop offset="0" stop-color="#FAF9F6"/>
+                                                        <stop offset="1" stop-color="#C9C3B8"/>
+                                                    </linearGradient>
+                                                </defs>
+                                                <g transform="translate(4 7) scale(1.5)"><path class="mode-moon-body" d="M19.5 14.6A8 8 0 0 1 9.4 4.5a8 8 0 1 0 10.1 10.1Z" fill="url(#mode-moon-fill)"/></g>
+                                                <path class="mode-star mode-n0" d="M37 6.5Q37 10 40.5 10Q37 10 37 13.5Q37 10 33.5 10Q37 10 37 6.5Z"/>
+                                                <path class="mode-star mode-n1" d="M42 19Q42 21 44 21Q42 21 42 23Q42 21 40 21Q42 21 42 19Z"/>
+                                                <path class="mode-star mode-n2" d="M31 17.5Q31 19 32.5 19Q31 19 31 20.5Q31 19 29.5 19Q31 19 31 17.5Z"/>
+                                                <path class="mode-star mode-n3" d="M41 31Q41 32.5 42.5 32.5Q41 32.5 41 34Q41 32.5 39.5 32.5Q41 32.5 41 31Z"/>
+                                            </svg>
+                                        </span>
+                                    </span>
+                                    <button type="button" class="mode-toggle-stop" role="radio" aria-checked="true" tabindex="0" data-display-mode="light" aria-label="Clair" title="Clair" data-site-i18n-attr="aria-label,title" data-site-i18n-en="Light" data-site-i18n-fr="Clair">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
                                     </button>
-                                    <button type="button" class="account-preference-option" data-account-theme="dark" aria-pressed="false">
-                                        <svg class="account-theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 13.1A8.5 8.5 0 0 1 10.9 3.5a8.5 8.5 0 1 0 9.6 9.6Z"/></svg>
-                                        <span data-site-i18n-en="Dark" data-site-i18n-fr="Sombre">Sombre</span>
+                                    <button type="button" class="mode-toggle-stop" role="radio" aria-checked="false" tabindex="-1" data-display-mode="warm" aria-label="Chaud" title="Chaud" data-site-i18n-attr="aria-label,title" data-site-i18n-en="Warm" data-site-i18n-fr="Chaud">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 17a5 5 0 0 1 10 0"/><path d="M2.5 17h19M5.5 20.5h13M12 5.5V8M5.3 9.8l1.6 1.6M18.7 9.8l-1.6 1.6"/></svg>
+                                    </button>
+                                    <button type="button" class="mode-toggle-stop" role="radio" aria-checked="false" tabindex="-1" data-display-mode="dark" aria-label="Sombre" title="Sombre" data-site-i18n-attr="aria-label,title" data-site-i18n-en="Dark" data-site-i18n-fr="Sombre">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19.5 14.6A8 8 0 0 1 9.4 4.5a8 8 0 1 0 10.1 10.1Z"/></svg>
                                     </button>
                                 </div>
                             </div>
+                            <div class="display-row">
+                                <span id="display-text-size-label" class="display-row-label" data-site-i18n-en="Text size" data-site-i18n-fr="Taille du texte">Taille du texte</span>
+                                <div class="display-stepper" role="group" aria-labelledby="display-text-size-label">
+                                    <button type="button" class="display-step" data-display-text-step="-1" aria-label="Réduire le texte" title="Réduire le texte" data-site-i18n-attr="aria-label,title" data-site-i18n-en="Smaller text" data-site-i18n-fr="Réduire le texte">
+                                        <span class="display-step-glyph display-step-glyph-small" aria-hidden="true">A</span>
+                                    </button>
+                                    <output class="display-stepper-value" aria-live="polite" data-display-text-size-value>100&nbsp;%</output>
+                                    <button type="button" class="display-step" data-display-text-step="1" aria-label="Agrandir le texte" title="Agrandir le texte" data-site-i18n-attr="aria-label,title" data-site-i18n-en="Larger text" data-site-i18n-fr="Agrandir le texte">
+                                        <span class="display-step-glyph" aria-hidden="true">A</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="display-row">
+                                <span id="display-spacing-label" class="display-row-label" data-site-i18n-en="Spacing" data-site-i18n-fr="Espacement">Espacement</span>
+                                <div class="account-preference-options" role="group" aria-labelledby="display-spacing-label">
+                                    <button type="button" class="account-preference-option display-icon-option" data-display-spacing="default" aria-pressed="true" aria-label="Standard" title="Standard" data-site-i18n-attr="aria-label,title" data-site-i18n-en="Standard" data-site-i18n-fr="Standard">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 8h14M5 12h14M5 16h14"/></svg>
+                                    </button>
+                                    <button type="button" class="account-preference-option display-icon-option" data-display-spacing="relaxed" aria-pressed="false" aria-label="Aéré" title="Aéré" data-site-i18n-attr="aria-label,title" data-site-i18n-en="Relaxed" data-site-i18n-fr="Aéré">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 6.5h14M5 12h14M5 17.5h14"/></svg>
+                                    </button>
+                                    <button type="button" class="account-preference-option display-icon-option" data-display-spacing="wide" aria-pressed="false" aria-label="Large" title="Large" data-site-i18n-attr="aria-label,title" data-site-i18n-en="Wide" data-site-i18n-fr="Large">
+                                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5h14M5 12h14M5 19h14"/></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <button type="button" class="display-toggle-row" role="switch" aria-checked="false" data-display-motion>
+                                <span class="display-toggle-copy">
+                                    <span class="display-row-label" data-site-i18n-en="Reduce motion" data-site-i18n-fr="Réduire les animations">Réduire les animations</span>
+                                </span>
+                                <span class="display-switch" aria-hidden="true"></span>
+                            </button>
+                            <button type="button" class="display-reset" data-display-reset hidden>
+                                <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
+                                <span data-site-i18n-en="Reset" data-site-i18n-fr="Réinitialiser">Réinitialiser</span>
+                            </button>
+                            <svg class="display-filters" aria-hidden="true" focusable="false">
+                                <filter id="display-warm-filter" color-interpolation-filters="sRGB">
+                                    <feColorMatrix type="matrix" values="1 0 0 0 0  0 0.949 0 0 0  0 0 0.871 0 0  0 0 0 1 0"/>
+                                </filter>
+                            </svg>
                         </section>
                         <?php if ($user): ?>
                             <a class="account-menu-link" href="logout.php">
@@ -1474,36 +1617,6 @@ function render_site_nav(string $active = '', bool $accountAvailable = true): vo
     <script>
     document.addEventListener('DOMContentLoaded', function () {
         var html = document.documentElement;
-        var savedTheme = '';
-        try {
-            savedTheme = localStorage.getItem('learningDesignerTheme') || '';
-        } catch (error) {
-            savedTheme = '';
-        }
-        if (savedTheme === 'dark') {
-            html.setAttribute('data-theme', 'dark');
-        }
-
-        var themeOptions = document.querySelectorAll('[data-account-theme]');
-        function syncThemeOptions() {
-            var theme = html.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
-            themeOptions.forEach(function (option) {
-                option.setAttribute('aria-pressed', option.dataset.accountTheme === theme ? 'true' : 'false');
-            });
-        }
-        syncThemeOptions();
-        themeOptions.forEach(function (option) {
-            option.addEventListener('click', function () {
-                var theme = option.dataset.accountTheme;
-                if (theme === 'dark') html.setAttribute('data-theme', 'dark');
-                else html.removeAttribute('data-theme');
-                syncThemeOptions();
-                try {
-                    localStorage.setItem('learningDesignerTheme', theme);
-                } catch (error) {
-                }
-            });
-        });
 
         function applySiteNavLanguage(lang) {
             document.querySelectorAll('[data-site-i18n-en]').forEach(function (el) {
@@ -1620,7 +1733,7 @@ function render_site_nav(string $active = '', bool $accountAvailable = true): vo
     <link rel="stylesheet" href="css/site-tooltip.css?v=<?= hash_file('sha256', __DIR__ . '/../css/site-tooltip.css') ?>" />
     <script defer src="js/site-tooltip.js?v=<?= hash_file('sha256', __DIR__ . '/../js/site-tooltip.js') ?>"></script>
     <link rel="stylesheet" href="css/account-preferences.css?v=<?= hash_file('sha256', __DIR__ . '/../css/account-preferences.css') ?>" />
-    <link rel="stylesheet" href="css/site-search.css?v=20260910-single-row" />
+    <link rel="stylesheet" href="css/site-search.css?v=20261124-rem" />
     <script src="js/site-search.js?v=20261101-updates-page"></script>
     <?php
 }
@@ -1640,6 +1753,9 @@ function site_breadcrumb_items(string $active = ''): array
         ],
         'updates' => [
             ['fr' => 'Nouveautés', 'en' => 'What’s new'],
+        ],
+        'mac-app' => [
+            ['fr' => 'App', 'en' => 'App'],
         ],
         'admin' => [
             ['fr' => 'Compte', 'en' => 'Account'],
@@ -1944,10 +2060,21 @@ function app_delete_design_document(PDO $db, int $ownerId, int $designId): bool
         $delete = $db->prepare('DELETE FROM learning_designs WHERE id = ? AND owner_user_id = ?');
         $delete->execute([$designId, $ownerId]);
         $deleted = $delete->rowCount() > 0;
+        if ($deleted) app_forget_design_sharing($db, $designId);
         $db->commit();
         return $deleted;
     } catch (Throwable $error) {
         if ($db->inTransaction()) $db->rollBack();
         throw $error;
     }
+}
+
+/**
+ * Retire les partages et la présence d’un scénario supprimé, dans la transaction de sa suppression.
+ * Le nettoyage reste explicite : un identifiant réattribué par MySQL ne doit jamais hériter d’un partage.
+ */
+function app_forget_design_sharing(PDO $db, int $designId): void
+{
+    $db->prepare('DELETE FROM design_collaborators WHERE design_id = ?')->execute([$designId]);
+    $db->prepare('DELETE FROM design_presence WHERE design_id = ?')->execute([$designId]);
 }

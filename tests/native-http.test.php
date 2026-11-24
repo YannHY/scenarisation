@@ -203,6 +203,69 @@ try {
     check(request('api/v1/get_design.php?design_id=' . $third, bearer: $tokens['access_token'], browser: false)['status'] === 404, 'HTTP native deletion removes the scenario');
     check(request('api/v1/delete_design.php', 'POST', ['design_id' => $third, 'expected_revision' => 1], $tokens['access_token'], true, false)['status'] === 200, 'HTTP native deletion is idempotent');
 
+    // Collaboration bêta : partage, présence et départ par les vraies routes.
+    $db->exec("INSERT INTO users (id,username,email,password_hash,role,status,email_verified_at)
+        VALUES (2,'Colleague','colleague@example.test','test','designer','active',CURRENT_TIMESTAMP)");
+    $colleague = exchange(native_issue_code($db, 2, native_validate_authorization(auth_query())))['access_token'];
+    $createAgain['client_uuid'] = '5c0f3b8e-2a4d-4e6f-8b1c-7d9e0a2b4c6d';
+    $sharedId = decoded(request('api/v1/save_design.php', 'POST', $createAgain, $tokens['access_token'], true, false))['design']['id'];
+    check(request('api/v1/collaborators.php?design_id=' . $sharedId, 'POST', [], $tokens['access_token'], true, false)['status'] === 405,
+        'HTTP member list requires GET');
+    check(request('api/v1/share_design.php', bearer: $tokens['access_token'], browser: false)['status'] === 405, 'HTTP sharing requires POST');
+    check(request('api/v1/share_design.php', 'POST', ['design_id' => $sharedId, 'email' => 'colleague@example.test'], $tokens['access_token'], browser: false)['status'] === 415,
+        'HTTP sharing requires JSON');
+    $unknown = request('api/v1/share_design.php', 'POST', ['design_id' => $sharedId, 'email' => 'nobody@example.test'], $tokens['access_token'], true, false);
+    check($unknown['status'] === 422 && decoded($unknown)['error'] === 'unknown_user', 'HTTP sharing reports unknown addresses');
+    $invited = request('api/v1/share_design.php', 'POST', ['design_id' => $sharedId, 'email' => 'Colleague@Example.test'], $tokens['access_token'], true, false);
+    check($invited['status'] === 200 && array_column(decoded($invited)['sharing']['members'], 'role') === ['owner', 'editor'], 'HTTP sharing invites a colleague');
+    $members = decoded(request('api/v1/collaborators.php?design_id=' . $sharedId, bearer: $colleague, browser: false))['sharing'];
+    check($members['canManage'] === false && !isset($members['members'][1]['email']), 'HTTP members hide addresses from collaborators');
+    $listed = decoded(request('api/v1/list_designs.php', bearer: $colleague, browser: false))['items'];
+    check($listed[0]['id'] === $sharedId && $listed[0]['role'] === 'editor' && $listed[0]['owner'] === 'Teacher', 'HTTP list includes shared scenarios');
+    $sharedInput = ['client_uuid' => '5c0f3b8e-2a4d-4e6f-8b1c-7d9e0a2b4c6d', 'design_id' => $sharedId, 'expected_revision' => 1, 'document' => $document];
+    check(decoded(request('api/v1/save_design.php', 'POST', $sharedInput, $colleague, true, false))['design']['revision'] === 2, 'HTTP collaborators save the shared scenario');
+    $signal = ['design_id' => $sharedId, 'client_id' => '1f0e4f6a-3c2b-4d5e-8f70-112233445566', 'focus' => 'activity:a-1:instructions'];
+    check(request('api/v1/presence.php', 'POST', $signal, $colleague, true, false)['status'] === 200, 'HTTP presence accepts a signal');
+    $signal['client_id'] = '2a1b3c4d-5e6f-4a7b-9c8d-0e1f2a3b4c5d'; $signal['focus'] = null;
+    $seen = decoded(request('api/v1/presence.php', 'POST', $signal, $tokens['access_token'], true, false))['presence'];
+    check($seen['revision'] === 2 && $seen['shared'] === true && $seen['participants'][0]['username'] === 'Colleague'
+        && $seen['participants'][0]['focus'] === 'activity:a-1:instructions', 'HTTP presence returns the revision and participants');
+    check(request('api/v1/delete_design.php', 'POST', ['design_id' => $sharedId, 'expected_revision' => 2], $colleague, true, false)['status'] === 403,
+        'HTTP collaborators cannot delete the scenario');
+    check(request('api/v1/collaborator_role.php', bearer: $tokens['access_token'], browser: false)['status'] === 405, 'HTTP role changes require POST');
+    $viewer = request('api/v1/collaborator_role.php', 'POST', ['design_id' => $sharedId, 'user_id' => 2, 'role' => 'viewer'], $tokens['access_token'], true, false);
+    check($viewer['status'] === 200 && array_column(decoded($viewer)['sharing']['members'], 'role') === ['owner', 'viewer'], 'HTTP owner restricts a colleague to viewing');
+    check(request('api/v1/collaborator_role.php', 'POST', ['design_id' => $sharedId, 'user_id' => 2, 'role' => 'editor'], $colleague, true, false)['status'] === 403,
+        'HTTP collaborators cannot change their rights');
+    $sharedInput['expected_revision'] = 2;
+    check(request('api/v1/save_design.php', 'POST', $sharedInput, $colleague, true, false)['status'] === 403, 'HTTP viewers cannot save');
+    check(decoded(request('api/v1/get_design.php?design_id=' . $sharedId, bearer: $colleague, browser: false))['design']['role'] === 'viewer',
+        'HTTP viewers still read the scenario');
+    $left = request('api/v1/unshare_design.php', 'POST', ['design_id' => $sharedId, 'user_id' => 2], $colleague, true, false);
+    check($left['status'] === 200 && decoded($left)['sharing'] === null, 'HTTP collaborators can leave the sharing');
+    check(request('api/v1/get_design.php?design_id=' . $sharedId, bearer: $colleague, browser: false)['status'] === 404, 'HTTP access ends after leaving');
+
+    // Collaboration depuis le site : mêmes règles avec la session web du propriétaire.
+    $webShare = request('design_sharing.php', 'POST', ['action' => 'share', 'design_id' => $sharedId, 'email' => 'colleague@example.test', 'role' => 'editor'], json: true);
+    check($webShare['status'] === 200 && array_column(decoded($webShare)['sharing']['members'], 'role') === ['owner', 'editor'], 'Web sharing invites a colleague');
+    check(decoded(request('design_sharing.php', 'POST', ['action' => 'members', 'design_id' => $sharedId], json: true))['sharing']['canManage'] === true,
+        'Web member list lets the owner manage');
+    $webPresence = decoded(request('design_sharing.php', 'POST', ['action' => 'presence', 'design_id' => $sharedId,
+        'client_id' => '3b2c1d4e-5f6a-4b7c-8d9e-0f1a2b3c4d5e', 'focus' => 'moment:m1:title'], json: true))['presence'];
+    check($webPresence['shared'] === true && $webPresence['revision'] === 2, 'Web presence returns the shared revision');
+    check(request('design_sharing.php', 'POST', ['action' => 'unknown', 'design_id' => $sharedId], json: true)['status'] === 422, 'Web sharing rejects unknown actions');
+    check(request('design_sharing.php', 'POST', ['action' => 'members', 'design_id' => $sharedId], json: true, browser: false)['status'] === 401,
+        'Web sharing requires a signed-in session');
+    $webDesign = decoded(request('get_design.php?design_id=' . $sharedId))['design'];
+    check($webDesign['role'] === 'owner' && $webDesign['shared'] === true, 'Web editor learns that the scenario is shared');
+    $colleagueSave = request('api/v1/save_design.php', 'POST', $sharedInput, $colleague, true, false);
+    check($colleagueSave['status'] === 200, 'Invited colleague saves again after a new invitation');
+    $staleWeb = request('save_design.php', 'POST', ['design_id' => $sharedId, 'expected_revision' => 2, 'document' => $document], json: true);
+    check($staleWeb['status'] === 409, 'Web save of a stale revision reports a conflict to merge');
+    check(request('design_sharing.php', 'POST', ['action' => 'unshare', 'design_id' => $sharedId, 'user_id' => 2], json: true)['status'] === 200,
+        'Web owner removes a colleague');
+    check(request('api/v1/presence.php', 'POST', $signal, $colleague, true, false)['status'] === 404, 'HTTP presence requires membership');
+
     $profile = request('profile.php');
     check(str_contains($profile['body'], 'native-session-row') && str_contains($profile['body'], 'Scénarisation pour Mac'), 'Profile displays connected applications');
     preg_match('/name="native_session_id" value="([a-f0-9]{32})"/', $profile['body'], $sessionMatch);

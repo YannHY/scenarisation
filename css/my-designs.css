@@ -48,13 +48,13 @@ html:not([data-theme="dark"]) body.designs-page .saved-title {
 
 .saved-table .saved-card-title {
   min-width: 220px;
-  font-size: 16px;
+  font-size: 1rem;
   margin: 0;
 }
 
 .saved-table .saved-card-meta {
   min-width: 145px;
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 
 .saved-table .saved-status {
@@ -97,7 +97,7 @@ body.designs-page .saved-table .btn-light:focus-visible {
 .saved-card-meta {
   margin: 0;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.68;
 }
 
@@ -110,7 +110,7 @@ body.designs-page .saved-table .btn-light:focus-visible {
   border: 1px solid var(--line);
   border-radius: 999px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 0.8125rem;
   background: var(--surface-light);
 }
 
@@ -137,7 +137,7 @@ body.designs-page .saved-table .btn-light:focus-visible {
   height: 32px;
   min-height: 32px;
   padding: 0;
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .saved-action-delete:hover,
@@ -193,4 +193,36 @@ body.designs-page .saved-table .btn-light:focus-visible {
     flex-direction: column;
     align-items: stretch;
   }
+}
+
+/* Collaboration : enseignants invités et scénarios partagés avec le compte. */
+.saved-card-team {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  line-height: 1.55;
+}
+
+.saved-card-team i {
+  margin-right: 6px;
+  color: var(--text-strong, #111);
+}
+
+.saved-shared {
+  margin-top: var(--page-section-gap);
+}
+
+html body.designs-page .saved-section-title,
+[data-theme="dark"] body.designs-page .saved-section-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 650;
+  letter-spacing: 0;
+  color: var(--text-strong);
+}
+
+.saved-section-intro {
+  margin: 6px 0 18px;
+  color: var(--muted);
+  line-height: var(--content-leading);
 }

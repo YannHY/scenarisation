@@ -167,7 +167,7 @@ body.admin-page .admin-feedback-panel {
   color: var(--muted);
   padding: 9px 14px;
   cursor: pointer;
-  font: 700 14px/1.2 var(--font-family);
+  font: 700 0.875rem/1.2 var(--font-family);
 }
 
 .admin-tab:hover,
@@ -217,7 +217,7 @@ body.admin-page .admin-feedback-panel {
 .admin-section-head p {
   margin: 0;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .admin-feedback-total {
@@ -227,7 +227,7 @@ body.admin-page .admin-feedback-panel {
   background: var(--surface-light);
   color: var(--text-subtle);
   padding: 7px 11px;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -241,7 +241,7 @@ body.admin-page .admin-feedback-panel {
   background: var(--surface-light);
   color: var(--text-subtle);
   padding: 7px 11px;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -269,7 +269,7 @@ body.admin-page .admin-feedback-panel {
   justify-content: space-between;
   gap: 12px;
   color: var(--text-subtle);
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 750;
 }
 
@@ -279,21 +279,21 @@ body.admin-page .admin-feedback-panel {
   height: 34px;
   place-items: center;
   color: var(--primary);
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 
 .admin-stat-card > strong {
   display: block;
   margin-top: 12px;
   color: var(--text-strong);
-  font-size: clamp(30px, 3vw, 40px);
+  font-size: clamp(1.875rem, 3vw, 2.5rem);
   line-height: 1;
 }
 
 .admin-stat-card p {
   margin: 10px 0 0;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 0.75rem;
   line-height: 1.45;
 }
 
@@ -317,7 +317,7 @@ body.admin-page .admin-feedback-panel {
 .admin-statistics-ranking h3 {
   margin: 0;
   color: var(--text-strong);
-  font-size: 16px;
+  font-size: 1rem;
 }
 
 .admin-stat-progress-list {
@@ -340,12 +340,12 @@ body.admin-page .admin-feedback-panel {
   justify-content: space-between;
   gap: 12px;
   color: var(--text-subtle);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .admin-stat-progress-row strong {
   color: var(--text-strong);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .admin-stat-progress-row strong small {
@@ -370,7 +370,7 @@ body.admin-page .admin-feedback-panel {
 .admin-stat-progress-row > small {
   min-width: 36px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 750;
   text-align: right;
 }
@@ -390,7 +390,7 @@ body.admin-page .admin-feedback-panel {
 .admin-statistics-ranking-head p {
   margin: 5px 0 0;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .admin-statistics-ranking-head > span {
@@ -399,7 +399,7 @@ body.admin-page .admin-feedback-panel {
   background: var(--surface-light);
   color: var(--text-subtle);
   padding: 7px 11px;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -420,7 +420,7 @@ body.admin-page .admin-feedback-panel {
 
 .admin-statistics-rank {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 800;
   text-align: center;
 }
@@ -440,23 +440,23 @@ body.admin-page .admin-feedback-panel {
 
 .admin-statistics-creator strong {
   color: var(--text-strong);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .admin-statistics-creator small {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 
 .admin-statistics-design-count {
   color: var(--text-strong);
-  font-size: 15px;
+  font-size: 0.9375rem;
   white-space: nowrap;
 }
 
 .admin-statistics-design-count small {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 650;
 }
 
@@ -484,17 +484,17 @@ body.admin-page .admin-feedback-panel {
 }
 
 .admin-feedback-stat i {
-  font-size: 23px;
+  font-size: 1.4375rem;
 }
 
 .admin-feedback-stat strong {
   color: currentColor;
-  font-size: 22px;
+  font-size: 1.375rem;
 }
 
 .admin-feedback-stat span {
   color: var(--text-strong);
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 700;
 }
 
@@ -534,7 +534,7 @@ body.admin-page .admin-feedback-panel {
   display: grid;
   gap: 6px;
   color: var(--text-strong);
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -547,7 +547,7 @@ body.admin-page .admin-feedback-panel {
   background: var(--panel);
   color: var(--text-strong);
   padding: 8px 10px;
-  font: 500 13px/1.3 var(--font-family);
+  font: 500 0.8125rem/1.3 var(--font-family);
 }
 
 .admin-filter-field {
@@ -572,7 +572,7 @@ body.admin-page .admin-feedback-panel {
   min-width: 112px;
   margin: 0 0 11px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
   text-align: right;
   white-space: nowrap;
@@ -605,7 +605,7 @@ body.admin-page .admin-feedback-panel {
   background: var(--panel);
   color: var(--text-strong);
   padding: 5px 30px 5px 9px;
-  font: 600 12px/1.2 var(--font-family);
+  font: 600 0.75rem/1.2 var(--font-family);
 }
 
 .admin-role-save {
@@ -649,7 +649,7 @@ body.admin-page .admin-feedback-panel {
   background: #f4f4f2;
   color: #161616;
   padding: 6px 10px;
-  font: 700 12px/1.2 var(--font-family);
+  font: 700 0.75rem/1.2 var(--font-family);
   cursor: pointer;
   white-space: nowrap;
 }
@@ -723,7 +723,7 @@ body.admin-page .admin-feedback-panel {
 .admin-manager-permission-options legend {
   color: var(--text-strong);
   padding: 0 6px;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 750;
 }
 
@@ -732,7 +732,7 @@ body.admin-page .admin-feedback-panel {
   align-items: flex-start;
   gap: 8px;
   color: var(--text-strong);
-  font-size: 13px;
+  font-size: 0.8125rem;
   line-height: 1.35;
 }
 
@@ -751,7 +751,7 @@ body.admin-page .admin-feedback-panel {
   background: #1d1d1b;
   color: #fff;
   padding: 8px 13px;
-  font: 700 12px/1.2 var(--font-family);
+  font: 700 0.75rem/1.2 var(--font-family);
   cursor: pointer;
 }
 
@@ -818,7 +818,7 @@ body.admin-page .admin-feedback-panel {
   gap: 7px;
   border-radius: 999px;
   padding: 6px 9px;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 750;
   white-space: nowrap;
 }
@@ -853,7 +853,7 @@ body.admin-page .inline-grid > div {
   width: min(var(--content-shell-width), calc(100vw - var(--content-shell-gutter)));
   margin: 40px auto 0;
   color: var(--muted);
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 600;
   line-height: 1.4;
 }
@@ -864,7 +864,7 @@ body.setup-page .site-breadcrumb {
 }
 body.login-page .site-breadcrumb {
   width: min(1040px, calc(100vw - var(--content-shell-gutter)));
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 650;
 }
 body.forgot-password-page .site-breadcrumb,
@@ -899,7 +899,7 @@ body.legal-page .site-breadcrumb {
   justify-content: center;
   width: 24px;
   height: 24px;
-  font-size: 17px;
+  font-size: 1.0625rem;
 }
 .site-breadcrumb a:hover,
 .site-breadcrumb a:focus-visible {
@@ -973,11 +973,11 @@ body.login-page .account-shell.with-nav {
   box-shadow: none;
 }
 .login-layout .account-card > h1 {
-  font-size: clamp(34px, 3vw, 40px);
+  font-size: clamp(2.125rem, 3vw, 2.5rem);
   line-height: 1.08;
 }
 .login-layout .account-card > .account-copy {
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 .login-layout .account-card::before {
   position: absolute;
@@ -999,7 +999,7 @@ html body.login-page .login-intro h2 {
   margin: 0;
   color: var(--heading-ink);
   font-family: var(--font-family);
-  font-size: clamp(28px, 3.1vw, 40px);
+  font-size: clamp(1.75rem, 3.1vw, 2.5rem);
   font-weight: 700;
   line-height: 1.08;
   letter-spacing: 0.03em;
@@ -1009,7 +1009,7 @@ html body.login-page .login-intro h2 {
   max-width: 450px;
   margin: 18px 0 0;
   color: var(--muted);
-  font-size: 18px;
+  font-size: 1.125rem;
   line-height: 1.55;
 }
 .login-benefits {
@@ -1030,12 +1030,12 @@ html body.login-page .login-intro h2 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 1.5rem;
+  height: 1.5rem;
   border-radius: 8px;
   background: #f0f0f0;
   color: #111;
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 .login-learning-rhythm {
   display: grid;
@@ -1123,7 +1123,7 @@ body.signup-page .account-card {
   color: var(--primary);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 h1, h2 {
@@ -1165,7 +1165,7 @@ h1, h2 {
 .account-form label,
 .field label {
   font-weight: 700;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 .account-form input,
 .account-form select {
@@ -1206,7 +1206,7 @@ h1, h2 {
   margin-top: -2px;
   padding: 4px 0;
   color: var(--primary);
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 700;
   text-decoration: none;
 }
@@ -1253,7 +1253,7 @@ h1, h2 {
 .account-privacy-notice {
   margin: 18px 0 0;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 0.75rem;
   line-height: 1.55;
 }
 .account-privacy-notice a,
@@ -1296,7 +1296,7 @@ h1, h2 {
 .account-signup-action p {
   margin: 0 0 12px;
   color: var(--text);
-  font-size: 16px;
+  font-size: 1rem;
   line-height: 1.4;
   font-weight: 700;
 }
@@ -1322,12 +1322,12 @@ h1, h2 {
   text-decoration: none;
 }
 .account-signup-action .account-secondary-button {
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.5;
   font-weight: 600;
 }
 .account-signup-action .account-secondary-button i {
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 .account-topbar {
   display: flex;
@@ -1415,7 +1415,7 @@ body.profile-page .account-topbar {
 }
 .profile-stat-value {
   color: var(--primary);
-  font-size: 30px;
+  font-size: 1.875rem;
   line-height: 1;
   font-weight: 800;
 }
@@ -1425,7 +1425,7 @@ body.profile-page .account-topbar {
 }
 .profile-subtitle {
   margin: 0 0 10px;
-  font-size: 16px;
+  font-size: 1rem;
 }
 .profile-empty {
   margin: 0;
@@ -1446,7 +1446,7 @@ body.profile-page .account-topbar {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 .profile-publications-table th,
 .profile-publications-table td {
@@ -1456,7 +1456,7 @@ body.profile-page .account-topbar {
 }
 .profile-publications-table th {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 .profile-publications-table tbody tr {
@@ -1472,7 +1472,7 @@ body.profile-page .account-topbar {
 .profile-publication-date {
   min-width: 150px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 .profile-publication-action-cell {
   text-align: center;
@@ -1502,13 +1502,13 @@ body.profile-page .account-topbar {
 }
 .profile-publication-main h4 {
   margin: 0 0 6px;
-  font-size: 16px;
+  font-size: 1rem;
 }
 .profile-publication-main a {
   display: inline-block;
   max-width: 100%;
   color: var(--primary);
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 500;
   overflow-wrap: anywhere;
   text-decoration: none;
@@ -1516,10 +1516,10 @@ body.profile-page .account-topbar {
 .profile-publication-main p {
   margin: 8px 0 0;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 0.75rem;
 }
 .profile-cli .profile-publication-main p {
-  font-size: 11px;
+  font-size: 0.6875rem;
 }
 .profile-cli .profile-publication-main p code {
   font-size: inherit;
@@ -1539,7 +1539,7 @@ body.profile-page #cli_token_name::placeholder {
   border-radius: 50%;
   background: #fff6f7;
   color: var(--danger);
-  font-size: 15px;
+  font-size: 0.9375rem;
   font: inherit;
   cursor: pointer;
   display: inline-flex;
@@ -1575,7 +1575,7 @@ th, td {
   padding: 12px 10px;
   border-bottom: 1px solid var(--line);
   text-align: left;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 th {
   color: var(--muted);
@@ -1940,7 +1940,7 @@ body.profile-page .profile-settings .panel {
 
 body.profile-page .profile-settings h3 {
   margin: 0;
-  font-size: 18px;
+  font-size: 1.125rem;
 }
 
 /* White actions stay readable in both themes, including the scenario counter. */
@@ -1996,7 +1996,7 @@ body.profile-page .danger-panel .account-copy {
 }
 
 body.profile-page .danger-panel .account-copy {
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 body.profile-page .danger-panel .account-copy,
@@ -2115,7 +2115,7 @@ body.models-page a:focus-visible {
   color: var(--primary);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 800;
 }
 
@@ -2129,7 +2129,7 @@ body.models-page a:focus-visible {
   margin: 0 0 28px;
   color: var(--muted);
   line-height: var(--content-leading, 1.72);
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 
 .models-stats {
@@ -2145,7 +2145,7 @@ body.models-page a:focus-visible {
   border: 1px solid rgba(15, 23, 42, 0.12);
   border-radius: 999px;
   padding: 5px 12px;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 650;
   color: var(--text-body);
 }
@@ -2161,7 +2161,7 @@ body.models-page a:focus-visible {
 
 html body .models-howto h2 {
   margin: 0 0 20px;
-  font-size: 16px;
+  font-size: 1rem;
 }
 
 .models-howto ol {
@@ -2170,7 +2170,7 @@ html body .models-howto h2 {
   margin: 0;
   padding-left: 22px;
   line-height: 1.75;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .models-family {
@@ -2186,18 +2186,18 @@ html body .models-howto h2 {
 
 html body .models-family-head h2 {
   margin: 0;
-  font-size: 20px;
+  font-size: 1.25rem;
 }
 
 .models-family-icon {
   color: var(--primary);
-  font-size: 18px;
+  font-size: 1.125rem;
 }
 
 .models-family-desc {
   margin: 0 0 30px;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: var(--content-leading, 1.72);
 }
 
@@ -2220,14 +2220,14 @@ html body .models-family-head h2 {
 
 html body .model-card h3 {
   margin: 0;
-  font-size: 18px;
+  font-size: 1.125rem;
   line-height: 1.38;
 }
 
 .model-card-summary {
   margin: 0;
   color: var(--text-body);
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.72;
 }
 
@@ -2244,7 +2244,7 @@ html body .model-card h3 {
   border: 1px solid rgba(15, 23, 42, 0.12);
   border-radius: 999px;
   padding: 4px 11px;
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 650;
   color: var(--muted);
 }
@@ -2258,7 +2258,7 @@ html body .model-card h3 {
 }
 
 .model-outline-moment {
-  font-size: 13px;
+  font-size: 0.8125rem;
   line-height: 1.45;
 }
 
@@ -2280,7 +2280,7 @@ html body .model-card h3 {
   gap: 5px;
   border-radius: 5px;
   padding: 2px 7px;
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 650;
   color: #111827;
   background: var(--act-color, #e5e7eb);
@@ -2296,7 +2296,7 @@ html body .model-card h3 {
 
 .model-todo {
   margin: 0;
-  font-size: 12.5px;
+  font-size: 0.78125rem;
   color: var(--muted);
   line-height: 1.72;
 }
@@ -2317,13 +2317,13 @@ html body .model-card h3 {
   width: 100%;
   min-height: 38px;
   padding: 8px 7px;
-  font-size: 12px;
+  font-size: 0.75rem;
   gap: 7px;
 }
 
 .model-card-actions .btn-icon-inline {
-  width: 14px;
-  font-size: 11.5px;
+  width: 0.875rem;
+  font-size: 0.71875rem;
 }
 
 body.model-library-preview-open {
@@ -2354,7 +2354,7 @@ body.model-library-preview-open {
 .model-library-preview-actions .btn {
   min-height: 36px;
   padding: 7px 11px;
-  font-size: 12.5px;
+  font-size: 0.78125rem;
 }
 
 [data-theme="dark"] body.models-page {
@@ -2618,7 +2618,7 @@ body.model-library-preview-open {
   gap: 10px;
   margin-bottom: 16px;
   color: var(--text-strong);
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 600;
 }
 
@@ -2686,6 +2686,15 @@ body.admin-page .admin-role-form select {
   padding-right: 30px;
 }
 
+/* Le raccourci « background » du thème sombre des formulaires réinitialise la répétition : on la refixe. */
 [data-theme="dark"] body.admin-page select {
+  background-position: right 12px center;
+  background-repeat: no-repeat;
+  background-size: 12px 8px;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='m1 1 5 5 5-5' fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.8'/%3E%3C/svg%3E");
 }
+
+[data-theme="dark"] body.admin-page .admin-role-form select {
+  background-position: right 10px center;
+}
+

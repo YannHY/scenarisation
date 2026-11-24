@@ -16,9 +16,10 @@ app_start_session();
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="css/interface.css?v=20260905-subtle-focus">
-    <link rel="stylesheet" href="css/account-ui.css?v=20260906-highlight">
-    <link rel="stylesheet" href="css/account-pages.css?v=20260912-breadcrumb-alignment">
+    <link rel="stylesheet" href="css/interface.css?v=20261124-rem">
+    <link rel="stylesheet" href="css/account-ui.css?v=20261124-rem">
+    <link rel="stylesheet" href="css/account-pages.css?v=20261124-rem">
+<?php render_refined_styles(); ?>
 </head>
 <body class="legal-page">
 <?php render_site_nav('privacy'); ?>
@@ -68,7 +69,7 @@ app_start_session();
         <p>Pour limiter les envois automatisés, l’application produit une empreinte technique pseudonyme à partir de l’adresse IP et du type de navigateur. L’adresse IP et le type de navigateur ne sont pas conservés dans la base de retours. L’empreinte change chaque jour et est effacée des retours après 24 heures.</p>
 
         <h3>Préférences et brouillon dans le navigateur</h3>
-        <p>Scénarisation utilise le stockage local du navigateur pour mémoriser la langue, le thème clair ou sombre, certains réglages d’affichage et le scénario en cours d’édition. Le brouillon est séparé entre l’espace invité et le compte connecté. Ces informations restent normalement sur l’appareil jusqu’à leur remplacement ou leur suppression depuis les réglages du navigateur.</p>
+        <p>Scénarisation utilise le stockage local du navigateur pour mémoriser la langue, le mode d’affichage (clair, chaud ou sombre), la taille et l’espacement du texte, la réduction des animations et le scénario en cours d’édition. Le brouillon est séparé entre l’espace invité et le compte connecté. Ces informations restent normalement sur l’appareil jusqu’à leur remplacement ou leur suppression depuis les réglages du navigateur.</p>
 
         <h2>Cookies et traceurs</h2>
         <p>Un cookie de session est utilisé pour maintenir la connexion, protéger l’accès au compte, sécuriser les requêtes et délivrer le jeton temporaire du formulaire d’avis. Il est configuré pour ne pas être accessible au JavaScript, n’est envoyé que sur une connexion sécurisée lorsque HTTPS est actif, et expire à la fermeture du navigateur. Il est strictement nécessaire au service.</p>

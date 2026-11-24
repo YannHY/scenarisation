@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/lib/bootstrap.php';
+require_once __DIR__ . '/lib/native-collaboration.php';
 
 $user = require_login_page();
 $db = app_db();
@@ -22,6 +23,17 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             ? 'Scenario deleted.'
             : 'Scenario not found.';
         $flashKind = $deleted ? 'success' : 'warning';
+    } elseif ($action === 'leave' && $designId > 0) {
+        try {
+            native_api_unshare($db, (int)$user['id'], ['design_id' => $designId, 'user_id' => (int)$user['id']]);
+            $flashMessage = 'Vous avez quitté ce scénario partagé. Son propriétaire le conserve.';
+            $flashMessageEn = 'You left this shared scenario. Its owner keeps it.';
+            $flashKind = 'success';
+        } catch (NativeRequestError $error) {
+            $flashMessage = 'Ce scénario partagé est introuvable.';
+            $flashMessageEn = 'This shared scenario could not be found.';
+            $flashKind = 'warning';
+        }
     } elseif ($action === 'unlist' && $designId > 0) {
         $stmt = $db->prepare('UPDATE learning_designs
             SET is_listed = 0, listed_at = NULL
@@ -55,6 +67,30 @@ $stmt = $db->prepare('SELECT id, title, share_token, is_published, is_listed, up
 $stmt->execute([(int)$user['id']]);
 $items = $stmt->fetchAll();
 
+// Enseignants invités sur chaque scénario du compte (comptes actifs et vérifiés seulement).
+$collaboratorCounts = [];
+$members = $db->prepare('SELECT c.design_id, u.status, u.email_verified_at FROM design_collaborators c
+    JOIN users u ON u.id = c.user_id JOIN learning_designs d ON d.id = c.design_id WHERE d.owner_user_id = ?');
+$members->execute([(int)$user['id']]);
+foreach ($members->fetchAll() as $member) {
+    if (!native_collaboration_verified($member)) continue;
+    $collaboratorCounts[(int)$member['design_id']] = ($collaboratorCounts[(int)$member['design_id']] ?? 0) + 1;
+}
+
+// Scénarios partagés avec ce compte, accessibles tant que son adresse reste vérifiée.
+$sharedItems = [];
+$self = $db->prepare('SELECT status, email_verified_at FROM users WHERE id = ?');
+$self->execute([(int)$user['id']]);
+$selfRow = $self->fetch();
+if ($selfRow && native_collaboration_verified($selfRow)) {
+    $shared = $db->prepare('SELECT d.id, d.title, d.updated_at, c.role, u.username AS owner_name
+        FROM design_collaborators c JOIN learning_designs d ON d.id = c.design_id
+        JOIN users u ON u.id = d.owner_user_id
+        WHERE c.user_id = ? AND d.owner_user_id <> ? ORDER BY d.updated_at DESC, d.id DESC');
+    $shared->execute([(int)$user['id'], (int)$user['id']]);
+    $sharedItems = $shared->fetchAll();
+}
+
 function e(string $value): string
 {
     return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
@@ -71,11 +107,12 @@ function e(string $value): string
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="css/interface.css?v=20260905-subtle-focus" />
-    <link rel="stylesheet" href="css/account-ui.css?v=20260906-highlight" />
-    <link rel="stylesheet" href="css/account-pages.css?v=20260910-saved-table" />
-    <link rel="stylesheet" href="css/my-designs.css?v=20260910-no-heading-divider" />
+    <link rel="stylesheet" href="css/interface.css?v=20261124-rem" />
+    <link rel="stylesheet" href="css/account-ui.css?v=20261124-rem" />
+    <link rel="stylesheet" href="css/account-pages.css?v=20261124-rem" />
+    <link rel="stylesheet" href="css/my-designs.css?v=<?= hash_file('sha256', __DIR__ . '/css/my-designs.css') ?>" />
     <link rel="stylesheet" href="css/provenance.css?v=<?= hash_file('sha256', __DIR__ . '/css/provenance.css') ?>" />
+      <?php render_refined_styles(); ?>
   </head>
   <body class="designs-page">
     <?php render_site_nav('saves'); ?>
@@ -115,6 +152,14 @@ function e(string $value): string
                 <?php $itemProvenance = app_design_provenance_payload($item); ?>
                 <?php if ($itemProvenance): ?>
                   <p class="saved-card-provenance"><i class="fa-solid fa-code-branch" aria-hidden="true"></i><span data-site-i18n-en="Derived from" data-site-i18n-fr="Dérivé de">Dérivé de</span> « <?= e((string)$itemProvenance['sourceTitle']) ?> » <span data-site-i18n-en="by" data-site-i18n-fr="par">par</span> <?= e((string)$itemProvenance['sourceAuthor']) ?><?php if ($itemProvenance['sourceLicenseLabel']): ?> · <?= e((string)$itemProvenance['sourceLicenseLabel']) ?><?php endif; ?></p>
+                <?php endif; ?>
+                <?php $collaboratorCount = $collaboratorCounts[(int)$item['id']] ?? 0; ?>
+                <?php if ($collaboratorCount > 0): ?>
+                  <?php
+                    $teamFr = $collaboratorCount === 1 ? 'Partagé avec 1 enseignant' : 'Partagé avec ' . $collaboratorCount . ' enseignants';
+                    $teamEn = $collaboratorCount === 1 ? 'Shared with 1 teacher' : 'Shared with ' . $collaboratorCount . ' teachers';
+                  ?>
+                  <p class="saved-card-team"><i class="fa-solid fa-user-group" aria-hidden="true"></i><span data-site-i18n-en="<?= e($teamEn) ?>" data-site-i18n-fr="<?= e($teamFr) ?>"><?= e($teamFr) ?></span></p>
                 <?php endif; ?>
               </td>
               <td class="saved-card-meta"><?= e((string)$item['updated_at']) ?></td>
@@ -187,6 +232,55 @@ function e(string $value): string
           </div>
         </section>
       <?php endif; ?>
+      <?php if ($sharedItems): ?>
+        <section class="saved-shared" aria-labelledby="saved-shared-title">
+          <h2 id="saved-shared-title" class="saved-section-title" data-site-i18n-en="Shared with me" data-site-i18n-fr="Partagés avec moi">Partagés avec moi</h2>
+          <p class="saved-section-intro" data-site-i18n-en="Scenarios that colleagues invited you to. Their owner alone can delete them." data-site-i18n-fr="Scénarios auxquels des collègues vous ont invité. Seul leur propriétaire peut les supprimer.">Scénarios auxquels des collègues vous ont invité. Seul leur propriétaire peut les supprimer.</p>
+          <div class="saved-table-scroll">
+          <table class="profile-publications-table saved-table" aria-labelledby="saved-shared-title">
+            <thead><tr>
+              <th scope="col" data-site-i18n-en="Scenario" data-site-i18n-fr="Scénario">Scénario</th>
+              <th scope="col" data-site-i18n-en="Last updated" data-site-i18n-fr="Dernière mise à jour">Dernière mise à jour</th>
+              <th scope="col" data-site-i18n-en="Rights" data-site-i18n-fr="Droits">Droits</th>
+              <th scope="col" data-site-i18n-en="Actions" data-site-i18n-fr="Actions">Actions</th>
+            </tr></thead>
+            <tbody>
+            <?php foreach ($sharedItems as $item): ?>
+              <?php $canEdit = native_collaborator_role($item['role']) === 'editor'; ?>
+              <tr>
+                <td>
+                  <h3 class="saved-card-title"><?= e((string)$item['title']) ?></h3>
+                  <p class="saved-card-team"><i class="fa-solid fa-user-group" aria-hidden="true"></i><span data-site-i18n-en="Shared by" data-site-i18n-fr="Partagé par">Partagé par</span>&nbsp;<?= e((string)$item['owner_name']) ?></p>
+                </td>
+                <td class="saved-card-meta"><?= e((string)$item['updated_at']) ?></td>
+                <td>
+                  <span class="saved-status"><i class="<?= $canEdit ? 'fa-solid fa-pen' : 'fa-regular fa-eye' ?>" aria-hidden="true"></i><span data-site-i18n-en="<?= $canEdit ? 'Can edit' : 'Can view' ?>" data-site-i18n-fr="<?= $canEdit ? 'Peut modifier' : 'Peut consulter' ?>"><?= $canEdit ? 'Peut modifier' : 'Peut consulter' ?></span></span>
+                </td>
+                <td><div class="saved-card-actions">
+                  <a class="btn btn-primary saved-action-btn" href="designer.php?remote_design_id=<?= (int)$item['id'] ?>"
+                    aria-label="Ouvrir le scénario" title="Ouvrir le scénario"
+                    data-site-i18n-attr="aria-label,title" data-site-i18n-en="Open scenario" data-site-i18n-fr="Ouvrir le scénario">
+                    <i class="fa-regular fa-folder-open" aria-hidden="true"></i>
+                  </a>
+                  <form class="saved-action-confirm" method="post" action="my-designs.php"
+                    data-confirm-fr="Quitter ce scénario partagé ? Il disparaîtra de votre liste ; son propriétaire le conserve et pourra vous inviter de nouveau."
+                    data-confirm-en="Leave this shared scenario? It will disappear from your list; its owner keeps it and can invite you again.">
+                    <input type="hidden" name="action" value="leave" />
+                    <input type="hidden" name="design_id" value="<?= (int)$item['id'] ?>" />
+                    <button class="btn btn-light saved-action-btn saved-action-delete" type="submit"
+                      aria-label="Quitter le partage" title="Quitter le partage"
+                      data-site-i18n-attr="aria-label,title" data-site-i18n-en="Leave shared scenario" data-site-i18n-fr="Quitter le partage">
+                      <i class="fa-solid fa-arrow-right-from-bracket" aria-hidden="true"></i>
+                    </button>
+                  </form>
+                </div></td>
+              </tr>
+            <?php endforeach; ?>
+            </tbody>
+          </table>
+          </div>
+        </section>
+      <?php endif; ?>
     </main>
     <?php render_site_footer(); ?>
     <dialog id="saved-action-dialog" class="modal account-confirm-dialog"
@@ -214,15 +308,16 @@ function e(string $value): string
             event.preventDefault();
             if (pendingForm) return;
             var english = document.documentElement.lang === 'en';
-            var deleting = form.elements.action.value === 'delete';
-            dialog.querySelector('h2').textContent = deleting
-              ? (english ? 'Delete scenario' : 'Supprimer le scénario')
-              : (english ? 'Revoke share link' : 'Révoquer le lien de partage');
+            var action = form.elements.action.value;
+            var labels = {
+              'delete': [english ? 'Delete scenario' : 'Supprimer le scénario', english ? 'Delete' : 'Supprimer'],
+              'leave': [english ? 'Leave shared scenario' : 'Quitter le partage', english ? 'Leave' : 'Quitter'],
+              'unlist': [english ? 'Remove from shared catalog' : 'Retirer des partages', english ? 'Remove' : 'Retirer']
+            }[action] || [english ? 'Revoke share link' : 'Révoquer le lien de partage', english ? 'Revoke link' : 'Révoquer le lien'];
+            dialog.querySelector('h2').textContent = labels[0];
             dialog.querySelector('p').textContent = english ? form.dataset.confirmEn : form.dataset.confirmFr;
             cancel.textContent = english ? 'Cancel' : 'Annuler';
-            confirm.textContent = deleting
-              ? (english ? 'Delete' : 'Supprimer')
-              : (english ? 'Revoke link' : 'Révoquer le lien');
+            confirm.textContent = labels[1];
             pendingForm = form;
             pendingSubmitter = event.submitter;
             previousFocus = event.submitter || document.activeElement;

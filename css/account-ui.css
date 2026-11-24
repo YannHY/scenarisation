@@ -14,7 +14,7 @@
   border-radius: 999px;
   background: transparent;
   color: #ffffff;
-  font-size: 16px;
+  font-size: 1rem;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -43,7 +43,7 @@
   background: transparent;
   color: #ffffff;
   font-family: var(--font-family);
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
   display: inline-flex;
@@ -108,7 +108,7 @@
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.92);
   color: var(--text-subtle);
-  font-size: 13px;
+  font-size: 0.8125rem;
   line-height: 1;
   box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
 }
@@ -150,8 +150,8 @@
 }
 
 .account-menu-icon {
-  width: 16px;
-  flex: 0 0 16px;
+  width: 1rem;
+  flex: 0 0 1rem;
   text-align: center;
 }
 
@@ -220,7 +220,7 @@ body.site-search-is-open {
   margin: 0;
   color: var(--text-strong, #253245);
   font-family: var(--font-family, sans-serif);
-  font-size: 22px;
+  font-size: 1.375rem;
   line-height: 1.2;
 }
 
@@ -266,7 +266,7 @@ body.site-search-is-open {
   border-radius: 14px;
   background: var(--surface-input, #ffffff);
   color: var(--text-strong, #1e293b);
-  font: 500 16px/1.4 var(--font-family, sans-serif);
+  font: 500 1rem/1.4 var(--font-family, sans-serif);
 }
 
 .site-search-field input::placeholder {
@@ -282,14 +282,14 @@ body.site-search-is-open {
   border-radius: 6px;
   background: var(--panel-2, #f8fafc);
   color: var(--text-subtle, #64748b);
-  font: 600 11px/1.4 var(--font-family, sans-serif);
+  font: 600 0.6875rem/1.4 var(--font-family, sans-serif);
 }
 
 .site-search-status {
   min-height: 21px;
   margin: 13px 22px 10px;
   color: var(--text-subtle, #64748b);
-  font-size: 13px;
+  font-size: 0.8125rem;
   line-height: 1.55;
 }
 
@@ -325,7 +325,7 @@ body.site-search-is-open {
 
 .site-search-result-category {
   color: var(--primary, #2f5bea);
-  font-size: 11px;
+  font-size: 0.6875rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -333,7 +333,7 @@ body.site-search-is-open {
 
 .site-search-result-title {
   color: var(--text-strong, #253245);
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 750;
   line-height: 1.35;
 }
@@ -342,7 +342,7 @@ body.site-search-is-open {
   display: -webkit-box;
   overflow: hidden;
   color: var(--text-body, #475569);
-  font-size: 13px;
+  font-size: 0.8125rem;
   line-height: 1.55;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -429,7 +429,7 @@ mark.site-search-highlight {
 .publish-modal-intro {
   margin: 6px 0 18px;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.55;
 }
 
@@ -468,21 +468,21 @@ mark.site-search-highlight {
 .publish-option-heading h3 {
   margin: 0;
   color: var(--text, #1e2430);
-  font-size: 15px;
+  font-size: 0.9375rem;
   line-height: 1.35;
 }
 
 .publish-option-heading p {
   margin: 3px 0 0;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 0.8125rem;
   line-height: 1.5;
 }
 
 .publish-link-status {
   margin: 13px 0 0 45px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .publish-url-row {
@@ -496,7 +496,7 @@ mark.site-search-highlight {
   flex: 1;
   min-width: 0;
   padding: 9px 12px;
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-family: ui-monospace, monospace;
   border: 1px solid var(--border, #d0d7e2);
   border-radius: 8px;
@@ -524,7 +524,7 @@ mark.site-search-highlight {
   display: block;
   margin-bottom: 7px;
   color: var(--text, #1e2430);
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 700;
 }
 
@@ -536,7 +536,7 @@ mark.site-search-highlight {
   background: var(--input-bg, #f5f7fb);
   color: var(--text, #1e2430);
   font: inherit;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .publish-license-choice select:focus {
@@ -549,7 +549,7 @@ mark.site-search-highlight {
 .publish-license-warning {
   margin: 7px 0 0;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 0.75rem;
   line-height: 1.5;
 }
 
@@ -591,19 +591,19 @@ mark.site-search-highlight {
 }
 
 .publish-listing-choice strong {
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .publish-listing-choice small {
   margin-top: 3px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 0.8125rem;
   line-height: 1.45;
 }
 
 .publish-catalog-link {
   margin: -2px 16px 14px 48px;
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .publish-catalog-link a {

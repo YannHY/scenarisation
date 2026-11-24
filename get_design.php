@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/lib/bootstrap.php';
+require_once __DIR__ . '/lib/native-collaboration.php';
 
 $user = require_login_json();
 $db = app_db();
@@ -9,10 +10,16 @@ if ($designId <= 0) {
     app_json_response(['success' => false, 'error' => 'Identifiant invalide.'], 422);
 }
 
+// Le propriétaire et les enseignants invités lisent le scénario ; les autres comptes reçoivent 404.
+$access = native_design_access($db, (int)$user['id'], $designId);
+if (!$access) {
+    app_json_response(['success' => false, 'error' => 'Production introuvable.'], 404);
+}
+
 $stmt = $db->prepare("SELECT id, title, document_json, updated_at, revision,
     source_design_id, root_design_id, source_title, source_author_name, source_license_code, derived_at
     FROM learning_designs WHERE id = ? AND owner_user_id = ? LIMIT 1");
-$stmt->execute([$designId, (int)$user['id']]);
+$stmt->execute([$designId, $access['owner_user_id']]);
 $row = $stmt->fetch();
 if (!$row) {
     app_json_response(['success' => false, 'error' => 'Production introuvable.'], 404);
@@ -32,6 +39,9 @@ app_json_response([
         'updatedAt' => (string)$row['updated_at'],
         'revision' => (int)$row['revision'],
         'provenance' => $provenance,
+        'role' => $access['role'],
+        'owner' => $access['owner_name'],
+        'shared' => native_design_collaborators($db, $designId) !== [],
         'document' => $document,
     ],
 ]);

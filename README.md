@@ -173,6 +173,7 @@ node scripts/build-cli-competency-catalog.cjs
 node --test tests/*.test.cjs
 php tests/server-state.test.php
 php tests/native-sync.test.php
+php tests/native-collaboration.test.php
 php tests/native-http.test.php
 php tests/native-concurrency.test.php
 ```

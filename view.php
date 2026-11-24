@@ -890,10 +890,10 @@ $displayDesignedMinutes = $designedMinutes > 0 ? $designedMinutes : $totalMinute
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="assets/favicon.svg?v=20260906-scenarisation" type="image/svg+xml" sizes="any">
   <title><?= esc($title) ?> — Scénarisation</title>
-  <link rel="stylesheet" href="css/interface.css?v=20260910-public-cursor">
-  <link rel="stylesheet" href="css/view-footer.css?v=20260910">
+  <link rel="stylesheet" href="css/interface.css?v=20261124-rem">
+  <link rel="stylesheet" href="css/view-footer.css?v=20261124-rem">
   <link rel="stylesheet" href="css/view-toolbar.css?v=20260910">
-  <link rel="stylesheet" href="css/view-links.css?v=20260910">
+  <link rel="stylesheet" href="css/view-links.css?v=20261124-rem">
   <link rel="stylesheet" href="css/provenance.css?v=<?= hash_file('sha256', __DIR__ . '/css/provenance.css') ?>">
   <link rel="stylesheet" href="assets/vendor/katex/katex.min.css?v=0.16.27">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
@@ -1202,6 +1202,7 @@ $displayDesignedMinutes = $designedMinutes > 0 ? $designedMinutes : $totalMinute
       .session-card { break-inside: avoid; }
     }
   </style>
+<?php render_refined_styles(); ?>
 </head>
 <body class="published-design-page">
 <main class="page">

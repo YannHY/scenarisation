@@ -13,6 +13,70 @@
   let saveInFlight = null;
   let remoteLoadInFlight = null;
   let autoSaveHideTimer = null;
+  let mergeRetryTimer = null;
+
+  /* Collaboration : droits sur le scénario ouvert et dernière version commune avec le site.
+     Cette version sert de base à la fusion à trois voies lorsqu’un collègue a enregistré entre-temps. */
+  const collaboration = { designId: 0, role: "owner", owner: "", shared: false, active: false };
+  const BASE_STORAGE_PREFIX = "ld_remote_base_v1_";
+  const SHARED_AUTOSAVE_DELAY = 1200;
+  const AUTOSAVE_DELAY = 45000;
+  const merger = () => window.LearningDesignerMerge || null;
+
+  function baseStorageKey(designId) {
+    return `${BASE_STORAGE_PREFIX}${authState.user?.id ?? "guest"}_${designId}`;
+  }
+
+  function rememberBase(designId, revision, document) {
+    if (!(designId > 0) || !(revision > 0) || !document) return;
+    try {
+      localStorage.setItem(baseStorageKey(designId), JSON.stringify({ revision, document }));
+    } catch (_) {}
+  }
+
+  function storedBase(designId) {
+    try {
+      const value = JSON.parse(localStorage.getItem(baseStorageKey(designId)) || "null");
+      return value && Number.isSafeInteger(value.revision) && value.document ? value : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function setCollaboration(design) {
+    const designId = Number(design?.id || 0);
+    const changed = designId !== collaboration.designId;
+    collaboration.designId = designId;
+    collaboration.role = ["editor", "viewer"].includes(design?.role) ? design.role : "owner";
+    collaboration.owner = String(design?.owner || "");
+    collaboration.shared = Boolean(design?.shared);
+    if (changed) collaboration.active = false;
+    syncSaveUi();
+    syncPublishUi();
+    window.dispatchEvent(new CustomEvent("ld:collaboration", { detail: collaborationContext() }));
+  }
+
+  function collaborationContext() {
+    const designId = currentDesignId();
+    const current = designId > 0 && designId === collaboration.designId;
+    return {
+      user: authState.user,
+      designId,
+      role: current ? collaboration.role : "owner",
+      owner: current ? collaboration.owner : "",
+      shared: current && collaboration.shared,
+      revision: Number(app()?.getState?.()?.meta?.remoteRevision || 0)
+    };
+  }
+
+  function isReadOnly() {
+    return collaboration.role === "viewer" && collaboration.designId > 0 && collaboration.designId === currentDesignId();
+  }
+
+  function isCollaborating() {
+    return collaboration.designId > 0 && collaboration.designId === currentDesignId()
+      && (collaboration.shared || collaboration.active || collaboration.role !== "owner");
+  }
 
   function tr(fr, en) {
     return app()?.getCurrentLang?.() === "en" ? en : fr;
@@ -148,6 +212,7 @@
       syncPublishUi();
       await maybeLoadRequestedDesign();
       await maybeSyncCurrentRemoteDesign();
+      window.dispatchEvent(new CustomEvent("ld:collaboration", { detail: collaborationContext() }));
     }
   }
 
@@ -179,7 +244,7 @@
     const button = $("save-btn");
     if (!button) return;
 
-    if (authState.user) {
+    if (authState.user && !isReadOnly()) {
       button.hidden = false;
       if (!button.dataset.saveStatus) {
         resetSaveButtonState();
@@ -322,23 +387,114 @@
   function scheduleAutoSave() {
     clearTimeout(autoSaveTimer);
     autoSaveTimer = null;
-    if (!authState.user || saveInFlight || remoteLoadInFlight) return;
+    if (!authState.user || saveInFlight || remoteLoadInFlight || isReadOnly()) return;
     const state = app()?.getState?.();
     if (!state || hasSaveConflict(state) || isSaved(state)) return;
     if (Number(state.meta?.remoteDesignId || 0) <= 0 && !hasMeaningfulDesignContent(state)) return;
+    // Dans un scénario partagé, chaque modification part vite pour que les collègues la voient.
     autoSaveTimer = setTimeout(() => {
       autoSaveTimer = null;
       void autoSaveRemote();
-    }, 45000);
+    }, isCollaborating() ? SHARED_AUTOSAVE_DELAY : AUTOSAVE_DELAY);
+  }
+
+  /* Fusionne la version du site avec le brouillon, à partir de leur dernière version commune.
+     Résultat : "merged", "busy" (interface occupée, à réessayer), "unavailable" (pas de base) ou "failed". */
+  async function mergeRemoteDesign(designId) {
+    const Merge = merger();
+    const base = storedBase(designId);
+    const initial = app()?.getState?.();
+    if (!Merge || !base || !initial || Number(initial.meta?.remoteRevision) !== base.revision) return "unavailable";
+    const generation = app()?.getDocumentGeneration?.();
+    const userId = authState.user?.id;
+    let data;
+    try {
+      data = await fetchJson(`get_design.php?design_id=${encodeURIComponent(String(designId))}`);
+    } catch (error) {
+      if (error?.status === 404) handleAccessLost(designId);
+      return "failed";
+    }
+    if (generation !== app()?.getDocumentGeneration?.() || userId !== authState.user?.id
+      || currentDesignId() !== designId) return "failed";
+    // Relu après la requête : ce qui a été saisi pendant ce temps fait partie de la fusion.
+    const local = app().getState();
+    if (Number(local.meta?.remoteRevision) !== base.revision) return "failed";
+    const remoteDocument = data.design.document;
+    const { scenario, conflicts } = Merge.merge(base.document, local, remoteDocument);
+    if (!app().applyMergedDocument?.(scenario)) return "busy";
+    rememberBase(designId, data.design.revision, remoteDocument);
+    const dirty = !Merge.sameContent(scenario, remoteDocument);
+    app().updateMeta({
+      remoteUpdatedAt: data.design.updatedAt,
+      remoteRevision: data.design.revision,
+      remoteSaveConflict: null,
+      remoteDirty: dirty
+    }, { markDirty: false });
+    if (!dirty) {
+      lastSaved = { generation, id: designId, signature: contentSignature(app().getState()), data };
+    }
+    renderDesignProvenance(data.design.provenance);
+    setCollaboration(data.design);
+    if (conflicts.length) {
+      const message = tr(
+        "Un collègue a modifié les mêmes passages que vous au même moment\u00A0: votre version de ces passages a été conservée.",
+        "A colleague changed the same passages as you at the same time: your version of these passages was kept."
+      );
+      app()?.showNotice?.(message, "warning");
+      app()?.announce?.(message);
+    }
+    return "merged";
+  }
+
+  /* Un collègue a enregistré une révision plus récente : ses modifications sont récupérées et fusionnées.
+     Un brouillon non envoyé part d’abord ; le conflit qui en résulte déclenche la même fusion. */
+  async function pullRemoteChanges(revision) {
+    const designId = currentDesignId();
+    const state = app()?.getState?.();
+    if (!authState.user || !state || designId <= 0 || saveInFlight || remoteLoadInFlight) return;
+    if (!(Number(revision) > Number(state.meta?.remoteRevision || 0)) || hasSaveConflict(state)) return;
+    if (!isReadOnly() && !isSaved(state)) {
+      await persistRemoteDesign(true);
+      return;
+    }
+    remoteLoadInFlight = mergeRemoteDesign(designId);
+    try {
+      await remoteLoadInFlight;
+    } finally {
+      remoteLoadInFlight = null;
+      scheduleAutoSave();
+    }
+  }
+
+  let accessLostNotified = 0;
+  function handleAccessLost(designId) {
+    if (accessLostNotified === designId) return;
+    accessLostNotified = designId;
+    window.dispatchEvent(new CustomEvent("ld:collaboration-lost", { detail: { designId } }));
+    const message = tr(
+      "Vous n’avez plus accès à ce scénario partagé. Votre brouillon reste affiché dans ce navigateur.",
+      "You no longer have access to this shared scenario. Your draft remains in this browser."
+    );
+    app()?.showNotice?.(message, "warning");
+    app()?.announce?.(message);
   }
 
   // All save entry points share one request at a time and acknowledge only
   // the snapshot actually sent, so edits made during the request stay dirty.
-  async function persistRemoteDesign(automatic = false) {
+  async function persistRemoteDesign(automatic = false, mergeAttempts = 0) {
     while (remoteLoadInFlight || saveInFlight) await (remoteLoadInFlight || saveInFlight);
     if (!authState.user) return null;
     const state = app()?.getState?.();
     if (!state) return null;
+    if (isReadOnly()) {
+      if (!automatic) {
+        app()?.showNotice?.(tr(
+          "Ce scénario vous est partagé en consultation\u00A0: vos modifications ne sont pas enregistrées.",
+          "This scenario is shared with you for viewing: your changes are not saved."
+        ), "warning");
+      }
+      return null;
+    }
     let designId = Number(state.meta?.remoteDesignId || 0);
     let expectedRevision = Number(state.meta?.remoteRevision) || null;
     if (hasSaveConflict(state)) {
@@ -372,7 +528,10 @@
       && userId === authState.user?.id && sourceId === currentDesignId();
     const document = JSON.parse(signature);
     const title = String(state.meta?.name || "").trim() || tr("Production sans titre", "Untitled scenario");
-    setAutoSaveStatus("saving", tr("Sauvegarde…", "Saving…"));
+    // Dans un scénario partagé, l’enregistrement automatique reste discret : il a lieu à chaque pause.
+    const quiet = automatic && isCollaborating();
+    if (!quiet) setAutoSaveStatus("saving", tr("Sauvegarde…", "Saving…"));
+    let conflictToMerge = false;
     saveInFlight = (async () => {
       try {
         const data = await fetchJson("save_design.php", {
@@ -381,6 +540,8 @@
         });
         if (!stillCurrent()) return null;
         lastSaved = { generation, id: data.design.id, signature, data };
+        rememberBase(data.design.id, data.design.revision, document);
+        if (designId <= 0) setCollaboration({ id: data.design.id, role: "owner" });
         app()?.updateMeta?.({
           remoteDesignId: data.design.id,
           remoteUpdatedAt: data.design.updatedAt,
@@ -389,10 +550,27 @@
           remoteDirty: contentSignature(app().getState()) !== signature
         }, { markDirty: false });
         setRemoteDesignUrl(data.design.id);
-        setAutoSaveStatus("success", tr("Enregistré ✓", "Saved ✓"));
+        if (quiet) resetSaveButtonState();
+        else setAutoSaveStatus("success", tr("Enregistré ✓", "Saved ✓"));
         return data;
       } catch (error) {
         if (!stillCurrent()) return null;
+        if (error?.status === 409 && sourceId > 0 && merger() && storedBase(sourceId)?.revision === expectedRevision) {
+          // Un collègue a enregistré entre-temps : sa version est fusionnée, puis l’envoi recommence.
+          conflictToMerge = true;
+          return null;
+        }
+        if (error?.status === 403 && sourceId > 0) {
+          resetSaveButtonState();
+          setCollaboration({ id: sourceId, role: "viewer", owner: collaboration.owner, shared: true });
+          app()?.showNotice?.(error.message, "warning");
+          return null;
+        }
+        if (error?.status === 404 && sourceId > 0 && collaboration.designId === sourceId && collaboration.role !== "owner") {
+          resetSaveButtonState();
+          handleAccessLost(sourceId);
+          return null;
+        }
         if (error?.status === 409) {
           // Keep the revision that belongs to the local snapshot. Adopting
           // the server revision here would allow the next save to overwrite it.
@@ -410,9 +588,35 @@
       result = await saveInFlight;
     } finally {
       saveInFlight = null;
-      if (result || !stillCurrent()) scheduleAutoSave();
+      if (!conflictToMerge && (result || !stillCurrent())) scheduleAutoSave();
     }
+    if (conflictToMerge) return resolveSaveConflict(sourceId, automatic, mergeAttempts);
     return result;
+  }
+
+  async function resolveSaveConflict(designId, automatic, mergeAttempts) {
+    remoteLoadInFlight = mergeRemoteDesign(designId);
+    let outcome;
+    try {
+      outcome = await remoteLoadInFlight;
+    } finally {
+      remoteLoadInFlight = null;
+    }
+    if (outcome === "merged" && mergeAttempts < 3) {
+      return persistRemoteDesign(automatic, mergeAttempts + 1);
+    }
+    resetSaveButtonState();
+    if (outcome === "busy" || (outcome === "merged" && mergeAttempts >= 3)) {
+      // Une modale ou un menu est ouvert : la fusion attend sa fermeture.
+      clearTimeout(mergeRetryTimer);
+      mergeRetryTimer = setTimeout(() => void persistRemoteDesign(true), 1500);
+    } else if (outcome === "unavailable" && currentDesignId() === designId) {
+      app()?.updateMeta?.({ remoteSaveConflict: designId }, { markDirty: false });
+      showSaveConflict();
+    } else {
+      scheduleAutoSave();
+    }
+    return null;
   }
 
   async function autoSaveRemote() {
@@ -561,7 +765,34 @@
           const sameDesign = localId === designId;
           const sameRevision = Number.isSafeInteger(local.meta.remoteRevision)
             && local.meta.remoteRevision > 0 && local.meta.remoteRevision === data.design.revision;
+          const base = storedBase(designId);
+          const Merge = merger();
+          if (sameDesign && !sameRevision && !hasSaveConflict(local) && Merge && base
+            && base.revision === Number(local.meta.remoteRevision)) {
+            // Le brouillon et la version du site ont tous deux évolué depuis leur base commune : fusion.
+            const { scenario } = Merge.merge(base.document, local, data.design.document);
+            if (app()?.applyMergedDocument?.(scenario)) {
+              rememberBase(designId, data.design.revision, data.design.document);
+              app().updateMeta({
+                remoteUpdatedAt: data.design.updatedAt,
+                remoteRevision: data.design.revision,
+                remoteDirty: !Merge.sameContent(scenario, data.design.document)
+              }, { markDirty: false });
+              renderDesignProvenance(data.design.provenance);
+              setCollaboration(data.design);
+              setRemoteDesignUrl(designId);
+              const message = tr(
+                "Votre brouillon local a été fusionné avec la dernière version du site.",
+                "Your local draft has been merged with the latest version from the site."
+              );
+              app()?.showNotice?.(message, "success");
+              app()?.announce?.(message);
+              canResumeAutoSave = true;
+              return true;
+            }
+          }
           if (sameDesign && sameRevision && !hasSaveConflict(local)) {
+            setCollaboration(data.design);
             app()?.updateMeta?.({ remoteDirty: true }, { markDirty: false });
             setRemoteDesignUrl(designId);
             const message = tr(
@@ -616,6 +847,8 @@
           signature: contentSignature(app().getState()),
           data
         };
+        rememberBase(data.design.id, data.design.revision, data.design.document);
+        setCollaboration(data.design);
         canResumeAutoSave = true;
         setRemoteDesignUrl(data.design.id);
         if (showLoadedMessage) {
@@ -672,7 +905,9 @@
   function syncPublishUi() {
     const btn = $("publish-btn");
     if (!btn) return;
-    btn.hidden = !authState.user;
+    // Seul le propriétaire publie : un enseignant invité ne voit pas ce bouton.
+    const invited = collaboration.designId > 0 && collaboration.designId === currentDesignId() && collaboration.role !== "owner";
+    btn.hidden = !authState.user || invited;
   }
 
   const CC_LICENSES = [
@@ -899,6 +1134,27 @@
   window.learningDesignerOpenSaves = openSavedDesignsOrLogin;
   window.learningDesignerSaveToAccount = saveToAccountOrLogin;
   window.learningDesignerClearRemoteDesignUrl = clearRemoteDesignUrl;
+  window.learningDesignerConfirm = (options) => confirmAccountAction(options);
+  window.learningDesignerCollaboration = {
+    context: collaborationContext,
+    pull: pullRemoteChanges,
+    save: () => persistRemoteDesign(false),
+    /* Présence de collègues ou invitation : l’enregistrement passe au rythme rapide. */
+    setActive(active) {
+      const next = Boolean(active);
+      if (collaboration.active === next) return;
+      collaboration.active = next;
+      scheduleAutoSave();
+    },
+    setShared(shared) {
+      if (collaboration.designId !== currentDesignId() || collaboration.shared === Boolean(shared)) return;
+      collaboration.shared = Boolean(shared);
+      scheduleAutoSave();
+      window.dispatchEvent(new CustomEvent("ld:collaboration", { detail: collaborationContext() }));
+    },
+    accessLost: handleAccessLost,
+    fetchJson
+  };
 
   document.addEventListener("DOMContentLoaded", () => {
     ensureSiteNavUi();

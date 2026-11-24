@@ -1,0 +1,148 @@
+/* Taxonomie de Bloom : styles propres à bloom.php. */
+
+body.bloom-page { background: #fff; }
+.bloom-shell {
+    width: min(var(--content-shell-width, 1180px), calc(100vw - var(--content-shell-gutter, 36px)));
+    margin: 40px auto 80px;
+}
+.bloom-header {
+    margin: 0 0 var(--page-section-gap);
+    padding-bottom: 24px;
+}
+.bloom-kicker {
+    margin: 0 0 8px;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+.bloom-title {
+    margin: 0 0 14px;
+}
+.bloom-subtitle {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    color: var(--muted);
+    line-height: var(--content-leading);
+    font-size: 0.9375rem;
+}
+.bloom-poster-title {
+    margin: var(--page-section-gap) 0 14px;
+    border-radius: 6px 6px 0 0;
+    background: #12295a;
+    color: #fff;
+    padding: 18px 22px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: clamp(1.125rem, 3vw, 2rem);
+    font-weight: 900;
+}
+.bloom-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(150px, 1fr));
+    gap: 12px;
+}
+.bloom-level {
+    container-type: inline-size;
+    min-height: 47.5rem;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    border-radius: 7px;
+    background: var(--bloom-bg);
+    padding: 24px 18px 28px;
+    text-align: center;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+    display: grid;
+    grid-template-rows: 4.125rem 6.375rem 8.75rem 1fr;
+    align-items: start;
+}
+.bloom-level-1 { --bloom-bg: #c7b7e6; --bloom-ink: #2d2452; }
+.bloom-level-2 { --bloom-bg: #b9cef0; --bloom-ink: #19355f; }
+.bloom-level-3 { --bloom-bg: #c5d8b5; --bloom-ink: #243f24; }
+.bloom-level-4 { --bloom-bg: #ffe69a; --bloom-ink: #5c4300; }
+.bloom-level-5 { --bloom-bg: #ffc889; --bloom-ink: #603109; }
+.bloom-level-6 { --bloom-bg: #f69a96; --bloom-ink: #651f25; }
+.bloom-icon {
+    display: grid;
+    place-items: center;
+    color: color-mix(in srgb, var(--bloom-bg) 80%, #000 20%);
+    font-size: 3.5rem;
+}
+.bloom-level h2 {
+    margin: 0;
+    padding: 6px 8px;
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--bloom-bg) 80%, #000 20%);
+    text-wrap: balance;
+    align-self: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+/* L’étiquette suit la taille du texte choisie, sans dépasser la largeur de sa colonne. */
+html body.bloom-page .bloom-level h2 {
+    color: var(--bloom-ink);
+    font-size: min(1.4375rem, 14cqi);
+}
+.bloom-description {
+    margin: 0;
+    color: var(--bloom-ink);
+    line-height: 1.48;
+    font-size: 0.75rem;
+    font-weight: 700;
+    align-self: start;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.bloom-verbs {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.bloom-verb {
+    color: #111827;
+    padding: 5px 0;
+    font-size: clamp(0.9375rem, 1.35vw, 1.25rem);
+    line-height: 1.28;
+    font-weight: 650;
+}
+[data-theme="dark"] body.bloom-page {
+    background: #181816;
+}
+[data-theme="dark"] .bloom-subtitle {
+    color: var(--text-body);
+}
+[data-theme="dark"] .bloom-poster-title {
+    background: #0f1f44;
+}
+[data-theme="dark"] .bloom-level {
+    border-color: rgba(15, 23, 42, 0.18);
+    filter: saturate(0.88) brightness(0.92);
+}
+@media (max-width: 900px) {
+    .bloom-grid {
+        grid-template-columns: repeat(3, minmax(180px, 1fr));
+    }
+    .bloom-level {
+        min-height: 40rem;
+    }
+}
+@media (max-width: 720px) {
+    .bloom-grid {
+        grid-template-columns: 1fr;
+    }
+    .bloom-poster-title {
+        font-size: 1.125rem;
+    }
+    .bloom-level {
+        min-height: 0;
+        grid-template-rows: auto auto auto auto;
+        row-gap: 12px;
+    }
+    .bloom-level h2 {
+        white-space: normal;
+    }
+}
