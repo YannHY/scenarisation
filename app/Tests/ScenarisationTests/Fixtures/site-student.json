@@ -1,0 +1,35 @@
+{
+  "exportType": "student_instructions",
+  "title": "Français & sciences — « l’eau »",
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Observer",
+      "activities": [
+        {
+          "number": "1.1",
+          "instructions": "Lisez, puis répondez :\n- exemple : « Où va l’eau ? »\nJustifiez votre réponse."
+        },
+        {
+          "number": "1.2",
+          "instructions": "Comparez deux sources."
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Observer",
+      "activities": [
+        {
+          "number": "2.1",
+          "instructions": "Rédigez votre explication."
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "title": "Prolongement",
+      "activities": []
+    }
+  ]
+}

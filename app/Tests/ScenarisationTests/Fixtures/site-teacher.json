@@ -1,0 +1,112 @@
+{
+  "meta": {
+    "name": "Français & sciences — « l’eau »",
+    "modeDelivery": "hybrid",
+    "schoolSystem": "france",
+    "schoolLevel": "sixieme",
+    "sizeClass": "24",
+    "designers": "Yann",
+    "trainers": "Équipe",
+    "learningDays": 1,
+    "learningHours": 2,
+    "learningMinutes": 30,
+    "dayHours": 7,
+    "description": "Observer l’eau, puis expliquer.\nDeuxième ligne ; avec « guillemets ».",
+    "command": "Croiser les disciplines.",
+    "teacherMaterials": "Un verre & une carte.",
+    "personas": "Décrire le cycle.",
+    "sliders": [
+      {
+        "id": "outcome-1",
+        "category": "comprendre",
+        "verb": "Expliquer",
+        "text": "le cycle de l’eau"
+      }
+    ]
+  },
+  "sessions": [
+    {
+      "id": "s1",
+      "title": "Observer",
+      "objectives": "Comparer.\nJustifier.",
+      "intentions": "Faire formuler des hypothèses.",
+      "notes": "Préparer les documents.",
+      "activities": [
+        {
+          "id": "a1",
+          "type": "read",
+          "duration": 12.5,
+          "groupMode": "whole",
+          "teachingMode": "directed",
+          "syncMode": "sync",
+          "locationMode": "onsite",
+          "evaluationMode": "formative",
+          "aias": {
+            "version": "2.1",
+            "status": "specified",
+            "level": 3
+          },
+          "description": "Lire un document.\nRepérer les informations.",
+          "instructions": "Lisez, puis répondez :\n- exemple : « Où va l’eau ? »\nJustifiez votre réponse.",
+          "notes": "",
+          "tools": []
+        },
+        {
+          "id": "a2",
+          "type": "investigate",
+          "duration": 7,
+          "groupMode": "subgroups",
+          "teachingMode": "supported",
+          "syncMode": "async",
+          "locationMode": "online",
+          "evaluationMode": "none",
+          "aias": {
+            "version": "2.1",
+            "status": "not_applicable",
+            "level": null
+          },
+          "description": "Mener une recherche.",
+          "instructions": "Comparez deux sources.",
+          "notes": "",
+          "tools": []
+        }
+      ]
+    },
+    {
+      "id": "s2",
+      "title": "Observer",
+      "objectives": "Réinvestir.",
+      "intentions": "",
+      "notes": "",
+      "activities": [
+        {
+          "id": "a3",
+          "type": "produce",
+          "duration": 23,
+          "groupMode": "individual",
+          "teachingMode": "independent",
+          "syncMode": "sync",
+          "locationMode": "hybrid",
+          "evaluationMode": "summative",
+          "aias": {
+            "version": "2.1",
+            "status": "undecided",
+            "level": null
+          },
+          "description": "Produire une synthèse.",
+          "instructions": "Rédigez votre explication.",
+          "notes": "",
+          "tools": []
+        }
+      ]
+    },
+    {
+      "id": "s3",
+      "title": "Prolongement",
+      "objectives": "Préparer la suite.",
+      "intentions": "",
+      "notes": "À compléter.",
+      "activities": []
+    }
+  ]
+}

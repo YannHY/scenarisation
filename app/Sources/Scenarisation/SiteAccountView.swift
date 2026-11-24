@@ -1,0 +1,653 @@
+import SwiftUI
+#if os(macOS)
+import AppKit
+#endif
+
+struct DocumentSyncLabel: View {
+    let identity: SyncDocumentIdentity?
+    @ObservedObject var workspace: SiteSyncWorkspace
+    var body: some View {
+        let record = identity.flatMap { $0.accountKey == workspace.account.key ? workspace.record($0.id) : nil }
+        Label(record?.status.label ?? "Synchroniser", systemImage: record?.status.symbol ?? "icloud")
+    }
+}
+
+/// Rapproche la fenêtre et sa copie suivie : chaque saisie part dans la copie, puis sur le site quelques
+/// secondes plus tard ; une version reçue du site (ou d’un collègue) revient dans la fenêtre, fusionnée
+/// avec ce qui a été saisi entre-temps.
+struct DocumentSyncObserver: View {
+    @Binding var document: ScenarioDocument
+    @Binding var checkpoint: Scenario
+    @ObservedObject var workspace: SiteSyncWorkspace
+    var collaboration: CollaborationSession? = nil
+    var online = false
+    /// Vrai lorsque le scénario est partagé avec ce compte en consultation seule.
+    var readOnly: Binding<Bool>? = nil
+    let onError: (String) -> Void
+
+    private struct PresenceTarget: Hashable { let record: UUID?; let remote: Int?; let online: Bool }
+    private var identity: SyncDocumentIdentity? {
+        document.syncIdentity.flatMap { $0.accountKey == workspace.account.key ? $0 : nil }
+    }
+
+    var body: some View {
+        Color.clear.frame(width: 0, height: 0)
+            .onAppear { stage(); updateReadOnly() }
+            .onDisappear { readOnly?.wrappedValue = false }
+            .onChange(of: document.scenario) { _, _ in reconcile() }
+            .onChange(of: workspace.records) { _, _ in reconcile(); updateReadOnly() }
+            // Chaque modification part sur le site quelques secondes après la dernière frappe (une seconde
+            // pour un scénario partagé) ; à l’ouverture, le même envoi récupère d’abord les changements du site.
+            .task(id: document.scenario) {
+                guard let identity, workspace.record(identity.id) != nil else { return }
+                try? await Task.sleep(for: .seconds(collaboration?.shared == true ? 1 : 3))
+                guard !Task.isCancelled, SiteAccountModel.shared.networkAvailable else { return }
+                // Un envoi n’est jamais interrompu à mi-chemin : il s’exécute hors de cette tâche annulable.
+                Task { await workspace.synchronizeAutomatically(identity.id) }
+            }
+            .task(id: PresenceTarget(record: identity?.id, remote: identity.flatMap { workspace.record($0.id)?.remoteID },
+                                     online: online)) {
+                guard let collaboration, online, let id = identity?.id, workspace.record(id)?.remoteID != nil else { return }
+                await collaboration.run(workspace: workspace, recordID: id)
+            }
+    }
+
+    private func updateReadOnly() {
+        let value = identity.flatMap { workspace.record($0.id)?.isReadOnly } ?? false
+        if let readOnly, readOnly.wrappedValue != value { readOnly.wrappedValue = value }
+    }
+
+    /// À l’ouverture, la fenêtre doit correspondre à la copie suivie.
+    private func stage() {
+        guard let identity, workspace.record(identity.id) != nil else { return }
+        do {
+            try workspace.stage(identity, scenario: document.scenario, previous: checkpoint)
+            checkpoint = document.scenario
+        } catch { onError(error.localizedDescription) }
+    }
+
+    private func reconcile() {
+        guard let identity, let stored = workspace.record(identity.id)?.local else { return }
+        if stored == document.scenario { checkpoint = stored; return }
+        if stored != checkpoint {
+            // La copie a changé hors de cette fenêtre : modifications du site ou d’un collègue.
+            let next = document.scenario == checkpoint ? stored
+                : ScenarioMerge.merge(base: checkpoint, local: document.scenario, remote: stored).scenario
+            checkpoint = stored
+            document.scenario = next
+            return
+        }
+        do {
+            try workspace.stage(identity, scenario: document.scenario, previous: checkpoint)
+            collaboration?.noteLocalChange(from: checkpoint, to: document.scenario)
+            checkpoint = document.scenario
+        } catch { onError(error.localizedDescription) }
+    }
+}
+
+struct SiteAccountView: View {
+    @ObservedObject var model: SiteAccountModel = .shared
+
+    var body: some View {
+        Group {
+            if let workspace = model.workspace {
+                SiteLibraryView(workspace: workspace, model: model)
+            } else {
+                ContentUnavailableView {
+                    Label("Retrouver ses scénarios sur \(Platform.deviceName)", systemImage: "icloud")
+                } description: {
+                    Text("Connectez votre compte scenarisation.eu pour retrouver vos scénarios et les garder sur \(Platform.thisDevice).")
+                } actions: {
+                    SiteConnectionButton(model: model).controlSize(.large)
+                }
+                .toolbar { ToolbarItem(placement: .primaryAction) { SiteAccountMenu(model: model) } }
+            }
+        }
+        .desktopFrame(minWidth: 640, minHeight: 500)
+        .onAppear {
+            // Avec la navigation au clavier, le premier bouton de la liste recevrait d’office le cadre de focus.
+#if os(macOS)
+            Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(250))
+                let window = NSApp.windows.first { $0.identifier?.rawValue.hasPrefix("site-account") == true } ?? NSApp.keyWindow
+                window?.makeFirstResponder(nil)
+            }
+#endif
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if let message = model.auth.storageMessage {
+                Label(message, systemImage: "exclamationmark.triangle").font(.callout).foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading).padding(.horizontal, 20).padding(.vertical, 10)
+                    .background(.bar)
+            }
+        }
+        .alert("Mon compte", isPresented: Binding(get: { model.message != nil }, set: { if !$0 { model.message = nil } })) {
+            Button("Fermer") { model.message = nil }
+        } message: { Text(model.message ?? "") }
+    }
+}
+
+private struct SiteConnectionButton: View {
+    @ObservedObject var model: SiteAccountModel
+    var body: some View {
+        HStack(spacing: 12) {
+            if model.action == .connecting {
+                ProgressView().controlSize(.small)
+                Text("Connexion dans le navigateur…").font(.callout).foregroundStyle(.secondary)
+                Button("Annuler") { model.cancelConnection() }
+            } else if model.action == .disconnecting {
+                ProgressView().controlSize(.small)
+                Text("Déconnexion…").foregroundStyle(.secondary)
+            } else {
+                Button(model.user == nil ? "Se connecter à Scénarisation" : "Reconnecter mon compte") { model.connect() }
+                    .studioButtons(prominent: true).disabled(model.busy)
+            }
+        }
+    }
+}
+
+/// Menu « Compte » de la barre d’outils : les actions suivent l’état de la session.
+private struct SiteAccountMenu: View {
+    @ObservedObject var model: SiteAccountModel
+    var locked = false
+    var body: some View {
+        let unavailable = model.busy || locked
+        Menu {
+            Link("Ouvrir scenarisation.eu", destination: URL(string: "https://scenarisation.eu/profile.php")!)
+            Divider()
+            if model.workspace != nil && model.auth.connected {
+                Button("Se déconnecter") { model.disconnect() }.disabled(unavailable)
+            } else {
+                Button(model.user == nil ? "Se connecter à Scénarisation" : "Reconnecter mon compte") { model.connect() }
+                    .disabled(unavailable)
+            }
+        } label: { Label("Compte", systemImage: "person.crop.circle") }
+            .help("Compte")
+    }
+}
+
+private struct SiteLibraryRefreshID: Hashable {
+    let workspace: ObjectIdentifier
+    let available: Bool
+}
+
+/// Pastille d’une ligne de la bibliothèque, dans l’esprit des Réglages de macOS.
+private struct SiteRowGlyph: View {
+    let symbol: String
+    let tint: Color
+    var body: some View {
+        Image(systemName: symbol).font(.system(size: 14, weight: .medium)).foregroundStyle(.white)
+            .frame(width: 30, height: 30)
+            .background(LinearGradient(colors: [tint, tint.opacity(0.78)], startPoint: .top, endPoint: .bottom),
+                        in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .accessibilityHidden(true)
+    }
+}
+
+private struct SiteLibraryView: View {
+    @ObservedObject var workspace: SiteSyncWorkspace
+    @ObservedObject var model: SiteAccountModel
+    @State private var search = ""
+    /// Identifiant distant du scénario en cours de téléchargement.
+    @State private var opening: Int?
+    @State private var examining: UUID?
+    @State private var removing: SiteSyncRecord?
+    @State private var removingRemote: SiteDesignSummary?
+    @State private var deleting: Set<String> = []
+
+    private var name: String { model.user?.username ?? workspace.account.label }
+    private var locals: [SiteSyncRecord] {
+        workspace.records.filter { matches($0.local.name) }
+    }
+    private var remotes: [SiteDesignSummary] {
+        workspace.remoteDesigns.filter { summary in
+            !workspace.records.contains { $0.remoteID == summary.id } && matches(summary.title)
+        }
+    }
+    private func matches(_ title: String) -> Bool { search.isEmpty || title.localizedStandardContains(search) }
+
+    var body: some View {
+        Form {
+            Section { account }
+            Section("Sur \(Platform.thisDevice)") {
+                ForEach(locals) { localRow($0) }
+                if locals.isEmpty {
+                    Text(!search.isEmpty ? "Aucun scénario sur \(Platform.thisDevice) ne correspond à « \(search) »."
+                         : "Les scénarios ouverts depuis votre compte resteront disponibles ici.")
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Section("Sur le site") {
+                ForEach(remotes) { remoteRow($0) }
+                if remotes.isEmpty && !workspace.refreshing {
+                    Text(!search.isEmpty && !workspace.remoteDesigns.isEmpty ? "Aucun scénario du site ne correspond à « \(search) »."
+                         : !model.networkAvailable ? "Reconnectez votre compte pour afficher les scénarios du site."
+                         : "Aucun autre scénario à télécharger. Actualisez pour vérifier votre compte.")
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .formStyle(.grouped)
+        .searchable(text: $search, prompt: "Rechercher un scénario")
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    Task { do { try await workspace.refresh() } catch { model.message = error.localizedDescription } }
+                } label: {
+                    if workspace.refreshing { ProgressView().controlSize(.small) }
+                    else { Label("Actualiser", systemImage: "arrow.clockwise") }
+                }
+                .help("Actualiser la liste des scénarios").keyboardShortcut("r")
+                .disabled(workspace.refreshing || !model.networkAvailable)
+            }
+            ToolbarItem(placement: .primaryAction) { SiteAccountMenu(model: model, locked: opening != nil) }
+        }
+        .task(id: SiteLibraryRefreshID(workspace: ObjectIdentifier(workspace), available: model.networkAvailable)) {
+            guard model.networkAvailable else { return }
+            do { try await workspace.refresh() }
+            catch is CancellationError {}
+            catch { model.message = error.localizedDescription }
+        }
+        .sheet(isPresented: Binding(get: { examining != nil }, set: { if !$0 { examining = nil } })) {
+            if let id = examining { SiteConflictView(workspace: workspace, recordID: id) }
+        }
+        .confirmationDialog(sharedWithMe(removing?.remoteID) ? "Quitter ce scénario partagé ?" : "Supprimer ce scénario ?",
+                            isPresented: Binding(get: { removing != nil }, set: { if !$0 { removing = nil } }),
+                            presenting: removing) { record in
+                Button(sharedWithMe(record.remoteID) ? "Quitter le partage" : "Supprimer", role: .destructive) { remove(record) }
+            } message: { record in Text(removalWarning(record)) }
+        .confirmationDialog(removingRemote?.sharedWithMe == true ? "Quitter ce scénario partagé ?" : "Supprimer ce scénario ?",
+                            isPresented: Binding(get: { removingRemote != nil }, set: { if !$0 { removingRemote = nil } }),
+                            presenting: removingRemote) { summary in
+                Button(summary.sharedWithMe ? "Quitter le partage" : "Supprimer", role: .destructive) { removeRemote(summary) }
+            } message: { summary in
+                Text(summary.sharedWithMe ? Self.leaveWarning : "Il sera définitivement supprimé de votre compte scenarisation.eu.")
+            }
+    }
+
+    private static let leaveWarning = "Il disparaîtra de votre compte et de \(Platform.thisDevice). Son propriétaire le conserve et peut vous inviter à nouveau."
+    private func sharedWithMe(_ remoteID: Int?) -> Bool { workspace.summary(for: remoteID)?.sharedWithMe == true }
+
+    private func removalWarning(_ record: SiteSyncRecord) -> String {
+        if record.remoteID == nil || record.remoteMissing { return "Il sera définitivement supprimé de \(Platform.thisDevice)." }
+        if sharedWithMe(record.remoteID) {
+            return Self.leaveWarning + (record.status == .pending ? " Les modifications pas encore envoyées seront perdues." : "")
+        }
+        return "Il sera définitivement supprimé de \(Platform.thisDevice) et de votre compte scenarisation.eu."
+    }
+    private func remove(_ record: SiteSyncRecord) {
+        let key = record.id.uuidString
+        deleting.insert(key)
+        Task {
+            defer { deleting.remove(key) }
+            do {
+                // Un scénario partagé par un collègue n’est pas supprimé : ce compte quitte le partage.
+                if let remoteID = record.remoteID, sharedWithMe(remoteID), let me = model.user?.id {
+                    try await workspace.leave(remoteID, userID: me)
+                    return
+                }
+                let url = try workspace.workingFileURL(record.id)
+                try await workspace.delete(record.id)
+                // Une fenêtre encore ouverte n’aurait plus de copie à tenir à jour ; le fichier lié du dossier
+                // des scénarios part à la Corbeille, comme pour une suppression faite sur le site.
+                SiteDeletionCleanup.apply(SyncDocumentIdentity(id: record.id, accountKey: workspace.account.key),
+                                          workingFile: url)
+            } catch { model.message = error.localizedDescription }
+        }
+    }
+    private func removeRemote(_ summary: SiteDesignSummary) {
+        let key = "remote-\(summary.id)"
+        deleting.insert(key)
+        Task {
+            defer { deleting.remove(key) }
+            do {
+                if summary.sharedWithMe, let me = model.user?.id { try await workspace.leave(summary.id, userID: me) }
+                else { try await workspace.deleteRemote(summary) }
+            } catch { model.message = error.localizedDescription }
+        }
+    }
+
+    // MARK: Compte
+
+    private var account: some View {
+        HStack(spacing: 14) {
+            Text(name.prefix(1).uppercased()).font(.system(size: 21, weight: .semibold, design: .rounded))
+                .foregroundStyle(.white).frame(width: 46, height: 46)
+            .background(LinearGradient(colors: [Color.accentColor, Color.accentColor.opacity(0.72)],
+                                       startPoint: .top, endPoint: .bottom), in: Circle())
+            .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(name).font(.title3.weight(.semibold)).lineLimit(1)
+                Text(model.user?.email ?? "scenarisation.eu").font(.callout).foregroundStyle(.secondary).lineLimit(1)
+                if !model.auth.connected {
+                    Text("Session déconnectée · copies locales disponibles").font(.caption).foregroundStyle(.secondary)
+                }
+            }
+            Spacer(minLength: 12)
+            if model.auth.connected && model.action == .idle {
+                Label { Text("Connecté") } icon: { Image(systemName: "checkmark.circle.fill").foregroundStyle(.green) }
+                    .font(.callout).foregroundStyle(.secondary)
+            } else { SiteConnectionButton(model: model) }
+        }.padding(.vertical, 4)
+    }
+
+    // MARK: Lignes
+
+    private func localRow(_ record: SiteSyncRecord) -> some View {
+        HStack(spacing: 12) {
+            SiteRowGlyph(symbol: "doc.text", tint: .accentColor)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(record.local.name.isEmpty ? "Sans titre" : record.local.name).fontWeight(.medium).lineLimit(1)
+                HStack(spacing: 4) {
+                    Image(systemName: record.status.symbol).foregroundStyle(tint(record.status)).accessibilityHidden(true)
+                    Text(record.status.label)
+                    if let summary = workspace.summary(for: record.remoteID), summary.shared == true {
+                        Text("·")
+                        Image(systemName: "person.2.fill").accessibilityHidden(true)
+                        Text(SiteLibraryDate.sharing(summary))
+                    }
+                }.font(.caption).foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 12)
+            if workspace.syncing.contains(record.id) { ProgressView().controlSize(.small) }
+            else if record.status == .conflict {
+                Button("Examiner") { examining = record.id }
+            } else if record.status == .missing {
+                Button("Conserver une copie") {
+                    do { open(try workspace.copyDeleted(record.id).id) }
+                    catch { model.message = error.localizedDescription }
+                }
+            } else {
+                Button { synchronize(record.id) } label: {
+                    Label("Synchroniser", systemImage: "arrow.triangle.2.circlepath")
+                }.labelStyle(.iconOnly).buttonStyle(.borderless).help("Synchroniser ce scénario").disabled(!model.networkAvailable)
+            }
+            Button { open(record.id) } label: { Label("Ouvrir", systemImage: "arrow.up.forward.square") }
+                .labelStyle(.iconOnly).buttonStyle(.borderless).help("Ouvrir ce scénario")
+            Button(role: .destructive) { removing = record } label: {
+                Label(sharedWithMe(record.remoteID) ? "Quitter le partage" : "Supprimer",
+                      systemImage: sharedWithMe(record.remoteID) ? "person.crop.circle.badge.minus" : "trash")
+            }
+                .labelStyle(.iconOnly).buttonStyle(.borderless)
+                .help(sharedWithMe(record.remoteID) ? "Quitter ce scénario partagé" : "Supprimer ce scénario")
+                .disabled(workspace.syncing.contains(record.id) || deleting.contains(record.id.uuidString)
+                          || (record.remoteID != nil && !record.remoteMissing && !model.networkAvailable))
+        }
+        .padding(.vertical, 2).contentShape(Rectangle())
+        .onTapGesture(count: 2) { open(record.id) }
+        .contextMenu {
+            Button("Ouvrir") { open(record.id) }
+            Divider()
+            Button(sharedWithMe(record.remoteID) ? "Quitter le partage…" : "Supprimer…", role: .destructive) { removing = record }
+                .disabled(workspace.syncing.contains(record.id) || (record.remoteID != nil && !record.remoteMissing && !model.networkAvailable))
+        }
+    }
+
+    private func remoteRow(_ summary: SiteDesignSummary) -> some View {
+        HStack(spacing: 12) {
+            SiteRowGlyph(symbol: summary.sharedWithMe ? "person.2" : "icloud", tint: Color.platformGray)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(summary.title.isEmpty ? "Sans titre" : summary.title).fontWeight(.medium).lineLimit(1)
+                Text(summary.shared == true ? SiteLibraryDate.sharing(summary) + " · " + SiteLibraryDate.caption(summary)
+                     : SiteLibraryDate.caption(summary)).font(.caption).foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 12)
+            if opening == summary.id { ProgressView().controlSize(.small) }
+            Button { download(summary.id) } label: { Label("Ouvrir", systemImage: "icloud.and.arrow.down") }
+                .labelStyle(.iconOnly).buttonStyle(.borderless).help("Ouvrir sur \(Platform.thisDevice)")
+                .disabled(opening != nil || !model.networkAvailable)
+            Button(role: .destructive) { removingRemote = summary } label: {
+                Label(summary.sharedWithMe ? "Quitter le partage" : "Supprimer",
+                      systemImage: summary.sharedWithMe ? "person.crop.circle.badge.minus" : "trash")
+            }
+                .labelStyle(.iconOnly).buttonStyle(.borderless)
+                .help(summary.sharedWithMe ? "Quitter ce scénario partagé" : "Supprimer ce scénario de votre compte")
+                .disabled(opening == summary.id || deleting.contains("remote-\(summary.id)") || !model.networkAvailable)
+        }
+        .padding(.vertical, 2).contentShape(Rectangle())
+        .onTapGesture(count: 2) { if opening == nil && model.networkAvailable { download(summary.id) } }
+    }
+
+    private func tint(_ status: SiteSyncStatus) -> Color {
+        switch status {
+        case .synced: .green
+        case .conflict: .orange
+        case .missing: .red
+        case .local, .pending: .secondary
+        }
+    }
+
+    private func open(_ id: UUID) {
+        Task { do { try await SiteDocumentOpener.open(id, workspace: workspace) } catch { model.message = error.localizedDescription } }
+    }
+    private func download(_ remoteID: Int) {
+        opening = remoteID
+        Task {
+            defer { opening = nil }
+            do {
+                let record = try await workspace.downloadToMac(remoteID)
+                try await SiteDocumentOpener.open(record.id, workspace: workspace)
+            } catch { model.message = error.localizedDescription }
+        }
+    }
+    private func synchronize(_ id: UUID) {
+        Task {
+            do {
+                try await workspace.synchronize(id)
+                if workspace.record(id)?.status == .conflict { examining = id }
+            } catch { model.message = error.localizedDescription }
+        }
+    }
+}
+
+/// Date de dernière modification renvoyée par le site, affichée lorsqu’elle est lisible.
+enum SiteLibraryDate {
+    static func parse(_ text: String) -> Date? {
+        let iso = ISO8601DateFormatter()
+        if let date = iso.date(from: text) { return date }
+        iso.formatOptions.insert(.withFractionalSeconds)
+        if let date = iso.date(from: text) { return date }
+        let plain = DateFormatter()
+        plain.locale = Locale(identifier: "en_US_POSIX"); plain.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        return plain.date(from: text)
+    }
+    /// « Partagé par Marie » pour un scénario d’un collègue (« · consultation » s’il ne peut pas le modifier),
+    /// « Partagé » pour un scénario de ce compte.
+    static func sharing(_ summary: SiteDesignSummary) -> String {
+        guard summary.sharedWithMe else { return "Partagé" }
+        let label = summary.owner.flatMap { $0.isEmpty ? nil : "Partagé par \($0)" } ?? "Partagé avec vous"
+        return summary.readOnly ? label + " · consultation" : label
+    }
+    static func caption(_ summary: SiteDesignSummary) -> String {
+        guard let date = parse(summary.updatedAt) else { return "Révision \(summary.revision)" }
+        return "Modifié le \(date.formatted(date: .abbreviated, time: .omitted))"
+    }
+}
+
+#if os(macOS)
+@MainActor
+enum SiteDocumentOpener {
+    static func open(_ id: UUID, workspace: SiteSyncWorkspace) async throws {
+        let identity = SyncDocumentIdentity(id: id, accountKey: workspace.account.key)
+        let working = try workspace.workingFileURL(id)
+        // Une fenêtre déjà ouverte sur ce scénario, depuis le dossier ou la copie de travail, est réutilisée.
+        if let document = NSDocumentController.shared.documents.first(where: { document in
+            guard let url = document.fileURL else { return false }
+            return url == working || ScenarioFolder.identity(of: url) == identity
+        }) {
+            document.showWindows()
+            document.windowControllers.first?.window?.makeKeyAndOrderFront(nil)
+            return
+        }
+        let file = try folderFile(identity, workspace: workspace) ?? workspace.workingFile(id)
+        _ = try await NSDocumentController.shared.openDocument(withContentsOf: file, display: true)
+    }
+
+    /// Le scénario s’ouvre depuis le dossier des scénarios, sous son titre : le fichier déjà lié
+    /// est actualisé avec la dernière version connue, sinon un fichier est créé.
+    /// Sans dossier choisi, la copie de travail interne reste utilisée.
+    private static func folderFile(_ identity: SyncDocumentIdentity, workspace: SiteSyncWorkspace) throws -> URL? {
+        guard let folder = ScenarioFolder.current, let record = workspace.record(identity.id) else { return nil }
+        let data = try ScenarioDocument.data(record.local, identity: identity)
+        guard let existing = ScenarioFolder.files(linkedTo: identity, in: folder).first else {
+            return try ScenarioFolder.write(data, named: ScenarioFolder.fileName(record.local), in: folder)
+        }
+        // Seul un fichier antérieur à la dernière synchronisation est remplacé : des modifications
+        // faites hors connexion au compte ne sont jamais écrasées.
+        let modified = (try? existing.resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate
+        if (try? Data(contentsOf: existing)) != data, let synced = record.lastSyncedAt, let modified, modified <= synced {
+            try data.write(to: existing, options: .atomic)
+            ScenarioFolder.hideExtension(existing)
+        }
+        return existing
+    }
+}
+#endif
+
+struct ScenarioSyncSheet: View {
+    @Binding var document: ScenarioDocument
+    @ObservedObject var workspace: SiteSyncWorkspace
+    @ObservedObject var accountModel: SiteAccountModel = .shared
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.openWindow) private var openWindow
+    @State private var message: String?
+    @State private var busy = false
+
+    private var record: SiteSyncRecord? { document.syncIdentity.flatMap { workspace.record($0.id) } }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            HStack {
+                Text("Synchroniser le scénario").font(.title2.bold())
+                Spacer()
+                Button("Fermer") { dismiss() }.keyboardShortcut(.cancelAction)
+            }
+            Label(workspace.account.label, systemImage: "person.crop.circle").foregroundStyle(.secondary)
+            Text(document.scenario.name.isEmpty ? "Sans titre" : document.scenario.name).font(.headline)
+            if let record {
+                Label(record.status.label, systemImage: record.status.symbol)
+                if record.remoteConflict != nil {
+                    SiteConflictContent(record: record) { duplicate in
+                        // Keep the original file's identity stable; the independent copy opens in its own file.
+                        if let original = workspace.record(record.id) { document.scenario = original.local }
+                        Task {
+                            do { try await SiteDocumentOpener.open(duplicate.id, workspace: workspace); dismiss() }
+                            catch { message = error.localizedDescription }
+                        }
+                    }.environmentObject(workspace)
+                } else if record.remoteMissing {
+                    Text("Votre travail reste sur \(Platform.thisDevice). Vous pouvez en faire une nouvelle copie indépendante.").foregroundStyle(.secondary)
+                    Button("Conserver une copie") {
+                        do {
+                            let duplicate = try workspace.copyDeleted(record.id)
+                            Task {
+                                do { try await SiteDocumentOpener.open(duplicate.id, workspace: workspace); dismiss() }
+                                catch { message = error.localizedDescription }
+                            }
+                        } catch { message = error.localizedDescription }
+                    }
+                } else {
+                    if let date = record.lastSyncedAt {
+                        Text("Dernière synchronisation : \(date.formatted(date: .abbreviated, time: .shortened))")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                    syncButton
+                }
+            } else {
+                Text("Ce scénario sera enregistré dans votre compte sur scenarisation.eu.").foregroundStyle(.secondary)
+                syncButton
+            }
+            if !accountModel.networkAvailable {
+                HStack {
+                    Text("Reconnectez votre compte pour synchroniser.").font(.callout).foregroundStyle(.secondary)
+                    Spacer()
+                    Button("Mon compte") { dismiss(); openStudioWindow("site-account", openWindow) }
+                }
+            }
+            if let message { Text(message).font(.callout).foregroundStyle(.red).textSelection(.enabled) }
+        }
+        .padding(28).desktopFrame(minWidth: 580, maxWidth: 900).disabled(busy).clearsInitialFocus()
+    }
+
+    private var syncButton: some View {
+        HStack {
+            Spacer()
+            if busy { ProgressView().controlSize(.small) }
+            Button("Synchroniser") {
+                busy = true; message = nil
+                Task {
+                    defer { busy = false }
+                    do {
+                        if document.syncIdentity.flatMap({ workspace.record($0.id) }) == nil {
+                            document.syncIdentity = try workspace.addLocal(document.scenario)
+                        }
+                        guard let identity = document.syncIdentity else { return }
+                        try workspace.stage(identity, scenario: document.scenario, previous: document.scenario)
+                        let before = document.scenario
+                        try await workspace.synchronize(identity.id)
+                        if document.syncIdentity == identity, document.scenario == before,
+                           let updated = workspace.record(identity.id), updated.remoteConflict == nil {
+                            document.scenario = updated.local
+                        }
+                    } catch { message = error.localizedDescription }
+                }
+            }.studioButtons(prominent: true).keyboardShortcut(.defaultAction)
+                .disabled(!accountModel.networkAvailable || record.map { workspace.syncing.contains($0.id) } == true)
+        }
+    }
+}
+
+private struct SiteConflictContent: View {
+    let record: SiteSyncRecord
+    let onKept: (SiteSyncRecord) -> Void
+    @EnvironmentObject private var workspace: SiteSyncWorkspace
+    @State private var error: String?
+    @State private var showJSON = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Le scénario a changé sur \(Platform.theDevice) et sur le site. Conservez les deux versions pour poursuivre votre travail.")
+                .foregroundStyle(.secondary)
+            DisclosureGroup("Examiner les versions", isExpanded: $showJSON) {
+                HStack(alignment: .top, spacing: 16) {
+                    version("Version \(Platform.ofTheDevice)", record.local)
+                    if let remote = record.remoteConflict { version("Version du site · révision \(remote.revision)", remote.document) }
+                }.padding(.top, 8)
+            }
+            Button("Conserver les deux versions") {
+                do { onKept(try workspace.keepBoth(record.id)) }
+                catch { self.error = error.localizedDescription }
+            }.studioButtons(prominent: true)
+            Text("Votre version devient une copie \(Platform.deviceName) indépendante, en attente de synchronisation.")
+                .font(.caption).foregroundStyle(.secondary)
+            if let error { Text(error).foregroundStyle(.red) }
+        }
+    }
+    private func version(_ title: String, _ scenario: Scenario) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title).font(.headline)
+            ScrollView([.horizontal, .vertical]) {
+                Text(String(decoding: (try? scenario.encoded()) ?? Data(), as: UTF8.self))
+                    .font(.system(.caption, design: .monospaced)).textSelection(.enabled).padding(12)
+            }.frame(height: 240).background(StudioStyle.field, in: RoundedRectangle(cornerRadius: 8))
+        }.frame(maxWidth: .infinity)
+    }
+}
+
+private struct SiteConflictView: View {
+    @ObservedObject var workspace: SiteSyncWorkspace
+    let recordID: UUID
+    @Environment(\.dismiss) private var dismiss
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            HStack {
+                Text("Examiner le conflit").font(.title2.bold())
+                Spacer()
+                Button("Fermer") { dismiss() }.keyboardShortcut(.cancelAction)
+            }
+            if let record = workspace.record(recordID), record.remoteConflict != nil {
+                SiteConflictContent(record: record) { _ in dismiss() }.environmentObject(workspace)
+            }
+        }.padding(28).desktopFrame(minWidth: 640, maxWidth: 900).clearsInitialFocus()
+    }
+}
