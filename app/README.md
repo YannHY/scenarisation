@@ -4,6 +4,8 @@
 
 Application native SwiftUI pour concevoir des scénarios pédagogiques hors ligne et les travailler avec un modèle local, un compte ChatGPT ou Claude, ou une clé API.
 
+L’app vit dans le dossier `app/` du dépôt [Scénarisation](https://github.com/YannHY/scenarisation), à côté du site dont elle partage les modèles, les référentiels et l’API de synchronisation. Les commandes ci-dessous s’exécutent depuis ce dossier `app/`.
+
 ## Démarrer
 
 Prérequis : macOS 15 ou ultérieur, Xcode 26 ou ultérieur avec Swift 6 (le SDK 26 est nécessaire pour Liquid Glass).
@@ -198,7 +200,7 @@ Les tests de synchronisation utilisent un serveur local simulé et des réponses
 Un test de bout en bout de la collaboration, désactivé par défaut, fait dialoguer le vrai client de l’app (trois comptes) avec le vrai code PHP du site, servi par `php -S` sur ce Mac : invitation, présence, modifications simultanées, droits, départ du partage et suppression. Il utilise une base SQLite jetable, ou une base MySQL/MariaDB de test vide désignée par `SCENARISATION_SITE_DSN`, `SCENARISATION_SITE_DB_USER` et `SCENARISATION_SITE_DB_PASS`. Aucune requête ne part vers scenarisation.eu.
 
 ```sh
-SCENARISATION_SITE_DIR=/chemin/vers/learning-designer swift test --filter LiveSiteTests
+SCENARISATION_SITE_DIR="$(cd .. && pwd)" swift test --filter LiveSiteTests
 ```
 
 ## Sources et licence

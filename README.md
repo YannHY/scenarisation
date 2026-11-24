@@ -25,6 +25,7 @@ Le projet est inspiré de l'[UCL Learning Designer](https://www.ucl.ac.uk/learni
 - [Modèles de scénarios](./models.php) : bibliothèque de scénarios génériques préremplis
 - [Bibliothèque de prompts](./prompts.php) : prompts prêts à copier pour analyser, adapter ou prolonger un scénario
 - [Comprendre le learning design](./learning-design.php) : principes et cadre pédagogique
+- [Application Mac et iPad](./app/README.md) : code SwiftUI de l’app native, dans le dossier `app/`
 
 ## Recherche sur le site
 
@@ -143,7 +144,8 @@ Conservez les secrets dans un fichier local non versionné, par exemple `learnin
 - [skills/scenarisation-site](./skills/scenarisation-site) : Skill de développement et de maintenance du site ;
 - [bin/scenarisation](./bin/scenarisation) : CLI de création, de validation et de publication ;
 - [data/cli-competencies.json](./data/cli-competencies.json) : catalogue compact installé avec le CLI, généré depuis les référentiels de l’éditeur ;
-- [lib/bootstrap.php](./lib/bootstrap.php) : configuration, base de données et fonctions PHP communes.
+- [lib/bootstrap.php](./lib/bootstrap.php) : configuration, base de données et fonctions PHP communes ;
+- [app/](./app) : application native Mac (paquet Swift) et iPad (`app/iPad`). Ce dossier n’est pas à déployer sur le serveur du site.
 
 ### Organisation du JavaScript du concepteur
 
