@@ -3,9 +3,18 @@ declare(strict_types=1);
 require_once __DIR__ . '/lib/bootstrap.php';
 app_start_session();
 $choices = [
-    ['designer.php?new=1', 'fa-plus', 'Créer un scénario', 'Create a scenario', 'Partez d’une page blanche et donnez forme à votre propre scénario pédagogique.', 'Start with a blank page and shape your own learning scenario.', 'Partir d’une page blanche', 'Start from scratch'],
-    ['models.php', 'fa-layer-group', 'Importer un modèle', 'Import a template', 'Explorez les modèles, visualisez leur contenu et choisissez celui que vous souhaitez adapter.', 'Browse templates, preview their content and choose one to adapt.', 'Explorer les modèles', 'Explore templates'],
-    ['share.php', 'fa-file-import', 'Importer un scénario partagé', 'Import a shared scenario', 'Importez un scénario de la communauté ou un fichier transmis par un collègue.', 'Import a community scenario or a file shared by a colleague.', 'Voir les scénarios partagés', 'Browse shared scenarios'],
+    ['designer.php?new=1', 'create', 'Créer un scénario', 'Create a scenario', 'Partez d’une page blanche et donnez forme à votre propre scénario pédagogique.', 'Start with a blank page and shape your own learning scenario.', 'Commencer', 'Get started'],
+    ['models.php', 'template', 'Importer un modèle', 'Import a template', 'Explorez les modèles, visualisez leur contenu et choisissez celui que vous souhaitez adapter.', 'Browse templates, preview their content and choose one to adapt.', 'Explorer les modèles', 'Explore templates'],
+    ['share.php', 'shared', 'Importer un scénario partagé', 'Import a shared scenario', 'Importez un scénario de la communauté ou un fichier transmis par un collègue.', 'Import a community scenario or a file shared by a colleague.', 'Voir les scénarios partagés', 'Browse shared scenarios'],
+];
+// Mini-scènes décoratives : les couleurs reprennent les six types d’apprentissage.
+$scenes = [
+    'create' => '<span class="nd-slot nd-c-read"></span><span class="nd-slot nd-c-discuss"></span><span class="nd-slot nd-c-practice"></span><span class="nd-slot nd-c-produce"></span>',
+    'template' => '<span class="nd-sheet"><i class="nd-c-collaborate"></i><i class="nd-c-read nd-w70"></i><i class="nd-c-produce"></i></span>'
+        . '<span class="nd-sheet"><i class="nd-c-investigate"></i><i class="nd-c-practice nd-w60"></i><i class="nd-c-read"></i></span>'
+        . '<span class="nd-sheet"><i class="nd-c-read"></i><i class="nd-c-discuss nd-w70"></i><i class="nd-c-practice"></i><i class="nd-c-produce nd-w50"></i></span>',
+    'shared' => '<span class="nd-person"><i class="fa-solid fa-user-group"></i></span><span class="nd-path"></span><span class="nd-person"><i class="fa-solid fa-user"></i></span>'
+        . '<span class="nd-file"><i class="nd-c-investigate"></i><i class="nd-c-collaborate nd-w70"></i><i class="nd-c-read"></i></span>',
 ];
 ?>
 <!doctype html>
@@ -35,9 +44,9 @@ $choices = [
         <p data-site-i18n-en="Create a scenario or import existing content." data-site-i18n-fr="Créez un scénario ou importez un contenu existant.">Créez un scénario ou importez un contenu existant.</p>
     </div>
     <div class="new-design-choices">
-        <?php foreach ($choices as [$href, $icon, $titleFr, $titleEn, $descriptionFr, $descriptionEn, $actionFr, $actionEn]): ?>
+        <?php foreach ($choices as [$href, $scene, $titleFr, $titleEn, $descriptionFr, $descriptionEn, $actionFr, $actionEn]): ?>
             <a class="new-design-choice<?= $href === 'designer.php?new=1' ? ' new-design-choice-primary' : '' ?>" href="<?= h($href) ?>"<?= $href !== 'designer.php?new=1' ? ' data-import-dialog aria-haspopup="dialog"' : '' ?>>
-                <span class="new-design-choice-icon" aria-hidden="true"><i class="fa-solid <?= h($icon) ?>"></i></span>
+                <span class="nd-scene nd-scene-<?= h($scene) ?>" aria-hidden="true"><?= $scenes[$scene] ?></span>
                 <h2 data-site-i18n-en="<?= h($titleEn) ?>" data-site-i18n-fr="<?= h($titleFr) ?>"><?= h($titleFr) ?></h2>
                 <p data-site-i18n-en="<?= h($descriptionEn) ?>" data-site-i18n-fr="<?= h($descriptionFr) ?>"><?= h($descriptionFr) ?></p>
                 <span class="new-design-choice-action"><span data-site-i18n-en="<?= h($actionEn) ?>" data-site-i18n-fr="<?= h($actionFr) ?>"><?= h($actionFr) ?></span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></span>
