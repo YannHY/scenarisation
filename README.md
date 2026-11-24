@@ -173,6 +173,12 @@ Publier une version :
 
 La clé privée de signature est dans le trousseau de session (compte `scenarisation-mac`). Sans elle, aucune mise à jour ne peut plus être publiée pour les apps déjà installées : exportez-la une fois avec `.build/artifacts/sparkle/Sparkle/bin/generate_keys --account scenarisation-mac -x <fichier>` et conservez ce fichier en lieu sûr.
 
+## Déploiement géré (Jamf Pro)
+
+`bash scripts/build-pkg.sh` produit `dist/Scenarisation-X.Y.Z-AppleSilicon.pkg`, qui installe l’app dans `/Applications`. L’app qu’il contient est signée Developer ID, notarisée et agrafée. Le paquet lui-même n’est signé et notarisé que si un certificat « Developer ID Installer » est dans le trousseau : sans lui, il convient aux règles (policies) Jamf Pro, mais pas à un déploiement par commande MDM ni à une installation par double-clic.
+
+Les mises à jour peuvent passer par Jamf plutôt que par Sparkle (les enseignants n’étant en général pas administrateurs) : un profil de configuration pour le domaine `eu.scenarisation.mac` avec `SUEnableAutomaticChecks` à `false` désactive la vérification automatique.
+
 ## Vérifier
 
 ```sh

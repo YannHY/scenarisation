@@ -15,33 +15,13 @@ cd "$(dirname "$0")/.."
 
 profile="${NOTARY_PROFILE:-scenarisation-notary}"
 identity="${SIGN_IDENTITY:-$(security find-identity -v -p codesigning | sed -n 's/.*"\(Developer ID Application: [^"]*\)".*/\1/p' | head -1)}"
-if [ -z "$identity" ]; then
-    echo "Aucun certificat « Developer ID Application » dans le trousseau." >&2
-    echo "Créez-le dans Xcode → Réglages → Comptes → Gérer les certificats → + → Developer ID Application." >&2
-    exit 1
-fi
+export SIGN_IDENTITY="$identity"
 
-bash scripts/build-app.sh release >/dev/null
+app="$(bash scripts/sign-app.sh | tail -1)"
 name="Scénarisation"
 prefix="Scenarisation"
-app="dist/$name.app"
 version="$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$app/Contents/Info.plist")"
 dmg="dist/$prefix-$version-AppleSilicon.dmg"
-
-# Remplace la signature locale de build-app.sh : runtime renforcé et horodatage sont exigés par la notarisation.
-for bundle in "$app"/Contents/Resources/*.bundle; do
-    [ -d "$bundle" ] && codesign --force --timestamp --sign "$identity" "$bundle"
-done
-# Sparkle : ses services et outils d’installation doivent être signés de l’intérieur vers l’extérieur.
-sparkle="$app/Contents/Frameworks/Sparkle.framework/Versions/B"
-codesign --force --options runtime --timestamp --sign "$identity" "$sparkle/XPCServices/Installer.xpc"
-codesign --force --options runtime --timestamp --sign "$identity" --preserve-metadata=entitlements "$sparkle/XPCServices/Downloader.xpc"
-codesign --force --options runtime --timestamp --sign "$identity" "$sparkle/Autoupdate"
-codesign --force --options runtime --timestamp --sign "$identity" "$sparkle/Updater.app"
-codesign --force --options runtime --timestamp --sign "$identity" "$app/Contents/Frameworks/Sparkle.framework"
-codesign --force --options runtime --timestamp --sign "$identity" "$app/Contents/MacOS/Scenarisation"
-codesign --force --options runtime --timestamp --sign "$identity" "$app"
-codesign --verify --deep --strict "$app"
 
 stage="$(mktemp -d)"
 trap 'rm -rf "$stage"' EXIT
